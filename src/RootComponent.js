@@ -1,0 +1,4 @@
+
+class RootComponent extends Component {
+
+}

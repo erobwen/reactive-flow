@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 module.exports = {
   context: __dirname,
-  entry: './src/app.js',
+  entry: './src/index.js',
   module: {},
   output: {
       path: __dirname + '/dist/',
@@ -16,6 +16,7 @@ module.exports = {
       directory: path.join(__dirname, 'dist'),
     },
     compress: true,
-    port: 9000
+    port: 9000,
+    open: true
   },
 };
