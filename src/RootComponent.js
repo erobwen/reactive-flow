@@ -1,4 +1,5 @@
+import { Component } from "./reactive-flow.js"
 
-class RootComponent extends Component {
+export class RootComponent extends Component {
 
 }

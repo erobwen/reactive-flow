@@ -2,7 +2,8 @@
 import { RootComponent } from "./RootComponent.js"
 import { ReactiveFlow, observable } from "./reactive-flow.js"
 
-let rootElement = document.getElementById("reactive-root");
+
+let rootElement = document.getElementById("flow-root");
 rootElement.appendChild(document.createElement("div"));
 console.log("ALIVE!");
 
