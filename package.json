@@ -23,6 +23,7 @@
     "webpack-dev-server": "^4.7.3"
   },
   "dependencies": {
-    "causalityjs": "^3.1.4"
+    "causalityjs": "^3.1.4",
+    "lit-html": "^2.1.1"
   }
 }

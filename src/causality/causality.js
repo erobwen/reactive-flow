@@ -202,7 +202,7 @@ function createWorld(configuration) {
     state.postponeInvalidation++;
     callback();
     state.postponeInvalidation--;
-    proceedWithPostponedInvalidations();
+    proceedWithPostponedInvalidations(); // Note will also revalidate all repeaters until finished.
   }
 
   function withoutReactions(callback) {
@@ -324,7 +324,20 @@ function createWorld(configuration) {
         if (emitEvents) emitSpliceEvent(this, target, added, removed);
 
         return result;
-      }
+      },
+
+      forEach: function(callback) {
+        throw new Error("Not implemented yet!");
+				// if (state.inActiveRecording) {
+				// 	registerChangeObserver(getSpecifier(this.const, "_arrayObservers"));//object
+				// }
+				// this.const.target.forEach(function(element) {
+				// 	if (state.incomingStructuresDisabled === 0) {
+				// 		element = getReferredObject(element);
+				// 	}
+				// 	callback(element);
+				// }.bind(this));
+			}
     };
 
     ['reverse', 'sort', 'fill'].forEach(function(functionName) {

@@ -1,4 +1,4 @@
-import getWorld from "causalityjs";
+import getWorld from "./causality/causality.js";
 export const world = getWorld();
 export const { observable, repeat } = world;
 

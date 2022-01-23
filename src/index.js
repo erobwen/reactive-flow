@@ -1,7 +1,9 @@
 
 import { RootComponent } from "./RootComponent.js"
 import { ReactiveFlow, observable } from "./reactive-flow.js"
+import { html } from "lit-html";
 
+window.html = html; 
 
 let rootElement = document.getElementById("flow-root");
 rootElement.appendChild(document.createElement("div"));
