@@ -2,13 +2,28 @@ import { ContextReplacementPlugin } from "webpack";
 import { observable } from "./reactive-flow";
 
 class Flow {
-  constructor() {
+  constructor(properties) {
     this.repeater = null;
-    this.children = null; // Actual children, once rendered. Could be a 
-    return observable(this);
+    this.children = null; // Actual children, once rendered. Could be a single object also
+    this.lastProperties = null;
+    let key = properties.key;  
+    delete properties.key;
+    this.compareAndSetProperties(properties);
+    return observable(this, key);
   }
 
+  compareAndSetProperties(properties) {
+    if (this.lastProperties) {
+      reuseOldIfEqual(this.lastProperties, properties); // 
+    }
+    this.setProperties(properties);
+    this.lastProperties = properties
+  }
+  
+  setProperties() { throw Error("Not implemented!") }
+   
   ensureRendered() {
+    // TODO: Finalize this if still being rebuilt! 
     if (this.children === null) {
       this.repeater = repeat(() => {
         this.render();
@@ -20,6 +35,10 @@ class Flow {
 
   render() { throw Error("Not implemented!") } 
 
+  getRendition() {
+    this.children.ensureRendered().children;
+  }
+
   bubbleBounds() {
     if (this.target.type === "html") {
       this.width = this.children.getWidthFromTemplateResultSomehow();
@@ -29,11 +48,10 @@ class Flow {
 }
 
 class MyComponent extends Flow {
-  constructor({key, target, children}) { 
-    super();
+
+  setProperties({target, children}) {
     this.target = target;
     this.givenChildren = children; // Children set by parent
-    return observable(this, key);
   }
 
   onReBuildCreate() {
@@ -61,7 +79,7 @@ class MyComponent extends Flow {
           children: givenChildren}), // Just pass on to child.
         childC
       ] 
-    }).ensureRendered().children;
+    })
   }
 }
 
@@ -88,9 +106,11 @@ class Container extends Flow {
       // Render to html
       const content = givenChildren.map(child => { child.ensureRendered(); child.children});
       if (this.children) {
-        // Patch result somehow. 
-        // this.children.
+        // Patch result. 
+        this.children.values[0] = content;
+        // Notify differential engine of change? 
       } else {
+        // A new result
         this.children = html`<div>${content}</div>`
       }
     } else if (this.target.type === "something else") {
