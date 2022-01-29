@@ -361,10 +361,12 @@ function createWorld(configuration) {
   }
 
   function sameAsPreviousDeep(previousValue, newValue, valueComparisonDepthLimit) {
+    if (previousValue === null && newValue === null) return true;
     if ((previousValue === newValue || Number.isNaN(previousValue) && Number.isNaN(newValue))) return true;
     if (valueComparisonDepthLimit === 0) return false; // Cannot go further, cannot guarantee that they are the same.  
     if (typeof(previousValue) !== typeof(newValue)) return false; 
     if (typeof(previousValue) !== "object") return false;
+    if ((previousValue === null) || (newVaue === null)) return false; 
     if (isObservable(previousValue) || isObservable(newValue)) return false;
     if (Object.keys(previousValue).length !== Object.keys(newValue).length) return false; 
     for(let property in previousValue) {
@@ -1123,8 +1125,8 @@ function createWorld(configuration) {
   }
 
   function finishRebuildInAdvance(object) {
-    if (!state.inRepeater) throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
-    if (!object[objectMetaProperty].buildId) throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
+    if (!state.inRepeater) return; // throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
+    if (!object[objectMetaProperty].buildId) return; //throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
     const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {
       // Push changes to established object.

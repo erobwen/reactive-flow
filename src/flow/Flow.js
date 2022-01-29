@@ -1,28 +1,33 @@
-import { observable } from "./reactive-flow";
-import getWorld from "./causality/causality.js";
+import getWorld from "../causality/causality.js";
 export const world = getWorld({useNonObservablesAsValues: true});
 export const { observable, repeat, finalize } = world;
 
 let parents = [];
 
-
 export class Flow {
   constructor(properties) {
+    this.parent = parents[parents.length - 1];
+    
     this.buildRepeater = null;
     this.result = null; 
-
+    
     this.integrationRepeater = null;
-    this.target = null;
+    this.target = properties.target ? properties.target : parent.target;
     
     let key = properties.key;  
     delete properties.key;
-    for (property in properties) {
+    for (let property in properties) {
       this[property] = properties[property];
     }
-    setProperties(properties);
+    this.setProperties(properties);
     return observable(this, key);
   }
-   
+
+  render() { 
+    this.getResult();
+    this.integrateResult();
+  }
+
   getChild(key) {
     if (typeof(this.buildRepeater.buildIdObjectMap[key]) === 'undefined') return null;
     return this.buildRepeater.buildIdObjectMap[key]
@@ -32,37 +37,31 @@ export class Flow {
     finalize(this);
     if (this.buildRepeater === null) {
       this.buildRepeater = repeat(() => {
-        this.result = this.build();
+        parents.push(this);
+        this.result = this.build().getResult();
+        parents.pop();
         this.bubbleBounds()
       });  
     }
     return this.result;
   }
 
+  bubbleBounds() {
+    if (this.target.type === "html") {
+      this.width = this.result.getWidthFromTemplateResultSomehow();
+      this.height = this.result.getHeightFromTemplateResultSomehow();
+    }
+  }
+
   integrateResult() {
     if (this.integrationRepeater === null) {
       this.integrationRepeater = repeat(() => {
-        let use = this.result;
-        let alsoUse = this.target;
-
-        // Merge them. 
+        this.target.integrate(this, this.result);
       });
     }
   }
 
   build() {
     throw new Error("Not implemented yet")
-  }
-
-  render() { 
-    this.getResult();
-    this.integrateResult();
-  }
-
-  bubbleBounds() {
-    if (this.target.type === "html") {
-      this.width = this.children.getWidthFromTemplateResultSomehow();
-      this.height = this.children.getHeightFromTemplateResultSomehow();
-    }
   }
 }

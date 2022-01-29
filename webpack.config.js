@@ -4,7 +4,15 @@ var webpack = require('webpack');
 module.exports = {
   context: __dirname,
   entry: './src/index.js',
-  module: {},
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        enforce: "pre",
+        use: ["source-map-loader"],
+      },
+    ],
+  },
   output: {
       path: __dirname + '/dist/',
       filename: 'bundle.js',

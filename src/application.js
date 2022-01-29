@@ -1,6 +1,55 @@
+import { finalize, Flow } from "./flow/Flow";
 
 
-class MyComponent extends Flow {
+export class TestComponent extends Flow {
+
+  setProperties({}) {
+  }
+
+  onReBuildCreate() {
+    // Lifecycle function for doing costly things, like opening up connections etc.
+  }
+
+  onReBuildRemove() {
+    this.repeater.dispose();
+  }
+
+  build() {
+    return new Div({
+      children: [new Text({text: "Foo"})]
+    });
+  }
+}
+
+
+class Text extends Flow {
+  
+  setProperties({text}) {
+    this.text = text;
+  }
+
+  getResult() {
+    finalize(this);
+    // return html`<span>${this.text}</span>`;
+    return html`${this.text}`;
+  }
+}
+
+
+class Div extends Flow {
+  
+  setProperties({children}) {
+    this.children = children;
+  }
+
+  getResult() {
+    finalize(this);
+    return html`<div>${this.children ? this.children.map(child => child.getResult()) : null}</div>`;
+  }
+}
+
+
+export class MyComponent extends Flow {
 
   setProperties({target, children}) {
     this.target = target;
@@ -32,6 +81,6 @@ class MyComponent extends Flow {
           children: children}), // Just pass on to child.
         childC
       ] 
-    }).getResult();
+    });
   }
 }

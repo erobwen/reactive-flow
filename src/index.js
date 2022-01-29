@@ -1,6 +1,6 @@
-import { MyComponent } from "./application.js"
-import { FlowDOMTarget } from "./flow/FlowDomTarget.js";
+import { MyComponent, TestComponent } from "./application.js"
+import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 
-new MyComponent({
-  target: new FlowDOMTarget(document.getElementById("flow-root")) 
+new TestComponent({
+  target: new DOMFlowTarget(document.getElementById("flow-root")) 
 }).render();
