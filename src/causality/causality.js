@@ -20,6 +20,9 @@ const defaultConfiguration = {
 
   objectMetaProperty: "causality",
 
+  useNonObservablesAsValues: false, 
+  valueComparisonDepthLimit: 5, 
+
   sendEventsToObjects: true,
     // Reserved properties that you can override on observables IF sendEventsToObjects is set to true. 
     // onChange
@@ -87,9 +90,10 @@ function createWorld(configuration) {
 
     // Main API
     observable,
-    create: observable, // observable alias that is more neutral
+    create: observable, // observable alias
     invalidateOnChange,
     repeat,
+    finalize: finishRebuildInAdvance,
 
     // Modifiers
     withoutRecording,
@@ -202,7 +206,7 @@ function createWorld(configuration) {
     state.postponeInvalidation++;
     callback();
     state.postponeInvalidation--;
-    proceedWithPostponedInvalidations(); // Note will also revalidate all repeaters until finished.
+    proceedWithPostponedInvalidations();
   }
 
   function withoutReactions(callback) {
@@ -324,20 +328,7 @@ function createWorld(configuration) {
         if (emitEvents) emitSpliceEvent(this, target, added, removed);
 
         return result;
-      },
-
-      forEach: function(callback) {
-        throw new Error("Not implemented yet!");
-				// if (state.inActiveRecording) {
-				// 	registerChangeObserver(getSpecifier(this.const, "_arrayObservers"));//object
-				// }
-				// this.const.target.forEach(function(element) {
-				// 	if (state.incomingStructuresDisabled === 0) {
-				// 		element = getReferredObject(element);
-				// 	}
-				// 	callback(element);
-				// }.bind(this));
-			}
+      }
     };
 
     ['reverse', 'sort', 'fill'].forEach(function(functionName) {
@@ -355,6 +346,33 @@ function createWorld(configuration) {
     });
 
     return result;
+  }
+
+
+  /***************************************************************
+   *
+   *  Non observables as value types
+   *
+   ***************************************************************/
+
+  function sameAsPrevious(previousValue, newValue) {
+    if (configuration.useNonObservablesAsValues) return sameAsPreviousDeep(previousValue, newValue, configuration.valueComparisonDepthLimit);
+    return (previousValue === newValue || Number.isNaN(previousValue) && Number.isNaN(newValue));
+  }
+
+  function sameAsPreviousDeep(previousValue, newValue, valueComparisonDepthLimit) {
+    if ((previousValue === newValue || Number.isNaN(previousValue) && Number.isNaN(newValue))) return true;
+    if (valueComparisonDepthLimit === 0) return false; // Cannot go further, cannot guarantee that they are the same.  
+    if (typeof(previousValue) !== typeof(newValue)) return false; 
+    if (typeof(previousValue) !== "object") return false;
+    if (isObservable(previousValue) || isObservable(newValue)) return false;
+    if (Object.keys(previousValue).length !== Object.keys(newValue).length) return false; 
+    for(let property in previousValue) {
+      if (!sameAsPreviousDeep(previousValue[property], newValue[property], valueComparisonDepthLimit - 1)) {
+        return false;
+      }
+    }
+    return true;
   }
 
 
@@ -400,8 +418,7 @@ function createWorld(configuration) {
 
     // If same value as already set, do nothing.
     if (key in target) {
-      if (previousValue === value || (Number.isNaN(previousValue) &&
-                                      Number.isNaN(value)) ) {
+      if (sameAsPrevious(previousValue, value)) {
         return true;
       }
     }
@@ -577,11 +594,10 @@ function createWorld(configuration) {
 
     // If same value as already set, do nothing.
     if (key in target) {
-      if (previousValue === value || (Number.isNaN(previousValue) &&
-                                      Number.isNaN(value)) ) {
+      if (sameAsPrevious(previousValue, value)) {
         return true;
       }
-    }
+    } // TODO: It would be even safer if we write protected non observable data structures that are assigned, if we are using mode: useNonObservablesAsValues
 
     let undefinedKey = !(key in target);
     target[key]      = value;
@@ -698,6 +714,11 @@ function createWorld(configuration) {
    *
    ***************************************************************/
 
+  function isObservable(entity) {
+    return typeof(entity) === "object" && typeof(entity[objectMetaProperty]) === "object" && entity[objectMetaProperty].world === world; 
+  }
+
+
   function observable(createdTarget, buildId) {
     if (typeof(createdTarget) === 'undefined') {
       createdTarget = {};
@@ -756,24 +777,26 @@ function createWorld(configuration) {
       handler : handler,
       proxy : proxy,
 
-      // Optimization. Here to avoid expensive decoration post object creation.
-      isBeingRebuilt: false,
+      // Here to avoid prevent events being sent to objects being rebuilt. 
+      isBeingRebuilt: false, 
     };
 
     if (state.inRepeater !== null && buildId !== null) {
-      if (!state.inRepeater.newlyCreated) state.inRepeater.newlyCreated = [];
+      const repeater = state.inRepeater;
+      if (!repeater.newBuildIdObjectMap) repeater.newBuildIdObjectMap = {};
+      if (!repeater.newIdObjectMap) repeater.newIdObjectMap = {};
       
-      if (state.inRepeater.buildIdObjectMap && typeof(state.inRepeater.buildIdObjectMap[buildId]) !== 'undefined') {
+      if (repeater.buildIdObjectMap && typeof(repeater.buildIdObjectMap[buildId]) !== 'undefined') {
         // Object identity previously created
         handler.meta.isBeingRebuilt = true;
-        let establishedObject = state.inRepeater.buildIdObjectMap[buildId];
+        let establishedObject = repeater.buildIdObjectMap[buildId];
         establishedObject[objectMetaProperty].forwardTo = proxy;
 
-        state.inRepeater.newlyCreated.push(establishedObject);
+        repeater.newBuildIdObjectMap[buildId] = establishedObject;
         return establishedObject;
       } else {
         // Create a new one
-        state.inRepeater.newlyCreated.push(proxy);
+        repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     }
     emitCreationEvent(handler);
@@ -1035,7 +1058,7 @@ function createWorld(configuration) {
         }
 
         // Finish rebuilding
-        if (repeater.newlyCreated) finishRebuilding(this);
+        if (repeater.newBuildIdObjectMap && Object.keys(repeater.newBuildIdObjectMap).length > 0) finishRebuilding(this);
 
         leaveContext( activeContext );
         this.firstTime = false; 
@@ -1069,34 +1092,48 @@ function createWorld(configuration) {
     const options = repeater.options;
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
-    const newIdMap = {}
-    repeater.newlyCreated.forEach((created) => {
-      newIdMap[created[objectMetaProperty].buildId] = created;
-      const forwardTo = created[objectMetaProperty].forwardTo;
-      if (forwardTo !== null) {
+    for (let buildId in repeater.newBuildIdObjectMap) {
+      let created = repeater.newBuildIdObjectMap[buildId]; 
+      const temporaryObject = created[objectMetaProperty].forwardTo;
+      if (temporaryObject !== null) {
         // Push changes to established object.
         created[objectMetaProperty].forwardTo = null;
-        created[objectMetaProperty].isBeingRebuilt = false;
-        mergeInto(created, forwardTo);
+        // created[objectMetaProperty].isBeingRebuilt = false; // Consider? Should this be done on 
+        temporaryObject[objectMetaProperty].isBeingRebuilt = false; 
+        mergeInto(created, temporaryObject);
       } else {
         // Send create on build message
         if (typeof(created.onReBuildCreate) === "function") created.onReBuildCreate();
       }
-    });
-    repeater.newlyCreated = [];
+    }
 
     // Send on build remove messages
-    for (let id in repeater.buildIdObjectMap) {
-      if (typeof(newIdMap[id]) === "undefined") {
-        const object = repeater.buildIdObjectMap[id];
+    for (let buildId in repeater.buildIdObjectMap) {
+      if (typeof(repeater.newBuildIdObjectMap[buildId]) === "undefined") {
+        const object = repeater.buildIdObjectMap[buildId];
         if (typeof(object.onReBuildRemove) === "function") object.onReBuildRemove();
       }
     }
-
+    
     // Set new map
-    repeater.buildIdObjectMap = newIdMap;
+    repeater.buildIdObjectMap = repeater.newBuildIdObjectMap;
+    repeater.newBuildIdObjectMap = {};
     
     if (options.onEndBuildUpdate) options.onEndBuildUpdate();
+  }
+
+  function finishRebuildInAdvance(object) {
+    if (!state.inRepeater) throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
+    if (!object[objectMetaProperty].buildId) throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
+    const temporaryObject = object[objectMetaProperty].forwardTo;
+    if (temporaryObject !== null) {
+      // Push changes to established object.
+      object[objectMetaProperty].forwardTo = null;
+      temporaryObject[objectMetaProperty].isBeingRebuilt = false; 
+      mergeInto(object, temporaryObject);
+    } else {
+      // New object, nothing to merge.
+    }
   }
 
   function modifyRepeaterAction(repeaterAction, {throttle=0}) {

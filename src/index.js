@@ -1,24 +1,6 @@
+import { MyComponent } from "./application.js"
+import { FlowDOMTarget } from "./flow/FlowDomTarget.js";
 
-import { RootComponent } from "./RootComponent.js"
-import { ReactiveFlow, observable } from "./reactive-flow.js"
-import { html } from "lit-html";
-
-window.html = html; 
-
-let rootElement = document.getElementById("flow-root");
-rootElement.appendChild(document.createElement("div"));
-console.log("ALIVE!");
-
-
-ReactiveFlow.render(observable(new RootComponent()), document.getElementById('flow-root'));
-
-// ReactDOM.render(<App />, document.getElementById('root'));
-
-// function render() {
-//   return {
-//     component: observable(new Child),
-//     children: []
-
-
-//   }
-// }
+new MyComponent({
+  target: new FlowDOMTarget(document.getElementById("flow-root")) 
+}).render();
