@@ -13,21 +13,15 @@ export class Flow {
     this.primitive = null; 
     
     this.integrationRepeater = null;
-    // log("in constructor: " + this.className());
-    // log(parents);
-    // log(properties.target)
-    // log(this.parent.target);
     this.target = properties.target ? properties.target : this.parent.target;
-    // log("target")
-    // log(this.target);
     let key = properties.key;  
     delete properties.key;
     for (let property in properties) {
       this[property] = properties[property];
     }
-    this.setProperties(properties);
-
+    
     let me = observable(this, key);
+    me.setProperties(properties);
     if (!this.parent) me.onReBuildCreate();
     return me;
   }
@@ -58,7 +52,6 @@ export class Flow {
   }
 
   render() {
-    // log(this)
     this.integratePrimitive();
   }
 
@@ -66,16 +59,13 @@ export class Flow {
     const me = this; 
     me.getPrimitive();
     if (me.integrationRepeater === null) {
-      // log("new repeater")
       me.integrationRepeater = repeat("integrationRepeater", () => {
-        // log("integrationRepeater:" + me.uniqueName())
         me.target.integrate(me, me.primitive);
       });
     }
   }
 
   getPrimitive() {
-    // log(this)
     const me = this; 
     finalize(me);
     if (me.buildRepeater === null) {
@@ -92,7 +82,6 @@ export class Flow {
     throw new Error("Not implemented yet")
   }
 }
-
 
 export class PrimitiveFlow extends Flow {
   getPrimitive() {
