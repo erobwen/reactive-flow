@@ -366,7 +366,7 @@ function createWorld(configuration) {
     if (valueComparisonDepthLimit === 0) return false; // Cannot go further, cannot guarantee that they are the same.  
     if (typeof(previousValue) !== typeof(newValue)) return false; 
     if (typeof(previousValue) !== "object") return false;
-    if ((previousValue === null) || (newVaue === null)) return false; 
+    if ((previousValue === null) || (newValue === null)) return false; 
     if (isObservable(previousValue) || isObservable(newValue)) return false;
     if (Object.keys(previousValue).length !== Object.keys(newValue).length) return false; 
     for(let property in previousValue) {
@@ -891,7 +891,7 @@ function createWorld(configuration) {
     }
   }
 
-  function invalidateObserver(observer) {
+  function invalidateObserver(observer, key) {
     if (observer != state.context) {
       // if( trace.contextMismatch && state.context && state.context.id ){
       //   console.log("invalidateObserver mismatch " + observer.type, observer.id||'');
@@ -914,7 +914,7 @@ function createWorld(configuration) {
         state.lastObserverToInvalidate = observer;
       } else {
         // blockSideEffects(function() {
-        observer.invalidateAction();
+        observer.invalidateAction(key);
         // });
       }
     }
@@ -1009,7 +1009,8 @@ function createWorld(configuration) {
       restart() {
         this.invalidateAction();
       },
-      invalidateAction() {
+      invalidateAction(key) {
+        console.log("invalidate " + description + " on " + key);
         removeAllSources(this);
         repeaterDirty(this);
         this.disposeChildren();

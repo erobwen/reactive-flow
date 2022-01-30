@@ -23,9 +23,15 @@ export function defaultDependencyInterfaceCreator(causality) {
     }
   }
 
-  function recordDependency(observer, observerSet) {
+  function recordDependency(observer, observerSet, optionalKey) {
     let observerId = observer.id;
 
+    if (!observerSet.contents) {
+      console.log("Observer set has no set for property " + optionalKey)
+      console.log(observer);
+      console.log(observerSet);
+      throw new Error("No observer set!")
+    }
     if (typeof(observerSet.contents[observerId]) !== 'undefined') {
       return;
     }
@@ -72,14 +78,14 @@ export function defaultDependencyInterfaceCreator(causality) {
     }
   }
 
-  function invalidateObservers(observers) {
+  function invalidateObservers(observers, key) {
     if (state.blockInvalidation > 0) {
       return;
     }
 
     let contents = observers.contents;
     for (let id in contents) {
-      invalidateObserver(contents[id]);
+      invalidateObserver(contents[id], key);
     }
 
     if (typeof(observers.first) !== 'undefined') {
@@ -87,7 +93,7 @@ export function defaultDependencyInterfaceCreator(causality) {
       while(chainedObserverChunk !== null) {
         let contents = chainedObserverChunk.contents;
         for (let id in contents) {
-          invalidateObserver(contents[id]);
+          invalidateObserver(contents[id], key);
         }
         chainedObserverChunk = chainedObserverChunk.next;
       }
@@ -158,14 +164,16 @@ export function defaultDependencyInterfaceCreator(causality) {
       recordDependency(observer, handler._enumerateObservers);
     },
 
-    recordDependencyOnProperty: (observer, handler, key) => {    
+    recordDependencyOnProperty: (observer, handler, key) => {   
+      // Note: if key == toString this will break!!!
+      if (key === "toString") return;
       if (typeof(handler._propertyObservers) ===  'undefined') {
         handler._propertyObservers = {};
       }
       if (typeof(handler._propertyObservers[key]) ===  'undefined') {
         handler._propertyObservers[key] = createObserverSet("propertyDependees", key, handler);
       }
-      recordDependency(observer, handler._propertyObservers[key]);
+      recordDependency(observer, handler._propertyObservers[key], key);
     },
 
     invalidateArrayObservers: (handler) => {  
@@ -177,7 +185,7 @@ export function defaultDependencyInterfaceCreator(causality) {
     invalidatePropertyObservers: (handler, key) => {
       if (typeof(handler._propertyObservers) !== 'undefined' &&
           typeof(handler._propertyObservers[key]) !== 'undefined') {
-        invalidateObservers(handler._propertyObservers[key]);
+        invalidateObservers(handler._propertyObservers[key], key);
       }
     },
 
