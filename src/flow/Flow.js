@@ -1,6 +1,7 @@
 import getWorld from "../causality/causality.js";
 export const world = getWorld({useNonObservablesAsValues: true});
 export const { observable, repeat, finalize } = world;
+const log = console.log;
 
 let parents = [];
 
@@ -39,8 +40,11 @@ export class Flow {
       this.buildRepeater = repeat(() => {
         parents.push(this);
         this.result = this.build().getResult();
+        this.result.owner = this;
+        // log("claimed!")
+        // log(this.result);
         parents.pop();
-        this.bubbleBounds()
+        // this.bubbleBounds()
       });  
     }
     return this.result;

@@ -8,6 +8,7 @@ export class TestComponent extends Flow {
 
   onReBuildCreate() {
     // Lifecycle function for doing costly things, like opening up connections etc.
+    console.log("created!");
   }
 
   onReBuildRemove() {
@@ -15,15 +16,28 @@ export class TestComponent extends Flow {
   }
 
   build() {
-    return new Div({
-      children: [new Text({text: "Foo"})]
+    return new Row({
+      children: [
+        new Text({text: "Foo"}),
+        new Text({text: "Foo"})
+      ]
     });
   }
 }
 
 
+class Row extends Flow {
+  setProperties({children}) {
+    this.children = children;
+  }
+
+  build() {
+    return new Div({children: this.children});
+  }
+}
+
+
 class Text extends Flow {
-  
   setProperties({text}) {
     this.text = text;
   }
@@ -31,7 +45,9 @@ class Text extends Flow {
   getResult() {
     finalize(this);
     // return html`<span>${this.text}</span>`;
-    return html`${this.text}`;
+    let result = html`${this.text}`;
+    result.owner = this;
+    return result; 
   }
 }
 
@@ -47,7 +63,6 @@ class Div extends Flow {
     return html`<div>${this.children ? this.children.map(child => child.getResult()) : null}</div>`;
   }
 }
-
 
 export class MyComponent extends Flow {
 
