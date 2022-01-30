@@ -1010,7 +1010,7 @@ function createWorld(configuration) {
         this.invalidateAction();
       },
       invalidateAction(key) {
-        console.log("invalidate " + description + " on " + key);
+        // console.log("invalidate " + description + " on " + key);
         removeAllSources(this);
         repeaterDirty(this);
         this.disposeChildren();

@@ -60,6 +60,8 @@ export class DOMFlowTarget {
   }
 
   getElement(primitiveFlow) {
+    if (primitiveFlow.domElement) return primitiveFlow.domElement; 
+
     if (primitiveFlow instanceof Text) {
       let result = document.createTextNode(primitiveFlow.text);
       return result; 

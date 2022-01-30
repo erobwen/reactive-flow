@@ -7,7 +7,7 @@ let parents = [];
 
 export class Flow {
   constructor(properties) {
-    this.parent = parents[parents.length - 1]; // Note this can only be done in constructor! 
+    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
     
     this.buildRepeater = null;
     this.primitive = null; 
@@ -26,7 +26,21 @@ export class Flow {
       this[property] = properties[property];
     }
     this.setProperties(properties);
-    return observable(this, key);
+
+    let me = observable(this, key);
+    if (!this.parent) me.onReBuildCreate();
+    return me;
+  }
+
+  
+  onReBuildCreate() {
+    // Lifecycle, override to do expensive things. Like opening up connections etc. 
+    // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
+  }
+
+  onReBuildRemove() {
+    if (this.buildRepeater) this.buildRepeater.dispose();
+    if (this.integrationRepeater) this.integrationRepeater.dispose();
   }
 
   uniqueName() {
@@ -44,6 +58,7 @@ export class Flow {
   }
 
   render() {
+    // log(this)
     this.integratePrimitive();
   }
 
@@ -60,6 +75,7 @@ export class Flow {
   }
 
   getPrimitive() {
+    // log(this)
     const me = this; 
     finalize(me);
     if (me.buildRepeater === null) {
