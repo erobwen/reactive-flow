@@ -8,25 +8,20 @@ let parents = [];
 export class Flow {
   constructor(properties) {
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
-    
-    this.buildRepeater = null;
-    this.primitive = null; 
-    
-    this.integrationRepeater = null;
     this.target = properties.target ? properties.target : this.parent.target;
-    let key = properties.key;  
+    this.key = properties.key ? properties.key : null;  
     delete properties.key;
+    if (this.key === null) console.warn("Component with no key, add key for better performance.")
     for (let property in properties) {
       this[property] = properties[property];
     }
     
-    let me = observable(this, key);
+    let me = observable(this, this.key);
     me.setProperties(properties);
     if (!this.parent) me.onReBuildCreate();
     return me;
   }
 
-  
   onReBuildCreate() {
     // Lifecycle, override to do expensive things. Like opening up connections etc. 
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
@@ -37,13 +32,20 @@ export class Flow {
     if (this.integrationRepeater) this.integrationRepeater.dispose();
   }
 
-  uniqueName() {
+  className() {
     let result; 
     withoutRecording(() => {
-      result = this.constructor.name + ":" + this.causality.id;
-      result = this.constructor.name + ":" + this.causality.id;
+      result = this.constructor.name;
     });
-    return result; 
+    return result;    
+  }
+
+  description() {
+    return this.className() + ":" + this.uniqueName(); 
+  }
+
+  uniqueName() {
+    return (this.key ? (this.key + ":") : "") + this.causality.id
   }
 
   getChild(key) {
@@ -58,7 +60,7 @@ export class Flow {
   integratePrimitive() {
     const me = this; 
     me.getPrimitive();
-    if (me.integrationRepeater === null) {
+    if (!me.integrationRepeater) {
       me.integrationRepeater = repeat("integrationRepeater", () => {
         me.target.integrate(me, me.primitive);
       });
@@ -68,11 +70,18 @@ export class Flow {
   getPrimitive() {
     const me = this; 
     finalize(me);
-    if (me.buildRepeater === null) {
+    if (!me.buildRepeater) {
       me.buildRepeater = repeat("buildRepeater", () => {
+        log("re-building: " + this.description());
+        // Recursivley build down to primitives
         parents.push(me);
         me.primitive = me.build().getPrimitive();
         parents.pop();
+
+        // Expand known children (do as much as possible before integration)
+        for(let id in me.causality.buildIdObjectMap) {
+          me.causality.buildIdObjectMap[id].getPrimitive();
+        }
       });  
     }
     return me.primitive;

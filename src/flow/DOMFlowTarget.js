@@ -1,4 +1,4 @@
-import { observable, world, Text, Row } from "./Flow";
+import { observable, world, Text, repeat, Row } from "./Flow";
 const log = console.log;
 
 
@@ -8,8 +8,9 @@ export class DOMFlowTarget {
   }
 
   integrate(flow, primitiveFlow) {
-    const flowElement = this.getElement(primitiveFlow);
+    const flowElement = this.getElement(flow, primitiveFlow);
     flow.domElement = flowElement;
+    primitiveFlow.domElement = flowElement;
   
     // Setup root
     if (!flow.parent) {
@@ -39,7 +40,10 @@ export class DOMFlowTarget {
     if (flow.domParentElement) {
       const domParentElement = flow.domParentElement;
       if (domParentElement.childNodes.length === flow.domTotalPositions) {
-        domParentElement.replaceChild(flowElement, domParentElement.childNodes[flow.domPosition])
+        const nodeToReplace = domParentElement.childNodes[flow.domPosition]; 
+        if (nodeToReplace !== flowElement) {
+          domParentElement.replaceChild(flowElement, nodeToReplace)
+        }
       } else {
         if (flow.previousFlow && !flow.previousFlow.isIntegrated) {
           return; // Wait until sibling is finished first.
@@ -50,13 +54,26 @@ export class DOMFlowTarget {
     }
   }
 
-  getElement(primitiveFlow) {
-    if (primitiveFlow.domElement) return primitiveFlow.domElement; 
+  getElement(flow, primitiveFlow) {
+    // log(primitiveFlow);
+    const me = this; 
+    // if (primitiveFlow === null) debugger;
+    if (!primitiveFlow.elementRepeater) {
+      primitiveFlow.elementRepeater = repeat("elementRepeater", () => {
+        primitiveFlow.domElement = me.createElement(flow, primitiveFlow);  
+      });
+    }
+    return primitiveFlow.domElement;
+  }
 
+  createElement(flow, primitiveFlow) {
     if (primitiveFlow instanceof Text) {
       return document.createTextNode(primitiveFlow.text);
     } else if (primitiveFlow instanceof Row) {
-      return document.createElement("div");
+      let element = document.createElement("div");
+      element.id = flow.uniqueName();
+      element.className = flow.className();
+      return element; 
     }
   }
 }
