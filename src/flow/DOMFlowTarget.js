@@ -23,14 +23,20 @@ export class DOMFlowTarget {
     if (primitiveFlow.children) {
       let position = 0;
       let previousFlow = null;
+      const childrenCount = primitiveFlow.children.length;
       for (let child of primitiveFlow.children) {
         child.domParentElement = flowElement;
         child.domPosition = position++;
-        child.domTotalPositions = primitiveFlow.children.length;
+        child.domTotalPositions = childrenCount;
         child.previousFlow = null;
         
         child.previousFlow = previousFlow;
         previousFlow = child;
+
+        while (flowElement.childNodes.length > childrenCount) {
+          // log(flowElement.childNodes.length);
+          flowElement.removeChild(flowElement.lastElementChild);
+        }
 
         child.integratePrimitive();
       }  
