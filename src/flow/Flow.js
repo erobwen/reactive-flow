@@ -22,6 +22,10 @@ export class Flow {
     return me;
   }
 
+  // requireProperties() {
+  //   throw new Error("Not implemented yet");
+  // }
+
   onReBuildCreate() {
     // Lifecycle, override to do expensive things. Like opening up connections etc. 
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
@@ -45,7 +49,11 @@ export class Flow {
   }
 
   uniqueName() {
-    return (this.key ? (this.key + ":") : "") + this.causality.id
+    let result;
+    withoutRecording(() => {
+      result = (this.key ? (this.key + ":") : "") + this.causality.id;
+    });
+    return result
   }
 
   getChild(key) {
@@ -72,7 +80,7 @@ export class Flow {
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat("buildRepeater", () => {
-        log("re-building: " + this.description());
+        // log("re-building: " + this.description());
         // Recursivley build down to primitives
         parents.push(me);
         me.primitive = me.build().getPrimitive();
@@ -92,6 +100,9 @@ export class Flow {
   }
 }
 
+/**
+ * Primitive Flows
+ */
 export class PrimitiveFlow extends Flow {
   getPrimitive() {
     this.primitive = this; 
@@ -108,5 +119,20 @@ export class Text extends PrimitiveFlow {
 export class Row extends PrimitiveFlow {
   setProperties({children}) {
     this.children = children;
+  }
+}
+
+export class Button extends PrimitiveFlow {
+  setProperties({onClick, text}) {
+    log("button set properties");
+    this.onClick = onClick;
+    this.text = text; 
+  }
+}
+
+export class HtmlElement extends PrimitiveFlow {
+  setProperties({children, tagType}) {
+    this.children = children;
+    this.tagType =  tagType;
   }
 }

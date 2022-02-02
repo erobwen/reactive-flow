@@ -185,13 +185,13 @@ export function defaultDependencyInterfaceCreator(causality) {
     invalidatePropertyObservers: (handler, key) => {
       if (typeof(handler._propertyObservers) !== 'undefined' &&
           typeof(handler._propertyObservers[key]) !== 'undefined') {
-        invalidateObservers(handler._propertyObservers[key], handler.proxy, key);
+        invalidateObservers(handler._propertyObservers[key], handler.proxy, key + "=");
       }
     },
 
     invalidateEnumerateObservers: (handler, key) => {
       if (typeof(handler._enumerateObservers) !== 'undefined') {
-        invalidateObservers(handler._enumerateObservers, handler.proxy, key);
+        invalidateObservers(handler._enumerateObservers, handler.proxy, key + "=");
       }
     }, 
 

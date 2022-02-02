@@ -1008,6 +1008,15 @@ function createWorld(configuration) {
       repeaterAction : modifyRepeaterAction(repeaterAction, options),
       nonRecordedAction: repeaterNonRecordingAction,
       options: options ? options : {},
+      causalityString() {
+        const object = this.invalidatedByObject;
+        const key = this.invalidatedByKey; 
+        let className;
+        withoutRecording(() => {
+          className = object.constructor.name;
+        });
+        return className + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " --> " + "repeat:" + this.description; 
+      },
       restart() {
         this.invalidateAction();
       },

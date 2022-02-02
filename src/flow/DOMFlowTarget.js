@@ -1,4 +1,4 @@
-import { observable, world, Text, repeat, Row } from "./Flow";
+import { observable, world, Text, repeat, Row, Button } from "./Flow";
 const log = console.log;
 
 
@@ -24,6 +24,12 @@ export class DOMFlowTarget {
       let position = 0;
       let previousFlow = null;
       const childrenCount = primitiveFlow.children.length;
+      
+      while (flowElement.childNodes.length > childrenCount) {
+        // log(flowElement.childNodes.length);
+        flowElement.removeChild(flowElement.lastElementChild);
+      }
+
       for (let child of primitiveFlow.children) {
         child.domParentElement = flowElement;
         child.domPosition = position++;
@@ -33,13 +39,8 @@ export class DOMFlowTarget {
         child.previousFlow = previousFlow;
         previousFlow = child;
 
-        while (flowElement.childNodes.length > childrenCount) {
-          // log(flowElement.childNodes.length);
-          flowElement.removeChild(flowElement.lastElementChild);
-        }
-
         child.integratePrimitive();
-      }  
+      }
     }
 
     // Place under parent node (if you have one yet)
@@ -48,12 +49,14 @@ export class DOMFlowTarget {
       if (domParentElement.childNodes.length === flow.domTotalPositions) {
         const nodeToReplace = domParentElement.childNodes[flow.domPosition]; 
         if (nodeToReplace !== flowElement) {
+          log("replace" + flow.description())
           domParentElement.replaceChild(flowElement, nodeToReplace)
         }
       } else {
         if (flow.previousFlow && !flow.previousFlow.isIntegrated) {
           return; // Wait until sibling is finished first.
         }
+        log("fresh" + flow.description())
         domParentElement.appendChild(flowElement);
         flow.isIntegrated = true; 
       }  
@@ -65,7 +68,10 @@ export class DOMFlowTarget {
     const me = this; 
     // if (primitiveFlow === null) debugger;
     if (!primitiveFlow.elementRepeater) {
-      primitiveFlow.elementRepeater = repeat("elementRepeater", () => {
+      primitiveFlow.elementRepeater = repeat("elementRepeater", (repeater) => {
+        if (!repeater.firstTime) log(repeater.causalityString()) 
+
+        log("new element:" + flow.description())
         primitiveFlow.domElement = me.createElement(flow, primitiveFlow);  
       });
     }
@@ -73,9 +79,15 @@ export class DOMFlowTarget {
   }
 
   createElement(flow, primitiveFlow) {
-    if (primitiveFlow instanceof Text) {
-      return document.createTextNode(primitiveFlow.text);
-    } else if (primitiveFlow instanceof Row) {
+    const you = primitiveFlow; 
+    if (you instanceof Button) {
+      const button = document.createElement("button");
+      button.onclick = you.onClick;
+      button.appendChild(document.createTextNode(you.text));
+      return button; 
+    } if (you instanceof Text) {
+      return document.createTextNode(you.text);
+    } else if (you instanceof Row) {
       let element = document.createElement("div");
       element.id = flow.uniqueName();
       element.className = flow.className();
