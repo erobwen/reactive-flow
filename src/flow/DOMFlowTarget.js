@@ -49,14 +49,14 @@ export class DOMFlowTarget {
       if (domParentElement.childNodes.length === flow.domTotalPositions) {
         const nodeToReplace = domParentElement.childNodes[flow.domPosition]; 
         if (nodeToReplace !== flowElement) {
-          log("replace" + flow.description())
+          // log("replace" + flow.description())
           domParentElement.replaceChild(flowElement, nodeToReplace)
         }
       } else {
         if (flow.previousFlow && !flow.previousFlow.isIntegrated) {
           return; // Wait until sibling is finished first.
         }
-        log("fresh" + flow.description())
+        // log("fresh" + flow.description())
         domParentElement.appendChild(flowElement);
         flow.isIntegrated = true; 
       }  
@@ -64,34 +64,51 @@ export class DOMFlowTarget {
   }
 
   getElement(flow, primitiveFlow) {
-    // log(primitiveFlow);
     const me = this; 
-    // if (primitiveFlow === null) debugger;
-    if (!primitiveFlow.elementRepeater) {
-      primitiveFlow.elementRepeater = repeat("elementRepeater", (repeater) => {
-        if (!repeater.firstTime) log(repeater.causalityString()) 
 
-        log("new element:" + flow.description())
-        primitiveFlow.domElement = me.createElement(flow, primitiveFlow);  
+    // Create element
+    if (!primitiveFlow.createElementRepeater) {
+      primitiveFlow.createElementRepeater = repeat(flow.description() + ".createElementRepeater", (repeater) => {
+        if (!repeater.firstTime) log(repeater.causalityString()); 
+        primitiveFlow.domElement = me.createDomElement(flow, primitiveFlow);  
+      });
+    }
+
+    // Build element
+    if (!primitiveFlow.buildElementRepeater) {
+      primitiveFlow.buildElementRepeater = repeat(flow.description() + ".buildElementRepeater", (repeater) => {
+        if (!repeater.firstTime) log(repeater.causalityString()); 
+        me.buildDomElement(flow, primitiveFlow, primitiveFlow.domElement);  
       });
     }
     return primitiveFlow.domElement;
   }
 
-  createElement(flow, primitiveFlow) {
-    const you = primitiveFlow; 
+  createDomElement(flow, primitiveFlow) {
+    const you = primitiveFlow;
+    let element;
     if (you instanceof Button) {
-      const button = document.createElement("button");
-      button.onclick = you.onClick;
-      button.appendChild(document.createTextNode(you.text));
-      return button; 
+      element = document.createElement("button");
     } if (you instanceof Text) {
-      return document.createTextNode(you.text);
+      element = document.createTextNode(you.text);
     } else if (you instanceof Row) {
-      let element = document.createElement("div");
-      element.id = flow.uniqueName();
-      element.className = flow.className();
-      return element; 
+      element = document.createElement("div");
+    }
+    element.id = flow.buildUniqueName();
+    element.className = flow.className();
+    return element; 
+  }
+
+  buildDomElement(flow, primitiveFlow, element) {
+    const you = primitiveFlow;
+    if (you instanceof Button) {
+      element.onclick = you.onClick;
+      if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
+      element.lastChild.nodeValue = you.text;
+    } if (you instanceof Text) {
+      element.nodeValue = you.text;
+    } else if (you instanceof Row) {
+      // Nothing
     }
   }
 }

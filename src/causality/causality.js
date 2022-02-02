@@ -87,7 +87,8 @@ function createWorld(configuration) {
 
   const world = {
     name: configuration.name,
-
+    sameAsPreviousDeep,
+    
     // Main API
     observable,
     create: observable, // observable alias
@@ -361,6 +362,7 @@ function createWorld(configuration) {
   }
 
   function sameAsPreviousDeep(previousValue, newValue, valueComparisonDepthLimit) {
+    if (typeof(valueComparisonDepthLimit) === "undefined") valueComparisonDepthLimit = 8;
     if (previousValue === null && newValue === null) return true;
     if ((previousValue === newValue || Number.isNaN(previousValue) && Number.isNaN(newValue))) return true;
     if (valueComparisonDepthLimit === 0) return false; // Cannot go further, cannot guarantee that they are the same.  
@@ -1015,7 +1017,7 @@ function createWorld(configuration) {
         withoutRecording(() => {
           className = object.constructor.name;
         });
-        return className + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " --> " + "repeat:" + this.description; 
+        return className + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " (modified) --> " + this.description + " (repeat)"; 
       },
       restart() {
         this.invalidateAction();

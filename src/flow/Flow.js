@@ -1,8 +1,10 @@
 import getWorld from "../causality/causality.js";
 export const world = getWorld({useNonObservablesAsValues: true, warnOnNestedRepeater: false});
-export const { observable, repeat, finalize, withoutRecording } = world;
+export const { observable, repeat, finalize, withoutRecording, sameAsPreviousDeep } = world;
 const log = console.log;
-
+window.sameAsPreviousDeep = sameAsPreviousDeep;
+window.world = world;
+window.observable = observable;
 let parents = [];
 
 export class Flow {
@@ -45,13 +47,21 @@ export class Flow {
   }
 
   description() {
-    return this.className() + ":" + this.uniqueName(); 
+    return this.className() + ":" + this.buildUniqueName(); 
   }
 
   uniqueName() {
     let result;
     withoutRecording(() => {
       result = (this.key ? (this.key + ":") : "") + this.causality.id;
+    });
+    return result
+  }
+
+  buildUniqueName() {
+    let result;
+    withoutRecording(() => {
+      result = this.key ? this.key : this.causality.id;
     });
     return result
   }
@@ -69,7 +79,8 @@ export class Flow {
     const me = this; 
     me.getPrimitive();
     if (!me.integrationRepeater) {
-      me.integrationRepeater = repeat("integrationRepeater", () => {
+      me.integrationRepeater = repeat(this.description() + ".integrationRepeater", repeater => {
+        if (!repeater.firstTime) log(repeater.causalityString());
         me.target.integrate(me, me.primitive);
       });
     }
@@ -79,7 +90,8 @@ export class Flow {
     const me = this; 
     finalize(me);
     if (!me.buildRepeater) {
-      me.buildRepeater = repeat("buildRepeater", () => {
+      me.buildRepeater = repeat(this.description() + ".buildRepeater", repeater => {
+        if (!repeater.firstTime) log(repeater.causalityString());
         // log("re-building: " + this.description());
         // Recursivley build down to primitives
         parents.push(me);
@@ -124,7 +136,7 @@ export class Row extends PrimitiveFlow {
 
 export class Button extends PrimitiveFlow {
   setProperties({onClick, text}) {
-    log("button set properties");
+    // log("button set properties");
     this.onClick = onClick;
     this.text = text; 
   }
