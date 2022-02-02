@@ -104,7 +104,6 @@ describe("Re Build", function(){
       () => {
         tree.root = buildTree(source);
       },
-      null, 
       { 
         onRefresh: () => { collecting = true; events.length = 0 },
         onEndBuildUpdate: () => { collecting = false; updateBuildEvents = events.slice(); events.length = 0; }
