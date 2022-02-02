@@ -20,8 +20,15 @@ export class Flow {
     
     let me = observable(this, this.key);
     me.setProperties(properties);
-    if (!this.parent) me.onReBuildCreate();
+    if (!this.parent) {
+      log("no parent!")
+      me.onReBuildCreate();
+    }
     return me;
+  }
+
+  setProperties() {
+    // throw new Error("Not implemented yet");
   }
 
   // requireProperties() {
@@ -72,36 +79,36 @@ export class Flow {
   }
 
   render() {
-    this.integratePrimitive();
-  }
-
-  integratePrimitive() {
-    const me = this; 
-    me.getPrimitive();
-    if (!me.integrationRepeater) {
-      me.integrationRepeater = repeat(this.description() + ".integrationRepeater", repeater => {
-        if (!repeater.firstTime) log(repeater.causalityString());
-        me.target.integrate(me, me.primitive);
-      });
-    }
+    this.target.integrate(this, this.getPrimitive());
   }
 
   getPrimitive() {
-    const me = this; 
+    // log("getPrimitive")
+    const me = this;
+    
+    me.equivalentParent = parents.length > 0 ? parents[parents.length - 1] : null;
+    if (me.equivalentParent) me.equivalentParent.equivalentChild = me;
+
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(this.description() + ".buildRepeater", repeater => {
         if (!repeater.firstTime) log(repeater.causalityString());
-        // log("re-building: " + this.description());
+
         // Recursivley build down to primitives
         parents.push(me);
         me.primitive = me.build().getPrimitive();
         parents.pop();
 
         // Expand known children (do as much as possible before integration)
-        for(let id in me.causality.buildIdObjectMap) {
-          me.causality.buildIdObjectMap[id].getPrimitive();
-        }
+        // function getPrimitives(flow) {
+        //   flow.getPrimitive();
+        //   if (flow.children) {
+        //     for (let child of flow.children) {
+        //       getPrimitives(child);
+        //     }
+        //   }
+        // }
+        // getPrimitives(me.primitive);
       });  
     }
     return me.primitive;
@@ -147,4 +154,13 @@ export class HtmlElement extends PrimitiveFlow {
     this.children = children;
     this.tagType =  tagType;
   }
+}
+
+
+export function when(condition, operation) {
+  return repeat(() => {
+    if (condition()) {
+      operation();
+    }
+  });
 }

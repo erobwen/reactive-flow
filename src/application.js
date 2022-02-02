@@ -1,21 +1,20 @@
-import { Flow, Text, Row, Button, repeat } from "./flow/Flow";
+import { Flow, Text, Row, Button, repeat, when } from "./flow/Flow";
 const log = console.log;
 
+
+
 export class TestComponent extends Flow {
-
-  setProperties({}) {
-    this.count = 1
-    // this.count = 1
-  }
-
+  
   onReBuildCreate() {
-    const me = this;
+    log("onBuildCreate")
+    this.count = 1
+    // const me = this;
 
-    repeat(() => { 
-      let observe = me.count;
-      log("-----------------------");
-    })
-    
+    // repeat(() => { 
+    //   let observe = me.count;
+    //   log("-----------------------");
+    // })
+
     // setTimeout(() => {
     //   log("-----------");
     //   me.count++
@@ -58,7 +57,20 @@ export class List extends Flow {
 export class Item extends Flow {
   setProperties({text}) {
     this.text = text;
+  }
+  
+  onReBuildCreate() {
+    const me = this;
     this.on = true;
+    // repeat(() => {
+    //   if (this.domElement) {
+    //     log("Got an element!")
+    //   }
+    // })
+    // when(() => {me.domElement}, 
+    //   () => { 
+    //     log("Got an element!") 
+    //   });
   }
 
   build() {
@@ -66,9 +78,9 @@ export class Item extends Flow {
     const me = this; 
     return new Row({key: "item-row", 
       children: [
-        // new Text({key: "text", text: me.on ? "on" : "off"}),
-        // new Button({key: "less", onClick: () => {me.on = !me.on}, text: "toggle"}),
-        new Text({key: "text2", text: me.text})
+        new Text({key: "text", text: me.on ? "on" : "off"}),
+        new Button({key: "less", onClick: () => {me.on = !me.on}, text: "toggle"}),
+        new Text({key: "item-text", text: me.text})
       ]});
   }
 }

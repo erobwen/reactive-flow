@@ -1,83 +1,48 @@
 import { observable, world, Text, repeat, Row, Button } from "./Flow";
 const log = console.log;
 
+function clearNode(node) {
+  while (node.childNodes.length > 0) {
+    node.removeChild(node.lastChild);
+  }
+}
 
 export class DOMFlowTarget {
   constructor(rootElement){
     this.rootElement = rootElement;
   }
-
+  
   integrate(flow, primitiveFlow) {
-    const flowElement = this.getElement(flow, primitiveFlow);
-    flow.domElement = flowElement;
-    primitiveFlow.domElement = flowElement;
-  
-    // Setup root
-    if (!flow.parent) {
-      flow.domParentElement = this.rootElement;
-      flow.domPosition = 0;
-      flow.domTotalPositions = 1;
-    }
-  
-    // Integrate children
-    if (primitiveFlow.children) {
-      let position = 0;
-      let previousFlow = null;
-      const childrenCount = primitiveFlow.children.length;
-      
-      while (flowElement.childNodes.length > childrenCount) {
-        // log(flowElement.childNodes.length);
-        flowElement.removeChild(flowElement.lastElementChild);
-      }
+    const you = flow;
+    if (!you.integrationRepeater) {
+      you.integrationRepeater = repeat(you.description() + ".integrationRepeater", repeater => {
+        if (!repeater.firstTime) log(repeater.causalityString());
 
-      for (let child of primitiveFlow.children) {
-        child.domParentElement = flowElement;
-        child.domPosition = position++;
-        child.domTotalPositions = childrenCount;
-        child.previousFlow = null;
-        
-        child.previousFlow = previousFlow;
-        previousFlow = child;
-
-        child.integratePrimitive();
-      }
-    }
-
-    // Place under parent node (if you have one yet)
-    if (flow.domParentElement) {
-      const domParentElement = flow.domParentElement;
-      if (domParentElement.childNodes.length === flow.domTotalPositions) {
-        const nodeToReplace = domParentElement.childNodes[flow.domPosition]; 
-        if (nodeToReplace !== flowElement) {
-          // log("replace" + flow.description())
-          domParentElement.replaceChild(flowElement, nodeToReplace)
-        }
-      } else {
-        if (flow.previousFlow && !flow.previousFlow.isIntegrated) {
-          return; // Wait until sibling is finished first.
-        }
-        // log("fresh" + flow.description())
-        domParentElement.appendChild(flowElement);
-        flow.isIntegrated = true; 
-      }  
+        const element = this.getElement(flow, primitiveFlow);
+        clearNode(this.rootElement);
+        this.rootElement.appendChild(element);
+      });
     }
   }
 
   getElement(flow, primitiveFlow) {
+    // log("getElmenet")
     const me = this; 
 
     // Create element
     if (!primitiveFlow.createElementRepeater) {
       primitiveFlow.createElementRepeater = repeat(flow.description() + ".createElementRepeater", (repeater) => {
-        if (!repeater.firstTime) log(repeater.causalityString()); 
-        primitiveFlow.domElement = me.createDomElement(flow, primitiveFlow);  
+        // if (!repeater.firstTime) log(repeater.causalityString()); 
+        // log("create repeater? ")
+        primitiveFlow.domElement = me.createDomElement(flow, primitiveFlow);
+        flow.domElement = primitiveFlow.domElement;
       });
     }
 
     // Build element
     if (!primitiveFlow.buildElementRepeater) {
       primitiveFlow.buildElementRepeater = repeat(flow.description() + ".buildElementRepeater", (repeater) => {
-        if (!repeater.firstTime) log(repeater.causalityString()); 
+        // if (!repeater.firstTime) log(repeater.causalityString()); 
         me.buildDomElement(flow, primitiveFlow, primitiveFlow.domElement);  
       });
     }
@@ -85,21 +50,24 @@ export class DOMFlowTarget {
   }
 
   createDomElement(flow, primitiveFlow) {
+    // log("createDomElement")
     const you = primitiveFlow;
     let element;
     if (you instanceof Button) {
       element = document.createElement("button");
     } if (you instanceof Text) {
-      element = document.createTextNode(you.text);
+      element = document.createTextNode("");
     } else if (you instanceof Row) {
       element = document.createElement("div");
     }
     element.id = flow.buildUniqueName();
-    element.className = flow.className();
+    element.className = flow.className()  + ":" + primitiveFlow.buildUniqueName();
     return element; 
   }
-
+  
   buildDomElement(flow, primitiveFlow, element) {
+    // log("buildDomElement")
+    const me = this; 
     const you = primitiveFlow;
     if (you instanceof Button) {
       element.onclick = you.onClick;
@@ -109,6 +77,13 @@ export class DOMFlowTarget {
       element.nodeValue = you.text;
     } else if (you instanceof Row) {
       // Nothing
+    }
+
+    if (primitiveFlow.children) {
+      clearNode(element);
+      for (let child of primitiveFlow.children) {
+        element.appendChild(me.getElement(child, child.getPrimitive()));
+      }
     }
   }
 }
