@@ -78,14 +78,14 @@ export function defaultDependencyInterfaceCreator(causality) {
     }
   }
 
-  function invalidateObservers(observers, key) {
+  function invalidateObservers(observers, proxy, key) {
     if (state.blockInvalidation > 0) {
       return;
     }
 
     let contents = observers.contents;
     for (let id in contents) {
-      invalidateObserver(contents[id], key);
+      invalidateObserver(contents[id], proxy, key);
     }
 
     if (typeof(observers.first) !== 'undefined') {
@@ -93,7 +93,7 @@ export function defaultDependencyInterfaceCreator(causality) {
       while(chainedObserverChunk !== null) {
         let contents = chainedObserverChunk.contents;
         for (let id in contents) {
-          invalidateObserver(contents[id], key);
+          invalidateObserver(contents[id], proxy, key);
         }
         chainedObserverChunk = chainedObserverChunk.next;
       }
@@ -176,22 +176,22 @@ export function defaultDependencyInterfaceCreator(causality) {
       recordDependency(observer, handler._propertyObservers[key], key);
     },
 
-    invalidateArrayObservers: (handler) => {  
+    invalidateArrayObservers: (handler, key) => {  
       if (handler._arrayObservers !== null) {
-        invalidateObservers(handler._arrayObservers);
+        invalidateObservers(handler._arrayObservers, handler.proxy, key);
       }
     },
 
     invalidatePropertyObservers: (handler, key) => {
       if (typeof(handler._propertyObservers) !== 'undefined' &&
           typeof(handler._propertyObservers[key]) !== 'undefined') {
-        invalidateObservers(handler._propertyObservers[key], key);
+        invalidateObservers(handler._propertyObservers[key], handler.proxy, key);
       }
     },
 
-    invalidateEnumerateObservers: (handler) => {
+    invalidateEnumerateObservers: (handler, key) => {
       if (typeof(handler._enumerateObservers) !== 'undefined') {
-        invalidateObservers(handler._enumerateObservers);
+        invalidateObservers(handler._enumerateObservers, handler.proxy, key);
       }
     }, 
 

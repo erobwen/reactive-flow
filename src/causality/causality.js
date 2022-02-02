@@ -256,7 +256,7 @@ function createWorld(configuration) {
         let index = this.target.length - 1;
         let result = this.target.pop();
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "pop");
         if (emitEvents) emitSpliceEvent(this, index, [result], null);
 
         return result;
@@ -267,7 +267,7 @@ function createWorld(configuration) {
         let argumentsArray = argumentsToArray(arguments);
         this.target.push.apply(this.target, argumentsArray);
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "push");
         if (emitEvents) emitSpliceEvent(this, index, null, argumentsArray);
 
         return this.target.length;
@@ -276,7 +276,7 @@ function createWorld(configuration) {
       shift : function() {
         let result = this.target.shift();
         
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "shift");
         if (emitEvents) emitSpliceEvent(this, 0, [result], null);
 
         return result;
@@ -287,7 +287,7 @@ function createWorld(configuration) {
         let argumentsArray = argumentsToArray(arguments);
         this.target.unshift.apply(this.target, argumentsArray);
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "unshift");
         if (emitEvents) emitSpliceEvent(this, 0, null, argumentsArray);
 
         return this.target.length;
@@ -303,7 +303,7 @@ function createWorld(configuration) {
         let removed = this.target.slice(index, index + removedCount);
         let result = this.target.splice.apply(this.target, argumentsArray);
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "splice");
         if (emitEvents) emitSpliceEvent(this, index, removed, added);
 
         return result; // equivalent to removed
@@ -324,7 +324,7 @@ function createWorld(configuration) {
         let added = this.target.slice(start, end);
         let result = this.target.copyWithin(target, start, end);
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, "copyWithin");
         if (emitEvents) emitSpliceEvent(this, target, added, removed);
 
         return result;
@@ -338,7 +338,7 @@ function createWorld(configuration) {
         let result = this.target[functionName]
             .apply(this.target, argumentsArray);
 
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, functionName);
         if (emitEvents) emitSpliceEvent(this, 0, removed, this.target.slice(0));
 
         return result;
@@ -434,7 +434,7 @@ function createWorld(configuration) {
 
       if( target[key] === value || (
         Number.isNaN(target[key]) && Number.isNaN(value)) ) {
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, key);
         emitSpliceReplaceEvent(this, key, value, previousValue);
       }
     } else {
@@ -442,7 +442,7 @@ function createWorld(configuration) {
       target[key] = value;
       if( target[key] === value || (Number.isNaN(target[key]) &&
                                     Number.isNaN(value)) ) {
-        invalidateArrayObservers(this);
+        invalidateArrayObservers(this, key);
         emitSetEvent(this, key, value, previousValue);
       }
     }
@@ -473,7 +473,7 @@ function createWorld(configuration) {
     let previousValue = target[key];
     delete target[key];
     if(!( key in target )) { // Write protected?
-      invalidateArrayObservers(this);
+      invalidateArrayObservers(this, "delete");
       emitDeleteEvent(this, key, previousValue);
     }
     if( key in target ) return false; // Write protected?
@@ -522,7 +522,7 @@ function createWorld(configuration) {
       return;
     } 
 
-    invalidateArrayObservers(this);
+    invalidateArrayObservers(this, key);
     return target;
   }
 
@@ -608,7 +608,7 @@ function createWorld(configuration) {
                                   Number.isNaN(value)) ) {
       // Write protected?
       invalidatePropertyObservers(this, key);
-      if (undefinedKey) invalidateEnumerateObservers(this);
+      if (undefinedKey) invalidateEnumerateObservers(this, key);
     }
 
     emitSetEvent(this, key, value, previousValue);
@@ -638,7 +638,7 @@ function createWorld(configuration) {
       delete target[key];
       if(!( key in target )) { // Write protected?
         invalidatePropertyObservers(this, key);
-        invalidateEnumerateObservers(this);
+        invalidateEnumerateObservers(this, key);
         emitDeleteEvent(this, key, previousValue);
       }
       if( key in target ) return false; // Write protected?
@@ -690,7 +690,7 @@ function createWorld(configuration) {
       return;
     }
  
-    invalidateEnumerateObservers(this);
+    invalidateEnumerateObservers(this, "define property");
     return Reflect.defineProperty(target, key, descriptor);
   }
 
@@ -891,8 +891,10 @@ function createWorld(configuration) {
     }
   }
 
-  function invalidateObserver(observer, key) {
+  function invalidateObserver(observer, proxy, key) {
     if (observer != state.context) {
+      observer.invalidatedByKey = key;
+      observer.invalidatedByObject = proxy;
       // if( trace.contextMismatch && state.context && state.context.id ){
       //   console.log("invalidateObserver mismatch " + observer.type, observer.id||'');
       //   if( !state.context ) console.log('current state.context null');
@@ -1009,8 +1011,7 @@ function createWorld(configuration) {
       restart() {
         this.invalidateAction();
       },
-      invalidateAction(key) {
-        // console.log("invalidate " + description + " on " + key);
+      invalidateAction() {
         removeAllSources(this);
         repeaterDirty(this);
         this.disposeChildren();
