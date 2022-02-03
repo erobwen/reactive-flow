@@ -894,7 +894,17 @@ function createWorld(configuration) {
   }
 
   function invalidateObserver(observer, proxy, key) {
-    if (observer != state.context) {
+    let observerActive = false
+    let scannedContext = state.context;
+    while(scannedContext) {
+      if (scannedContext === observer) {
+        observerActive = true;
+        break;
+      }
+      scannedContext = scannedContext.parent;
+    } 
+
+    if (!observerActive) {
       // if( trace.contextMismatch && state.context && state.context.id ){
       //   console.log("invalidateObserver mismatch " + observer.type, observer.id||'');
       //   if( !state.context ) console.log('current state.context null');
