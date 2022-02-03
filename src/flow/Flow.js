@@ -19,7 +19,7 @@ export class Flow {
     }
     
     let me = observable(this, this.key);
-    me.setProperties(properties);
+    me.setProperties(properties); // Set default values here
     if (!this.parent) {
       log("no parent!")
       me.onReBuildCreate();
@@ -98,18 +98,18 @@ export class Flow {
         parents.push(me);
         me.primitive = me.build().getPrimitive();
         parents.pop();
-
-        // Expand known children (do as much as possible before integration)
-        // function getPrimitives(flow) {
-        //   flow.getPrimitive();
-        //   if (flow.children) {
-        //     for (let child of flow.children) {
-        //       getPrimitives(child);
-        //     }
-        //   }
-        // }
-        // getPrimitives(me.primitive);
-      });  
+      });
+      // Expand known children (do as much as possible before integration)
+      // Do this outside repeater so we do not observe all child relations!
+      function getPrimitives(flow) {
+        flow.getPrimitive();
+        if (flow.children) {
+          for (let child of flow.children) {
+            getPrimitives(child);
+          }
+        }
+      }
+      getPrimitives(me.primitive);
     }
     return me.primitive;
   }

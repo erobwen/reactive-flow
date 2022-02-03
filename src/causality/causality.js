@@ -895,8 +895,6 @@ function createWorld(configuration) {
 
   function invalidateObserver(observer, proxy, key) {
     if (observer != state.context) {
-      observer.invalidatedByKey = key;
-      observer.invalidatedByObject = proxy;
       // if( trace.contextMismatch && state.context && state.context.id ){
       //   console.log("invalidateObserver mismatch " + observer.type, observer.id||'');
       //   if( !state.context ) console.log('current state.context null');
@@ -908,7 +906,11 @@ function createWorld(configuration) {
       //   }
       // }
       
+      observer.invalidatedInContext = state.context;
+      observer.invalidatedByKey = key;
+      observer.invalidatedByObject = proxy;
       observer.dispose(); // Cannot be any more dirty than it already is!
+
       if (state.postponeInvalidation > 0) {
         if (state.lastObserverToInvalidate !== null) {
           state.lastObserverToInvalidate.nextToNotify = observer;
@@ -1011,13 +1013,19 @@ function createWorld(configuration) {
       nonRecordedAction: repeaterNonRecordingAction,
       options: options ? options : {},
       causalityString() {
+        const context = this.invalidatedInContext;
         const object = this.invalidatedByObject;
         const key = this.invalidatedByKey; 
-        let className;
+        let objectClassName;
         withoutRecording(() => {
-          className = object.constructor.name;
+          objectClassName = object.constructor.name;
         });
-        return className + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " (modified) --> " + this.description + " (repeat)"; 
+
+        const contextString = (context ? context.description : "outside repeater/invalidator") 
+        const causeString = objectClassName + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " (modified)";
+        const effectString = this.description + " (repeat)";
+
+        return contextString + ":\n" + causeString + " --> " +  effectString;
       },
       restart() {
         this.invalidateAction();
