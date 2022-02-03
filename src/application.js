@@ -6,21 +6,13 @@ const log = console.log;
 export class TestComponent extends Flow {
   
   onReBuildCreate() {
-    log("onBuildCreate")
     this.count = 1
-    // const me = this;
+    const me = this;
 
-    // repeat(() => { 
-    //   let observe = me.count;
-    //   log("-----------------------");
-    // })
-
-    // setTimeout(() => {
-    //   log("-----------");
-    //   me.count++
-    // }, 1000);
-    // setTimeout(() => {me.count++}, 2000);
-    // setTimeout(() => {me.count++}, 3000);
+    repeat(() => { 
+      let observe = me.count;
+      log("---------- count -------------");
+    })
   }
 
   build() {
@@ -79,7 +71,7 @@ export class Item extends Flow {
     return new Row({key: "item-row", 
       children: [
         new Text({key: "text", text: me.on ? "on" : "off"}),
-        new Button({key: "less", onClick: () => {me.on = !me.on}, text: "toggle"}),
+        new Button({key: "less", onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
         new Text({key: "item-text", text: me.text})
       ]});
   }
