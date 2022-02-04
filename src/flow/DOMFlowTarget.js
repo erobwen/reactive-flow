@@ -15,8 +15,8 @@ export class DOMFlowTarget {
   integrate(flow, primitiveFlow) {
     const you = flow;
     if (!you.integrationRepeater) {
-      you.integrationRepeater = repeat(you.description() + ".integrationRepeater", repeater => {
-        if (!repeater.firstTime) log(repeater.causalityString());
+      you.integrationRepeater = repeat(you.toString() + ".integrationRepeater", repeater => {
+        log(repeater.causalityString());
 
         const element = this.getElement(flow, primitiveFlow);
         clearNode(this.rootElement);
@@ -31,9 +31,8 @@ export class DOMFlowTarget {
 
     // Create element
     if (!primitiveFlow.createElementRepeater) {
-      primitiveFlow.createElementRepeater = repeat(flow.description() + ".createElementRepeater", (repeater) => {
-        // if (!repeater.firstTime) log(repeater.causalityString()); 
-        // log("create repeater? ")
+      primitiveFlow.createElementRepeater = repeat(flow.toString() + ".createElementRepeater", (repeater) => {
+        log(repeater.causalityString());
         primitiveFlow.domElement = me.createDomElement(flow, primitiveFlow);
         flow.domElement = primitiveFlow.domElement;
       });
@@ -41,8 +40,8 @@ export class DOMFlowTarget {
 
     // Build element
     if (!primitiveFlow.buildElementRepeater) {
-      primitiveFlow.buildElementRepeater = repeat(flow.description() + ".buildElementRepeater", (repeater) => {
-        // if (!repeater.firstTime) log(repeater.causalityString()); 
+      primitiveFlow.buildElementRepeater = repeat(flow.toString() + ".buildElementRepeater", (repeater) => {
+        log(repeater.causalityString()); 
         me.buildDomElement(flow, primitiveFlow, primitiveFlow.domElement);  
       });
     }
@@ -60,8 +59,8 @@ export class DOMFlowTarget {
     } else if (you instanceof Row) {
       element = document.createElement("div");
     }
-    element.id = flow.buildUniqueName();
-    element.className = flow.className()  + ":" + primitiveFlow.buildUniqueName();
+    element.id = flow.toString()
+    // element.className = 
     return element; 
   }
   
@@ -74,7 +73,7 @@ export class DOMFlowTarget {
       if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
       element.lastChild.nodeValue = you.text;
     } if (you instanceof Text) {
-      element.nodeValue = you.text;
+      element.nodeValue = you.text; // toString();
     } else if (you instanceof Row) {
       // Nothing
     }

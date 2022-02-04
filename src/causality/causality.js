@@ -1025,15 +1025,17 @@ function createWorld(configuration) {
       causalityString() {
         const context = this.invalidatedInContext;
         const object = this.invalidatedByObject;
+        if (!object) return "not triggered yet " + this.description 
         const key = this.invalidatedByKey; 
-        let objectClassName;
-        withoutRecording(() => {
-          objectClassName = object.constructor.name;
-        });
+        // let objectClassName;
+        // withoutRecording(() => {
+        //   objectClassName = object.constructor.name;
+        // });
 
         const contextString = (context ? context.description : "outside repeater/invalidator") 
-        const causeString = objectClassName + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " (modified)";
-        const effectString = this.description + " (repeat)";
+        // const causeString = objectClassName + ":" + (object.causality.buildId ? object.causality.buildId : object.causality.id) + "." + key + " (modified)";
+        const causeString = "  " + object.toString() + "." + key + "";
+        const effectString = "" + this.description + "";
 
         return contextString + ":\n" + causeString + " --> " +  effectString;
       },

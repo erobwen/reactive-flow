@@ -142,9 +142,9 @@ export function defaultDependencyInterfaceCreator(causality) {
         }
       }
 
-      if (noMoreObservers && typeof(observerSet.handler.proxy.onRemovedLastObserver) === "function") {
-        observerSet.handler.proxy.onRemovedLastObserver(observerSet.description, observerSet.key)
-      }
+      // if (noMoreObservers && typeof(observerSet.handler.proxy.onRemovedLastObserver) === "function") {
+      //   observerSet.handler.proxy.onRemovedLastObserver(observerSet.description, observerSet.key)
+      // }
     }
   }
 

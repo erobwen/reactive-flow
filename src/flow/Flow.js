@@ -7,6 +7,9 @@ window.world = world;
 window.observable = observable;
 let parents = [];
 
+
+window.allFlows = {};
+
 export class Flow {
   constructor(properties) {
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
@@ -24,6 +27,7 @@ export class Flow {
       log("no parent!")
       me.onReBuildCreate();
     }
+    window.allFlows[me.causality.id] = me;
     return me;
   }
 
@@ -53,8 +57,8 @@ export class Flow {
     return result;    
   }
 
-  description() {
-    return this.className() + ":" + this.buildUniqueName(); 
+  toString() {
+    return this.className() + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   uniqueName() {
