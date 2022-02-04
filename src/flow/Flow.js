@@ -95,7 +95,7 @@ export class Flow {
 
     finalize(me);
     if (!me.buildRepeater) {
-      me.buildRepeater = repeat(this.description() + ".buildRepeater", repeater => {
+      me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
         if (!repeater.firstTime) log(repeater.causalityString());
 
         // Recursivley build down to primitives

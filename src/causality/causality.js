@@ -224,7 +224,7 @@ function createWorld(configuration) {
    **********************************/
 
   function updateContextState() {
-    state.inActiveRecording = state.context !== null && state.recordingPaused === 0;
+    state.inActiveRecording = state.context !== null && state.context.isRecording && state.recordingPaused === 0;
     state.inRepeater = (state.context && state.context.type === "repeater") ? state.context: null;
   }
 
@@ -953,6 +953,7 @@ function createWorld(configuration) {
 
   function defaultCreateInvalidator(description, doAfterChange) {
     return {
+      isRecording: true,  
       type: 'invalidator',
       id: state.observerId++,
       description: description,
@@ -1013,6 +1014,7 @@ function createWorld(configuration) {
 
   function defaultCreateRepeater(description, repeaterAction, repeaterNonRecordingAction, options, finishRebuilding) {
     return {
+      isRecording: true,  
       type: "repeater", 
       id: state.observerId++,
       firstTime: true, 
@@ -1073,8 +1075,11 @@ function createWorld(configuration) {
         if (options.onRefresh) options.onRefresh(repeater);
             
         // Recorded action (cause and/or effect)
+        repeater.isRecording = true; 
         const activeContext = enterContext(repeater);
-        repeater.returnValue = repeater.repeaterAction(repeater)
+        repeater.returnValue = repeater.repeaterAction(repeater);
+        repeater.isRecording = false; 
+        updateContextState()
 
         // Non recorded action (only effect)
         const { debounce=0, fireImmediately=true } = options; 
@@ -1095,8 +1100,8 @@ function createWorld(configuration) {
         // Finish rebuilding
         if (repeater.newBuildIdObjectMap && Object.keys(repeater.newBuildIdObjectMap).length > 0) finishRebuilding(this);
 
-        leaveContext( activeContext );
         this.firstTime = false; 
+        leaveContext( activeContext );
         return repeater;
       }
     }
