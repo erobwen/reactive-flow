@@ -77,13 +77,37 @@ export class Flow {
     return result
   }
 
-  getChild(key) {
-    if (typeof(this.buildRepeater.buildIdObjectMap[key]) === 'undefined') return null;
-    return this.buildRepeater.buildIdObjectMap[key]
+  getChild(keyOrPath) {
+    if (typeof(keyOrPath) === "string") {
+      const key = keyOrPath; 
+      if (typeof(this.buildRepeater.buildIdObjectMap[key]) === 'undefined') return null;
+      return this.buildRepeater.buildIdObjectMap[key]
+    } else {
+      const path = keyOrPath;
+      const child = this.getChild(path.shift());
+      if (path.length === 0) {
+        return child;
+      } else {
+        return child.getChild(path);
+      }
+    }
+  }
+
+  getPath() {
+    const tag = this.key ? this.key : "<no-tag>";
+    let path;
+    if (!this.parent) {
+      path = [];
+    } else {
+      path = this.parent.getPath();
+    }
+    path.push(tag);
+    return path; 
   }
 
   render() {
     this.target.integrate(this, this.getPrimitive());
+    return this;
   }
 
   getPrimitive() {
@@ -141,6 +165,7 @@ export class Text extends PrimitiveFlow {
 
 export class Row extends PrimitiveFlow {
   setProperties({children}) {
+    console.log("clicked at: " + JSON.stringify(this.getPath()))
     this.children = children;
   }
 }
@@ -148,7 +173,9 @@ export class Row extends PrimitiveFlow {
 export class Button extends PrimitiveFlow {
   setProperties({onClick, text}) {
     // log("button set properties");
-    this.onClick = onClick;
+    this.onClick = () => {
+      onClick();
+    }
     this.text = text; 
   }
 }

@@ -67,7 +67,7 @@ export class Item extends Flow {
     return new Row({key: "item-row", 
       children: [
         new Text({key: "text", text: me.on ? "on" : "off"}),
-        new Button({key: "less", onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
+        new Button({key: "toggle-button", onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
         new Text({key: "item-text", text: me.text})
       ]});
   }

@@ -10,4 +10,5 @@ npm install -g webpack-dev-server
 
 # TODO
 TODO: Call webpack from within a script instead to avoid global install. (use webpack at all now that we do not need jsx) 
-TODO: 
+TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
+TODO: How to deal with modal dialogs.
