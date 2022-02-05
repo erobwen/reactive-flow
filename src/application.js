@@ -9,7 +9,8 @@ export class TestComponent extends Flow {
     this.count = 1
     const me = this;
 
-    repeat(() => { 
+    repeat(this.toString() + " (count tracker)",repeater => {
+      log(repeater.causalityString());
       let observe = me.count;
       log("---------- count -------------");
     })

@@ -228,14 +228,26 @@ function createWorld(configuration) {
     state.inRepeater = (state.context && state.context.type === "repeater") ? state.context: null;
   }
 
+  function stackDescription() {
+    const descriptions = [];
+    let context = state.context;
+    while (context) {
+      descriptions.unshift(context.description);
+      context = context.parent;
+    }
+    return descriptions.join(" | ");
+  }
+
   function enterContext(enteredContext) {
+    // console.log("stack: [" + stackDescription() + "]");
     enteredContext.parent = state.context;
     state.context = enteredContext;
     updateContextState();
     return enteredContext;
   }
 
-  function leaveContext( activeContext ) {    
+  function leaveContext( activeContext ) {
+    // console.log("stack: [" + stackDescription() + "]");
     if( state.context && activeContext === state.context ) {
       state.context = state.context.parent;
     } else {
@@ -568,6 +580,7 @@ function createWorld(configuration) {
 
     if (typeof(key) !== 'undefined') {
       if (state.inActiveRecording) recordDependencyOnProperty(state.context, this, key);
+      // use? && (typeof(target[key]) === "undefined" || Object.prototype.hasOwnProperty.call(target, key))
 
       let scan = target;
       while ( scan !== null && typeof(scan) !== 'undefined' ) {
@@ -1039,7 +1052,15 @@ function createWorld(configuration) {
         const causeString = "  " + object.toString() + "." + key + "";
         const effectString = "" + this.description + "";
 
-        return contextString + ":\n" + causeString + " --> " +  effectString;
+        return "(" + contextString + ")" + causeString + " --> " +  effectString;
+      },
+      sourcesString() {
+        let result = "";
+        for (let source of this.sources) {
+          while (source.parent) source = source.parent;
+          result += source.handler.proxy.toString() + "." + source.key + "\n";
+        }
+        return result;
       },
       restart() {
         this.invalidateAction();
@@ -1126,6 +1147,8 @@ function createWorld(configuration) {
     if (repeater.previousDirty) {
       repeater.previousDirty.nextDirty = repeater.nextDirty;
     }
+    repeater.nextDirty = null;
+    repeater.previousDirty = null;
   }
 
   function finishRebuilding(repeater) {

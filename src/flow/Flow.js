@@ -96,11 +96,11 @@ export class Flow {
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
-        if (!repeater.firstTime) log(repeater.causalityString());
+        log(repeater.causalityString());
 
         // Recursivley build down to primitives
         parents.push(me);
-        me.primitive = me.build().getPrimitive();
+        me.primitive = me.build(repeater).getPrimitive();
         parents.pop();
       });
       // Expand known children (do as much as possible before integration)
@@ -161,10 +161,10 @@ export class HtmlElement extends PrimitiveFlow {
 }
 
 
-export function when(condition, operation) {
-  return repeat(() => {
-    if (condition()) {
-      operation();
-    }
-  });
-}
+// export function when(condition, operation) {
+//   return repeat(() => {
+//     if (condition()) {
+//       operation();
+//     }
+//   });
+// }
