@@ -161,10 +161,11 @@ export class HtmlElement extends PrimitiveFlow {
 }
 
 
-// export function when(condition, operation) {
-//   return repeat(() => {
-//     if (condition()) {
-//       operation();
-//     }
-//   });
-// }
+export function when(condition, operation) {
+  return repeat(() => {
+    const value = condition() 
+    if (value) {
+      operation(value);
+    }
+  });
+}

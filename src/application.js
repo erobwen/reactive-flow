@@ -55,19 +55,14 @@ export class Item extends Flow {
   onReBuildCreate() {
     const me = this;
     this.on = true;
-    // repeat(() => {
-    //   if (this.domElement) {
-    //     log("Got an element!")
-    //   }
-    // })
-    // when(() => {me.domElement}, 
-    //   () => { 
-    //     log("Got an element!") 
-    //   });
+    when(() => me.domElement, 
+      element => { 
+        log("Got an element!") 
+        log(element) 
+      });
   }
 
   build() {
-    // log("rebuilding item");
     const me = this; 
     return new Row({key: "item-row", 
       children: [
