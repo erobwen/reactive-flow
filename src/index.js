@@ -11,4 +11,3 @@ root.getChild(["more-button"]).onClick();
 root.getChild(["more-button"]).onClick();
 root.getChild(["more-button"]).onClick();
 root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
-// ["root","root-list","rest-list","list-row"]

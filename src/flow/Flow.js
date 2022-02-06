@@ -97,12 +97,12 @@ export class Flow {
     const tag = this.key ? this.key : "<no-tag>";
     let path;
     if (!this.parent) {
-      path = [];
+      return [];
     } else {
       path = this.parent.getPath();
+      path.push(tag);
+      return path; 
     }
-    path.push(tag);
-    return path; 
   }
 
   render() {
@@ -165,7 +165,6 @@ export class Text extends PrimitiveFlow {
 
 export class Row extends PrimitiveFlow {
   setProperties({children}) {
-    console.log("clicked at: " + JSON.stringify(this.getPath()))
     this.children = children;
   }
 }
@@ -174,6 +173,7 @@ export class Button extends PrimitiveFlow {
   setProperties({onClick, text}) {
     // log("button set properties");
     this.onClick = () => {
+      console.log("clicked at: " + JSON.stringify(this.getPath()))
       onClick();
     }
     this.text = text; 
