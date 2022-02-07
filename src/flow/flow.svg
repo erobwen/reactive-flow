@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   sodipodi:docname="flow.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.1292538"
+     inkscape:cx="289.91086"
+     inkscape:cy="350.44136"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:snap-page="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="2"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect850"
+       style="fill:#3c4ccc;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.264583;stroke-opacity:1"
+       d="M 55.261106,68.830741 C 50.964858,68.724184 43.796612,69.70009 41.911528,77.036968 l -4.840346,18.838945 c -2.067561,8.047077 -9.484321,9.729937 -9.484321,9.729937 0,0 13.920359,2.78605 16.662301,-7.885767 l 4.840334,-18.838612 c 2.067561,-8.047087 9.48399,-9.729954 9.48399,-9.729954 0,0 -1.359541,-0.272343 -3.31238,-0.320776 z" />
+    <text
+       xml:space="preserve"
+       style="font-size:22.3208px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="52.693806"
+       y="96.562721"
+       id="text873"><tspan
+         sodipodi:role="line"
+         id="tspan871"
+         x="52.693806"
+         y="96.562721"
+         style="stroke-width:0.264583">Flow</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.52777px;line-height:0;font-family:sans-serif;stroke-width:0.264583"
+       x="30.164146"
+       y="117.04987"
+       id="text877"><tspan
+         style="font-size:5.64444px;line-height:1.25;stroke-width:0.264583"
+         sodipodi:role="line"
+         id="tspan997"
+         x="30.164146"
+         y="117.04987">Reactive DOM Rendering and State Management</tspan><tspan
+         x="30.164146"
+         y="122.23267"
+         style="line-height:1.25;stroke-width:0.264583"
+         id="tspan879"
+         sodipodi:role="line" /><tspan
+         x="30.164146"
+         y="126.64238"
+         style="line-height:1.25;stroke-width:0.264583"
+         id="tspan885"
+         sodipodi:role="line">→ No template literals or jsx, no CSS, just plain Javascript.</tspan><tspan
+         x="30.164146"
+         y="131.05209"
+         style="line-height:1.25;stroke-width:0.264583"
+         sodipodi:role="line"
+         id="tspan907">→ Integrated state handling. Modify any state anywhere, at any time.</tspan><tspan
+         x="30.164146"
+         y="135.46181"
+         style="line-height:1.25;stroke-width:0.264583"
+         id="tspan899"
+         sodipodi:role="line">→ Minimal updates of DOM</tspan><tspan
+         x="30.164146"
+         y="139.87152"
+         style="line-height:1.25;stroke-width:0.264583"
+         id="tspan889"
+         sodipodi:role="line">→ DOM independent component model, potential for portability to other platforms.</tspan><tspan
+         x="30.164146"
+         y="144.28123"
+         style="line-height:1.25;stroke-width:0.264583"
+         sodipodi:role="line"
+         id="tspan913">→ Component key-paths, for convenient UI test automation.</tspan><tspan
+         x="30.164146"
+         y="146.48608"
+         style="line-height:1.25;stroke-width:0.264583"
+         sodipodi:role="line"
+         id="tspan911" /></text>
+    <rect
+       style="fill:none;fill-rule:evenodd;stroke:#000066;stroke-width:0.264583;stroke-opacity:1"
+       id="rect901"
+       width="151.82593"
+       height="48.968552"
+       x="27.586861"
+       y="111.42667"
+       ry="1.7802225" />
+  </g>
+</svg>
