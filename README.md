@@ -16,8 +16,11 @@ Note: This is a compound repository where I experiment with Flow together with o
 * Based on causalityjs (similar to MobX).  
 
 # Running the demo
+
+```console
 npm install
 npm start
+```
 
 # TODO
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 
