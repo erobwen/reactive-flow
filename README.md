@@ -14,6 +14,8 @@ Note: This is a compound repository where I experiment with Flow together with o
 * DOM independent component model, future potential for portability to other platforms besides Web. 
 * Component key-paths, for convenient UI test automation and debugging.
 * Based on causalityjs (similar to MobX).  
+* Probably very lightweight? (I haven´t tried ot minimize it yet). In full text it is only around 10kb for Flow (250 lines of code) and an additional 50kb for causality. 
+
 
 # Running the demo
 
