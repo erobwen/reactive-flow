@@ -5,6 +5,13 @@ const log = console.log;
 /**
  * This is a demo-application that showcases some of the principles of Flow. 
  * Please read the comments for a tour over what features exists and how they work.  
+ * 
+ * This simple program just demonstrates the recursive and state preserving capabilities 
+ * of Flow. A number of components are created recursivley according to the "count" state.
+ * And each component has its own state that can be toggled on/off. Note that the state of each individual 
+ * component is maintained, while the whole recursive chain of components are re-built. 
+ * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
+ * to the DOM when the UI is rebuilt.  
  */
 
 export class TestComponent extends Flow {
