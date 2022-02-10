@@ -61,6 +61,7 @@ function createWorld(configuration) {
   
     // Object creation
     nextObjectId: 1,
+    nextTempObjectId: 1,
   
     // Stack
     context: null,
@@ -787,7 +788,7 @@ function createWorld(configuration) {
 
     handler.meta = {
       world: world,
-      id: state.nextObjectId++,
+      id: null, // Wait for rebuild analysis
       buildId : buildId,
       forwardTo : null,
       target: createdTarget,
@@ -809,10 +810,12 @@ function createWorld(configuration) {
         let establishedObject = repeater.buildIdObjectMap[buildId];
         establishedObject[objectMetaProperty].forwardTo = proxy;
 
+        handler.meta.id = "temp" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
         return establishedObject;
       } else {
         // Create a new one
+        handler.meta.id = state.nextObjectId++;
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     }
