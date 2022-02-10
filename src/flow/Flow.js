@@ -40,6 +40,7 @@ export class Flow {
   // }
 
   onReBuildCreate() {
+    log("Established:" + this.toString());
     // Lifecycle, override to do expensive things. Like opening up connections etc. 
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
   }
