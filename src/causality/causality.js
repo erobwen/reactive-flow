@@ -809,9 +809,10 @@ function createWorld(configuration) {
         handler.meta.isBeingRebuilt = true;
         let establishedObject = repeater.buildIdObjectMap[buildId];
         establishedObject[objectMetaProperty].forwardTo = proxy;
-
-        handler.meta.id = "temp" + state.nextTempObjectId++;
+        
+        handler.meta.id = "temp-" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
+        console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
         return establishedObject;
       } else {
         // Create a new one
@@ -819,6 +820,7 @@ function createWorld(configuration) {
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     }
+    console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
     emitCreationEvent(handler);
     return proxy;
   }
@@ -1043,7 +1045,7 @@ function createWorld(configuration) {
       causalityString() {
         const context = this.invalidatedInContext;
         const object = this.invalidatedByObject;
-        if (!object) return "not triggered yet " + this.description 
+        if (!object) return "Repeater started: " + this.description 
         const key = this.invalidatedByKey; 
         // let objectClassName;
         // withoutRecording(() => {
