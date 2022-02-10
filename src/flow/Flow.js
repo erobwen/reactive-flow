@@ -128,17 +128,6 @@ export class Flow {
         me.primitive = me.build(repeater).getPrimitive();
         parents.pop();
       });
-      // Expand known children (do as much as possible before integration)
-      // Do this outside repeater so we do not observe all child relations!
-      function getPrimitives(flow) {
-        flow.getPrimitive();
-        if (flow.children) {
-          for (let child of flow.children) {
-            getPrimitives(child);
-          }
-        }
-      }
-      getPrimitives(me.primitive);
     }
     return me.primitive;
   }
@@ -153,8 +142,23 @@ export class Flow {
  */
 export class PrimitiveFlow extends Flow {
   getPrimitive() {
-    this.primitive = this; 
-    return this;
+    const me = this;
+    me.primitive = me;
+    
+    finalize(me);
+    if (!me.expandRepeater) {
+      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
+
+        // Expand known children (do as much as possible before integration)
+        if (me.children) {
+          for (let child of me.children) {
+            child.getPrimitive();
+          }
+        }
+      });
+    }
+
+    return me;
   }
 }
 
