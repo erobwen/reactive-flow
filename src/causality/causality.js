@@ -788,7 +788,7 @@ function createWorld(configuration) {
 
     handler.meta = {
       world: world,
-      id: null, // Wait for rebuild analysis
+      id: "not yet", // Wait for rebuild analysis
       buildId : buildId,
       forwardTo : null,
       target: createdTarget,
@@ -819,6 +819,8 @@ function createWorld(configuration) {
         handler.meta.id = state.nextObjectId++;
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
+    } else {
+      handler.meta.id = state.nextObjectId++;
     }
     console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
     emitCreationEvent(handler);

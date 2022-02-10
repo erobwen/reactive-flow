@@ -5,7 +5,7 @@ import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 const root = new TestComponent({
   key: "root",
   target: new DOMFlowTarget(document.getElementById("flow-root")) 
-}).render();
+}).activate();
 
 // Emulated user interaction.
 root.getChild(["more-button"]).onClick();

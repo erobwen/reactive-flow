@@ -7,26 +7,49 @@ window.world = world;
 window.observable = observable;
 let parents = [];
 
-
 window.allFlows = {};
 
 export class Flow {
-  constructor(properties) {
-    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
-    this.target = properties.target ? properties.target : this.parent.target;
-    this.key = properties.key ? properties.key : null;  
+  constructor(keyOrProperties, possiblyProperties) {
+    // Arguments
+    let properties; 
+    if (typeof(keyOrProperties) === "string") {
+      this.key = keyOrProperties;
+      properties = possiblyProperties
+    } else {
+      properties = keyOrProperties;
+    }
+    if (!properties) properties = {};
+
+    // Key & Parent
+    if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
     if (this.key === null) console.warn("Component with no key, add key for better performance.")
+    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
+
+    // Target propagation
+    this.target = properties.target ? properties.target : this.parent.target;
+    
+    // Set properties by bypassing setProperties
     for (let property in properties) {
-      this[property] = properties[property];
+      let destination = property;
+      if (property === "build") {
+        destination = "buildFunction";
+      }
+      this[destination] = properties[property];
     }
     
+    // Create observable
     let me = observable(this, this.key);
+    
+    // Set properties through interface
     me.setProperties(properties); // Set default values here
     if (!this.parent) {
       log("no parent!")
       me.onReBuildCreate();
     }
+
+    // Debug
     window.allFlows[me.causality.id] = me;
     return me;
   }
@@ -106,89 +129,42 @@ export class Flow {
     }
   }
 
-  render() {
-    this.target.integrate(this, this.getPrimitive());
+  activate() {
+    // this.target.integrate(this, this.getPrimitive());
+    this.target.integrate(this);
     return this;
   }
 
   getPrimitive() {
     // log("getPrimitive")
     const me = this;
-    
-    me.equivalentParent = parents.length > 0 ? parents[parents.length - 1] : null;
-    if (me.equivalentParent) me.equivalentParent.equivalentChild = me;
 
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
         log(repeater.causalityString());
-
-        // Recursivley build down to primitives
+        
+        // Build this one step
         parents.push(me);
-        me.primitive = me.build(repeater).getPrimitive();
+        const build = me.build(repeater);
         parents.pop();
+
+        // Establish relationship between child, parent.
+        build.equivalentParent = me;
+        me.equivalentChild = build;
+
+        // Recursive call
+        me.primitive = build.getPrimitive();
       });
     }
     return me.primitive;
   }
 
-  build() {
+  build(repeater) {
+    if (this.buildFunction) {
+      this.buildFunction(repeater)
+    }
     throw new Error("Not implemented yet")
-  }
-}
-
-/**
- * Primitive Flows
- */
-export class PrimitiveFlow extends Flow {
-  getPrimitive() {
-    const me = this;
-    me.primitive = me;
-    
-    finalize(me);
-    if (!me.expandRepeater) {
-      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
-
-        // Expand known children (do as much as possible before integration)
-        if (me.children) {
-          for (let child of me.children) {
-            child.getPrimitive();
-          }
-        }
-      });
-    }
-
-    return me;
-  }
-}
-
-export class Text extends PrimitiveFlow {
-  setProperties({text}) {
-    this.text = text;
-  }
-}
-
-export class Row extends PrimitiveFlow {
-  setProperties({children}) {
-    this.children = children;
-  }
-}
-
-export class Button extends PrimitiveFlow {
-  setProperties({onClick, text}) {
-    // log("button set properties");
-    this.onClick = () => {
-      console.log("clicked at: " + JSON.stringify(this.getPath()))
-      onClick();
-    }
-    this.text = text; 
-  }
-}
-
-export class HtmlElement extends PrimitiveFlow {
-  setProperties({children, tagType}) {
-    this.children = children;
-    this.tagType =  tagType;
   }
 }
 
@@ -200,4 +176,24 @@ export function when(condition, operation) {
       operation(value);
     }
   });
+}
+
+function argumentsToArray(functionArguments) {
+  return Array.prototype.slice.call(functionArguments);
+};
+
+export function readArguments(functionArguments) {
+  const arglist = argumentsToArray(functionArguments);
+  let properties = {};
+  if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
+    properties.key = arglist.shift();
+  }
+  if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
+    Object.assign(properties, arglist.shift());
+  }
+  if (arglist.length > 0) {
+    if (!properties) properties = {};
+    properties.children = arglist;
+  }
+  return properties;
 }

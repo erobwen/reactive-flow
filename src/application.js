@@ -1,4 +1,5 @@
-import { Flow, Text, Row, Button, repeat, when } from "./flow/Flow";
+import { observable, world, repeat, when, Flow } from "./flow/Flow";
+import { text, row, button } from "./flow/PrimitiveFlow";
 const log = console.log;
 
 
@@ -39,31 +40,37 @@ export class TestComponent extends Flow {
     // build() is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
     const me = this;
     let observe = this.count;
-    return new Row({
-      key:"root-row",
-      children: [
-        new Text({key: "root-text", text: "My List:"}),
-        new Button({key: "less-button", onClick: () => {me.count--}, text: "Less"}),
-        new Button({key: "more-button", onClick: () => {me.count++}, text: "More"}),
-        new List({key: "root-list", count: this.count})
-      ]
-    });
+    
+    const rootText = text("root-text", {text: "My List:"});
+    const rootTextElement = this.target.getElement(rootText.getPrimitive()); 
+    log("Getting element in advance during build!")
+    log(rootTextElement);
+
+    return (
+      row("root-row",
+        rootText,
+        button("less-button", {onClick: () => {me.count--}, text: "Less"}),
+        button("more-button", {onClick: () => {me.count++}, text: "More"}),
+        new List("root-list", {maxCount: this.count, count: 1})
+      )
+    );
   }
 }
 
 export class List extends Flow {
   // setProperties({}) is a function where you declare all properties that a parent can set on its child. This is a good place to define default values, or modify values given by parent. Note however, that you could omit this if you want to and properties would still be transfered by the default constructor to the object.   
-  setProperties({count}) {
+  setProperties({maxCount, count}) {
+    this.maxCount = maxCount;
     this.count = count;
   }
 
   build() {
     const children = [];
-    children.push(new Item({key: "first-item", text: "Foo " +  this.count}));
-    if (this.count > 1) {
-      children.push(new List({key: "rest-list", count: this.count - 1}));
+    children.push(new Item("first-item", {text: "Foo " +  this.count}));
+    if (this.count < this.maxCount) {
+      children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
-    return new Row({key:"list-row", children: children });
+    return row("list-row", {children: children});
   }
 }
 
@@ -92,12 +99,47 @@ export class Item extends Flow {
   // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
   build() {
     const me = this; 
-    return new Row({key: "item-row", // Row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
-      children: [
-        new Text({key: "text", text: me.on ? "on" : "off"}),
-        new Button({key: "toggle-button", onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
-        new Text({key: "item-text", text: me.text})
-      ]});
+    return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
+      text("text", {text: me.on ? "on" : "off"}),
+      button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
+      text("item-text", {text: me.text})
+      // text("item-text", {text: me.text})
+    );
   }
 }
 
+/**
+ * This is how to declare a simple function flow without state
+ */
+function frame() {
+  return new Flow({
+    build: ({children}) => {
+      return new Div({children: [
+        row({children})
+      ]});
+    },
+    ... readArguments(arguments)
+  })
+}
+
+/**
+ * This is how to package a class component in a way so that it can be used without "new".
+ * One way is to do this to primitive flows only, so they are easy to distinguish from compound/stateful flows. 
+ */
+export const MyComponent = () => new MyComponentFlow(readArguments(arguments)); // lean constructor
+export class MyComponentFlow extends Flow {
+  setProperties({count}) {
+    this.count = count;
+  }
+  
+  build() {
+    return ( 
+      row("list-row", {}, 
+        button("a", {onClick: () => {console.log("a clicked")}}),
+        button("b", {onClick: () => {console.log("b clicked")}})
+      )
+    );
+  }
+}
+  
+  
