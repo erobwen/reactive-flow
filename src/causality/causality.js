@@ -812,17 +812,21 @@ function createWorld(configuration) {
         
         handler.meta.id = "temp-" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
-        console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
+        establishedObject[objectMetaProperty].isFinalized = false; 
+        // console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
+        if (state.context) state.context.createdTemporaryCount++;
         return establishedObject;
       } else {
         // Create a new one
         handler.meta.id = state.nextObjectId++;
+        handler.meta.isFinalized = false; 
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     } else {
       handler.meta.id = state.nextObjectId++;
     }
-    console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
+    // console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
+    if (state.context) state.context.createdCount++;
     emitCreationEvent(handler);
     return proxy;
   }
@@ -973,6 +977,9 @@ function createWorld(configuration) {
 
   function defaultCreateInvalidator(description, doAfterChange) {
     return {
+      createdCount:0,
+      createdTemporaryCount:0,
+      removedCount:0,
       isRecording: true,  
       type: 'invalidator',
       id: state.observerId++,
@@ -1034,6 +1041,9 @@ function createWorld(configuration) {
 
   function defaultCreateRepeater(description, repeaterAction, repeaterNonRecordingAction, options, finishRebuilding) {
     return {
+      createdCount:0,
+      createdTemporaryCount:0,
+      removedCount:0,
       isRecording: true,  
       type: "repeater", 
       id: state.observerId++,
@@ -1060,6 +1070,13 @@ function createWorld(configuration) {
         const effectString = "" + this.description + "";
 
         return "(" + contextString + ")" + causeString + " --> " +  effectString;
+      },
+      creationString() {
+        let result = "{";
+        result += "created: " + this.createdCount + ", ";
+        result += "createdTemporary:" + this.createdTemporaryCount + ", ";
+        result += "removed:" + this.removedCount + "}";
+        return result;
       },
       sourcesString() {
         let result = "";
@@ -1097,11 +1114,15 @@ function createWorld(configuration) {
       lastRepeatTime: 0,
       waitOnNonRecordedAction: 0,
       children: null,
-      refresh() {
+      refresh() {       
         const repeater = this; 
         const options = repeater.options;
         if (options.onRefresh) options.onRefresh(repeater);
             
+        repeater.createdCount = 0;
+        repeater.createdTemporaryCount = 0;
+        repeater.removedCount = 0; 
+
         // Recorded action (cause and/or effect)
         repeater.isRecording = true; 
         const activeContext = enterContext(repeater);
@@ -1163,7 +1184,9 @@ function createWorld(configuration) {
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
     for (let buildId in repeater.newBuildIdObjectMap) {
-      let created = repeater.newBuildIdObjectMap[buildId]; 
+      let created = repeater.newBuildIdObjectMap[buildId];
+      if (created[objectMetaProperty].isFinalized) continue; 
+
       const temporaryObject = created[objectMetaProperty].forwardTo;
       if (temporaryObject !== null) {
         // Push changes to established object.
@@ -1175,11 +1198,13 @@ function createWorld(configuration) {
         // Send create on build message
         if (typeof(created.onReBuildCreate) === "function") created.onReBuildCreate();
       }
+      created[objectMetaProperty].isFinalized = true;
     }
 
     // Send on build remove messages
     for (let buildId in repeater.buildIdObjectMap) {
       if (typeof(repeater.newBuildIdObjectMap[buildId]) === "undefined") {
+        repeater.removedCount++;
         const object = repeater.buildIdObjectMap[buildId];
         if (typeof(object.onReBuildRemove) === "function") object.onReBuildRemove();
       }
@@ -1195,6 +1220,7 @@ function createWorld(configuration) {
   function finishRebuildInAdvance(object) {
     if (!state.inRepeater) return; // throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
     if (!object[objectMetaProperty].buildId) return; //throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
+    if (object[objectMetaProperty].isFinalized) return; // Already finished!
     const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {
       // Push changes to established object.
@@ -1202,8 +1228,10 @@ function createWorld(configuration) {
       temporaryObject[objectMetaProperty].isBeingRebuilt = false; 
       mergeInto(object, temporaryObject);
     } else {
-      // New object, nothing to merge.
+      // Send create on build message
+      if (typeof(object.onReBuildCreate) === "function") object.onReBuildCreate();
     }
+    object[objectMetaProperty].isFinalized = true;
   }
 
   function modifyRepeaterAction(repeaterAction, {throttle=0}) {
