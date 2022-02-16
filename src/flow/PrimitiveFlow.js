@@ -2,6 +2,7 @@ import { observable, repeat, finalize, Flow, withoutRecording, sameAsPreviousDee
 const log = console.log;
 
 
+
 /**
  * Primitive Flow Base class
  */
@@ -97,9 +98,43 @@ export class Button extends PrimitiveFlow {
   }
 }
 
+export function htmlElement() { return new Button(readFlowArguments(arguments)) };
 export class HtmlElement extends PrimitiveFlow {
-  setProperties({children, tagType}) {
+  setProperties({children, tagType, style}) {
     this.children = children;
-    this.tagType =  tagType;
+    this.tagType =  tagType ? tagType : "div";
+    this.style = style ? style : {};
+  }
+
+  setState() {
+    this.previouslySetStyles = {};
+  }
+
+  createEmptyDomNode() {
+    return document.createElement(this.tagType);
+  }
+  
+  buildDomNode(node) {
+    // Nothing
+    const newStyle = this.style;
+    const nodeStyle = node.style;
+    const newPreviouslySetStyles = {};
+
+    // Clear out styles that will no longer be modified
+    for (let property in this.previouslySetStyles) {
+      if (typeof(newStyle[property]) === "undefined") {
+        nodeStyle[property] = "";
+      }
+    }
+
+    // Set styles if changed
+    for (let property in newStyle) {
+      if (nodeStyle[property] !== this.style[property]) {
+        nodeStyle[property] = this.style[property];
+      }
+      newPreviouslySetStyles[property] = true;
+    }
+
+    this.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater. 
   }
 }

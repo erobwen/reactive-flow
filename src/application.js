@@ -51,9 +51,9 @@ export class TestComponent extends Flow {
     let observe = this.count;
     
     const rootText = text("root-text", {text: "My List:"});
-    const rootTextElement = this.target.getDomNode(rootText.getPrimitive()); 
-    log("Getting element in advance during build!")
-    log(rootTextElement);
+    const rootTextNode = this.target.getDomNode(rootText.getPrimitive()); 
+    log("Getting dom text node in advance during build!")
+    log(rootTextNode);
 
     return (
       row("root-row",
@@ -98,9 +98,9 @@ export class Item extends Flow {
     // This is a reactivley triggered repeater that reacts when me.domNode is set. This is a way to catch a reference to the actual DOM element of this component.
     const me = this;
     when(() => me.domNode, 
-      element => { 
-        log("Got an element!") 
-        log(element) 
+      node => { 
+        log("Got a node!");
+        log(node);
       });
   }
 

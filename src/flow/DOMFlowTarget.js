@@ -94,7 +94,7 @@ export class DOMFlowTarget {
         // you.domNode.id = mostAbstractFlow(you).toString()
         
         // Decorate all equivalent flows
-        let scanFlow = mostAbstractFlow(you).equivalentParent;
+        let scanFlow = you.equivalentParent;
         while (scanFlow != null) {
           scanFlow.domNode = you.domNode;
           scanFlow = scanFlow.equivalentParent;
