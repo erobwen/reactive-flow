@@ -21,6 +21,7 @@ export class TestComponent extends Flow {
 
   // onReBuildCreate(): Lifecycle function when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
   onReBuildCreate() {
+    // log("Established:" + this.toString());
     Flow.prototype.onReBuildCreate.call(this);
     this.count = 1
     const me = this;
@@ -34,7 +35,9 @@ export class TestComponent extends Flow {
   }
 
   // onReBuildRemove(): Lifecycle function when parent no longer creates a child with the same key/class.
-  onReBuildRemove() {}
+  onReBuildRemove() {
+    // log("Removed:" + this.toString());
+  }
 
   build() {
     // build() is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
@@ -80,6 +83,7 @@ export class Item extends Flow {
   }
   
   onReBuildCreate() {
+    // log("Established:" + this.toString());
     Flow.prototype.onReBuildCreate.call(this);
 
     // This is the place to define view model variables. In this case the "on" property is defined. 

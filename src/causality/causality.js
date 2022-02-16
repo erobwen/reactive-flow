@@ -229,15 +229,15 @@ function createWorld(configuration) {
     state.inRepeater = (state.context && state.context.type === "repeater") ? state.context: null;
   }
 
-  function stackDescription() {
-    const descriptions = [];
-    let context = state.context;
-    while (context) {
-      descriptions.unshift(context.description);
-      context = context.parent;
-    }
-    return descriptions.join(" | ");
-  }
+  // function stackDescription() {
+  //   const descriptions = [];
+  //   let context = state.context;
+  //   while (context) {
+  //     descriptions.unshift(context.description);
+  //     context = context.parent;
+  //   }
+  //   return descriptions.join(" | ");
+  // }
 
   function enterContext(enteredContext) {
     // console.log("stack: [" + stackDescription() + "]");
