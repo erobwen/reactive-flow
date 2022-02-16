@@ -10,27 +10,18 @@ let parents = [];
 window.allFlows = {};
 
 export class Flow {
-  constructor(keyOrProperties, possiblyProperties) {
-    // Provision (inherited properties)
-    this.providedProperties = {target: true};
-
+  constructor() {   
     // Arguments
-    let properties; 
-    if (typeof(keyOrProperties) === "string") {
-      this.key = keyOrProperties;
-      properties = possiblyProperties
-    } else {
-      properties = keyOrProperties;
-    }
-    if (!properties) properties = {};
-
+    let properties = readFlowArguments(arguments); 
+    
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
     if (this.key === null) console.warn("Component with no key, add key for better performance.")
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
-
+    
     //Provided/Inherited properties
+    this.providedProperties = {target: true};
     if (this.parent) {
       for (let property in this.parent.providedProperties) {
         this.providedProperties[property] = true;
@@ -52,6 +43,8 @@ export class Flow {
     
     // Set properties through interface
     me.setProperties(properties); // Set default values here
+
+    // Emulate onEstablish for top element.
     if (!this.parent) {
       me.onEstablish();
     }
@@ -79,19 +72,25 @@ export class Flow {
     // throw new Error("Not implemented yet");
   }
 
-  // requireProperties() {
-  //   throw new Error("Not implemented yet");
-  // }
+  setState() {
+    // throw new Error("Not implemented yet");
+  }
+  
+  disposeState() {
+    // throw new Error("Not implemented yet");
+  }
 
   onEstablish() {
+    this.setState();
     // log("Established:" + this.toString());
     // Lifecycle, override to do expensive things. Like opening up connections etc. 
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
   }
   
   onDispose() {
-    // log("Removed:" + this.toString());
+    // log("Disposed:" + this.toString());
     if (this.buildRepeater) this.buildRepeater.dispose();
+    this.disposeState();
   }
 
   className() {
@@ -204,7 +203,11 @@ function argumentsToArray(functionArguments) {
   return Array.prototype.slice.call(functionArguments);
 };
 
-export function readArguments(functionArguments) {
+export function readFlowArguments(functionArguments) {
+  // Shortcut
+  if (typeof(functionArguments[0]) === "object" && typeof(functionArguments[1]) === "undefined") return functionArguments[0]
+  
+  // The long way
   const arglist = argumentsToArray(functionArguments);
   let properties = {};
   if (typeof(arglist[0]) === "string" && !arglist[0].causality) {

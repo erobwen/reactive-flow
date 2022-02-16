@@ -17,19 +17,20 @@ const log = console.log;
 
 export class TestComponent extends Flow {
   
-  // Constructor: Normally do not override constructor (unless in special ocasions)
+  // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
-  // onEstablish(): Lifecycle function when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
-  onEstablish() {
+  // Lifecycle function onEstablish when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
+  setState() {
     // log("Established:" + this.toString());
-    Flow.prototype.onEstablish.call(this);
+    
+    // Set state
     this.count = 1
-    const me = this;
-    me.myModel = observable({
+    this.myModel = observable({
       value: 42 
     })
-
+    
     // Just a debug causality repeater that writes a debug log whenever count is changed. 
+    const me = this;
     repeat(this.toString() + " (count tracker)",repeater => {
       log(repeater.causalityString());
       let observe = me.count;
@@ -37,15 +38,15 @@ export class TestComponent extends Flow {
     })
   }
 
-  // onDispose(): Lifecycle function when parent no longer creates a child with the same key/class.
-  onDispose() {
+  // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
+  disposeState() {
     // log("Removed:" + this.toString());
   }
 
+  // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
-    this.provide("myModel"); // Give all grand-children access to myModel
+    this.provide("myModel"); // Give all grand-children access to myModel, they will get this as a property of their own.
 
-    // build() is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
     const me = this;
     let observe = this.count;
     
@@ -66,7 +67,7 @@ export class TestComponent extends Flow {
 }
 
 export class List extends Flow {
-  // setProperties({}) is a function where you declare all properties that a parent can set on its child. This is a good place to define default values, or modify values given by parent. Note however, that you could omit this if you want to and properties would still be transfered by the default constructor to the object.   
+  // This is the function setProperties where you declare all properties that a parent can set on its child. This is optional, but is a good place to define default values, modify values given by parent, or document what properties that the component needs.   
   setProperties({maxCount, count}) {
     this.maxCount = maxCount;
     this.count = count;
@@ -87,9 +88,8 @@ export class Item extends Flow {
     this.text = text;
   }
   
-  onEstablish() {
+  setState() {
     // log("Established:" + this.toString());
-    Flow.prototype.onEstablish.call(this);
 
     // This is the place to define view model variables. In this case the "on" property is defined. 
     // Note: Do NOT  do this in the constructor or setProperties as then the established value might be overwritten by the default value!   
@@ -127,7 +127,7 @@ function frame() {
         row({children})
       ]});
     },
-    ... readArguments(arguments)
+    ... readFlowArguments(arguments)
   })
 }
 
@@ -135,7 +135,7 @@ function frame() {
  * This is how to package a class component in a way so that it can be used without "new".
  * One way is to do this to primitive flows only, so they are easy to distinguish from compound/stateful flows. 
  */
-export const MyComponent = () => new MyComponentFlow(readArguments(arguments)); // lean constructor
+export const MyComponent = () => new MyComponentFlow(readFlowArguments(arguments)); // lean constructor
 export class MyComponentFlow extends Flow {
   setProperties({count}) {
     this.count = count;

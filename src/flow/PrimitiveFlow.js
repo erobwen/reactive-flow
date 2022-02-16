@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, withoutRecording, sameAsPreviousDeep, readArguments } from "./Flow.js";
+import { observable, repeat, finalize, Flow, withoutRecording, sameAsPreviousDeep, readFlowArguments } from "./Flow.js";
 const log = console.log;
 
 
@@ -39,7 +39,7 @@ const log = console.log;
 /**
  * Primitive Flows
  */
-export function text() { return new Text(readArguments(arguments)) };
+export function text() { return new Text(readFlowArguments(arguments)) };
 class Text extends PrimitiveFlow {
   setProperties({text}) {
     this.text = text;
@@ -58,7 +58,7 @@ class Text extends PrimitiveFlow {
 /**
  * Primitive Flows
  */
-export function row() { return new Row(readArguments(arguments)) };
+export function row() { return new Row(readFlowArguments(arguments)) };
 export class Row extends PrimitiveFlow {
   setProperties({children}) {
     this.children = children;
@@ -73,7 +73,7 @@ export class Row extends PrimitiveFlow {
   }
 }
 
-export function button() { return new Button(readArguments(arguments)) };
+export function button() { return new Button(readFlowArguments(arguments)) };
 export class Button extends PrimitiveFlow {
   setProperties({onClick, text}) {
     // log("button set properties");
