@@ -35,66 +35,72 @@ export class DOMFlowTarget {
     if (!you.integrationRepeater) {
       you.integrationRepeater = repeat(mostAbstractFlow(you).toString() + ".integrationRepeater", repeater => {
         log(repeater.causalityString());
-        const element = me.getElement(you.getPrimitive());
+        const primitive = you.getPrimitive(); 
+        let domNode;
+        if (primitive !== null) {
+          domNode = me.getDomNode(primitive);
+        }
         clearNode(me.rootElement);
-        me.rootElement.appendChild(element);
+        if (domNode) {
+          me.rootElement.appendChild(domNode);
+        }
       });
     }
   }
   
-  getElement(primitiveFlow) {
+  getDomNode(primitiveFlow) {
     const me = this; 
     const you = primitiveFlow;
     if (!you.buildElementRepeater) {
       you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
         log(repeater.causalityString());
 
-        me.getEmptyDomElement(you);
-        me.buildDomElement(you);  
+        me.getEmptyDomNode(you);
+        me.buildDomNode(you);  
       });
     }
-    return you.domElement;
+    return you.domNode;
   }
   
-  buildDomElement(primitiveFlow) {
+  buildDomNode(primitiveFlow) {
     const me = this; 
     const you = primitiveFlow;
-    const element = you.domElement;
-    you.buildDomElement(element);
+    const node = you.domNode;
+    you.buildDomNode(node);
     
     if (you.children) {
-      clearNode(element);
+      clearNode(node);
       for (let child of you.children) {
         if (child !== null) {
           const childPrimitive = child.getPrimitive();
           if (childPrimitive !== null) {
-            element.appendChild(me.getElement(childPrimitive));
+            node.appendChild(me.getDomNode(childPrimitive));
           }
         }
       }
     }
   }
 
-  getEmptyDomElement(primitiveFlow) {
+  getEmptyDomNode(primitiveFlow) {
     const me = this; 
     const you = primitiveFlow;
     if (!you.createElementRepeater) {
       you.createElementRepeater = repeat(mostAbstractFlow(you).toString() + ".createElementRepeater", (repeater) => {
         log(repeater.causalityString());
 
-        // Create empty dom element
-        you.domElement = you.createEmptyDomElement();
-        you.domElement.id = aggregateToString(you);
-        // you.domElement.id = mostAbstractFlow(you).toString()
+        // Create empty dom node
+        you.domNode = you.createEmptyDomNode();
+        you.domNode.id = aggregateToString(you);
+        // you.domNode.id = mostAbstractFlow(you).toString()
         
         // Decorate all equivalent flows
         let scanFlow = mostAbstractFlow(you).equivalentParent;
         while (scanFlow != null) {
-          scanFlow.domElement = you.domElement;
+          scanFlow.domNode = you.domNode;
           scanFlow = scanFlow.equivalentParent;
         }
       });
     }
-    return you.domElement;
+    return you.domNode;
   }
 }

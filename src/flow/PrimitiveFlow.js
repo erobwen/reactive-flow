@@ -28,11 +28,11 @@ const log = console.log;
     return me;
   }
 
-  createEmptyDomElement() {
+  createEmptyDomNode() {
     throw new Error("Not implemented yet!");
   }
 
-  buildDomElement(element) {
+  buildDomNode(element) {
     throw new Error("Not implemented yet!");
   }
 }
@@ -47,11 +47,11 @@ class Text extends PrimitiveFlow {
     this.text = text;
   }
   
-  createEmptyDomElement() {
+  createEmptyDomNode() {
     return document.createTextNode("");
   }
 
-  buildDomElement(element) {
+  buildDomNode(element) {
     element.nodeValue = this.text; // toString()
   }
 }
@@ -66,11 +66,11 @@ export class Row extends PrimitiveFlow {
     this.children = children;
   }
   
-  createEmptyDomElement() {
+  createEmptyDomNode() {
     return document.createElement("div");
   }
   
-  buildDomElement(element) {
+  buildDomNode(element) {
     // Nothing
   }
 }
@@ -86,11 +86,11 @@ export class Button extends PrimitiveFlow {
     this.text = text; 
   }
 
-  createEmptyDomElement() {
+  createEmptyDomNode() {
     return document.createElement("button");
   }
 
-  buildDomElement(element) {
+  buildDomNode(element) {
     element.onclick = this.onClick;
     if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
     element.lastChild.nodeValue = this.text;
