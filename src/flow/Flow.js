@@ -11,6 +11,9 @@ window.allFlows = {};
 
 export class Flow {
   constructor(keyOrProperties, possiblyProperties) {
+    // Provision (inherited properties)
+    this.providedProperties = {target: true};
+
     // Arguments
     let properties; 
     if (typeof(keyOrProperties) === "string") {
@@ -27,9 +30,14 @@ export class Flow {
     if (this.key === null) console.warn("Component with no key, add key for better performance.")
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
 
-    // Target propagation
-    this.target = properties.target ? properties.target : this.parent.target;
-    
+    //Provided/Inherited properties
+    if (this.parent) {
+      for (let property in this.parent.providedProperties) {
+        this.providedProperties[property] = true;
+        this[property] = this.parent[property];
+      }
+    }
+
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
@@ -45,13 +53,26 @@ export class Flow {
     // Set properties through interface
     me.setProperties(properties); // Set default values here
     if (!this.parent) {
-      log("no parent!")
       me.onEstablish();
     }
 
     // Debug
     window.allFlows[me.causality.id] = me;
     return me;
+  }
+
+  provide() {
+    const provided = argumentsToArray(arguments)
+    for (let property of provided) {
+      this.providedProperties[property] = true;
+    }
+  }
+
+  unprovide() {
+    const provided = argumentsToArray(arguments)
+    for (let property of provided) {
+      delete this.providedProperties[property];
+    }
   }
 
   setProperties() {

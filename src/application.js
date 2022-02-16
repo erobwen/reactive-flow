@@ -25,6 +25,9 @@ export class TestComponent extends Flow {
     Flow.prototype.onEstablish.call(this);
     this.count = 1
     const me = this;
+    me.myModel = observable({
+      value: 42 
+    })
 
     // Just a debug causality repeater that writes a debug log whenever count is changed. 
     repeat(this.toString() + " (count tracker)",repeater => {
@@ -40,6 +43,8 @@ export class TestComponent extends Flow {
   }
 
   build() {
+    this.provide("myModel"); // Give all grand-children access to myModel
+
     // build() is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
     const me = this;
     let observe = this.count;
