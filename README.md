@@ -29,12 +29,17 @@ To see the demo application code, look at the file /src/application.js.
 
 # Hello World
 
-This simple hello world example showcases some basic principles of Flow. It shows how 
+This simple hello world example showcases some basic principles of Flow. It shows two ways of defining flow components, either by inheriting from "Flow" or using the "flow" function. It also showcases how you can direct manipulate flow properties from outside the flow, and how the flow can deeply observe data strutures and have the built UI reflect changes in them. 
+
 
 ```js
-import { observable, Flow, readFlowArguments } from "./flow/Flow";
+import { observable, Flow, flow } from "./flow/Flow";
 import { text, row } from "./flow/PrimitiveFlow";
 import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
+
+/**
+ * Flow definitions
+ */
 
 // Parent flow
 class HelloWorld extends Flow {
@@ -46,46 +51,55 @@ class HelloWorld extends Flow {
     this.provide("hello");  // Makes all children/grandchildren inherit the hello property! 
 
     return row("row",
-      new Hello("hello"),
-      new text("spacer", {text: " "}),
+      hello("hello"),
+      text("spacer", {text: " "}),
       new World("world", {world: this.world})
     );
   }
 }
 
-// Child flow
-class Hello extends Flow {
-  build() {
-    return text("text", {text: this.hello.value});
-  }
-}
+// Stateless child flow (compact definition)
+const hello = flow(
+  ({hello}) => text("text", {text: hello.value})
+);
 
 // Child flow with state
 class World extends Flow {
   setState() {
     this.world = "";
+    this.emphasis = false; 
   }
 
   build() {
-    return row(
-      text("text", {text: this.world}),
-      emphasis("emphasis", {on: !!this.world})
+    log("here")
+    return (
+      row("row",
+        text("text", {text: this.world}),
+        emphasis("emphasis", {on: this.emphasis})
+      )
     );
   }
 }
 
-// Flow without class declaration
-function emphasis() {
-  return new Flow(readFlowArguments(arguments), 
-    ({on}) => {
-      on ? text({text: "!"}) : null; 
-    });
-}
+// Another stateless child flow
+const emphasis = flow(
+  ({on}) => on ? text({text: "!"}) : null
+);
+
+
+/**
+ * Browser setup
+ */
 
 // Activate continous build/integration to DOMFlowTarget.
 const helloWorld = new HelloWorld({
   target: new DOMFlowTarget(document.getElementById("flow-root")) 
 }).activate();
+
+
+/**
+ * Async modification
+ */
 
 // Set "Hello" deep inside observable data structure
 setTimeout(() => {
@@ -97,6 +111,10 @@ setTimeout(() => {
   helloWorld.getChild("world").world = "world";
 } , 2000)
 
+// Exclamation mark!
+setTimeout(() => {
+  helloWorld.getChild("world").emphasis = true;
+} , 3000)
 ```
 
 ## Flow objects

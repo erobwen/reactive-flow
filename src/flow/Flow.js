@@ -229,3 +229,10 @@ export function readFlowArguments(functionArguments) {
   }
   return properties;
 }
+
+export function flow(buildFunction) {
+  function flowBuilder() {
+    return new Flow(readFlowArguments(arguments), buildFunction);
+  }
+  return flowBuilder;
+}
