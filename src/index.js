@@ -25,29 +25,35 @@ import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 // Parent flow
 class HelloWorld extends Flow {
   setState() {
-    this.hello = observable({value: ""});
+    this.helloText = observable({value: ""});
   }
 
   build() {
-    this.provide("hello");  // Makes all children/grandchildren inherit the hello property! 
+    this.provide("helloText");  // Makes all children/grandchildren inherit the hello property! 
 
     return row("row",
-      hello("hello"),
+      hello("hello"), // No need to pass parameters as it will be inherited.
       text("spacer", {text: " "}),
-      new World("world", {world: this.world})
+      new World("world", {emphasisCharacter: "!"}) // This is how we create child flow components with a key "world" and pass them properties.
     );
   }
 }
 
 // Stateless child flow (compact definition)
 const hello = flow(
-  ({hello}) => text("text", {text: hello.value})
+  ({helloText}) => text("text", {text: helloText.value})
 );
 
-// Child flow with state
+// Statefull child flow
 class World extends Flow {
+  setProperties({emphasisCharacter}) {
+    // This life cycle function is optional, but can be used to set default values for properties.
+    this.emphasisCharacter = emphasisCharacter ? emphasisCharacter : "!";
+  }
+
   setState() {
-    this.world = "";
+    // In this lifecycle function you can setup state and obtain expensive resources.
+    this.worldText = "";
     this.emphasis = false; 
   }
 
@@ -55,8 +61,8 @@ class World extends Flow {
     log("here")
     return (
       row("row",
-        text("text", {text: this.world}),
-        emphasis("emphasis", {on: this.emphasis})
+        text("text", {text: this.worldText}),
+        emphasis("emphasis", {on: this.emphasis, character: this.emphasisCharacter})
       )
     );
   }
@@ -64,7 +70,7 @@ class World extends Flow {
 
 // Another stateless child flow
 const emphasis = flow(
-  ({on}) => on ? text({text: "!"}) : null
+  ({on, character}) => on ? text({text: character}) : null
 );
 
 
@@ -84,12 +90,12 @@ const helloWorld = new HelloWorld({
 
 // Set "Hello" deep inside observable data structure
 setTimeout(() => {
-  helloWorld.hello.value = "Hello";
+  helloWorld.helloText.value = "Hello";
 } , 1000)
 
 // Set state property to "world!", using a component path to access child component.
 setTimeout(() => {
-  helloWorld.getChild("world").world = "world";
+  helloWorld.getChild("world").worldText = "world";
 } , 2000)
 
 // Exclamation mark!
