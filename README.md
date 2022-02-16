@@ -67,7 +67,7 @@ const hello = flow(
 class World extends Flow {
   setProperties({emphasisCharacter}) {
     // This life cycle function is optional, but can be used to set default values for properties.
-    this.emphasisCharacter = emphasisCharacter ? emphasisCharacter : "!";
+    this.emphasisCharacter = emphasisCharacter ? emphasisCharacter : "?";
   }
 
   setState() {
@@ -77,7 +77,6 @@ class World extends Flow {
   }
 
   build() {
-    log("here")
     return (
       row("row",
         text("text", {text: this.worldText}),
