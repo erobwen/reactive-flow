@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, withoutRecording, sameAsPreviousDeep, readFlowArguments } from "./Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowArguments } from "./Flow.js";
 const log = console.log;
 
 
@@ -61,20 +61,21 @@ class Text extends PrimitiveFlow {
 /**
  * Primitive Flows
  */
-export function row() { return new Row(readFlowArguments(arguments)) };
-export class Row extends PrimitiveFlow {
-  setProperties({children}) {
-    this.children = children;
-  }
+// export function row() { return new Row(readFlowArguments(arguments)) };
+// export class Row extends PrimitiveFlow {
+//   setProperties({children}) {
+//     this.children = children;
+//   }
   
-  createEmptyDomNode() {
-    return document.createElement("div");
-  }
+//   createEmptyDomNode() {
+//     return document.createElement("div");
+//   }
   
-  buildDomNode(element) {
-    // Nothing
-  }
-}
+//   buildDomNode(element) {
+//     // Nothing
+//   }
+// }
+
 
 export function button() { return new Button(readFlowArguments(arguments)) };
 export class Button extends PrimitiveFlow {
@@ -98,7 +99,22 @@ export class Button extends PrimitiveFlow {
   }
 }
 
-export function htmlElement() { return new Button(readFlowArguments(arguments)) };
+
+export const rowStyle = {
+  overflow: "hidden",
+  boxSizing: "border-box",
+  display:"flex", 
+  flexDirection: "row", 
+  alignItems: "stretch", 
+  justifyContent: "flexStart",
+  whiteSpace: "pre"
+};
+
+export const row = flow(
+  ({style, children}) => htmlElement({children, tagType: "div", style: {...rowStyle, ...style}})
+);
+
+export function htmlElement() { return new HtmlElement(readFlowArguments(arguments)) };
 export class HtmlElement extends PrimitiveFlow {
   setProperties({children, tagType, style}) {
     this.children = children;
@@ -115,6 +131,8 @@ export class HtmlElement extends PrimitiveFlow {
   }
   
   buildDomNode(node) {
+    log("buildingDomNode");
+    log(this.style.fontSize)
     // Nothing
     const newStyle = this.style;
     const nodeStyle = node.style;
@@ -129,8 +147,9 @@ export class HtmlElement extends PrimitiveFlow {
 
     // Set styles if changed
     for (let property in newStyle) {
-      if (nodeStyle[property] !== this.style[property]) {
-        nodeStyle[property] = this.style[property];
+      if (nodeStyle[property] !== newStyle[property]) {
+        log("setting!" + property)
+        nodeStyle[property] = newStyle[property];
       }
       newPreviouslySetStyles[property] = true;
     }
