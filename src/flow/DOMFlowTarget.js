@@ -65,7 +65,12 @@ export class DOMFlowTarget {
     if (you.children) {
       clearNode(element);
       for (let child of you.children) {
-        element.appendChild(me.getElement(child.getPrimitive()));
+        if (child !== null) {
+          const childPrimitive = child.getPrimitive();
+          if (childPrimitive !== null) {
+            element.appendChild(me.getElement(childPrimitive));
+          }
+        }
       }
     }
   }

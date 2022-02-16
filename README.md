@@ -32,41 +32,54 @@ To see the demo application code, look at the file /src/application.js.
 This simple hello world example showcases some basic principles of Flow. It shows how 
 
 ```js
-
-import { observable, Flow } from "./flow/Flow";
+import { observable, Flow, readFlowArguments } from "./flow/Flow";
 import { text, row } from "./flow/PrimitiveFlow";
 import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 
-export class HelloWorld extends Flow {
+// Parent flow
+class HelloWorld extends Flow {
   setState() {
     this.hello = observable({value: ""});
   }
 
   build() {
-    this.provide("hello"); // Makes all children/grandchildren inherit the value of the hello property! 
+    this.provide("hello");  // Makes all children/grandchildren inherit the hello property! 
 
     return row("row",
       new Hello("hello"),
-      text({text: " "}),
+      new text("spacer", {text: " "}),
       new World("world", {world: this.world})
     );
   }
 }
 
-export class Hello extends Flow {
+// Child flow
+class Hello extends Flow {
   build() {
     return text("text", {text: this.hello.value});
   }
 }
 
-export class World extends Flow {
+// Child flow with state
+class World extends Flow {
   setState() {
     this.world = "";
   }
 
   build() {
-    return text("text", {text: this.world});
+    return row(
+      text("text", {text: this.world}),
+      emphasis("emphasis", {on: !!this.world})
+    );
   }
+}
+
+// Flow without class declaration
+function emphasis() {
+  return new Flow(readFlowArguments(arguments), 
+    ({on}) => {
+      on ? text({text: "!"}) : null; 
+    });
 }
 
 // Activate continous build/integration to DOMFlowTarget.
@@ -81,8 +94,9 @@ setTimeout(() => {
 
 // Set state property to "world!", using a component path to access child component.
 setTimeout(() => {
-  helloWorld.getChild("world").world = "world!";
+  helloWorld.getChild("world").world = "world";
 } , 2000)
+
 ```
 
 ## Flow objects

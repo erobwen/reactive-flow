@@ -17,7 +17,9 @@ const log = console.log;
         // Expand known children (do as much as possible before integration)
         if (me.children) {
           for (let child of me.children) {
-            child.getPrimitive();
+            if (child !== null) {
+              child.getPrimitive();
+            }
           }
         }
       });

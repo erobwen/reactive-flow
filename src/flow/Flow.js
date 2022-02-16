@@ -17,7 +17,6 @@ export class Flow {
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
-    if (this.key === null) console.warn("Component with no key, add key for better performance.")
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
     
     //Provided/Inherited properties
@@ -28,13 +27,11 @@ export class Flow {
         this[property] = this.parent[property];
       }
     }
-
+    
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
-      if (property === "build") {
-        destination = "buildFunction";
-      }
+      if (property === "build") destination = "buildFunction";
       this[destination] = properties[property];
     }
     
@@ -43,14 +40,16 @@ export class Flow {
     
     // Set properties through interface
     me.setProperties(properties); // Set default values here
-
+    
     // Emulate onEstablish for top element.
     if (!this.parent) {
       me.onEstablish();
     }
-
-    // Debug
+    
+    // Debug & warning
     window.allFlows[me.causality.id] = me;
+    if (me.key === null && me.parent) console.warn("Component " + me.toString() + " with no key, add key for better performance.")
+
     return me;
   }
 
@@ -170,11 +169,13 @@ export class Flow {
         parents.pop();
 
         // Establish relationship between child, parent.
-        build.equivalentParent = me;
-        me.equivalentChild = build;
+        if (build !== null) {
+          build.equivalentParent = me;
+          me.equivalentChild = build;
+        }
 
         // Recursive call
-        me.primitive = build.getPrimitive();
+        me.primitive = (build !== null) ? build.getPrimitive() : null;
         log(repeater.description + ":" + repeater.creationString());
       });
     }
@@ -183,7 +184,8 @@ export class Flow {
 
   build(repeater) {
     if (this.buildFunction) {
-      this.buildFunction(repeater)
+      log("-----------------")
+      return this.buildFunction(this)
     }
     throw new Error("Not implemented yet")
   }
@@ -205,20 +207,25 @@ function argumentsToArray(functionArguments) {
 
 export function readFlowArguments(functionArguments) {
   // Shortcut
-  if (typeof(functionArguments[0]) === "object" && typeof(functionArguments[1]) === "undefined") return functionArguments[0]
+  if (typeof(functionArguments[0]) === "object" && !functionArguments[0].causality && typeof(functionArguments[1]) === "undefined") return functionArguments[0]
   
   // The long way
   const arglist = argumentsToArray(functionArguments);
   let properties = {};
-  if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
-    properties.key = arglist.shift();
-  }
-  if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
-    Object.assign(properties, arglist.shift());
-  }
-  if (arglist.length > 0) {
-    if (!properties) properties = {};
-    properties.children = arglist;
+  while (arglist.length > 0) {
+    if (typeof(arglist[0]) === "function" && !arglist[0].causality) {
+      properties.build = arglist.shift();
+    }  
+    if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
+      properties.key = arglist.shift();
+    }
+    if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
+      Object.assign(properties, arglist.shift());
+    }
+    if (typeof(arglist[0]) === "object" && arglist[0].causality) {
+      if (!properties.children) properties.children = [];
+      properties.children.push(arglist.shift());
+    }
   }
   return properties;
 }
