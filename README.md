@@ -34,7 +34,7 @@ This simple hello world example showcases some basic principles of Flow. It show
 
 ```js
 import { observable, Flow, flow } from "./flow/Flow";
-import { text, row } from "./flow/PrimitiveFlow";
+import { text, row as primitiveRow } from "./flow/PrimitiveFlow";
 import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 
 /**
@@ -45,15 +45,16 @@ import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 class HelloWorld extends Flow {
   setState() {
     this.helloText = observable({value: ""});
+    this.emphasis = false; 
   }
 
   build() {
-    this.provide("helloText");  // Makes all children/grandchildren inherit the hello property! 
+    this.provide("helloText", "emphasis");  // Makes all children/grandchildren inherit the helloText and emphasis properties! 
 
-    return row("row",
+    return myRow("row", 
       hello("hello"), // No need to pass parameters as it will be inherited.
       text("spacer", {text: " "}),
-      new World("world", {emphasisCharacter: "!"}) // This is how we create child flow components with a key "world" and pass them properties.
+      new World("world", {exclamationCharacter: "!"}) // This is how we create child flow components with a key "world" and pass them properties.
     );
   }
 }
@@ -65,31 +66,40 @@ const hello = flow(
 
 // Statefull child flow
 class World extends Flow {
-  setProperties({emphasisCharacter}) {
+  setProperties({exclamationCharacter}) {
     // This life cycle function is optional, but can be used to set default values for properties.
-    this.emphasisCharacter = emphasisCharacter ? emphasisCharacter : "?";
+    this.exclamationCharacter = exclamationCharacter ? exclamationCharacter : "?";
   }
 
   setState() {
     // In this lifecycle function you can setup state and obtain expensive resources.
     this.worldText = "";
-    this.emphasis = false; 
   }
 
   build() {
     return (
-      row("row",
+      myRow("row",
         text("text", {text: this.worldText}),
-        emphasis("emphasis", {on: this.emphasis, character: this.emphasisCharacter})
+        exclamationMark("!", {on: this.emphasis, character: this.exclamationCharacter})
       )
     );
   }
 }
 
 // Another stateless child flow
-const emphasis = flow(
+const exclamationMark = flow(
   ({on, character}) => on ? text({text: character}) : null
 );
+
+// My own dynamically/reactivley styled row
+const myRow = flow(
+  ({style, children, emphasis}) => {
+    if (!style) style = {};
+    if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component. 
+    return primitiveRow({children, style});
+  }
+);
+
 
 
 /**
@@ -118,7 +128,7 @@ setTimeout(() => {
 
 // Exclamation mark!
 setTimeout(() => {
-  helloWorld.getChild("world").emphasis = true;
+  helloWorld.emphasis = true;
 } , 3000)
 ```
 

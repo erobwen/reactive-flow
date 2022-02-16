@@ -58,25 +58,6 @@ class Text extends PrimitiveFlow {
 }
 
 
-/**
- * Primitive Flows
- */
-// export function row() { return new Row(readFlowArguments(arguments)) };
-// export class Row extends PrimitiveFlow {
-//   setProperties({children}) {
-//     this.children = children;
-//   }
-  
-//   createEmptyDomNode() {
-//     return document.createElement("div");
-//   }
-  
-//   buildDomNode(element) {
-//     // Nothing
-//   }
-// }
-
-
 export function button() { return new Button(readFlowArguments(arguments)) };
 export class Button extends PrimitiveFlow {
   setProperties({onClick, text}) {
@@ -114,6 +95,10 @@ export const row = flow(
   ({style, children}) => htmlElement({children, tagType: "div", style: {...rowStyle, ...style}})
 );
 
+
+/**
+ * 1:1 HTML mapping 
+ */
 export function htmlElement() { return new HtmlElement(readFlowArguments(arguments)) };
 export class HtmlElement extends PrimitiveFlow {
   setProperties({children, tagType, style}) {
@@ -131,8 +116,6 @@ export class HtmlElement extends PrimitiveFlow {
   }
   
   buildDomNode(node) {
-    log("buildingDomNode");
-    log(this.style.fontSize)
     // Nothing
     const newStyle = this.style;
     const nodeStyle = node.style;
@@ -148,7 +131,6 @@ export class HtmlElement extends PrimitiveFlow {
     // Set styles if changed
     for (let property in newStyle) {
       if (nodeStyle[property] !== newStyle[property]) {
-        log("setting!" + property)
         nodeStyle[property] = newStyle[property];
       }
       newPreviouslySetStyles[property] = true;
