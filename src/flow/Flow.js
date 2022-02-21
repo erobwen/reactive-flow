@@ -18,7 +18,8 @@ export class Flow {
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
     this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
-    
+    // this.flowDepth = this.parent ? this.parent.flowDepth + 1 : 0; 
+     
     //Provided/Inherited properties
     this.providedProperties = {target: true};
     if (this.parent) {
@@ -101,7 +102,9 @@ export class Flow {
   }
 
   toString() {
-    return this.className() + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+    let classDescription = this.className();
+    if (classDescription === "Flow" && this.description) classDescription = this.description;
+    return classDescription + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   uniqueName() {
@@ -230,9 +233,19 @@ export function readFlowArguments(functionArguments) {
   return properties;
 }
 
-export function flow(buildFunction) {
+export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
+  let description;
+  let buildFunction;
+  if (typeof(descriptionOrBuildFunction) === "string") {
+    description = descriptionOrBuildFunction;
+    buildFunction = possibleBuildFunction;
+  } else {
+    buildFunction = descriptionOrBuildFunction;
+  }
   function flowBuilder() {
-    return new Flow(readFlowArguments(arguments), buildFunction);
+    const flow = new Flow(readFlowArguments(arguments), buildFunction);
+    if (description) flow.description = description;
+    return flow;
   }
   return flowBuilder;
 }

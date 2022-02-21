@@ -41,7 +41,7 @@ class HelloWorld extends Flow {
 }
 
 // Stateless child flow (compact definition)
-const hello = flow(
+const hello = flow("hello",
   ({helloText}) => text("text", {text: helloText.value})
 );
 
@@ -68,12 +68,12 @@ class World extends Flow {
 }
 
 // Another stateless child flow
-const exclamationMark = flow(
+const exclamationMark = flow("exclamationMark",
   ({on, character}) => on ? text({text: character}) : null
 );
 
 // My own dynamically/reactivley styled row
-const myRow = flow(
+const myRow = flow("myRow",
   ({style, children, emphasis}) => {
     if (!style) style = {};
     if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component. 

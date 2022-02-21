@@ -91,7 +91,7 @@ export const rowStyle = {
   whiteSpace: "pre"
 };
 
-export const row = flow(
+export const row = flow("row",
   ({style, children}) => htmlElement({children, tagType: "div", style: {...rowStyle, ...style}})
 );
 
