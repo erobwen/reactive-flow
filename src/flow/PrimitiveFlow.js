@@ -57,26 +57,19 @@ class Text extends PrimitiveFlow {
   }
 }
 
+// export const button = flow("button",
+//   ({target, text, onClick}) => target.htmlElement({
+//     tagType: "button",
+//     onClick,
+//     children: [target.htmlTextNode({text})]
+//   })
+// );
 
-export function button() { return new Button(readFlowArguments(arguments)) };
-export class Button extends PrimitiveFlow {
-  setProperties({onClick, text}) {
-    // log("button set properties");
-    this.onClick = () => {
-      console.log("clicked at: " + JSON.stringify(this.getPath()))
-      onClick();
-    }
-    this.text = text; 
-  }
 
-  createEmptyDomNode() {
-    return document.createElement("button");
-  }
-
-  buildDomNode(element) {
-    element.onclick = this.onClick;
-    if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
-    element.lastChild.nodeValue = this.text;
+export function button() { return new GenericButton(readFlowArguments(arguments)) };
+export class GenericButton extends Flow {
+  build()  {
+    return this.target.button(this.properties);
   }
 }
 
@@ -95,6 +88,11 @@ export const row = flow("row",
   ({style, children}) => htmlElement({children, tagType: "div", style: {...rowStyle, ...style}})
 );
 
+
+
+export const _htmlElement = flow("htmlElement",
+  ({target, children, tagType, style}) => target.primitiveHtmlElement({children, tagType, style})
+);
 
 /**
  * 1:1 HTML mapping 

@@ -13,6 +13,7 @@ export class Flow {
   constructor() {   
     // Arguments
     let properties = readFlowArguments(arguments); 
+    this.properties = properties; 
     
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;

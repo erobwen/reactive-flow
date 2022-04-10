@@ -1,4 +1,4 @@
-import { observable, world, repeat } from "./Flow";
+import { observable, world, repeat, readFlowArguments, Flow } from "./Flow";
 import { Text, Row, Button, PrimitiveFlow } from "./PrimitiveFlow";
 const log = console.log;
 
@@ -23,12 +23,32 @@ function aggregateToString(flow) {
   return id.join(" | ");
 }
 
+export class FlowTarget {
+  integrate(flow) {
+    throw new Error("Not implemented yet!");
+  }
 
-export class DOMFlowTarget {
+  primitiveHtmlElement() {
+    throw new Error("Not implemented yet!");
+  }
+
+  button() {
+    throw new Error("Not implemented yet!");
+  }
+}
+
+
+export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement){
+    super();
     this.rootElement = rootElement;
   }
   
+  button() {
+    const properties = readFlowArguments(arguments);
+    return new DOMButton(properties);
+  }
+
   integrate(flow) {
     const me = this; 
     const you = flow;
@@ -68,7 +88,7 @@ export class DOMFlowTarget {
     const node = you.domNode;
     you.buildDomNode(node);
     
-    if (you.children) {
+    if (you.children instanceof Array) {
       clearNode(node);
       for (let child of you.children) {
         if (child !== null) {
@@ -78,7 +98,13 @@ export class DOMFlowTarget {
           }
         }
       }
-    }
+    } else if (you.children instanceof Flow) {
+      clearNode(node);
+      const childPrimitive = you.children.getPrimitive();
+      if (childPrimitive !== null) {
+        node.appendChild(me.getDomNode(childPrimitive));
+      }
+    }  
   }
 
   getEmptyDomNode(primitiveFlow) {
@@ -102,5 +128,30 @@ export class DOMFlowTarget {
       });
     }
     return you.domNode;
+  }
+}
+
+
+/**
+ * DOM primitive flows
+ */
+export class DOMButton extends PrimitiveFlow {
+  setProperties({onClick, text}) {
+    // log("button set properties");
+    this.onClick = () => {
+      console.log("clicked at: " + JSON.stringify(this.getPath()))
+      onClick();
+    }
+    this.text = text; 
+  }
+
+  createEmptyDomNode() {
+    return document.createElement("button");
+  }
+
+  buildDomNode(element) {
+    element.onclick = this.onClick;
+    if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
+    element.lastChild.nodeValue = this.text;
   }
 }
