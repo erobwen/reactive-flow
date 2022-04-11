@@ -193,6 +193,10 @@ export class Flow {
     }
     throw new Error("Not implemented yet")
   }
+
+  button() {
+    return this.target.button(readFlowArguments(arguments));
+  }
 }
 
 
