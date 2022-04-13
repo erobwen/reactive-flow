@@ -1,5 +1,5 @@
-import { observable, world, repeat, when, Flow } from "./flow/Flow";
-import { text, row, button } from "./flow/PrimitiveFlow";
+import { observable, world, repeat, when, Flow } from "../flow/Flow";
+import { text, row, button } from "../flow/PrimitiveFlow";
 const log = console.log;
 
 
@@ -15,7 +15,7 @@ const log = console.log;
  * to the DOM when the UI is rebuilt.  
  */
 
-export class TestComponent extends Flow {
+export class ShowcaseComponent extends Flow {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
@@ -127,7 +127,7 @@ function frame() {
         row({children})
       ]});
     },
-    ... readFlowArguments(arguments)
+    ... readFlowProperties(arguments)
   })
 }
 
@@ -135,7 +135,7 @@ function frame() {
  * This is how to package a class component in a way so that it can be used without "new".
  * One way is to do this to primitive flows only, so they are easy to distinguish from compound/stateful flows. 
  */
-export const MyComponent = () => new MyComponentFlow(readFlowArguments(arguments)); // lean constructor
+export const MyComponent = () => new MyComponentFlow(readFlowProperties(arguments)); // lean constructor
 export class MyComponentFlow extends Flow {
   setProperties({count}) {
     this.count = count;

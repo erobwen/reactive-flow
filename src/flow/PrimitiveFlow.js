@@ -1,80 +1,49 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowArguments } from "./Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties } from "./Flow.js";
 const log = console.log;
 
 
-
 /**
- * Primitive Flow Base class
+ * Target Acccess Flows
  */
- export class PrimitiveFlow extends Flow {
-  getPrimitive() {
-    const me = this;
-    me.primitive = me;
-    
-    finalize(me);
-    if (!me.expandRepeater) {
-      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
-
-        // Expand known children (do as much as possible before integration)
-        if (me.children) {
-          for (let child of me.children) {
-            if (child !== null) {
-              child.getPrimitive();
-            }
-          }
-        }
-      });
-    }
-
-    return me;
-  }
-
-  createEmptyDomNode() {
-    throw new Error("Not implemented yet!");
-  }
-
-  buildDomNode(element) {
-    throw new Error("Not implemented yet!");
-  }
-}
-
-
-/**
- * Primitive Flows
- */
-export function text() { return new Text(readFlowArguments(arguments)) };
-class Text extends PrimitiveFlow {
-  setProperties({text}) {
-    this.text = text;
-  }
-  
-  createEmptyDomNode() {
-    return document.createTextNode("");
-  }
-
-  buildDomNode(element) {
-    element.nodeValue = this.text; // toString()
-  }
-}
-
-// export const button = flow("button",
-//   ({target, text, onClick}) => target.htmlElement({
-//     tagType: "button",
-//     onClick,
-//     children: [target.htmlTextNode({text})]
-//   })
-// );
-
-
-export function button() { return new GenericButton(readFlowArguments(arguments)) };
-export class GenericButton extends Flow {
+export class ElementNode extends Flow {
   build()  {
-    return this.target.button(this.properties);
+    return this.target.elementNode(this.properties);
   }
 }
 
+export function elementNode() { 
+  return new ElementNode(readFlowProperties(arguments)) 
+};
 
-export const rowStyle = {
+
+export class TextNode extends Flow {
+  build()  {
+    return this.target.textNode(this.properties);
+  }
+}
+
+export function textNode() { 
+  return new TextNode(readFlowProperties(arguments)) 
+};
+
+
+/**
+ * Convenience 
+ */
+export function text() {
+  return new TextNode(readFlowProperties(arguments));
+}
+
+export function button() { 
+  const properties = readFlowProperties(arguments);
+  const text = properties.text; delete properties.text; 
+  if (text && !properties.children) {
+    properties.children = [new TextNode({text})]; 
+  }
+  return new ElementNode({tag: "button", ...properties}) 
+};
+
+export const flexContainerStyle = {
   overflow: "hidden",
   boxSizing: "border-box",
   display:"flex", 
@@ -84,56 +53,27 @@ export const rowStyle = {
   whiteSpace: "pre"
 };
 
-export const row = flow("row",
-  ({style, children}) => htmlElement({children, tagType: "div", style: {...rowStyle, ...style}})
-);
+export const rowStyle = {
+  flexDirection: "row", 
+  ...flexContainerStyle
+};
+
+export const columnStyle = {
+  flexDirection: "row", 
+  ...flexContainerStyle
+};
+
+export function row() { 
+  const properties = readFlowProperties(arguments); 
+  const style = properties.style; delete properties.style; 
+  return new ElementNode({tag: "div", style: {rowStyle, ...style}, ...properties }); 
+};
+
+export function column() { 
+  const properties = readFlowProperties(arguments); 
+  const style = properties.style; delete properties.style; 
+  return new ElementNode({tag: "div", style: {columnStyle, ...style}, ...properties }); 
+};
 
 
 
-export const _htmlElement = flow("htmlElement",
-  ({target, children, tagType, style}) => target.primitiveHtmlElement({children, tagType, style})
-);
-
-/**
- * 1:1 HTML mapping 
- */
-export function htmlElement() { return new HtmlElement(readFlowArguments(arguments)) };
-export class HtmlElement extends PrimitiveFlow {
-  setProperties({children, tagType, style}) {
-    this.children = children;
-    this.tagType =  tagType ? tagType : "div";
-    this.style = style ? style : {};
-  }
-
-  setState() {
-    this.previouslySetStyles = {};
-  }
-
-  createEmptyDomNode() {
-    return document.createElement(this.tagType);
-  }
-  
-  buildDomNode(node) {
-    // Nothing
-    const newStyle = this.style;
-    const nodeStyle = node.style;
-    const newPreviouslySetStyles = {};
-
-    // Clear out styles that will no longer be modified
-    for (let property in this.previouslySetStyles) {
-      if (typeof(newStyle[property]) === "undefined") {
-        nodeStyle[property] = "";
-      }
-    }
-
-    // Set styles if changed
-    for (let property in newStyle) {
-      if (nodeStyle[property] !== newStyle[property]) {
-        nodeStyle[property] = newStyle[property];
-      }
-      newPreviouslySetStyles[property] = true;
-    }
-
-    this.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater. 
-  }
-}

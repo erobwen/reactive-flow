@@ -8,11 +8,10 @@ window.observable = observable;
 let parents = [];
 
 window.allFlows = {};
-
 export class Flow {
   constructor() {   
     // Arguments
-    let properties = readFlowArguments(arguments); 
+    let properties = readFlowProperties(arguments); 
     this.properties = properties; 
     
     // Key & Parent
@@ -195,7 +194,7 @@ export class Flow {
   }
 
   button() {
-    return this.target.button(readFlowArguments(arguments));
+    return this.target.button(readFlowProperties(arguments));
   }
 }
 
@@ -213,7 +212,7 @@ function argumentsToArray(functionArguments) {
   return Array.prototype.slice.call(functionArguments);
 };
 
-export function readFlowArguments(functionArguments) {
+export function readFlowProperties(functionArguments) {
   // Shortcut
   if (typeof(functionArguments[0]) === "object" && !functionArguments[0].causality && typeof(functionArguments[1]) === "undefined") return functionArguments[0]
   
@@ -234,23 +233,34 @@ export function readFlowArguments(functionArguments) {
       if (!properties.children) properties.children = [];
       properties.children.push(arglist.shift());
     }
+    //if (properties.children && !(typeof(properties.children) instanceof Array)) properties.children = [properties.children];
   }
   return properties;
 }
 
-export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
-  let description;
-  let buildFunction;
-  if (typeof(descriptionOrBuildFunction) === "string") {
-    description = descriptionOrBuildFunction;
-    buildFunction = possibleBuildFunction;
-  } else {
-    buildFunction = descriptionOrBuildFunction;
-  }
-  function flowBuilder() {
-    const flow = new Flow(readFlowArguments(arguments), buildFunction);
-    if (description) flow.description = description;
-    return flow;
-  }
-  return flowBuilder;
+
+export class FlowTargetPrimitive extends Flow {
+  getPrimitive() {
+    const me = this;
+    me.primitive = me;
+    
+    finalize(me);
+    if (!me.expandRepeater) {
+      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
+  
+        // Expand known children (do as much as possible before integration)
+        if (me.children) {
+          for (let child of me.children) {
+            if (child !== null) {
+              log(child);
+              child.getPrimitive();
+            }
+          }
+        }
+      });
+    }
+  
+    return me;
+  }  
 }
+

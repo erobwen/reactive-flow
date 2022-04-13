@@ -1,5 +1,6 @@
-import { observable, world, repeat, readFlowArguments, Flow } from "./Flow";
-import { DOMButton } from "./DOMFlowPrimitive";
+import { observable, world, repeat, readFlowProperties, Flow } from "./Flow";
+import { DOMButton, ElementNode, TextNode } from "./DOMFlowTargetPrimitive";
+import { FlowTarget } from "./FlowTarget";
 
 const log = console.log;
 
@@ -24,32 +25,12 @@ function aggregateToString(flow) {
   return id.join(" | ");
 }
 
-export class FlowTarget {
-  integrate(flow) {
-    throw new Error("Not implemented yet!");
-  }
-
-  primitiveHtmlElement() {
-    throw new Error("Not implemented yet!");
-  }
-
-  button() {
-    throw new Error("Not implemented yet!");
-  }
-}
-
-
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement){
     super();
     this.rootElement = rootElement;
   }
   
-  button() {
-    const properties = readFlowArguments(arguments);
-    return new DOMButton(properties);
-  }
-
   integrate(flow) {
     const me = this; 
     const you = flow;
@@ -69,9 +50,9 @@ export class DOMFlowTarget extends FlowTarget {
     }
   }
   
-  getDomNode(primitiveFlow) {
+  getDomNode(domFlow) {
     const me = this; 
-    const you = primitiveFlow;
+    const you = domFlow;
     if (!you.buildElementRepeater) {
       you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
         log(repeater.causalityString());
@@ -83,9 +64,9 @@ export class DOMFlowTarget extends FlowTarget {
     return you.domNode;
   }
   
-  buildDomNode(primitiveFlow) {
+  buildDomNode(domFlow) {
     const me = this; 
-    const you = primitiveFlow;
+    const you = domFlow;
     const node = you.domNode;
     you.buildDomNode(node);
     
@@ -108,9 +89,9 @@ export class DOMFlowTarget extends FlowTarget {
     }  
   }
 
-  getEmptyDomNode(primitiveFlow) {
+  getEmptyDomNode(domFlow) {
     const me = this; 
-    const you = primitiveFlow;
+    const you = domFlow;
     if (!you.createElementRepeater) {
       you.createElementRepeater = repeat(mostAbstractFlow(you).toString() + ".createElementRepeater", (repeater) => {
         log(repeater.causalityString());
@@ -129,6 +110,14 @@ export class DOMFlowTarget extends FlowTarget {
       });
     }
     return you.domNode;
+  }
+
+  elementNode() {
+    return new ElementNode(readFlowProperties(arguments));
+  }
+
+  textNode() {
+    return new TextNode(readFlowProperties(arguments));
   }
 }
 
