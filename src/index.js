@@ -1,5 +1,5 @@
 import { MyComponent, ShowcaseComponent } from "./application/showcaseApplication.js"
-import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
+import { DOMFlowTarget } from "./flow.DOMTarget/DOMFlowTarget.js";
 
 // Setup flow
 const root = new ShowcaseComponent({
@@ -8,9 +8,9 @@ const root = new ShowcaseComponent({
 }).activate();
 
 // Emulated user interaction.
-root.getChild(["more-button"]).onClick();
-root.getChild(["more-button"]).onClick();
-root.getChild(["more-button"]).onClick();
+console.log(root.buildRepeater.buildIdObjectMap);
+root.getChild("more-button").onClick();
+root.findChild("more-button").onClick();
 root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
 
 

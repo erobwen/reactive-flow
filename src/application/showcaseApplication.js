@@ -1,5 +1,5 @@
 import { observable, world, repeat, when, Flow } from "../flow/Flow";
-import { text, row, column, button } from "../flow/BasicFlow";
+import { text, row, column, button } from "../flow.components/BasicFlowComponents";
 const log = console.log;
 
 

@@ -1,6 +1,6 @@
-import { observable, world, repeat, readFlowProperties, Flow } from "./Flow";
+import { observable, world, repeat, readFlowProperties, Flow } from "../flow/Flow";
 import { DOMElementNode, DOMTextNode } from "./DOMFlowTargetPrimitive";
-import { FlowTarget } from "./FlowTarget";
+import { FlowTarget } from "../flow/FlowTarget";
 
 const log = console.log;
 

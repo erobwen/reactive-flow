@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties } from "./Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -10,13 +10,15 @@ export function text() {
 }
 
 export function button() { 
+  let result; 
   const properties = readFlowProperties(arguments);
   const attributes = extractAttributes(properties); 
 
   // Inject debug printout in click.
   if (properties.onClick) {
+    const onClick = properties.onClick;
     properties.onClick = () => {
-      console.log("clicked at: " + JSON.stringify(this.getPath()))
+      console.log("clicked at: " + JSON.stringify(result.getPath()));
       onClick();
     }  
   }
@@ -26,7 +28,8 @@ export function button() {
   if (text && !properties.children) {
     properties.children = [new TextNode({text})]; 
   }
-  return new ElementNode({tagName: "button", attributes, ...properties}) 
+  result = new ElementNode({tagName: "button", attributes, ...properties})
+  return result; 
 };
 
 export const flexContainerStyle = {

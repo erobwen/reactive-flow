@@ -1,4 +1,4 @@
-import { FlowTargetPrimitive } from "./Flow";
+import { FlowTargetPrimitive } from "../flow/Flow";
 
 const log = console.log;
 

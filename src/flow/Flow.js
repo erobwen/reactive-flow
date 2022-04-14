@@ -133,6 +133,11 @@ export class Flow {
     return result
   }
 
+  findChild(key) { 
+    if (this.key === key) return this;
+    return this.getPrimitive().findChild(key);
+  }
+
   getChild(keyOrPath) {
     if (typeof(keyOrPath) === "string") {
       const key = keyOrPath; 
@@ -250,6 +255,20 @@ export function readFlowProperties(functionArguments) {
 
 
 export class FlowTargetPrimitive extends Flow {
+  
+  findChild(key) { 
+    if (this.key === key) return this;
+    if (this.children) {
+      for (let child of this.children) {
+        if (child !== null) {
+          let result = child.findChild(key);
+          if (result !== null) return result;
+        }
+      }
+    }
+    return null;
+  }
+
   getPrimitive() {
     const me = this;
     me.primitive = me;
