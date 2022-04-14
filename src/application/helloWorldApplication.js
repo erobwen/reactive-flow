@@ -1,5 +1,5 @@
 import { observable, Flow, flow } from "./flow/Flow";
-import { text, row as primitiveRow } from "./flow/PrimitiveFlow";
+import { text, row as basicRow } from "./flow/BasicFlow";
 import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 const log = console.log;
 
@@ -63,7 +63,7 @@ const myRow = flow("myRow",
   ({style, children, emphasis}) => {
     if (!style) style = {};
     if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component. 
-    return primitiveRow("primitive", {children, style});
+    return basicRow("primitive", {children, style});
   }
 );
 

@@ -1,5 +1,5 @@
 import { observable, world, repeat, readFlowProperties, Flow } from "./Flow";
-import { DOMButton, ElementNode, TextNode } from "./DOMFlowTargetPrimitive";
+import { DOMElementNode, DOMTextNode } from "./DOMFlowTargetPrimitive";
 import { FlowTarget } from "./FlowTarget";
 
 const log = console.log;
@@ -113,11 +113,11 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   elementNode() {
-    return new ElementNode(readFlowProperties(arguments));
+    return new DOMElementNode(readFlowProperties(arguments));
   }
 
   textNode() {
-    return new TextNode(readFlowProperties(arguments));
+    return new DOMTextNode(readFlowProperties(arguments));
   }
 }
 

@@ -54,7 +54,17 @@ export class Flow {
     return me;
   }
 
-  provide() {
+  // allNonProvidedProperties() {
+  //   const result = []
+  //   for (let property in this.properties) {
+  //     if (!this.providedProperties[property]) {
+  //       result.push(property);
+  //     } 
+  //   }
+  //   return result;
+  // }
+
+  provide() { // Cannot be called within an if statement! 
     const provided = argumentsToArray(arguments)
     for (let property of provided) {
       this.providedProperties[property] = true;

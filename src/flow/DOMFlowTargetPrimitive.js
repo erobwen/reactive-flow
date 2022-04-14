@@ -18,54 +18,81 @@ const log = console.log;
 }
 
 /**
- * DOM primitive flows
+ * DOM Flow Target Primitive
  */
-  
-  
-/**
- * 1:1 HTML mapping 
- */
-export class ElementNode extends DOMFlow {
-  setProperties({children, tagType, style}) {
+export class DOMElementNode extends DOMFlow {
+  setProperties({children, tagName, attributes}) {
     this.children = children;
-    this.tagType =  tagType ? tagType : "div";
-    this.style = style ? style : {};
+    this.tagName =  tagName ? tagName : "div";
+    this.attributes = attributes ? attributes : {};
   }
 
   setState() {
     this.previouslySetStyles = {};
+    this.newPreviouslySetAttributes = {};
   }
 
   createEmptyDomNode() {
-    return document.createElement(this.tagType);
+    return document.createElement(this.tagName);
   }
   
-  buildDomNode(node) {
-    // Nothing
-    const newStyle = this.style;
-    const nodeStyle = node.style;
+  buildDomNode(element) {
+    const newAttributes = this.attributes;
+    const newPreviouslySetAttributes = {};
+    if (this.tagName.toUpperCase() !== element.tagName) {
+      throw new Error("Too high expectations error. Cannot change tagName of existing HTML element. Please do not change the tagName property once set!");
+    }
+
+    // Clear out styles that will no longer be modified
+    for (let property in this.newPreviouslySetAttributes) {
+      if (typeof(newAttributes[property]) === "undefined") {
+        if (property === "style") {
+          this.updateStyle(element, {}); // Clear style
+        } else {
+          element[property] = "";
+        }
+      }
+    }
+
+    // Set styles if changed
+    for (let property in newAttributes) {
+      if (property === "style") {
+        this.updateStyle(element, newAttributes[property]);
+      } else {
+        if (element[property] !== newAttributes[property]) {
+          element[property] = newAttributes[property];
+        }
+        newPreviouslySetAttributes[property] = true;  
+      }
+    }
+
+    this.newPreviouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
+  }
+
+  updateStyle(element, newStyle) {
+    const elementStyle = element.style;
     const newPreviouslySetStyles = {};
 
     // Clear out styles that will no longer be modified
     for (let property in this.previouslySetStyles) {
       if (typeof(newStyle[property]) === "undefined") {
-        nodeStyle[property] = "";
+        elementStyle[property] = "";
       }
     }
 
     // Set styles if changed
     for (let property in newStyle) {
-      if (nodeStyle[property] !== newStyle[property]) {
-        nodeStyle[property] = newStyle[property];
+      if (elementStyle[property] !== newStyle[property]) {
+        elementStyle[property] = newStyle[property];
       }
       newPreviouslySetStyles[property] = true;
     }
 
-    this.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater. 
+    this.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
   }
 }
 
-export class TextNode extends DOMFlow {
+export class DOMTextNode extends DOMFlow {
   setProperties({text}) {
     this.text = text;
   }
@@ -80,25 +107,3 @@ export class TextNode extends DOMFlow {
 }
 
 
-
-
-//  export class DOMButton extends DOMFlow {
-//     setProperties({onClick, text}) {
-//       // log("button set properties");
-//       this.onClick = () => {
-//         console.log("clicked at: " + JSON.stringify(this.getPath()))
-//         onClick();
-//       }
-//       this.text = text; 
-//     }
-  
-//     createEmptyDomNode() {
-//       return document.createElement("button");
-//     }
-  
-//     buildDomNode(element) {
-//       element.onclick = this.onClick;
-//       if (element.childNodes.length === 0) element.appendChild(document.createTextNode(''));
-//       element.lastChild.nodeValue = this.text;
-//     }
-//   }

@@ -34,7 +34,7 @@ This simple hello world example showcases some basic principles of Flow. It show
 
 ```js
 import { observable, Flow, flow } from "./flow/Flow";
-import { text, row as primitiveRow } from "./flow/PrimitiveFlow";
+import { text, row as primitiveRow } from "./flow/BasicFlow";
 import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
 
 /**
