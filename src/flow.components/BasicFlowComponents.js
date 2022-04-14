@@ -26,7 +26,7 @@ export function button() {
   // Autogenerate child text node from string.
   const text = properties.text; delete properties.text; 
   if (text && !properties.children) {
-    properties.children = [new TextNode({text})]; 
+    properties.children = [new TextNode(properties.key + ".toggle-button-text", {text, textNode:true})]; 
   }
   result = new ElementNode({tagName: "button", attributes, ...properties})
   return result; 

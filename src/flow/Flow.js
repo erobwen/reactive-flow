@@ -13,6 +13,8 @@ export class Flow {
     // Arguments
     let properties = readFlowProperties(arguments); 
     this.properties = properties; 
+    log("properties of " + properties.key + ":");
+    log(properties)
     
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
@@ -281,7 +283,6 @@ export class FlowTargetPrimitive extends Flow {
         if (me.children) {
           for (let child of me.children) {
             if (child !== null) {
-              log(child);
               child.getPrimitive();
             }
           }
