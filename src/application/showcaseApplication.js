@@ -1,5 +1,5 @@
 import { observable, world, repeat, when, Flow } from "../flow/Flow";
-import { text, row, button } from "../flow/BasicFlow";
+import { text, row, column, button } from "../flow/BasicFlow";
 const log = console.log;
 
 
@@ -56,10 +56,12 @@ export class ShowcaseComponent extends Flow {
     log(rootTextNode);
 
     return (
-      row("root-row",
-        rootText,
-        button("less-button", {onClick: () => {me.count--}, text: "Less"}),
-        button("more-button", {onClick: () => {me.count++}, text: "More"}),
+      column("root-column",
+        row("top-row", 
+          rootText,
+          button("less-button", {onClick: () => {me.count--}, text: "Less"}),
+          button("more-button", {onClick: () => {me.count++}, text: "More"})
+        ),
         new List("root-list", {maxCount: this.count, count: 1})
       )
     );
@@ -79,7 +81,7 @@ export class List extends Flow {
     if (this.count < this.maxCount) {
       children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
-    return row("list-row", {children: children});
+    return column("list-row", {children: children});
   }
 }
 

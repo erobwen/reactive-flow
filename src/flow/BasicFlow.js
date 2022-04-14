@@ -40,13 +40,13 @@ export const flexContainerStyle = {
 };
 
 export const rowStyle = {
-  flexDirection: "row", 
-  ...flexContainerStyle
+  ...flexContainerStyle,
+  flexDirection: "row"
 };
 
 export const columnStyle = {
-  flexDirection: "column", 
-  ...flexContainerStyle
+  ...flexContainerStyle,
+  flexDirection: "column" 
 };
 
 export function row() { 
