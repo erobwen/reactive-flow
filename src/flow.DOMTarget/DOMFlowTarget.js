@@ -1,4 +1,4 @@
-import { observable, world, repeat, readFlowProperties, Flow } from "../flow/Flow";
+import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
 import { DOMElementNode, DOMTextNode } from "./DOMFlowTargetPrimitive";
 import { FlowTarget } from "../flow/FlowTarget";
 
@@ -17,9 +17,12 @@ function mostAbstractFlow(flow) {
 
 function aggregateToString(flow) {
   let id = [];
-  let scan = flow; 
+  let scan = flow;
   while (scan) {
-    id.unshift(scan.toString());
+    if (!(scan instanceof FlowTargetPrimitive)) {
+      // Dont display flow target primitive.       
+      id.unshift(scan.toString());
+    }
     scan = scan.equivalentParent;
   }
   return id.join(" | ");

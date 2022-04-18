@@ -26,7 +26,7 @@ export function button() {
   // Autogenerate child text node from string.
   const text = properties.text; delete properties.text; 
   if (text && !properties.children) {
-    properties.children = [new TextNode(properties.key + ".toggle-button-text", {text, textNode:true})]; 
+    properties.children = [new TextNode(properties.key + ".button-text", {text, textNode:true})]; 
   }
   result = new ElementNode({tagName: "button", attributes, ...properties})
   return result; 
@@ -70,7 +70,11 @@ export function column() {
 /**
  * 1:1 HTML 
  */
- export class ElementNode extends Flow {
+ export class ElementNode extends Flow { 
+  toString() {
+    return this.tagName + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+  }
+
   build()  {
     return this.target.elementNode(this.properties);
   }
@@ -82,6 +86,10 @@ export function elementNode() {
 
 
 export class TextNode extends Flow {
+  toString() {
+    return "[text]" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+  }
+
   build()  {
     return this.target.textNode(this.properties);
   }
