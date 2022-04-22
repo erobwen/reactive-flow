@@ -4,12 +4,6 @@ import { FlowTarget } from "../flow/FlowTarget";
 
 const log = console.log;
 
-function clearNode(node) {
-  while (node.childNodes.length > 0) {
-    node.removeChild(node.lastChild);
-  }
-}
-
 function mostAbstractFlow(flow) {
   while (flow.equivalentParent) flow = flow.equivalentParent;
   return flow; 
@@ -28,6 +22,12 @@ function aggregateToString(flow) {
   return id.join(" | ");
 }
 
+function clearNode(node) {
+  while (node.childNodes.length > 0) {
+    node.removeChild(node.lastChild);
+  }
+}
+
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement){
     super();
@@ -43,7 +43,7 @@ export class DOMFlowTarget extends FlowTarget {
         const primitive = you.getPrimitive(); 
         let domNode;
         if (primitive !== null) {
-          domNode = me.getDomNode(primitive);
+          domNode = primitive.getDomNode(me);
         }
         clearNode(me.rootElement);
         if (domNode) {
@@ -51,45 +51,6 @@ export class DOMFlowTarget extends FlowTarget {
         }
       });
     }
-  }
-  
-  getDomNode(domFlow) {
-    const me = this; 
-    const you = domFlow;
-    if (!you.buildElementRepeater) {
-      you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
-        log(repeater.causalityString());
-
-        you.getEmptyDomNode(me);
-        me.buildDomNode(you);  
-      });
-    }
-    return you.domNode;
-  }
-  
-  buildDomNode(domFlow) {
-    const me = this; 
-    const you = domFlow;
-    const node = you.domNode;
-    you.buildDomNode(node);
-    
-    if (you.children instanceof Array) {
-      clearNode(node);
-      for (let child of you.children) {
-        if (child !== null) {
-          const childPrimitive = child.getPrimitive();
-          if (childPrimitive !== null) {
-            node.appendChild(me.getDomNode(childPrimitive));
-          }
-        }
-      }
-    } else if (you.children instanceof Flow) {
-      clearNode(node);
-      const childPrimitive = you.children.getPrimitive();
-      if (childPrimitive !== null) {
-        node.appendChild(me.getDomNode(childPrimitive));
-      }
-    }  
   }
 
   elementNode() {

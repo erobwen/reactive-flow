@@ -51,7 +51,7 @@ export class ShowcaseComponent extends Flow {
     let observe = this.count;
     
     const rootText = text("root-text", {text: "My List:"});
-    const rootTextNode = this.target.getDomNode(rootText.getPrimitive()); 
+    const rootTextNode = rootText.getPrimitive().getDomNode(); 
     log("Getting dom text node in advance during build!")
     log(rootTextNode);
 

@@ -21,14 +21,59 @@ function aggregateToString(flow) {
   return id.join(" | ");
 }
 
+function clearNode(node) {
+  while (node.childNodes.length > 0) {
+    node.removeChild(node.lastChild);
+  }
+}
 
 /**
  * DOM Flow Base class
  */
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
 
+  
+  getDomNode(domTarget) {
+    const me = domTarget; 
+    const you = this;
+    if (!you.buildElementRepeater) {
+      you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
+        log(repeater.causalityString());
+
+        you.getEmptyDomNode(me);
+        you.buildDomNodeWithChildren(me);  
+      });
+    }
+    return you.domNode;
+  }
+
   createEmptyDomNode() {
     throw new Error("Not implemented yet!");
+  }
+
+  buildDomNodeWithChildren(domTarget) {
+    const me = domTarget; 
+    const you = this;
+    const node = you.domNode;
+    you.buildDomNode(node);
+    
+    if (you.children instanceof Array) {
+      clearNode(node);
+      for (let child of you.children) {
+        if (child !== null) {
+          const childPrimitive = child.getPrimitive();
+          if (childPrimitive !== null) {
+            node.appendChild(childPrimitive.getDomNode(me));
+          }
+        }
+      }
+    } else if (you.children instanceof Flow) {
+      clearNode(node);
+      const childPrimitive = you.children.getPrimitive();
+      if (childPrimitive !== null) {
+        node.appendChild(childPrimitive.getDomNode(me));
+      }
+    }  
   }
 
   getEmptyDomNode(domTarget) {
@@ -58,7 +103,6 @@ function aggregateToString(flow) {
     throw new Error("Not implemented yet!");
   }
 }
-
 
 /**
  * DOM Flow Target Primitive
