@@ -60,7 +60,7 @@ export class DOMFlowTarget extends FlowTarget {
       you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
         log(repeater.causalityString());
 
-        me.getEmptyDomNode(you);
+        you.getEmptyDomNode(me);
         me.buildDomNode(you);  
       });
     }
@@ -90,29 +90,6 @@ export class DOMFlowTarget extends FlowTarget {
         node.appendChild(me.getDomNode(childPrimitive));
       }
     }  
-  }
-
-  getEmptyDomNode(domFlow) {
-    const me = this; 
-    const you = domFlow;
-    if (!you.createElementRepeater) {
-      you.createElementRepeater = repeat(mostAbstractFlow(you).toString() + ".createElementRepeater", (repeater) => {
-        log(repeater.causalityString());
-
-        // Create empty dom node
-        you.domNode = you.createEmptyDomNode();
-        you.domNode.id = aggregateToString(you);
-        // you.domNode.id = mostAbstractFlow(you).toString()
-        
-        // Decorate all equivalent flows
-        let scanFlow = you.equivalentParent;
-        while (scanFlow != null) {
-          scanFlow.domNode = you.domNode;
-          scanFlow = scanFlow.equivalentParent;
-        }
-      });
-    }
-    return you.domNode;
   }
 
   elementNode() {
