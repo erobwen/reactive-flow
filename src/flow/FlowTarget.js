@@ -17,6 +17,9 @@ export class FlowTarget {
         throw new Error("Not implemented yet!");
     }
 
-    
+    modalNode() {
+        // Should return an object of the type: FlowTargetPrimitive
+        throw new Error("Not implemented yet!");
+    }
 }
   

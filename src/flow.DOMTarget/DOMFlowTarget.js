@@ -1,5 +1,5 @@
 import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
-import { DOMElementNode, DOMTextNode } from "./DOMFlowTargetPrimitive";
+import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMFlowTargetPrimitive";
 import { FlowTarget } from "../flow/FlowTarget";
 
 const log = console.log;
@@ -121,6 +121,10 @@ export class DOMFlowTarget extends FlowTarget {
 
   textNode() {
     return new DOMTextNode(readFlowProperties(arguments));
+  }
+
+  modalNode() {
+    return new DOMModalNode(readFlowProperties(arguments));
   }
 }
 

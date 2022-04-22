@@ -99,6 +99,17 @@ export function textNode() {
   return new TextNode(readFlowProperties(arguments)) 
 };
 
+export class ModalNode extends Flow { 
+  toString() {
+    return "ModalNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+  }
+
+  build()  {
+    return this.target.modalNode(this.properties);
+  }
+}
+
+
 
 /**
  * Element Node Attributes 

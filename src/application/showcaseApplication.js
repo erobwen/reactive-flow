@@ -68,6 +68,32 @@ export class ShowcaseComponent extends Flow {
   }
 }
 
+  // build() {
+  //   this.provide("myModel"); // Give all grand-children access to myModel, they will get this as a property of their own.
+  //   const me = this;
+  //   let observe = this.count;
+    
+  //   const lessButton = button("less-button", {onClick: () => {me.count--}, text: "Less"});
+  //   const lessButtonNode = this.target.getDomNode(lessButton.getPrimitive()); 
+  //   log("Getting dom text node in advance during build!")
+  //   log(lessButtonNode); 
+  //   document.getElementById("flow-root").appendChild(lessButtonNode); // We have to add it to the dom to analyze it.
+  //   const style = window.getComputedStyle(lessButtonNode, null);
+  //   log(style.getPropertyValue("height"));
+
+  //   return (
+  //     column("root-column",
+  //       row("top-row", 
+  //         text("root-text", {text: "My List:"}),
+  //         lessButton,
+  //         button("more-button", {onClick: () => {me.count++}, text: "More"})
+  //       ),
+  //       new List("root-list", {maxCount: this.count, count: 1})
+  //     )
+  //   );
+  // }
+
+  
 export class List extends Flow {
   // This is the function setProperties where you declare all properties that a parent can set on its child. This is optional, but is a good place to define default values, modify values given by parent, or document what properties that the component needs.   
   setProperties({maxCount, count}) {

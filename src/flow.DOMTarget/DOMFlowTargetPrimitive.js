@@ -106,4 +106,47 @@ export class DOMTextNode extends DOMFlow {
   }
 }
 
+export class DOMModalNode extends DOMFlow {
+  setProperties({children}) {
+    this.children = children;
+  }
+
+  setState({}) {
+    // Create the new flow target?
+  }
+  
+  createEmptyDomNode() {
+    // Do nothing.
+  }
+
+  buildDomNode(element) {
+    // Do nothing.
+  }
+
+  getPrimitive() {
+    const me = this;
+    me.primitive = me;
+    
+    finalize(me);
+    if (!me.mountRepeater) {
+      me.mountRepeater = repeat(me.toString() + ".mountRepeater", repeater => {
+
+        // TODO: somehow mount 
+  
+        // Expand known children (do as much as possible before integration)
+        // if (me.children) {
+        //   for (let child of me.children) {
+        //     if (child !== null) {
+        //       child.getPrimitive();
+        //     }
+        //   }
+        // }
+      });
+    }
+  
+    return me;
+  }  
+}
+
+
 
