@@ -3,12 +3,12 @@ import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitiv
 const log = console.log;
 
 
-function mostAbstractFlow(flow) {
+export function mostAbstractFlow(flow) {
   while (flow.equivalentParent) flow = flow.equivalentParent;
   return flow; 
 }
 
-function aggregateToString(flow) {
+export function aggregateToString(flow) {
   let id = [];
   let scan = flow;
   while (scan) {
@@ -21,7 +21,7 @@ function aggregateToString(flow) {
   return id.join(" | ");
 }
 
-function clearNode(node) {
+export function clearNode(node) {
   while (node.childNodes.length > 0) {
     node.removeChild(node.lastChild);
   }

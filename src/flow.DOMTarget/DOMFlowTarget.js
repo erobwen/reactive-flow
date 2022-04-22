@@ -1,37 +1,23 @@
 import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
-import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMFlowTargetPrimitive";
+import { DOMElementNode, DOMTextNode, DOMModalNode, mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
 import { FlowTarget } from "../flow/FlowTarget";
 
 const log = console.log;
-
-function mostAbstractFlow(flow) {
-  while (flow.equivalentParent) flow = flow.equivalentParent;
-  return flow; 
-}
-
-function aggregateToString(flow) {
-  let id = [];
-  let scan = flow;
-  while (scan) {
-    if (!(scan instanceof FlowTargetPrimitive)) {
-      // Dont display flow target primitive.       
-      id.unshift(scan.toString());
-    }
-    scan = scan.equivalentParent;
-  }
-  return id.join(" | ");
-}
-
-function clearNode(node) {
-  while (node.childNodes.length > 0) {
-    node.removeChild(node.lastChild);
-  }
-}
 
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement){
     super();
     this.rootElement = rootElement;
+    this.rootElement.style.width = "100%";
+    this.rootElement.style.height = "100%";
+    this.modalDiv = document.createElement("div");
+    this.modalDiv.id = "modal-div";
+    this.modalDiv.style.position = "absolute";
+    this.modalDiv.style.top = 0;
+    this.modalDiv.style.left = 0;
+    this.modalDiv.style.width = "100%";
+    this.modalDiv.style.height = "100%";
+    this.modalDiv.style.display = "none"
   }
   
   integrate(flow) {
@@ -48,6 +34,7 @@ export class DOMFlowTarget extends FlowTarget {
         clearNode(me.rootElement);
         if (domNode) {
           me.rootElement.appendChild(domNode);
+          me.rootElement.appendChild(this.modalDiv);
         }
       });
     }
