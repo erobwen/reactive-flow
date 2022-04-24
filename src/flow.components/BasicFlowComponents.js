@@ -6,7 +6,13 @@ const log = console.log;
  * Basic flows for your app 
  */
 export function text() {
-  return new TextNode(readFlowProperties(arguments));
+  const properties = readFlowProperties(arguments); 
+  return new ElementNode(properties.key + ".span", 
+    {
+      tagName:"span", 
+      children: [new TextNode(properties.key + ".text", {text: properties.text})], 
+      ...properties
+    });
 }
 
 export function button() { 
@@ -70,13 +76,26 @@ export function column() {
 /**
  * 1:1 HTML 
  */
- export class ElementNode extends Flow { 
+export class BasicFlow extends Flow {
+  constructor() {
+    super();
+    let properties = readFlowProperties(arguments); 
+
+    // Arguments
+    this.causality.flowProperties = properties; 
+    log("properties of " + properties.key + ":");
+    log(properties)
+  }
+}
+
+
+ export class ElementNode extends BasicFlow { 
   toString() {
     return this.tagName + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.elementNode(this.properties);
+    return this.target.elementNode(this.causality.flowProperties);
   }
 }
 
@@ -85,13 +104,13 @@ export function elementNode() {
 };
 
 
-export class TextNode extends Flow {
+export class TextNode extends BasicFlow {
   toString() {
     return "[text]" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.textNode(this.properties);
+    return this.target.textNode(this.causality.flowProperties);
   }
 }
 
@@ -99,13 +118,13 @@ export function textNode() {
   return new TextNode(readFlowProperties(arguments)) 
 };
 
-export class ModalNode extends Flow { 
+export class ModalNode extends BasicFlow { 
   toString() {
     return "ModalNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.modalNode(this.properties);
+    return this.target.modalNode(this.causality.flowProperties);
   }
 }
 

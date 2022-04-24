@@ -9,13 +9,9 @@ let parents = [];
 
 window.allFlows = {};
 export class Flow {
-  constructor() {   
-    // Arguments
+  constructor() {
     let properties = readFlowProperties(arguments); 
-    this.properties = properties; 
-    log("properties of " + properties.key + ":");
-    log(properties)
-    
+  
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
@@ -273,22 +269,22 @@ export class FlowTargetPrimitive extends Flow {
 
   getPrimitive() {
     const me = this;
-    me.primitive = me;
+    // me.primitive = me;
     
-    finalize(me);
-    if (!me.expandRepeater) {
-      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
+    // finalize(me);
+    // if (!me.expandRepeater) {
+    //   me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
   
-        // Expand known children (do as much as possible before integration)
-        if (me.children) {
-          for (let child of me.children) {
-            if (child !== null) {
-              child.getPrimitive();
-            }
-          }
-        }
-      });
-    }
+    //     // Expand known children (do as much as possible before integration)
+    //     if (me.children) {
+    //       for (let child of me.children) {
+    //         if (child !== null) {
+    //           child.getPrimitive();
+    //         }
+    //       }
+    //     }
+    //   });
+    // }
   
     return me;
   }  

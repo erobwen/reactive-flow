@@ -107,7 +107,7 @@ export class List extends Flow {
     if (this.count < this.maxCount) {
       children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
-    return column("list-row", {children: children});
+    return column("list-column", {children: children});
   }
 }
 
@@ -122,6 +122,7 @@ export class Item extends Flow {
     // This is the place to define view model variables. In this case the "on" property is defined. 
     // Note: Do NOT  do this in the constructor or setProperties as then the established value might be overwritten by the default value!   
     this.on = true;
+    this.showModal = false; 
     
     // This is a reactivley triggered repeater that reacts when me.domNode is set. This is a way to catch a reference to the actual DOM element of this component.
     const me = this;
@@ -137,9 +138,10 @@ export class Item extends Flow {
   build() {
     const me = this; 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
-      text("text", {text: me.on ? "on" : "off"}),
+      text("item-text", {text: me.text}),
       button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
-      text("item-text", {text: me.text})
+      text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
+      button("modal-button", {onClick: () => { log("---------- showModal = true -------------");me.showModal = true; }, text: "modal"}),
       // text("item-text", {text: me.text})
     );
   }

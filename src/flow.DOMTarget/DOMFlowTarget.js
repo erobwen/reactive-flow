@@ -1,5 +1,6 @@
 import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
-import { DOMElementNode, DOMTextNode, DOMModalNode, mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
+import { mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
+import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
 
 const log = console.log;
@@ -8,6 +9,10 @@ export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement){
     super();
     this.rootElement = rootElement;
+    this.setupRootAndModalElement();
+  }
+
+  setupRootAndModalElement() {
     this.rootElement.style.width = "100%";
     this.rootElement.style.height = "100%";
     this.modalDiv = document.createElement("div");
@@ -19,7 +24,7 @@ export class DOMFlowTarget extends FlowTarget {
     this.modalDiv.style.height = "100%";
     this.modalDiv.style.display = "none"
   }
-  
+
   integrate(flow) {
     const me = this; 
     const you = flow;
