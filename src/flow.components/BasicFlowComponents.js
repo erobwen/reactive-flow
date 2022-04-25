@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties } from "../flow/Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, readFlowProperties2 } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -7,10 +7,10 @@ const log = console.log;
  */
 export function text() {
   const properties = readFlowProperties(arguments); 
-  return new ElementNode(properties.key + ".span", 
+  return new BasicElementNode(properties.key + ".span", 
     {
       tagName:"span", 
-      children: [new TextNode(properties.key + ".text", {text: properties.text})], 
+      children: [new BasicTextNode(properties.key + ".text", {text: properties.text})], 
       ...properties
     });
 }
@@ -24,7 +24,7 @@ export function button() {
   if (properties.onClick) {
     const onClick = properties.onClick;
     properties.onClick = () => {
-      console.log("clicked at: " + JSON.stringify(result.getPath()));
+      //log("clicked at: " + JSON.stringify(result.getPath()));
       onClick();
     }  
   }
@@ -32,9 +32,9 @@ export function button() {
   // Autogenerate child text node from string.
   const text = properties.text; delete properties.text; 
   if (text && !properties.children) {
-    properties.children = [new TextNode(properties.key + ".button-text", {text, textNode:true})]; 
+    properties.children = [new BasicTextNode(properties.key + ".button-text", {text, textNode:true})]; 
   }
-  result = new ElementNode({tagName: "button", attributes, ...properties})
+  result = new BasicElementNode({tagName: "button", attributes, ...properties})
   return result; 
 };
 
@@ -62,69 +62,76 @@ export function row() {
   const properties = readFlowProperties(arguments);
   const attributes = extractAttributes(properties); 
   attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return new ElementNode({tagName: "div", attributes, ...properties }); 
+  return new BasicElementNode({tagName: "div", attributes, ...properties }); 
 };
 
 export function column() { 
   const properties = readFlowProperties(arguments);
   const attributes = extractAttributes(properties); 
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
-  return new ElementNode({tagName: "div", attributes, ...properties }); 
+  return new BasicElementNode({tagName: "div", attributes, ...properties }); 
 };
 
+
+function copyArray(array) {
+  const result = [];
+  array.forEach(element => result.push(element));
+  return result;
+}
 
 /**
  * 1:1 HTML 
  */
 export class BasicFlow extends Flow {
-  constructor() {
-    super();
-    let properties = readFlowProperties(arguments); 
+
+  constructor(...parameters) {
+    const me = super(...copyArray(parameters));
+    let properties = readFlowProperties2(parameters); 
+    if (!this.key) throw new Error("No key exception!");
 
     // Arguments
-    this.causality.flowProperties = properties; 
-    log("properties of " + properties.key + ":");
-    log(properties)
+    properties.key = "domFlow"
+    me.flowProperties = properties; 
   }
 }
 
 
- export class ElementNode extends BasicFlow { 
+ export class BasicElementNode extends BasicFlow { 
   toString() {
-    return this.tagName + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+    return "BasicElementNode:" + this.tagName + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.elementNode(this.causality.flowProperties);
+    return this.target.elementNode(this.flowProperties);
   }
 }
 
 export function elementNode() { 
-  return new ElementNode(readFlowProperties(arguments)) 
+  return new BasicElementNode(readFlowProperties(arguments)) 
 };
 
 
-export class TextNode extends BasicFlow {
+export class BasicTextNode extends BasicFlow {
   toString() {
-    return "[text]" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+    return "BasicTextNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.textNode(this.causality.flowProperties);
+    return this.target.textNode(this.flowProperties);
   }
 }
 
 export function textNode() { 
-  return new TextNode(readFlowProperties(arguments)) 
+  return new BasicTextNode(readFlowProperties(arguments)) 
 };
 
-export class ModalNode extends BasicFlow { 
+export class BasicModalNode extends BasicFlow { 
   toString() {
-    return "ModalNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+    return "BasicModalNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }
 
   build()  {
-    return this.target.modalNode(this.causality.flowProperties);
+    return this.target.modalNode(this.flowProperties);
   }
 }
 

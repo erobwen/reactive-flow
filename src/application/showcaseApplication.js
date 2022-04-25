@@ -32,9 +32,9 @@ export class ShowcaseComponent extends Flow {
     // Just a debug causality repeater that writes a debug log whenever count is changed. 
     const me = this;
     repeat(this.toString() + " (count tracker)",repeater => {
-      log(repeater.causalityString());
+      // log(repeater.causalityString());
       let observe = me.count;
-      log("---------- count -------------");
+      // log("---------- count -------------");
     })
   }
 
@@ -45,6 +45,8 @@ export class ShowcaseComponent extends Flow {
 
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
+    //return button("foo", {text: "foo", onClick: () => { log("foo") }})
+
     this.provide("myModel"); // Give all grand-children access to myModel, they will get this as a property of their own.
 
     const me = this;
@@ -52,15 +54,15 @@ export class ShowcaseComponent extends Flow {
     
     const rootText = text("root-text", {text: "My List:"});
     const rootTextNode = rootText.getPrimitive().getDomNode(); 
-    log("Getting dom text node in advance during build!")
-    log(rootTextNode);
+    // log("Getting dom text node in advance during build!")
+    // log(rootTextNode);
 
     return (
       column("root-column",
         row("top-row", 
           rootText,
           button("less-button", {onClick: () => {me.count--}, text: "Less"}),
-          button("more-button", {onClick: () => {me.count++}, text: "More"})
+          button("more-button", {onClick: () => {log("---------- MORE ---------");me.count++}, text: "More"})
         ),
         new List("root-list", {maxCount: this.count, count: 1})
       )
@@ -128,14 +130,17 @@ export class Item extends Flow {
     const me = this;
     when(() => me.domNode, 
       node => { 
-        log("Got a node!");
-        log(node);
+        // log("Got a node!");
+        // log(node);
       });
   }
 
   // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
   // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
   build() {
+
+
+
     const me = this; 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
       text("item-text", {text: me.text}),
@@ -174,8 +179,8 @@ export class MyComponentFlow extends Flow {
   build() {
     return ( 
       row("list-row", {}, 
-        button("a", {onClick: () => {console.log("a clicked")}}),
-        button("b", {onClick: () => {console.log("b clicked")}})
+        button("a", {onClick: () => {log("a clicked")}}),
+        button("b", {onClick: () => {log("b clicked")}})
       )
     );
   }

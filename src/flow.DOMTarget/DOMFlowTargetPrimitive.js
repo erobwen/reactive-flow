@@ -12,10 +12,10 @@ export function aggregateToString(flow) {
   let id = [];
   let scan = flow;
   while (scan) {
-    if (!(scan instanceof FlowTargetPrimitive)) {
+    // if (!(scan instanceof FlowTargetPrimitive)) {
       // Dont display flow target primitive.       
       id.unshift(scan.toString());
-    }
+    // }
     scan = scan.equivalentParent;
   }
   return id.join(" | ");
@@ -37,7 +37,7 @@ export function clearNode(node) {
     const you = this;
     if (!you.buildElementRepeater) {
       you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
 
         you.getEmptyDomNode(me);
         you.buildDomNodeWithChildren(me);  
@@ -79,7 +79,7 @@ export function clearNode(node) {
     const you = this;
     if (!you.createElementRepeater) {
       you.createElementRepeater = repeat(mostAbstractFlow(you).toString() + ".createElementRepeater", (repeater) => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
 
         // Create empty dom node
         you.domNode = you.createEmptyDomNode();

@@ -30,7 +30,7 @@ export class DOMFlowTarget extends FlowTarget {
     const you = flow;
     if (!you.integrationRepeater) {
       you.integrationRepeater = repeat(mostAbstractFlow(you).toString() + ".integrationRepeater", repeater => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
         const primitive = you.getPrimitive(); 
         let domNode;
         if (primitive !== null) {

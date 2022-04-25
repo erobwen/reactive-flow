@@ -10,8 +10,10 @@ let parents = [];
 window.allFlows = {};
 export class Flow {
   constructor() {
+    log("constructor-----" + this.className());
     let properties = readFlowProperties(arguments); 
-  
+    log(properties);
+
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
@@ -36,6 +38,7 @@ export class Flow {
     
     // Create observable
     let me = observable(this, this.key);
+    log("id: " + me.causality.id)
     
     // Set properties through interface
     me.setProperties(properties); // Set default values here
@@ -192,7 +195,7 @@ export class Flow {
 
         // Recursive call
         me.primitive = (build !== null) ? build.getPrimitive() : null;
-        log(repeater.description + ":" + repeater.creationString());
+        //log(repeater.description + ":" + repeater.creationString());
       });
     }
     return me.primitive;
@@ -200,7 +203,7 @@ export class Flow {
 
   build(repeater) {
     if (this.buildFunction) {
-      log("-----------------")
+      //log("-----------------")
       return this.buildFunction(this)
     }
     throw new Error("Not implemented yet")
@@ -231,6 +234,31 @@ export function readFlowProperties(functionArguments) {
   
   // The long way
   const arglist = argumentsToArray(functionArguments);
+  let properties = {};
+  while (arglist.length > 0) {
+    if (typeof(arglist[0]) === "function" && !arglist[0].causality) {
+      properties.build = arglist.shift();
+    }  
+    if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
+      properties.key = arglist.shift();
+    }
+    if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
+      Object.assign(properties, arglist.shift());
+    }
+    if (typeof(arglist[0]) === "object" && arglist[0].causality) {
+      if (!properties.children) properties.children = [];
+      properties.children.push(arglist.shift());
+    }
+    //if (properties.children && !(typeof(properties.children) instanceof Array)) properties.children = [properties.children];
+  }
+  return properties;
+}
+
+export function readFlowProperties2(arglist) {
+  // Shortcut
+  //if (typeof(arglist[0]) === "object" && !arglist[0].causality && typeof(arglist[1]) === "undefined") return arglist[0]
+  
+  // The long way
   let properties = {};
   while (arglist.length > 0) {
     if (typeof(arglist[0]) === "function" && !arglist[0].causality) {
