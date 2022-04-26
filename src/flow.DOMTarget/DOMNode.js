@@ -1,4 +1,5 @@
-import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";
+import { DOMFlowTarget } from "./DOMFlowTarget";
+import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";    
 
 /**
  * DOM Flow Target Primitive
@@ -92,10 +93,15 @@ import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";
   export class DOMModalNode extends DOMFlowTargetPrimitive {
     setProperties({children}) {
       this.children = children;
+      this.child = (this.children instanceof Array) ? this.children[0] : this.children; 
     }
   
     setState({}) {
       // Create the new flow target? show modal panel.
+      this.domFlowTarget = new DOMFlowTarget(this.target.modalDiv);
+      this.child.target = this.domFlowTarget; // This is kind of interesting if it works, the child was rendered by the parent, but later decorated by this. 
+      //this.domFlowTarget.integrate(this);
+      this.child.activate();
     }
   
     disposeState() {
@@ -103,36 +109,11 @@ import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";
     }
   
     createEmptyDomNode() {
-      // Do nothing.
+      return document.createElement("div");
     }
   
     buildDomNode(element) {
-      // Do nothing.
+      element.style.display = "none";
     }
-  
-  
-    getPrimitive() {
-      const me = this;
-      me.primitive = me;
-      
-      finalize(me);
-      if (!me.mountRepeater) {
-        me.mountRepeater = repeat(me.toString() + ".mountRepeater", repeater => {
-  
-          // TODO: somehow mount 
-    
-          // Expand known children (do as much as possible before integration)
-          // if (me.children) {
-          //   for (let child of me.children) {
-          //     if (child !== null) {
-          //       child.getPrimitive();
-          //     }
-          //   }
-          // }
-        });
-      }
-    
-      return me;
-    }  
   }
   

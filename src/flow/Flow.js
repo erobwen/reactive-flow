@@ -10,9 +10,7 @@ let parents = [];
 window.allFlows = {};
 export class Flow {
   constructor() {
-    log("constructor-----" + this.className());
     let properties = readFlowProperties(arguments); 
-    log(properties);
 
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
@@ -38,7 +36,7 @@ export class Flow {
     
     // Create observable
     let me = observable(this, this.key);
-    log("id: " + me.causality.id)
+    // log("id: " + me.causality.id)
     
     // Set properties through interface
     me.setProperties(properties); // Set default values here
@@ -180,7 +178,7 @@ export class Flow {
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
         
         // Build this one step
         parents.push(me);

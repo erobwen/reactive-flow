@@ -43,6 +43,10 @@ export class ShowcaseComponent extends Flow {
     // log("Removed:" + this.toString());
   }
 
+  derriveState() {
+    
+  }
+
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
     //return button("foo", {text: "foo", onClick: () => { log("foo") }})
