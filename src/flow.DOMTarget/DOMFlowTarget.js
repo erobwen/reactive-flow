@@ -22,7 +22,6 @@ export class DOMFlowTarget extends FlowTarget {
     this.modalDiv.style.left = 0;
     this.modalDiv.style.width = "100%";
     this.modalDiv.style.height = "100%";
-    // this.modalDiv.style.display = "none";
     this.modalDiv.style.opacity = 0;
     this.modalDiv.style.pointerEvents = "none";
   }

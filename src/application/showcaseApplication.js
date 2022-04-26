@@ -44,7 +44,7 @@ export class ShowcaseComponent extends Flow {
   }
 
   derriveState() {
-    
+
   }
 
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
@@ -142,9 +142,6 @@ export class Item extends Flow {
   // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
   // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
   build() {
-
-
-
     const me = this; 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
       text("item-text", {text: me.text}),

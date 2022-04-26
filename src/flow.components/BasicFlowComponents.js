@@ -7,11 +7,20 @@ const log = console.log;
  */
 export function text() {
   const properties = readFlowProperties(arguments); 
+  console.log(properties.target);
+  const textProperties = {
+    key: properties.key + ".text",
+    text: properties.text,
+  }
+  if (properties.target) {
+    textProperties.target = properties.target;
+  }
+
   return new BasicElementNode(properties.key + ".span", 
     {
       tagName:"span", 
-      children: [new BasicTextNode(properties.key + ".text", {text: properties.text})], 
-      ...properties
+      children: [targetOrBasicText(textProperties)], 
+      ...properties 
     });
 }
 
@@ -111,6 +120,14 @@ export function elementNode() {
 };
 
 
+function targetOrBasicText(properties) {
+  if (properties.target) {
+    return properties.target.textNode(properties);
+  } else {
+    return new BasicTextNode(properties) 
+  }
+} 
+
 export class BasicTextNode extends BasicFlow {
   toString() {
     return "BasicTextNode:" + this.causality.id + "(" + this.buildUniqueName() + ")";     
@@ -121,9 +138,7 @@ export class BasicTextNode extends BasicFlow {
   }
 }
 
-export function textNode() { 
-  return new BasicTextNode(readFlowProperties(arguments)) 
-};
+
 
 export class BasicModalNode extends BasicFlow { 
   toString() {
