@@ -178,7 +178,7 @@ export class Flow {
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
         
         // Build this one step
         parents.push(me);

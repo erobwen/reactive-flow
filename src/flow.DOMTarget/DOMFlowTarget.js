@@ -27,9 +27,10 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   integrate(flow) {
+    log(this);
     this.content = flow;
     flow.target = this;
-    console.log("integrate----");
+    // console.log("integrate----");
     const me = this; 
     const you = flow;
     if (!you.integrationRepeater) {
@@ -40,7 +41,7 @@ export class DOMFlowTarget extends FlowTarget {
         if (primitive !== null) {
           domNode = primitive.getDomNode(me);
         }
-        log(domNode)
+        // log(domNode)
         domNode.style.pointerEvents = "auto"; // If inside modal
         clearNode(me.rootElement);
         if (domNode) {
@@ -54,6 +55,8 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   dispose() {
+    log("dispose target")
+    log(this.rootElement)
     clearNode(this.rootElement);
     this.content.integrationRepeater.dispose();
   }

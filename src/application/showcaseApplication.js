@@ -142,20 +142,24 @@ export class Item extends Flow {
   // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
   // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
   build() {
+    // log("BUILD ITEMÖ::::")
     const me = this; 
+
+    function close() {
+      log("---------- showModal = false -------------" + me.text);
+      me.showModal = false; 
+    }
+
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
       text("item-text", {text: me.text}),
       button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
       text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { log("---------- showModal = true -------------");me.showModal = true; }, text: "modal"}),
-      !me.showModal ? null : this.target.modalNode("modal-node", 
+      !me.showModal ? null : this.target.modalNode("modal-node", {close},
         button("close-button", {
           text: "close " + me.text + " modal",
           style: {opacity: 1},
-          onClick: () => { 
-            log("---------- showModal = false -------------"); 
-            me.showModal = false 
-          },
+          onClick: close,
         })
       ) // text("item-text", {text: me.text})
     );

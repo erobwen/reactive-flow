@@ -97,16 +97,27 @@ import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";
     }
   
     setState() {
-      console.log("ACTIVATE!!!");
-      console.log(this.child)
+      // console.log("ACTIVATE MODAL NODE!!!");
+      // console.log(this.close)
       // Create the new flow target? show modal panel.
-      // this.child.target = this.domFlowTarget; // This is kind of interesting if it works, the child was rendered by the parent, but later decorated by this. 
+      // this.child.target = this.domFlowTarget; // This is kind of interesting if it works, the child was rendered by the parent, but later decorated by this.
+      if (this.target.currentModalOnClose) this.target.currentModalOnClose(); 
+      this.target.currentModalOnClose = this.close;
+      // const childDomNode = this.child.getPrimitive().getDomNode();
+      // childDomNode.style.pointerEvents = "auto";
       this.domFlowTarget = new DOMFlowTarget(this.target.modalDiv);
       this.domFlowTarget.integrate(this.child);
     }
   
     disposeState() {
-      this.domFlowTarget.dispose();
+      console.log("dispose");
+      console.log(this.domFlowTarget.content.toString());
+      console.log(this.child.toString());
+      if (this.target.currentModalOnClose === this.close) {
+        this.domFlowTarget.dispose();
+      } else {
+        console.log("not in charge...")
+      }
 
       // Remove new flow target, hide modal panel 
     }

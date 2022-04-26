@@ -7,7 +7,7 @@ const log = console.log;
  */
 export function text() {
   const properties = readFlowProperties(arguments); 
-  console.log(properties.target);
+  // console.log(properties.target);
   const textProperties = {
     key: properties.key + ".text",
     text: properties.text,
@@ -43,7 +43,7 @@ export function button() {
   if (text && !properties.children) {
     properties.children = [new BasicTextNode(properties.key + ".button-text", {text, textNode:true})]; 
   }
-  result = new BasicElementNode({tagName: "button", attributes, ...properties})
+  result = new BasicElementNode(properties.key + ".button", {tagName: "button", attributes, ...properties})
   return result; 
 };
 
@@ -111,7 +111,7 @@ export class BasicFlow extends Flow {
   }
 
   build()  {
-    return this.target.elementNode(this.flowProperties);
+    return this.target.elementNode("domNode", this.flowProperties);
   }
 }
 
@@ -134,7 +134,7 @@ export class BasicTextNode extends BasicFlow {
   }
 
   build()  {
-    return this.target.textNode(this.flowProperties);
+    return this.target.textNode("textNode", this.flowProperties);
   }
 }
 
