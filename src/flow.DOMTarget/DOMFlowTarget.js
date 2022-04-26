@@ -22,28 +22,40 @@ export class DOMFlowTarget extends FlowTarget {
     this.modalDiv.style.left = 0;
     this.modalDiv.style.width = "100%";
     this.modalDiv.style.height = "100%";
-    this.modalDiv.style.opacity = 0;
+    // this.modalDiv.style.opacity = 0;
     this.modalDiv.style.pointerEvents = "none";
   }
 
   integrate(flow) {
+    this.content = flow;
+    flow.target = this;
+    console.log("integrate----");
     const me = this; 
     const you = flow;
     if (!you.integrationRepeater) {
       you.integrationRepeater = repeat(mostAbstractFlow(you).toString() + ".integrationRepeater", repeater => {
-        // log(repeater.causalityString());
+        log(repeater.causalityString());
         const primitive = you.getPrimitive(); 
         let domNode;
         if (primitive !== null) {
           domNode = primitive.getDomNode(me);
         }
+        log(domNode)
+        domNode.style.pointerEvents = "auto"; // If inside modal
         clearNode(me.rootElement);
         if (domNode) {
+          log("Adding back")
+          log(domNode)
           me.rootElement.appendChild(domNode);
           me.rootElement.appendChild(this.modalDiv);
         }
       });
     }
+  }
+
+  dispose() {
+    clearNode(this.rootElement);
+    this.content.integrationRepeater.dispose();
   }
 
   elementNode() {

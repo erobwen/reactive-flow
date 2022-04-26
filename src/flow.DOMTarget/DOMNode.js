@@ -92,19 +92,22 @@ import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";
   
   export class DOMModalNode extends DOMFlowTargetPrimitive {
     setProperties({children}) {
-      this.children = children;
-      this.child = (this.children instanceof Array) ? this.children[0] : this.children; 
+      this.child = (children instanceof Array) ? children[0] : children;
+      this.children = null; // Avoid children for the initiator 
     }
   
-    setState({}) {
+    setState() {
+      console.log("ACTIVATE!!!");
+      console.log(this.child)
       // Create the new flow target? show modal panel.
+      // this.child.target = this.domFlowTarget; // This is kind of interesting if it works, the child was rendered by the parent, but later decorated by this. 
       this.domFlowTarget = new DOMFlowTarget(this.target.modalDiv);
-      this.child.target = this.domFlowTarget; // This is kind of interesting if it works, the child was rendered by the parent, but later decorated by this. 
-      //this.domFlowTarget.integrate(this);
-      this.child.activate();
+      this.domFlowTarget.integrate(this.child);
     }
   
     disposeState() {
+      this.domFlowTarget.dispose();
+
       // Remove new flow target, hide modal panel 
     }
   

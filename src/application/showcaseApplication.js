@@ -132,11 +132,11 @@ export class Item extends Flow {
     
     // This is a reactivley triggered repeater that reacts when me.domNode is set. This is a way to catch a reference to the actual DOM element of this component.
     const me = this;
-    when(() => me.domNode, 
-      node => { 
-        // log("Got a node!");
-        // log(node);
-      });
+    // when(() => me.domNode, 
+    //   node => { 
+    //     // log("Got a node!");
+    //     // log(node);
+    //   });
   }
 
   // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
@@ -148,14 +148,16 @@ export class Item extends Flow {
       button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
       text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { log("---------- showModal = true -------------");me.showModal = true; }, text: "modal"}),
-      !me.showModal ? null : target.modalNode("modal-node", [
+      !me.showModal ? null : this.target.modalNode("modal-node", 
         button("close-button", {
+          text: "close " + me.text + " modal",
+          style: {opacity: 1},
           onClick: () => { 
-            log("---------- showModal = true -------------"); 
+            log("---------- showModal = false -------------"); 
             me.showModal = false 
           },
         })
-      ]) // text("item-text", {text: me.text})
+      ) // text("item-text", {text: me.text})
     );
   }
 }
