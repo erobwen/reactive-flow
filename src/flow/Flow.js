@@ -240,6 +240,9 @@ export function readFlowProperties(functionArguments) {
     if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
       properties.key = arglist.shift();
     }
+    if (arglist[0] === null) {
+      arglist.shift();
+    }    
     if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
       Object.assign(properties, arglist.shift());
     }
@@ -265,6 +268,9 @@ export function readFlowProperties2(arglist) {
     if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
       properties.key = arglist.shift();
     }
+    if (arglist[0] === null) {
+      arglist.shift();
+    }     
     if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
       Object.assign(properties, arglist.shift());
     }

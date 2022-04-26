@@ -148,7 +148,14 @@ export class Item extends Flow {
       button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
       text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { log("---------- showModal = true -------------");me.showModal = true; }, text: "modal"}),
-      // text("item-text", {text: me.text})
+      !me.showModal ? null : target.modalNode("modal-node", [
+        button("close-button", {
+          onClick: () => { 
+            log("---------- showModal = true -------------"); 
+            me.showModal = false 
+          },
+        })
+      ]) // text("item-text", {text: me.text})
     );
   }
 }
