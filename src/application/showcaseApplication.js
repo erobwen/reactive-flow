@@ -66,7 +66,7 @@ export class ShowcaseComponent extends Flow {
         row("top-row", 
           rootText,
           button("less-button", {onClick: () => {me.count--}, text: "Less"}),
-          button("more-button", {onClick: () => {log("---------- MORE ---------");me.count++}, text: "More"})
+          button("more-button", {onClick: () => {me.count++}, text: "More"})
         ),
         new List("root-list", {maxCount: this.count, count: 1})
       )
@@ -142,11 +142,9 @@ export class Item extends Flow {
   // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
   // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
   build() {
-    // log("BUILD ITEMÖ::::")
     const me = this; 
 
     function close() {
-      log("---------- showModal = false -------------" + me.text);
       me.showModal = false; 
     }
 
@@ -154,7 +152,7 @@ export class Item extends Flow {
       text("item-text", {text: me.text}),
       button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
       text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      button("modal-button", {onClick: () => { log("---------- showModal = true -------------");me.showModal = true; }, text: "modal"}),
+      button("modal-button", {onClick: () => { me.showModal = true; }, text: "modal"}),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
         button("close-button", {
           text: "close " + me.text + " modal",

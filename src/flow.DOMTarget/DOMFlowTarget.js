@@ -6,28 +6,18 @@ import { FlowTarget } from "../flow/FlowTarget";
 const log = console.log;
 
 export class DOMFlowTarget extends FlowTarget {
-  constructor(rootElement){
+  constructor(rootElement, creator=null){
     super();
+    this.creator = creator;
     this.rootElement = rootElement;
-    this.setupRootAndModalElement();
-  }
-
-  setupRootAndModalElement() {
     this.rootElement.style.width = "100%";
     this.rootElement.style.height = "100%";
-    this.modalDiv = document.createElement("div");
-    this.modalDiv.id = "modal-div";
-    this.modalDiv.style.position = "absolute";
-    this.modalDiv.style.top = 0;
-    this.modalDiv.style.left = 0;
-    this.modalDiv.style.width = "100%";
-    this.modalDiv.style.height = "100%";
-    // this.modalDiv.style.opacity = 0;
-    this.modalDiv.style.pointerEvents = "none";
+    this.state = observable({
+      modalDiv: null
+    });
   }
 
   integrate(flow) {
-    log(this);
     this.content = flow;
     flow.target = this;
     // console.log("integrate----");
@@ -35,29 +25,72 @@ export class DOMFlowTarget extends FlowTarget {
     const you = flow;
     if (!you.integrationRepeater) {
       you.integrationRepeater = repeat(mostAbstractFlow(you).toString() + ".integrationRepeater", repeater => {
-        log(repeater.causalityString());
+        // log(repeater.causalityString());
+
+        // Get dom node
         const primitive = you.getPrimitive(); 
         let domNode;
         if (primitive !== null) {
           domNode = primitive.getDomNode(me);
         }
-        // log(domNode)
-        domNode.style.pointerEvents = "auto"; // If inside modal
+
+        // If inside modal, reactivate mouse events
+        if (this.creator) {
+          domNode.style.pointerEvents = "auto";
+        }
+
+        // Set contents of root
         clearNode(me.rootElement);
         if (domNode) {
-          log("Adding back")
-          log(domNode)
           me.rootElement.appendChild(domNode);
-          me.rootElement.appendChild(this.modalDiv);
+          if (this.state.modalDiv) me.rootElement.appendChild(this.state.modalDiv);
         }
       });
     }
   }
 
+  setupModalDiv() {
+    const div = document.createElement("div");
+    div.id = "modal-div";
+    div.style.position = "absolute";
+    div.style.top = 0;
+    div.style.left = 0;
+    div.style.width = "100%";
+    div.style.height = "100%";
+    // div.style.opacity = 0;
+    div.style.pointerEvents = "none";
+    return div;
+  }
+
+  setModalFlow(flow, close) {
+    // Close existing
+    if (this.modalFlow) {
+      this.modalFlowClose();
+    }
+
+    // Setup modal flow
+    this.modalFlow = flow;
+    this.modalFlowClose = close; 
+    const modalDiv = this.setupModalDiv();
+    this.modalTarget = new DOMFlowTarget(modalDiv, this);
+    this.modalTarget.integrate(this.modalFlow);
+
+    // Display modal flow
+    this.state.modalDiv = modalDiv;
+  }
+
+  removeModalFlow(flow) {
+    if (this.modalFlow === flow) {
+      // Remove new flow target, hide modal panel
+      this.modalFlow = null;
+      this.modalFlowClose = null;
+      this.modalTarget.dispose();
+      this.modalTarget = null;
+      this.state.modalDiv = null;
+    }
+  }
+
   dispose() {
-    log("dispose target")
-    log(this.rootElement)
-    clearNode(this.rootElement);
     this.content.integrationRepeater.dispose();
   }
 
