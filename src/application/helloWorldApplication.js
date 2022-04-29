@@ -11,15 +11,23 @@ const log = console.log;
 // Parent flow
 export class HelloWorld extends Flow {
   setState() {
-    this.helloText = observable({ value: "" });
+    log("SET STATE HELLO WORLD");
+    this.helloText = observable({ value: "sdfssdfsdf" });
     this.emphasis = false;
-    this.derrive(() => {
-      this.helloTextDouble = this.helloText.value + " " + this.helloText.value;
-    });
+    // this.derrive(() => {
+    //   this.helloTextDouble = this.helloText.value + " " + this.helloText.value;
+    // });
   }
 
+  // provide() {
+  //   return ["helloText", "emphasis"];
+  // }
+
+  // withdraw() {
+  // }
+
   build() {
-    this.provide("helloTextDouble", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
+    this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
 
     return myRow(
       "row",
@@ -34,6 +42,13 @@ export class HelloWorld extends Flow {
 const hello = flow("hello", ({ helloText }) =>
   text("text", { text: helloText.value })
 );
+// const hello = flow("hello", (me) => {
+//   const { helloText } = me;
+//   log("in flow...");
+//   log(me.toString());
+//   log(me.helloText);
+//   return text("text", { text: helloText.value });
+// });
 
 // Statefull child flow
 class World extends Flow {
@@ -88,15 +103,18 @@ const helloWorld = new HelloWorld({
 
 // Set "Hello" deep inside observable data structure
 setTimeout(() => {
+  log("----------------------------------");
   helloWorld.helloText.value = "Hello";
 }, 1000);
 
 // Set state property to "world!", using a component path to access child component.
 setTimeout(() => {
+  log("----------------------------------");
   helloWorld.getChild("world").worldText = "world";
 }, 2000);
 
 // Exclamation mark!
 setTimeout(() => {
+  log("----------------------------------");
   helloWorld.emphasis = true;
 }, 3000);

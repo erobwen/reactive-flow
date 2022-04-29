@@ -20,6 +20,7 @@ window.allFlows = {};
 export class Flow {
   constructor() {
     let properties = readFlowProperties(arguments);
+    log("-----constructor:" + this.className() + "." + properties.key);
 
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
@@ -50,10 +51,11 @@ export class Flow {
     // Set properties through interface
     me.setProperties(properties); // Set default values here
 
-    // Emulate onEstablish for top element.
-    if (!this.parent) {
-      me.onEstablish();
-    }
+    // Emulate onEstablish for top element. This will be done anyway with the integrationRepeater...
+    // however, what happens with flows without keys? Will they never get an establishing call? They should get one every time...
+    // if (!me.parent) {
+    //   me.onEstablish();
+    // }
 
     // Debug & warning
     window.allFlows[me.causality.id] = me;
@@ -101,10 +103,11 @@ export class Flow {
   }
 
   derrive(action) {
-    if (this.derriveRepeater)
+    if (this.derriveRepeater) {
       throw new Error(
         "Only one derrive call in setState allowed! But you can do multiple things in that one. Use causality/repeat for more options"
       );
+    }
     this.derriveRepeater = repeat(action);
   }
 
@@ -358,4 +361,21 @@ export class FlowTargetPrimitive extends Flow {
 
     return me;
   }
+}
+
+export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
+  let description;
+  let buildFunction;
+  if (typeof descriptionOrBuildFunction === "string") {
+    description = descriptionOrBuildFunction;
+    buildFunction = possibleBuildFunction;
+  } else {
+    buildFunction = descriptionOrBuildFunction;
+  }
+  function flowBuilder() {
+    const flow = new Flow(readFlowProperties(arguments), buildFunction);
+    if (description) flow.description = description;
+    return flow;
+  }
+  return flowBuilder;
 }

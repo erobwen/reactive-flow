@@ -1219,7 +1219,6 @@ function createWorld(configuration) {
 
   function finishRebuildInAdvance(object) {
     if (!state.inRepeater) return; // throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
-    if (!object[objectMetaProperty].buildId) return; //throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
     if (object[objectMetaProperty].isFinalized) return; // Already finished!
     const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {
