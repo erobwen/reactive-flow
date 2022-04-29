@@ -1,6 +1,15 @@
 import getWorld from "../causality/causality.js";
-export const world = getWorld({useNonObservablesAsValues: true, warnOnNestedRepeater: false});
-export const { observable, repeat, finalize, withoutRecording, sameAsPreviousDeep } = world;
+export const world = getWorld({
+  useNonObservablesAsValues: true,
+  warnOnNestedRepeater: false,
+});
+export const {
+  observable,
+  repeat,
+  finalize,
+  withoutRecording,
+  sameAsPreviousDeep,
+} = world;
 const log = console.log;
 window.sameAsPreviousDeep = sameAsPreviousDeep;
 window.world = world;
@@ -10,45 +19,50 @@ let parents = [];
 window.allFlows = {};
 export class Flow {
   constructor() {
-    let properties = readFlowProperties(arguments); 
+    let properties = readFlowProperties(arguments);
 
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
-    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor! 
-    // this.flowDepth = this.parent ? this.parent.flowDepth + 1 : 0; 
-     
+    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor!
+    // this.flowDepth = this.parent ? this.parent.flowDepth + 1 : 0;
+
     //Provided/Inherited properties
-    this.providedProperties = {target: true};
+    this.providedProperties = { target: true };
     if (this.parent) {
       for (let property in this.parent.providedProperties) {
         this.providedProperties[property] = true;
         this[property] = this.parent[property];
       }
     }
-    
+
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
       if (property === "build") destination = "buildFunction";
       this[destination] = properties[property];
     }
-    
+
     // Create observable
     let me = observable(this, this.key);
     // log("id: " + me.causality.id)
-    
+
     // Set properties through interface
     me.setProperties(properties); // Set default values here
-    
+
     // Emulate onEstablish for top element.
     if (!this.parent) {
       me.onEstablish();
     }
-    
+
     // Debug & warning
     window.allFlows[me.causality.id] = me;
-    if (me.key === null && me.parent) console.warn("Component " + me.toString() + " with no key, add key for better performance.")
+    if (me.key === null && me.parent)
+      console.warn(
+        "Component " +
+          me.toString() +
+          " with no key, add key for better performance."
+      );
 
     return me;
   }
@@ -58,20 +72,21 @@ export class Flow {
   //   for (let property in this.properties) {
   //     if (!this.providedProperties[property]) {
   //       result.push(property);
-  //     } 
+  //     }
   //   }
   //   return result;
   // }
 
-  provide() { // Cannot be called within an if statement! 
-    const provided = argumentsToArray(arguments)
+  provide() {
+    // Cannot be called within an if statement!
+    const provided = argumentsToArray(arguments);
     for (let property of provided) {
       this.providedProperties[property] = true;
     }
   }
 
   unprovide() {
-    const provided = argumentsToArray(arguments)
+    const provided = argumentsToArray(arguments);
     for (let property of provided) {
       delete this.providedProperties[property];
     }
@@ -84,7 +99,15 @@ export class Flow {
   setState() {
     // throw new Error("Not implemented yet");
   }
-  
+
+  derrive(action) {
+    if (this.derriveRepeater)
+      throw new Error(
+        "Only one derrive call in setState allowed! But you can do multiple things in that one. Use causality/repeat for more options"
+      );
+    this.derriveRepeater = repeat(action);
+  }
+
   disposeState() {
     // throw new Error("Not implemented yet");
   }
@@ -92,36 +115,45 @@ export class Flow {
   onEstablish() {
     this.setState();
     // log("Established:" + this.toString());
-    // Lifecycle, override to do expensive things. Like opening up connections etc. 
-    // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process. 
+    // Lifecycle, override to do expensive things. Like opening up connections etc.
+    // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process.
   }
-  
+
   onDispose() {
     // log("Disposed:" + this.toString());
     if (this.buildRepeater) this.buildRepeater.dispose();
+    if (this.derriveRepeater) this.derriveRepeater.dispose(); // Do you want a disposed repeater to nullify all its writed values? Probably not....
     this.disposeState();
   }
 
   className() {
-    let result; 
+    let result;
     withoutRecording(() => {
       result = this.constructor.name;
     });
-    return result;    
+    return result;
   }
 
   toString() {
     let classDescription = this.className();
-    if (classDescription === "Flow" && this.description) classDescription = this.description;
-    return classDescription + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
+    if (classDescription === "Flow" && this.description)
+      classDescription = this.description;
+    return (
+      classDescription +
+      ":" +
+      this.causality.id +
+      "(" +
+      this.buildUniqueName() +
+      ")"
+    );
   }
 
   uniqueName() {
     let result;
     withoutRecording(() => {
-      result = (this.key ? (this.key + ":") : "") + this.causality.id;
+      result = (this.key ? this.key + ":" : "") + this.causality.id;
     });
-    return result
+    return result;
   }
 
   buildUniqueName() {
@@ -129,19 +161,20 @@ export class Flow {
     withoutRecording(() => {
       result = this.key ? this.key : this.causality.id;
     });
-    return result
+    return result;
   }
 
-  findChild(key) { 
+  findChild(key) {
     if (this.key === key) return this;
     return this.getPrimitive().findChild(key);
   }
 
   getChild(keyOrPath) {
-    if (typeof(keyOrPath) === "string") {
-      const key = keyOrPath; 
-      if (typeof(this.buildRepeater.buildIdObjectMap[key]) === 'undefined') return null;
-      return this.buildRepeater.buildIdObjectMap[key]
+    if (typeof keyOrPath === "string") {
+      const key = keyOrPath;
+      if (typeof this.buildRepeater.buildIdObjectMap[key] === "undefined")
+        return null;
+      return this.buildRepeater.buildIdObjectMap[key];
     } else {
       const path = keyOrPath;
       const child = this.getChild(path.shift());
@@ -161,7 +194,7 @@ export class Flow {
     } else {
       path = this.parent.getPath();
       path.push(tag);
-      return path; 
+      return path;
     }
   }
 
@@ -177,24 +210,27 @@ export class Flow {
 
     finalize(me);
     if (!me.buildRepeater) {
-      me.buildRepeater = repeat(this.toString() + ".buildRepeater", repeater => {
-        // log(repeater.causalityString());
-        
-        // Build this one step
-        parents.push(me);
-        const build = me.build(repeater);
-        parents.pop();
+      me.buildRepeater = repeat(
+        this.toString() + ".buildRepeater",
+        (repeater) => {
+          // log(repeater.causalityString());
 
-        // Establish relationship between child, parent.
-        if (build !== null) {
-          build.equivalentParent = me;
-          me.equivalentChild = build;
+          // Build this one step
+          parents.push(me);
+          const build = me.build(repeater);
+          parents.pop();
+
+          // Establish relationship between child, parent.
+          if (build !== null) {
+            build.equivalentParent = me;
+            me.equivalentChild = build;
+          }
+
+          // Recursive call
+          me.primitive = build !== null ? build.getPrimitive() : null;
+          //log(repeater.description + ":" + repeater.creationString());
         }
-
-        // Recursive call
-        me.primitive = (build !== null) ? build.getPrimitive() : null;
-        //log(repeater.description + ":" + repeater.creationString());
-      });
+      );
     }
     return me.primitive;
   }
@@ -202,9 +238,9 @@ export class Flow {
   build(repeater) {
     if (this.buildFunction) {
       //log("-----------------")
-      return this.buildFunction(this)
+      return this.buildFunction(this);
     }
-    throw new Error("Not implemented yet")
+    throw new Error("Not implemented yet");
   }
 
   button() {
@@ -212,10 +248,9 @@ export class Flow {
   }
 }
 
-
 export function when(condition, operation) {
   return repeat(() => {
-    const value = condition() 
+    const value = condition();
     if (value) {
       operation(value);
     }
@@ -224,29 +259,34 @@ export function when(condition, operation) {
 
 function argumentsToArray(functionArguments) {
   return Array.prototype.slice.call(functionArguments);
-};
+}
 
 export function readFlowProperties(functionArguments) {
   // Shortcut
-  if (typeof(functionArguments[0]) === "object" && !functionArguments[0].causality && typeof(functionArguments[1]) === "undefined") return functionArguments[0]
-  
+  if (
+    typeof functionArguments[0] === "object" &&
+    !functionArguments[0].causality &&
+    typeof functionArguments[1] === "undefined"
+  )
+    return functionArguments[0];
+
   // The long way
   const arglist = argumentsToArray(functionArguments);
   let properties = {};
   while (arglist.length > 0) {
-    if (typeof(arglist[0]) === "function" && !arglist[0].causality) {
+    if (typeof arglist[0] === "function" && !arglist[0].causality) {
       properties.build = arglist.shift();
-    }  
-    if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
+    }
+    if (typeof arglist[0] === "string" && !arglist[0].causality) {
       properties.key = arglist.shift();
     }
     if (arglist[0] === null) {
       arglist.shift();
-    }    
-    if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
+    }
+    if (typeof arglist[0] === "object" && !arglist[0].causality) {
       Object.assign(properties, arglist.shift());
     }
-    if (typeof(arglist[0]) === "object" && arglist[0].causality) {
+    if (typeof arglist[0] === "object" && arglist[0].causality) {
       if (!properties.children) properties.children = [];
       properties.children.push(arglist.shift());
     }
@@ -258,23 +298,23 @@ export function readFlowProperties(functionArguments) {
 export function readFlowProperties2(arglist) {
   // Shortcut
   //if (typeof(arglist[0]) === "object" && !arglist[0].causality && typeof(arglist[1]) === "undefined") return arglist[0]
-  
+
   // The long way
   let properties = {};
   while (arglist.length > 0) {
-    if (typeof(arglist[0]) === "function" && !arglist[0].causality) {
+    if (typeof arglist[0] === "function" && !arglist[0].causality) {
       properties.build = arglist.shift();
-    }  
-    if (typeof(arglist[0]) === "string" && !arglist[0].causality) {
+    }
+    if (typeof arglist[0] === "string" && !arglist[0].causality) {
       properties.key = arglist.shift();
     }
     if (arglist[0] === null) {
       arglist.shift();
-    }     
-    if (typeof(arglist[0]) === "object" && !arglist[0].causality) {
+    }
+    if (typeof arglist[0] === "object" && !arglist[0].causality) {
       Object.assign(properties, arglist.shift());
     }
-    if (typeof(arglist[0]) === "object" && arglist[0].causality) {
+    if (typeof arglist[0] === "object" && arglist[0].causality) {
       if (!properties.children) properties.children = [];
       properties.children.push(arglist.shift());
     }
@@ -283,10 +323,8 @@ export function readFlowProperties2(arglist) {
   return properties;
 }
 
-
 export class FlowTargetPrimitive extends Flow {
-  
-  findChild(key) { 
+  findChild(key) {
     if (this.key === key) return this;
     if (this.children) {
       for (let child of this.children) {
@@ -302,11 +340,11 @@ export class FlowTargetPrimitive extends Flow {
   getPrimitive() {
     const me = this;
     // me.primitive = me;
-    
+
     // finalize(me);
     // if (!me.expandRepeater) {
     //   me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
-  
+
     //     // Expand known children (do as much as possible before integration)
     //     if (me.children) {
     //       for (let child of me.children) {
@@ -317,8 +355,7 @@ export class FlowTargetPrimitive extends Flow {
     //     }
     //   });
     // }
-  
-    return me;
-  }  
-}
 
+    return me;
+  }
+}
