@@ -22,6 +22,9 @@ const log = console.log;
     }
     
     buildDomNode(element) {
+      console.log(this.toString() + ".buildDomNode:");
+      console.log(element);
+
       const newAttributes = this.attributes;
       const newPreviouslySetAttributes = {};
       if (this.tagName.toUpperCase() !== element.tagName) {
@@ -87,6 +90,8 @@ const log = console.log;
     }
   
     buildDomNode(element) {
+      console.log(this.toString() + ".buildDomNode:");
+      console.log(element);
       element.nodeValue = this.text; // toString()
     }
   }
@@ -110,6 +115,8 @@ const log = console.log;
     }
   
     buildDomNode(element) {
+      console.log(this.toString() + ".buildDomNode:");
+      console.log(element);
       element.style.display = "none";
     }
   }

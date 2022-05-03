@@ -53,9 +53,9 @@ export class Flow {
 
     // Emulate onEstablish for top element. This will be done anyway with the integrationRepeater...
     // however, what happens with flows without keys? Will they never get an establishing call? They should get one every time...
-    if (!me.creator) {
-      me.onEstablish();
-    }
+    // if (!me.creator) {
+    //   me.onEstablish();
+    // }
 
     // Debug & warning
     window.allFlows[me.causality.id] = me;
@@ -225,7 +225,7 @@ export class Flow {
       me.buildRepeater = repeat(
         this.toString() + ".buildRepeater",
         (repeater) => {
-          log(repeater.causalityString());
+          console.group(repeater.causalityString());
 
           // Build this one step
           creators.push(me);
@@ -241,6 +241,7 @@ export class Flow {
           // Recursive call
           me.primitive = build !== null ? build.getPrimitive() : null;
           //log(repeater.description + ":" + repeater.creationString());
+          console.groupEnd();
         }
       );
     }

@@ -38,10 +38,11 @@ export function clearNode(node) {
     if (!you.buildElementRepeater) {
       // you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
       you.buildElementRepeater = repeat(you.toString() + ".buildElementRepeater", (repeater) => {
-        log(repeater.causalityString());
+        console.group(repeater.causalityString());
 
         you.getEmptyDomNode(me);
-        you.buildDomNodeWithChildren(me);  
+        you.buildDomNodeWithChildren(me);
+        console.groupEnd();  
       });
     }
     return you.domNode;

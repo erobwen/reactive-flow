@@ -94,6 +94,7 @@ const myRow = flow("myRow", ({ style, children, emphasis }) => {
 
 // Activate continous build/integration to DOMFlowTarget.
 const helloWorld = new HelloWorld({
+  key: "root",
   target: new DOMFlowTarget(document.getElementById("flow-root")),
 }).activate();
 
