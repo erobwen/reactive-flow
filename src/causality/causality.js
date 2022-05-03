@@ -813,13 +813,14 @@ function createWorld(configuration) {
         handler.meta.id = "temp-" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
         establishedObject[objectMetaProperty].isFinalized = false; 
-        // console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
+        // console.log("Reuse established object on create:" + crestablishedObject[objectMetaProperty].target.constructor.name + ":" +  crestablishedObject[objectMetaProperty].id + " buildId: " + buildId);
         if (state.context) state.context.createdTemporaryCount++;
         return establishedObject;
       } else {
         // Create a new one
         handler.meta.id = state.nextObjectId++;
         handler.meta.isFinalized = false; 
+        // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     } else {
@@ -1219,6 +1220,7 @@ function createWorld(configuration) {
 
   function finishRebuildInAdvance(object) {
     if (!state.inRepeater) return; // throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
+    if (!object[objectMetaProperty].buildId) return; //throw Error("Trying to finish rebuild in advance for an object without a buildId. Perhaps it should have a build id? Add one as second argument in the call to observable");
     if (object[objectMetaProperty].isFinalized) return; // Already finished!
     const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {

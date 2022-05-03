@@ -36,8 +36,9 @@ export function clearNode(node) {
     const me = domTarget; 
     const you = this;
     if (!you.buildElementRepeater) {
-      you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
-        // log(repeater.causalityString());
+      // you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
+      you.buildElementRepeater = repeat(you.toString() + ".buildElementRepeater", (repeater) => {
+        log(repeater.causalityString());
 
         you.getEmptyDomNode(me);
         you.buildDomNodeWithChildren(me);  
