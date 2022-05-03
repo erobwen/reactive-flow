@@ -4,7 +4,7 @@ const log = console.log;
 
 
 export function mostAbstractFlow(flow) {
-  while (flow.equivalentParent) flow = flow.equivalentParent;
+  while (flow.equivalentCreator) flow = flow.equivalentCreator;
   return flow; 
 }
 
@@ -16,7 +16,7 @@ export function aggregateToString(flow) {
       // Dont display flow target primitive.       
       id.unshift(scan.toString());
     // }
-    scan = scan.equivalentParent;
+    scan = scan.equivalentCreator;
   }
   return id.join(" | ");
 }
@@ -88,10 +88,10 @@ export function clearNode(node) {
         // you.domNode.id = mostAbstractFlow(you).toString()
         
         // Decorate all equivalent flows
-        let scanFlow = you.equivalentParent;
+        let scanFlow = you.equivalentCreator;
         while (scanFlow != null) {
           scanFlow.domNode = you.domNode;
-          scanFlow = scanFlow.equivalentParent;
+          scanFlow = scanFlow.equivalentCreator;
         }
       });
     }

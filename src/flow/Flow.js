@@ -14,7 +14,7 @@ const log = console.log;
 window.sameAsPreviousDeep = sameAsPreviousDeep;
 window.world = world;
 window.observable = observable;
-let parents = [];
+let creators = [];
 
 window.allFlows = {};
 export class Flow {
@@ -22,18 +22,18 @@ export class Flow {
     let properties = readFlowProperties(arguments);
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
-    // Key & Parent
+    // Key & Creator
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
-    this.parent = parents.length > 0 ? parents[parents.length - 1] : null; // Note this can only be done in constructor!
-    // this.flowDepth = this.parent ? this.parent.flowDepth + 1 : 0;
+    this.creator = creators.length > 0 ? creators[creators.length - 1] : null; // Note this can only be done in constructor!
+    // this.flowDepth = this.creator ? this.creator.flowDepth + 1 : 0;
 
     //Provided/Inherited properties
     this.providedProperties = { target: true };
-    if (this.parent) {
-      for (let property in this.parent.providedProperties) {
+    if (this.creator) {
+      for (let property in this.creator.providedProperties) {
         this.providedProperties[property] = true;
-        this[property] = this.parent[property];
+        this[property] = this.creator[property];
       }
     }
 
@@ -53,13 +53,13 @@ export class Flow {
 
     // Emulate onEstablish for top element. This will be done anyway with the integrationRepeater...
     // however, what happens with flows without keys? Will they never get an establishing call? They should get one every time...
-    if (!me.parent) {
+    if (!me.creator) {
       me.onEstablish();
     }
 
     // Debug & warning
     window.allFlows[me.causality.id] = me;
-    if (me.key === null && me.parent)
+    if (me.key === null && me.creator)
       console.warn(
         "Component " +
           me.toString() +
@@ -201,10 +201,10 @@ export class Flow {
   getPath() {
     const tag = this.key ? this.key : "<no-tag>";
     let path;
-    if (!this.parent) {
+    if (!this.creator) {
       return [];
     } else {
-      path = this.parent.getPath();
+      path = this.creator.getPath();
       path.push(tag);
       return path;
     }
@@ -228,13 +228,13 @@ export class Flow {
           log(repeater.causalityString());
 
           // Build this one step
-          parents.push(me);
+          creators.push(me);
           const build = me.build(repeater);
-          parents.pop();
+          creators.pop();
 
-          // Establish relationship between child, parent.
+          // Establish relationship between child, creator.
           if (build !== null) {
-            build.equivalentParent = me;
+            build.equivalentCreator = me;
             me.equivalentChild = build;
           }
 
