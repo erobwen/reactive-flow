@@ -26,15 +26,14 @@ export class HelloWorld extends Flow {
   // }
 
   build() {
-    // this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
+    this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
 
-    // return myRow(
-    //   "row",
-      return text("text", { text: this.helloText.value });
-      // return hello("hello")//, // No need to pass parameters as it will be inherited.
-      // text("spacer", { text: " " }),
-      // new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
-    // );
+    return myRow(
+      "row",
+      hello("hello"), // No need to pass parameters as it will be inherited.
+      text("spacer", { text: " " }),
+      new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
+    );
   }
 }
 
@@ -91,31 +90,32 @@ const myRow = flow("myRow", ({ style, children, emphasis }) => {
 /**
  * Browser setup
  */
+export function helloWorldIndex() {
+  // Activate continous build/integration to DOMFlowTarget.
+  const helloWorld = new HelloWorld({
+    key: "root",
+    target: new DOMFlowTarget(document.getElementById("flow-root")),
+  }).activate();
 
-// Activate continous build/integration to DOMFlowTarget.
-const helloWorld = new HelloWorld({
-  key: "root",
-  target: new DOMFlowTarget(document.getElementById("flow-root")),
-}).activate();
+  /**
+   * Async modification
+   */
 
-/**
- * Async modification
- */
+  // Set "Hello" deep inside observable data structure
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.helloText.value = "Hello";
+  }, 1000);
 
-// Set "Hello" deep inside observable data structure
-setTimeout(() => {
-  log("----------------------------------");
-  helloWorld.helloText.value = "Hello";
-}, 1000);
+  // Set state property to "world!", using a component path to access child component.
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.getChild("world").worldText = "world";
+  }, 2000);
 
-// // Set state property to "world!", using a component path to access child component.
-// setTimeout(() => {
-//   log("----------------------------------");
-//   helloWorld.getChild("world").worldText = "world";
-// }, 2000);
-
-// // Exclamation mark!
-// setTimeout(() => {
-//   log("----------------------------------");
-//   helloWorld.emphasis = true;
-// }, 3000);
+  // Exclamation mark!
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.emphasis = true;
+  }, 3000);
+}

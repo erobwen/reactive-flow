@@ -1,6 +1,8 @@
 import { ShowcaseComponent } from "./application/showcaseApplication.js";
-import { HelloWorld } from "./application/helloWorldApplication.js";
+import { helloWorldIndex } from "./application/helloWorldApplication.js";
 import { DOMFlowTarget } from "./flow.DOMTarget/DOMFlowTarget.js";
+
+helloWorldIndex();
 
 // Setup hello world showcase
 // const root = new HelloWorld({
