@@ -1,6 +1,9 @@
 import { observable, world, repeat, when, Flow } from "../flow/Flow";
 import { text, row, column, button } from "../flow.components/BasicFlowComponents";
 const log = console.log;
+const loga = (action) => {
+  log("-----------" + action + "-----------");
+}
 
 
 /**
@@ -65,8 +68,8 @@ export class ShowcaseComponent extends Flow {
       column("root-column",
         row("top-row", 
           rootText,
-          button("less-button", {onClick: () => {me.count--}, text: "Less"}),
-          button("more-button", {onClick: () => {me.count++}, text: "More"})
+          button("less-button", {onClick: () => {loga("Less");me.count--}, text: "Less"}),
+          button("more-button", {onClick: () => {loga("More");me.count++}, text: "More"})
         ),
         new List("root-list", {maxCount: this.count, count: 1})
       )
@@ -145,19 +148,20 @@ export class Item extends Flow {
     const me = this; 
 
     function close() {
+      log("Closing modal...");
       me.showModal = false; 
     }
 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
       text("item-text", {text: me.text}),
-      button("toggle-button", {onClick: () => { log("---------- toggle on -------------");me.on = !me.on; }, text: "toggle"}),
+      button("toggle-button", {onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
       text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      button("modal-button", {onClick: () => { me.showModal = true; }, text: "modal"}),
+      button("modal-button", {onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
         button("close-button", {
           text: "close " + me.text + " modal",
           style: {opacity: 1},
-          onClick: close,
+          onClick: () => {loga("Close modal");close()},
         })
       ) // text("item-text", {text: me.text})
     );

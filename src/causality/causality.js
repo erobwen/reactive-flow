@@ -813,14 +813,14 @@ function createWorld(configuration) {
         handler.meta.id = "temp-" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
         establishedObject[objectMetaProperty].isFinalized = false; 
-        // console.log("Reuse established object on create:" + crestablishedObject[objectMetaProperty].target.constructor.name + ":" +  crestablishedObject[objectMetaProperty].id + " buildId: " + buildId);
+        console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
         if (state.context) state.context.createdTemporaryCount++;
         return establishedObject;
       } else {
         // Create a new one
         handler.meta.id = state.nextObjectId++;
         handler.meta.isFinalized = false; 
-        // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
+        console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     } else {
@@ -1096,6 +1096,13 @@ function createWorld(configuration) {
         this.disposeChildren();
       },
       dispose() {
+        // Dispose all created objects? 
+        // if(this.buildIdObjectMap) {
+        //   for (let key in this.buildIdObjectMap) {
+        //     const object = this.buildIdObjectMap[key]; 
+        //     if (typeof(object.onDispose) === "function") object.onDispose();
+        //   }
+        // }
         detatchRepeater(this);
         removeAllSources(this);
         this.disposeChildren();
@@ -1207,6 +1214,7 @@ function createWorld(configuration) {
       if (typeof(repeater.newBuildIdObjectMap[buildId]) === "undefined") {
         repeater.removedCount++;
         const object = repeater.buildIdObjectMap[buildId];
+        console.log("Dispose object: " + object.constructor.name + "." + object[objectMetaProperty].id)
         if (typeof(object.onDispose) === "function") object.onDispose();
       }
     }

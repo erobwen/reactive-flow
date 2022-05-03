@@ -20,7 +20,7 @@ window.allFlows = {};
 export class Flow {
   constructor() {
     let properties = readFlowProperties(arguments);
-    log("-----constructor:" + this.className() + "." + properties.key);
+    // log("Flow constructor: " + this.className() + "." + properties.key);
 
     // Key & Parent
     if (!this.key) this.key = properties.key ? properties.key : null;
@@ -124,8 +124,18 @@ export class Flow {
 
   onDispose() {
     // log("Disposed:" + this.toString());
-    if (this.buildRepeater) this.buildRepeater.dispose();
+    if (this.buildRepeater) {
+      if (this.buildRepeater.buildIdObjectMap) {
+        for (let key in this.buildRepeater.buildIdObjectMap) {
+          const object = this.buildRepeater.buildIdObjectMap[key]; 
+          if (typeof(object.onDispose) === "function") object.onDispose();
+        }
+      }
+
+      this.buildRepeater.dispose();
+    } 
     if (this.derriveRepeater) this.derriveRepeater.dispose(); // Do you want a disposed repeater to nullify all its writed values? Probably not....
+
     this.disposeState();
   }
 
