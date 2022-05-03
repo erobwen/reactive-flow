@@ -11,8 +11,7 @@ const log = console.log;
 // Parent flow
 export class HelloWorld extends Flow {
   setState() {
-    log("SET STATE HELLO WORLD");
-    this.helloText = observable({ value: "sdfssdfsdf" });
+    this.helloText = observable({ value: "[original]" });
     this.emphasis = false;
     // this.derrive(() => {
     //   this.helloTextDouble = this.helloText.value + " " + this.helloText.value;
@@ -23,15 +22,16 @@ export class HelloWorld extends Flow {
   //   return ["helloText", "emphasis"];
   // }
 
-  // withdraw() {
+  // cease() {
   // }
 
   build() {
-    this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
+    // this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
 
     // return myRow(
     //   "row",
-      return hello("hello")//, // No need to pass parameters as it will be inherited.
+      return text("text", { text: this.helloText.value });
+      // return hello("hello")//, // No need to pass parameters as it will be inherited.
       // text("spacer", { text: " " }),
       // new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
     // );

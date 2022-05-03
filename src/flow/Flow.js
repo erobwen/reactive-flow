@@ -123,7 +123,6 @@ export class Flow {
   }
 
   onDispose() {
-    // log("Disposed:" + this.toString());
     if (this.buildRepeater) {
       if (this.buildRepeater.buildIdObjectMap) {
         for (let key in this.buildRepeater.buildIdObjectMap) {
