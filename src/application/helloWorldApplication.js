@@ -13,21 +13,17 @@ export class HelloWorld extends Flow {
   setState() {
     this.helloText = observable({ value: "[original]" });
     this.emphasis = false;
-    // this.derrive(() => {
-    //   this.helloTextDouble = this.helloText.value + " " + this.helloText.value;
-    // });
+    this.derrive(() => {
+      this.helloTextDouble = this.helloText.value + " " + this.helloText.value;
+    });
   }
 
-  // provide() {
-  //   return ["helloText", "emphasis"];
-  // }
-
-  // cease() {
-  // }
+  provide() {
+     // Makes all children/grandchildren inherit the helloText and emphasis properties! Define withdraw() to remove inherited properties.
+    return ["helloText", "emphasis"];
+  }
 
   build() {
-    this.provide("helloText", "emphasis"); // Makes all children/grandchildren inherit the helloText and emphasis properties!
-
     return myRow(
       "row",
       hello("hello"), // No need to pass parameters as it will be inherited.
@@ -41,25 +37,16 @@ export class HelloWorld extends Flow {
 const hello = flow("hello", ({ helloText }) =>
   text("text", { text: helloText.value })
 );
-// const hello = flow("hello", (me) => {
-//   const { helloText } = me;
-//   log("in flow...");
-//   log(me.toString());
-//   log(me.helloText);
-//   return text("text", { text: helloText.value });
-// });
 
 // Statefull child flow
 class World extends Flow {
   setProperties({ exclamationCharacter }) {
     // This life cycle function is optional, but can be used to set default values for properties.
-    this.exclamationCharacter = exclamationCharacter
-      ? exclamationCharacter
-      : "?";
+    this.exclamationCharacter = exclamationCharacter ? exclamationCharacter : "?";
   }
 
   setState() {
-    // In this lifecycle function you can setup state and obtain expensive resources.
+    // In this lifecycle function you can setup state and obtain expensive resources. You can let go of these resources in disposeState().
     this.worldText = "";
   }
 
@@ -88,14 +75,15 @@ const myRow = flow("myRow", ({ style, children, emphasis }) => {
 });
 
 /**
- * Browser setup
+ * This is what you would typically do in index.js to start this app. 
  */
-export function helloWorldIndex() {
+export function startHelloWorld() {
   // Activate continous build/integration to DOMFlowTarget.
   const helloWorld = new HelloWorld({
     key: "root",
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
+
 
   /**
    * Async modification

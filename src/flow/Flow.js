@@ -36,6 +36,12 @@ export class Flow {
         this[property] = this.creator[property];
       }
     }
+    for (let property of this.withdraw()) {
+      delete this.providedProperties[property];
+    }
+    for (let property of this.provide()) {
+      this.providedProperties[property] = true;
+    }
 
     // Set properties by bypassing setProperties
     for (let property in properties) {
@@ -80,18 +86,11 @@ export class Flow {
   // }
 
   provide() {
-    // Cannot be called within an if statement!
-    const provided = argumentsToArray(arguments);
-    for (let property of provided) {
-      this.providedProperties[property] = true;
-    }
+    return [];
   }
 
-  unprovide() {
-    const provided = argumentsToArray(arguments);
-    for (let property of provided) {
-      delete this.providedProperties[property];
-    }
+  withdraw() {
+    return [];
   }
 
   setProperties() {
