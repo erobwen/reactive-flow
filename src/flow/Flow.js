@@ -75,15 +75,22 @@ export class Flow {
     return me;
   }
 
-  // allNonProvidedProperties() {
-  //   const result = []
-  //   for (let property in this.properties) {
-  //     if (!this.providedProperties[property]) {
-  //       result.push(property);
-  //     }
-  //   }
-  //   return result;
-  // }
+  /**
+   * Lifecycle methods
+   */
+
+  setProperties() {
+    // throw new Error("Not implemented yet");
+  }
+
+  setState() {
+    // throw new Error("Not implemented yet");
+    // Use this.derrive(action) to establish reactive relations here. 
+  }
+
+  disposeState() {
+    // throw new Error("Not implemented yet");
+  }
 
   provide() {
     return [];
@@ -93,13 +100,18 @@ export class Flow {
     return [];
   }
 
-  setProperties() {
-    // throw new Error("Not implemented yet");
+  build(repeater) {
+    if (this.buildFunction) {
+      //log("-----------------")
+      return this.buildFunction(this);
+    }
+    throw new Error("Not implemented yet");
   }
 
-  setState() {
-    // throw new Error("Not implemented yet");
-  }
+  
+  /**
+   * Internal methods
+   */
 
   derrive(action) {
     if (this.derriveRepeater) {
@@ -108,10 +120,6 @@ export class Flow {
       );
     }
     this.derriveRepeater = repeat(action);
-  }
-
-  disposeState() {
-    // throw new Error("Not implemented yet");
   }
 
   onEstablish() {
@@ -245,18 +253,6 @@ export class Flow {
       );
     }
     return me.primitive;
-  }
-
-  build(repeater) {
-    if (this.buildFunction) {
-      //log("-----------------")
-      return this.buildFunction(this);
-    }
-    throw new Error("Not implemented yet");
-  }
-
-  button() {
-    return this.target.button(readFlowProperties(arguments));
   }
 }
 

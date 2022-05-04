@@ -41,28 +41,22 @@ export class ShowcaseComponent extends Flow {
     })
   }
 
-  // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
   disposeState() {
-    // log("Removed:" + this.toString());
+      // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
   }
 
-  derriveState() {
-
+  provide() {
+    // Give all grand-children access to myModel, they will get this as a property of their own.
+    return ["myModel"];
   }
 
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
-    //return button("foo", {text: "foo", onClick: () => { log("foo") }})
-
-    this.provide("myModel"); // Give all grand-children access to myModel, they will get this as a property of their own.
-
     const me = this;
     let observe = this.count;
     
     const rootText = text("root-text", {text: "My List:"});
     const rootTextNode = rootText.getPrimitive().getDomNode(); 
-    // log("Getting dom text node in advance during build!")
-    // log(rootTextNode);
 
     return (
       column("root-column",

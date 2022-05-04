@@ -11,17 +11,18 @@ const log = console.log;
 // Parent flow
 export class HelloWorld extends Flow {
   setState() {
-    this.helloText = observable({ value: "[original]" });
+    this.helloText = observable({ value: "..." });
     this.emphasis = false;
     this.derrive(() => {
       // In setState you can establish reactive relations between different properties using this.derrive(). You could accomplish the same thing using causality/repeat but this.derrive takes care of disposing the repeater for your convenience. 
-      this.helloTextComma = this.helloText.value + ",";
+      // Note that this repeater even decorates the observable helloText object with additional data, but we could have added more properties to this as well, it would make no difference. 
+      this.helloText.withComma = this.helloText.value.length > 4 ? this.helloText.value + "," : this.helloText.value;
     });
   }
 
   provide() {
      // Makes all children/grandchildren inherit the helloText and emphasis properties! Define withdraw() to remove inherited properties.
-    return ["helloTextComma", "emphasis"];
+    return ["helloText", "emphasis"];
   }
 
   build() {
@@ -35,8 +36,8 @@ export class HelloWorld extends Flow {
 }
 
 // Stateless child flow (compact definition)
-const hello = flow("hello", ({ helloTextComma }) =>
-  text("text", { text: helloTextComma })
+const hello = flow("hello", ({ helloText }) =>
+  text("text", { text: helloText.withComma })
 );
 
 // Statefull child flow
