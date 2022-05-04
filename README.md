@@ -33,103 +33,115 @@ This simple hello world example showcases some basic principles of Flow. It show
 
 
 ```js
-import { observable, Flow, flow } from "./flow/Flow";
-import { text, row as primitiveRow } from "./flow/BasicFlow";
-import { DOMFlowTarget } from "./flow/DOMFlowTarget.js";
+import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { text, row as basicRow } from "../flow.components/BasicFlowComponents";
+import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
+
+const log = console.log;
 
 /**
  * Flow definitions
  */
-
-// Parent flow
-class HelloWorld extends Flow {
+export class HelloWorld extends Flow {
   setState() {
-    this.helloText = observable({value: ""});
-    this.emphasis = false; 
+    this.helloText = observable({ value: "..." });
+    this.emphasis = false;
+    this.derrive(() => {
+      // In setState you can establish reactive relations between different properties using this.derrive(). You could accomplish the same thing using causality/repeat but this.derrive takes care of disposing the repeater for your convenience. 
+      // Note that this repeater even decorates the observable helloText object with additional data, but we could have added more properties to this as well, it would make no difference. 
+      this.helloText.withComma = this.helloText.value.length > 4 ? this.helloText.value + "," : this.helloText.value;
+    });
+  }
+
+  provide() {
+     // Makes all children/grandchildren inherit the helloText and emphasis properties! Define withdraw() to remove inherited properties.
+    return ["helloText", "emphasis"];
   }
 
   build() {
-    this.provide("helloText", "emphasis");  // Makes all children/grandchildren inherit the helloText and emphasis properties! 
-
-    return myRow("row", 
+    return myRow(
+      "row",
       hello("hello"), // No need to pass parameters as it will be inherited.
-      text("spacer", {text: " "}),
-      new World("world", {exclamationCharacter: "!"}) // This is how we create child flow components with a key "world" and pass them properties.
+      text("spacer", { text: " " }),
+      new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
     );
   }
 }
 
 // Stateless child flow (compact definition)
-const hello = flow(
-  ({helloText}) => text("text", {text: helloText.value})
+const hello = flow("hello", ({ helloText }) =>
+  text("text", { text: helloText.withComma })
 );
 
 // Statefull child flow
 class World extends Flow {
-  setProperties({exclamationCharacter}) {
+  setProperties({ exclamationCharacter }) {
     // This life cycle function is optional, but can be used to set default values for properties.
     this.exclamationCharacter = exclamationCharacter ? exclamationCharacter : "?";
   }
 
   setState() {
-    // In this lifecycle function you can setup state and obtain expensive resources.
+    // In this lifecycle function you can setup state and obtain expensive resources. You can let go of these resources in disposeState().
     this.worldText = "";
   }
 
   build() {
-    return (
-      myRow("row",
-        text("text", {text: this.worldText}),
-        exclamationMark("!", {on: this.emphasis, character: this.exclamationCharacter})
-      )
+    return myRow(
+      "row",
+      text("text", { text: this.worldText }),
+      exclamationMark("!", {
+        on: this.emphasis,
+        character: this.exclamationCharacter,
+      })
     );
   }
 }
 
 // Another stateless child flow
-const exclamationMark = flow(
-  ({on, character}) => on ? text({text: character}) : null
+const exclamationMark = flow("exclamationMark", ({ on, character }) =>
+  on ? text({ text: character }) : null
 );
 
 // My own dynamically/reactivley styled row
-const myRow = flow(
-  ({style, children, emphasis}) => {
-    if (!style) style = {};
-    if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component. 
-    return primitiveRow({children, style});
-  }
-);
-
-
+const myRow = flow("myRow", ({ style, children, emphasis }) => {
+  if (!style) style = {};
+  if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component.
+  return basicRow("primitive", { children, style });
+});
 
 /**
- * Browser setup
+ * This is what you would typically do in index.js to start this app. 
  */
+export function startHelloWorld() {
+  // Activate continous build/integration to DOMFlowTarget.
+  const helloWorld = new HelloWorld({
+    key: "root",
+    target: new DOMFlowTarget(document.getElementById("flow-root")),
+  }).activate();
 
-// Activate continous build/integration to DOMFlowTarget.
-const helloWorld = new HelloWorld({
-  target: new DOMFlowTarget(document.getElementById("flow-root")) 
-}).activate();
 
+  /**
+   * Async modification
+   */
 
-/**
- * Async modification
- */
+  // Set "Hello" deep inside observable data structure
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.helloText.value = "Hello";
+  }, 1000);
 
-// Set "Hello" deep inside observable data structure
-setTimeout(() => {
-  helloWorld.helloText.value = "Hello";
-} , 1000)
+  // Set state property to "world!", using a component path to access child component.
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.getChild("world").worldText = "world";
+  }, 2000);
 
-// Set state property to "world!", using a component path to access child component.
-setTimeout(() => {
-  helloWorld.getChild("world").worldText = "world";
-} , 2000)
-
-// Exclamation mark!
-setTimeout(() => {
-  helloWorld.emphasis = true;
-} , 3000)
+  // Exclamation mark!
+  setTimeout(() => {
+    log("----------------------------------");
+    helloWorld.emphasis = true;
+  }, 3000);
+}
 ```
 
 ## Flow objects

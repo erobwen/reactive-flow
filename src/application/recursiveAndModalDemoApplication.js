@@ -1,5 +1,7 @@
 import { observable, world, repeat, when, Flow } from "../flow/Flow";
+import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text, row, column, button } from "../flow.components/BasicFlowComponents";
+
 const log = console.log;
 const loga = (action) => {
   log("-----------" + action + "-----------");
@@ -17,8 +19,7 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-
-export class ShowcaseComponent extends Flow {
+export class DemoComponent extends Flow {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
@@ -110,7 +111,7 @@ export class List extends Flow {
     if (this.count < this.maxCount) {
       children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
-    return column("list-column", {children: children});
+    return column("list-column", {style: {marginLeft: "10px", marginBottom: "2px", marginRight: "2px", borderWidth: "1px", borderStyle: "solid"}, children: children});
   }
 }
 
@@ -196,4 +197,15 @@ export class MyComponentFlow extends Flow {
   }
 }
   
-  
+export function startRecursiveAndModalDemo() {
+  const root = new DemoComponent({
+    key: "root",
+    target: new DOMFlowTarget(document.getElementById("flow-root")),
+  }).activate();
+
+  // Emulated user interaction.
+  console.log(root.buildRepeater.buildIdObjectMap);
+  root.getChild("more-button").onClick();
+  root.findChild("more-button").onClick();
+  root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
+}
