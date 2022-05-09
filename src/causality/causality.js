@@ -815,6 +815,7 @@ function createWorld(configuration) {
         establishedObject[objectMetaProperty].isFinalized = false; 
         console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
         if (state.context) state.context.createdTemporaryCount++;
+        emitReCreationEvent(handler);
         return establishedObject;
       } else {
         // Create a new one
@@ -872,6 +873,12 @@ function createWorld(configuration) {
         type: 'delete',
         property: key,
         deletedValue: previousValue});
+    }
+  }
+
+  function emitReCreationEvent(handler) {
+    if (emitEvents) {
+      emitEvent(handler, {type: 'reCreate'})
     }
   }
 

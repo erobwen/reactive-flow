@@ -156,7 +156,13 @@ When build is run for a component, child objects are created, but in the case wh
 # TODO
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
-TODO: How to deal with modal dialogs.
+
+TODO: Make it possible to not use keys
+TODO: Animaiton Demo
+TODO: Programmatic-Bottom Up Hybrid Layout  PBUHL Demo
+TODO: Alternative Flow Target Demo  
+TODO: Priority in causality.
+
 
 # Random Notes
 npm install -g webpack

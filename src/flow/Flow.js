@@ -2,6 +2,7 @@ import getWorld from "../causality/causality.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
+  onEventGlobal: event => collectEvent(event)
 });
 export const {
   observable,
@@ -223,6 +224,55 @@ export class Flow {
     return this;
   }
 
+  findEquivalentAndReuse(establishedBuild, build, creations) {
+    let visited = {};
+    this.findEquivalents(establishedBuild, build, visited, creations);
+    
+    function translateReference(reference) {
+      if (reference instanceof Flow) {
+        if (reference.causality.copyToFlow) {
+          return reference.causality.copyToFlow;
+        }
+      }
+      return reference;
+    }
+
+    for (let id in creations) {
+      const newFlow = creations[id]; 
+      if (newFlow.causality.copyToFlow) {
+        const establishedFlow = newFlow.causality.copyToFlow;
+        for (let property in newFlow) {
+          establishedFlow[property] = translateReference(newFlow[property]);
+        }
+      }
+    }
+  }
+
+  findEquivalents(establishedFlow, newFlow, visited, creations) {
+    if (visited[newFlow.causality.id]) return; // Already done!
+    visited[newFlow.causality.id] = true;
+
+    if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
+
+    if (establishedFlow === newFlow || establishedFlow.className() === newFlow.className()) {
+      if (establishedFlow !== newFlow) {
+        newFlow.causality.copyToFlow = establishedFlow;
+      }
+      
+      // Note: there is a possibility that  establishedFlow === newFlow at this stage. Perhaps a key were used!
+      // Change might already be triggered when a key-flow , but replacing flows at this stage could revert back to the way it was. 
+      
+      for (let property in newFlow) {
+        const newChildFlow = newFlow[property]; 
+        const establishedChildFlow = establishedFlow[property];
+        if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
+          this.findEquivalents(establishedChildFlow, newChildFlow, visited, creations)
+        }
+      }
+    }
+  }
+
+
   getPrimitive() {
     // log("getPrimitive")
     const me = this;
@@ -234,10 +284,20 @@ export class Flow {
         (repeater) => {
           console.group(repeater.causalityString());
 
+          // Track creations
+          collectingCreationsStack.push([]);
+
           // Build this one step
           creators.push(me);
           const build = me.build(repeater);
           creators.pop();
+
+          // Reuse flows without keys
+          const creations = collectingCreationsStack.pop();
+          if (me.previousBuild) {
+            me.findEquivalentAndReuse(me.previousBuild, build, creations);
+          }
+          me.previousBuild = build;
 
           // Establish relationship between child, creator.
           if (build !== null) {
@@ -366,6 +426,10 @@ export class FlowTargetPrimitive extends Flow {
 
     return me;
   }
+
+  dimensions() {
+    // Should return an object of the form {width: _, height: _}
+  }
 }
 
 export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
@@ -383,4 +447,13 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
     return flow;
   }
   return flowBuilder;
+}
+
+let collectingCreationsStack = [] 
+function collectEvent(event) {
+  if (collectingCreationsStack.length > 0 && (event.type === "creation"  || event.type === "reCreation")) {
+    const collectingCreations = collectingCreationsStack[collectingCreationsStack.length - 1];
+    const object = event.object;
+    collectingCreations[object.causality.id] = object;
+  }
 }
