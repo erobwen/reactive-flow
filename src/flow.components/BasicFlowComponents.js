@@ -96,7 +96,7 @@ export class BasicFlow extends Flow {
   constructor(...parameters) {
     const me = super(...copyArray(parameters));
     let properties = readFlowProperties2(parameters); 
-    if (!this.key) throw new Error("No key exception!");
+    // if (!this.key) throw new Error("No key exception!");
 
     // Arguments
     properties.key = "domFlow"

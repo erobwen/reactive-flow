@@ -92,6 +92,7 @@ function createWorld(configuration) {
     
     // Main API
     observable,
+    isObservable,
     create: observable, // observable alias
     invalidateOnChange,
     repeat,
@@ -733,7 +734,7 @@ function createWorld(configuration) {
    ***************************************************************/
 
   function isObservable(entity) {
-    return typeof(entity) === "object" && typeof(entity[objectMetaProperty]) === "object" && entity[objectMetaProperty].world === world; 
+    return entity !== null && typeof(entity) === "object" && typeof(entity[objectMetaProperty]) === "object" && entity[objectMetaProperty].world === world; 
   }
 
 
@@ -815,7 +816,7 @@ function createWorld(configuration) {
         establishedObject[objectMetaProperty].isFinalized = false; 
         console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
         if (state.context) state.context.createdTemporaryCount++;
-        emitReCreationEvent(handler);
+        emitReCreationEvent(establishedObject[objectMetaProperty].handler);
         return establishedObject;
       } else {
         // Create a new one
@@ -1231,6 +1232,10 @@ function createWorld(configuration) {
     repeater.newBuildIdObjectMap = {};
     
     if (options.onEndBuildUpdate) options.onEndBuildUpdate();
+  }
+
+  function finishRebuildingObject(newOrEstablishedObject) {
+
   }
 
   function finishRebuildInAdvance(object) {

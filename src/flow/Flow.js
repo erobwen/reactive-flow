@@ -2,10 +2,12 @@ import getWorld from "../causality/causality.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
+  emitReBuildEvents: true, 
   onEventGlobal: event => collectEvent(event)
 });
 export const {
   observable,
+  isObservable, 
   repeat,
   finalize,
   withoutRecording,
@@ -224,9 +226,13 @@ export class Flow {
     return this;
   }
 
-  findEquivalentAndReuse(establishedBuild, build, creations) {
+  findEquivalentAndReuse(establishedBuild, newBuild, creations) {
+    log("findEquivalentAndReuse");
+    log(establishedBuild.toString());
+    log(newBuild.toString());
+    log(creations);
     let visited = {};
-    this.findEquivalents(establishedBuild, build, visited, creations);
+    this.findEquivalents(newBuild.causality.forwardTo ? newBuild : establishedBuild, newBuild, visited, creations);
     
     function translateReference(reference) {
       if (reference instanceof Flow) {
@@ -241,11 +247,13 @@ export class Flow {
       const newFlow = creations[id]; 
       if (newFlow.causality.copyToFlow) {
         const establishedFlow = newFlow.causality.copyToFlow;
-        for (let property in newFlow) {
-          establishedFlow[property] = translateReference(newFlow[property]);
+        for (let property in newFlow.causality.target) { // No observation! 
+          establishedFlow[property] = translateReference(newFlow[property]); // Possibly trigger! 
         }
       }
     }
+
+    return establishedBuild;
   }
 
   findEquivalents(establishedFlow, newFlow, visited, creations) {
@@ -256,17 +264,20 @@ export class Flow {
 
     if (establishedFlow === newFlow || establishedFlow.className() === newFlow.className()) {
       if (establishedFlow !== newFlow) {
+        console.log("-- Found equivalent! --");
         newFlow.causality.copyToFlow = establishedFlow;
       }
       
       // Note: there is a possibility that  establishedFlow === newFlow at this stage. Perhaps a key were used!
       // Change might already be triggered when a key-flow , but replacing flows at this stage could revert back to the way it was. 
       
-      for (let property in newFlow) {
-        const newChildFlow = newFlow[property]; 
-        const establishedChildFlow = establishedFlow[property];
-        if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
-          this.findEquivalents(establishedChildFlow, newChildFlow, visited, creations)
+      for (let property in newFlow.causality.target) {
+        const newChildFlow = newFlow.causality.target[property]; 
+        if (isObservable(newChildFlow) && creations[newChildFlow.causality.id]) {
+          const establishedChildFlow = newChildFlow.causality.forwardTo ? newChildFlow : establishedFlow.causality.target[property];
+          if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
+            this.findEquivalents(establishedChildFlow, newChildFlow, visited, creations)
+          }  
         }
       }
     }
@@ -289,13 +300,13 @@ export class Flow {
 
           // Build this one step
           creators.push(me);
-          const build = me.build(repeater);
+          let build = me.build(repeater);
           creators.pop();
 
           // Reuse flows without keys
           const creations = collectingCreationsStack.pop();
           if (me.previousBuild) {
-            me.findEquivalentAndReuse(me.previousBuild, build, creations);
+            build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
           }
           me.previousBuild = build;
 
@@ -451,7 +462,10 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
 
 let collectingCreationsStack = [] 
 function collectEvent(event) {
-  if (collectingCreationsStack.length > 0 && (event.type === "creation"  || event.type === "reCreation")) {
+  // log("pre collect event..." + event.type);
+  if (collectingCreationsStack.length > 0 && (event.type === "create"  || event.type === "reCreate")) {
+    // log("collectEvent:")
+    // log(event)
     const collectingCreations = collectingCreationsStack[collectingCreationsStack.length - 1];
     const object = event.object;
     collectingCreations[object.causality.id] = object;
