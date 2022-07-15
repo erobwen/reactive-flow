@@ -35,8 +35,8 @@ export function startSuperSimple() {
     simple.foo = "FOO";
   }, 1000);
 
-//   setTimeout(() => {
-//     log("----------------------------------");
-//     simple.bar = "BAR";
-//   }, 2000);
+  setTimeout(() => {
+    log("----------------------------------");
+    simple.bar = "BAR";
+  }, 2000);
 }

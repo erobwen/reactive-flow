@@ -19,6 +19,10 @@ window.world = world;
 window.observable = observable;
 let creators = [];
 
+const configuration = {
+  warnWhenNoKey: false
+}
+
 window.allFlows = {};
 export class Flow {
   constructor() {
@@ -68,7 +72,7 @@ export class Flow {
 
     // Debug & warning
     window.allFlows[me.causality.id] = me;
-    if (me.key === null && me.creator)
+    if (configuration.warnWhenNoKey && me.key === null && me.creator)
       console.warn(
         "Component " +
           me.toString() +
@@ -295,7 +299,9 @@ export class Flow {
     function translateReference(reference) {
       if (reference instanceof Flow) {
         if (reference.causality.copyToFlow) {
-          return reference.causality.copyToFlow;
+          const result = reference.causality.copyToFlow;
+          delete reference.causality.copyToFlow;
+          return result; 
         }
       }
       return reference;
@@ -303,12 +309,13 @@ export class Flow {
 
     for (let id in creations) {
       const newFlow = creations[id]; 
+      const newTarget = newFlow.causality.target; 
       if (newFlow.causality.copyToFlow) {
         const establishedFlow = newFlow.causality.copyToFlow;
-        for (let property in newFlow.causality.target) { // No observation! 
-          establishedFlow[property] = translateReference(newFlow[property]); // Possibly trigger! 
+        for (let property in newTarget) { // No observation! 
+          establishedFlow[property] = translateReference(newTarget[property]); // Possibly trigger! 
         }
-        const children = newFlow.causality.target.children; // No observation!
+        const children = newTarget.children; // No observation!
         if (children instanceof Array) {
           let index = 0;
           while(index < children.length) {
