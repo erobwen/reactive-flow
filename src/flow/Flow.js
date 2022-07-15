@@ -17,7 +17,7 @@ const log = console.log;
 window.sameAsPreviousDeep = sameAsPreviousDeep;
 window.world = world;
 window.observable = observable;
-let creators = [];
+export let creators = [];
 
 const configuration = {
   warnWhenNoKey: false
@@ -25,8 +25,8 @@ const configuration = {
 
 window.allFlows = {};
 export class Flow {
-  constructor() {
-    let properties = readFlowProperties(arguments);
+  constructor(...parameters) {
+    let properties = readFlowProperties(parameters);
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
     // Key & Creator
@@ -243,6 +243,7 @@ export class Flow {
       visited[newFlowId] = 1;
     
       if (establishedFlow.className() === newFlow.className()) {
+        console.log("Matched a reusable flow!")
         newFlow.causality.copyToFlow = establishedFlow;
         findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
@@ -379,49 +380,10 @@ export function when(condition, operation) {
   });
 }
 
-function argumentsToArray(functionArguments) {
-  return Array.prototype.slice.call(functionArguments);
-}
-
-export function readFlowProperties(functionArguments) {
-  // Shortcut
-  if (
-    typeof functionArguments[0] === "object" &&  
-    functionArguments[0] !== null &&
-    !functionArguments[0].causality &&
-    typeof functionArguments[1] === "undefined"
-  )
-    return functionArguments[0];
-
-  // The long way
-  const arglist = argumentsToArray(functionArguments);
-  let properties = {};
-  while (arglist.length > 0) {
-    if (typeof arglist[0] === "function" && !arglist[0].causality) {
-      properties.build = arglist.shift();
-    }
-    if (typeof arglist[0] === "string" && !arglist[0].causality) {
-      properties.key = arglist.shift();
-    }
-    if (arglist[0] === null) {
-      arglist.shift();
-    }
-    if (typeof arglist[0] === "object" && !arglist[0].causality) {
-      Object.assign(properties, arglist.shift());
-    }
-    if (typeof arglist[0] === "object" && arglist[0].causality) {
-      if (!properties.children) properties.children = [];
-      properties.children.push(arglist.shift());
-    }
-    //if (properties.children && !(typeof(properties.children) instanceof Array)) properties.children = [properties.children];
-  }
-  return properties;
-}
-
-export function readFlowProperties2(arglist, config) {
+export function readFlowProperties(arglist, config) {
   let singleStringAsText = config ? config.singleStringAsText : null;
   // Shortcut
-  //if (typeof(arglist[0]) === "object" && !arglist[0].causality && typeof(arglist[1]) === "undefined") return arglist[0]
+  if (typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") return arglist[0]
 
   // The long way
   let properties = {};
@@ -508,8 +470,8 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
   } else {
     buildFunction = descriptionOrBuildFunction;
   }
-  function flowBuilder() {
-    const flow = new Flow(readFlowProperties(arguments), buildFunction);
+  function flowBuilder(...parameters) {
+    const flow = new Flow(readFlowProperties(parameters), buildFunction);
     if (description) flow.description = description;
     return flow;
   }

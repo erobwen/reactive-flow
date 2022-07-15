@@ -166,14 +166,14 @@ export class Item extends Flow {
 /**
  * This is how to declare a simple function flow without state
  */
-function frame() {
+function frame(...parameters) {
   return new Flow({
     build: ({children}) => {
       return new Div({children: [
         row({children})
       ]});
     },
-    ... readFlowProperties(arguments)
+    ... readFlowProperties(parameters)
   })
 }
 
@@ -181,7 +181,7 @@ function frame() {
  * This is how to package a class component in a way so that it can be used without "new".
  * One way is to do this to primitive flows only, so they are easy to distinguish from compound/stateful flows. 
  */
-export const MyComponent = () => new MyComponentFlow(readFlowProperties(arguments)); // lean constructor
+export const MyComponent = (...parameters) => new MyComponentFlow(readFlowProperties(parameters)); // lean constructor
 export class MyComponentFlow extends Flow {
   setProperties({count}) {
     this.count = count;

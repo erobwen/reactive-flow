@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, readFlowProperties2, targetStack } from "../flow/Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -6,27 +6,27 @@ const log = console.log;
  * HTML Node building 
  */
 export function elemenNode(...parameters) {
-  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
   return target.elementNode({key: properties.key, attributes});
 }
 
 export function textNode(...parameters) {
-  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
   return target.textNode({key: properties.key, attributes});
 }
 
 export function modalNode(...parameters) {
-  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters); 
   const target = targetStack[targetStack.length - 1];
   return target.modalNode({key: properties.key});
 }
 
 export function div(...parameters) {
-  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
   return target.elementNode({tagName: "div", key: properties.key, attributes});
@@ -36,9 +36,8 @@ export function div(...parameters) {
 /**
  * Basic flows for your app 
  */
-
 export function text(...parameters) {
-  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters, {singleStringAsText: true}); 
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
 
@@ -56,9 +55,9 @@ export function text(...parameters) {
     });
 }
 
-export function button() { 
+export function button(...parameters) { 
   let result; 
-  const properties = readFlowProperties(arguments);
+  const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
 
@@ -66,7 +65,7 @@ export function button() {
   if (properties.onClick) {
     const onClick = properties.onClick;
     properties.onClick = () => {
-      //log("clicked at: " + JSON.stringify(result.getPath()));
+      log("clicked at: " + JSON.stringify(result.getPath()));
       onClick();
     }  
   }
@@ -100,27 +99,28 @@ export const columnStyle = {
   flexDirection: "column" 
 };
 
-export function row() { 
-  const properties = readFlowProperties(arguments);
+export function row(...parameters) { 
+  const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
+  // const creator = creators[creators.length - 1];
+  // if (!properties.key) properties.key = creator.causality.target.key + "->";
+
   attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
   return target.elementNode({tagName: "div", attributes, ...properties }); 
 };
 
-export function column() { 
-  const properties = readFlowProperties(arguments);
+export function column(...parameters) { 
+  const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
+  // const creator = creators[creators.length - 1];
+  // if (!properties.key) properties.key = creator.causality.target.key + "->";
+
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
   return target.elementNode({tagName: "div", attributes, ...properties }); 
 };
 
-function copyArray(array) {
-  const result = [];
-  array.forEach(element => result.push(element));
-  return result;
-}
 
 /**
  * Element Node Attributes 

@@ -94,16 +94,16 @@ export class DOMFlowTarget extends FlowTarget {
     this.content.integrationRepeater.dispose();
   }
 
-  elementNode() {
-    return new DOMElementNode(readFlowProperties(arguments));
+  elementNode(...parameters) {
+    return new DOMElementNode(readFlowProperties(parameters));
   }
 
-  textNode() {
-    return new DOMTextNode(readFlowProperties(arguments));
+  textNode(...parameters) {
+    return new DOMTextNode(readFlowProperties(parameters));
   }
 
-  modalNode() {
-    return new DOMModalNode(readFlowProperties(arguments));
+  modalNode(...parameters) {
+    return new DOMModalNode(readFlowProperties(parameters));
   }
 }
 
