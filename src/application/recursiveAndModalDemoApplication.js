@@ -56,7 +56,7 @@ export class DemoComponent extends Flow {
     const me = this;
     let observe = this.count;
     
-    const rootText = text("root-text", {text: "My List:"});
+    const rootText = text({ key: "root-text", text: "My List:"});
     const rootTextNode = rootText.getPrimitive().getDomNode(); 
 
     return (
@@ -148,9 +148,9 @@ export class Item extends Flow {
     }
 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
-      text("item-text", {text: me.text}),
+      text({ key: "item-text", text: me.text}),
       button("toggle-button", {onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
-      text("text", {style: {width: "60px"}, text: me.on ? "on" : "off"}),
+      text( { key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
         button("close-button", {
@@ -158,7 +158,7 @@ export class Item extends Flow {
           style: {opacity: 1},
           onClick: () => {loga("Close modal");close()},
         })
-      ) // text("item-text", {text: me.text})
+      ) // text( { key: "item-text", text: me.text})
     );
   }
 }

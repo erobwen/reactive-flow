@@ -228,11 +228,66 @@ export class Flow {
 
   findEquivalentAndReuse(establishedBuild, newBuild, creations) {
     log("findEquivalentAndReuse");
-    log(establishedBuild.toString());
-    log(newBuild.toString());
-    log(creations);
+
+    function hasEquivalentThroughKey(object) {
+      if (!object) return false; 
+      return !!object.causality.forwardTo;
+    }
+
+    function findEquivalents(establishedFlow, newFlow) {
+      if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
+
+      if (visited[newFlow.causality.id]) return; // Already done!
+      visited[newFlow.causality.id] = 1;
+    
+      if (establishedFlow.className() === newFlow.className()) {
+        console.log("-- Found equivalent! --");
+        newFlow.causality.copyToFlow = establishedFlow;
+        findEquivalentPropertiesAndChildren(establishedFlow, null, newFlow);
+      }
+    }
+    
+    function findEquivalentPropertiesAndChildren(establishedFlow, establishedTarget, newFlow) {
+      log("findEquivalentPropertiesAndChildren");
+      if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
+
+      if (visited[newFlow.causality.id] === 2) return; // Already done!
+      visited[newFlow.causality.id] = 2;
+
+      for (let property in newFlow.causality.target) {
+        const newChildFlow = newFlow.causality.target[property]; 
+        if (isObservable(newChildFlow) && creations[newChildFlow.causality.id]) {
+          if (hasEquivalentThroughKey(newChildFlow)) {
+            findEquivalentPropertiesAndChildren(null, newChildFlow.causality.target, newChildFlow);
+          } else {
+            findEquivalents(establishedFlow ? establishedFlow.causality.target[property] : establishedTarget[property], newChildFlow);
+          }
+        }
+      }
+      const children = newFlow.causality.target.children; 
+      const establishedChildren = establishedFlow ? establishedFlow.causality.target.children : establishedTarget.children; 
+      if (children instanceof Array && establishedChildren instanceof Array) {
+        let index = 0;
+        let establishedIndex = 0;
+
+        while(index < children.length && establishedIndex < establishedChildren.length) {
+          while(hasEquivalentThroughKey(children[index])) index++;
+          while(hasEquivalentThroughKey(establishedChildren[establishedIndex])) establishedIndex++;
+          const newChildFlow = children[index];
+          const establishedChildFlow = establishedChildren[establishedIndex];
+          if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
+            findEquivalents(establishedChildFlow, newChildFlow)
+          }
+        }
+      }
+    }
+
     let visited = {};
-    this.findEquivalents(newBuild.causality.forwardTo ? newBuild : establishedBuild, newBuild, visited, creations);
+    if (establishedBuild === newBuild) {
+      findEquivalentPropertiesAndChildren(null, establishedBuild.causality.target, newBuild);
+    } else {
+      findEquivalents(establishedBuild, newBuild);
+    }
     
     function translateReference(reference) {
       if (reference instanceof Flow) {
@@ -250,38 +305,21 @@ export class Flow {
         for (let property in newFlow.causality.target) { // No observation! 
           establishedFlow[property] = translateReference(newFlow[property]); // Possibly trigger! 
         }
+        const children = newFlow.causality.target.children; // No observation!
+        if (children instanceof Array) {
+          let index = 0;
+          while(index < children.length) {
+            children[index] = translateReference(children[index]); // Possibly trigger! (will trigger later on final assignment) 
+            index++;
+          }
+        }
       }
     }
 
     return establishedBuild;
   }
 
-  findEquivalents(establishedFlow, newFlow, visited, creations) {
-    if (visited[newFlow.causality.id]) return; // Already done!
-    visited[newFlow.causality.id] = true;
 
-    if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
-
-    if (establishedFlow === newFlow || establishedFlow.className() === newFlow.className()) {
-      if (establishedFlow !== newFlow) {
-        console.log("-- Found equivalent! --");
-        newFlow.causality.copyToFlow = establishedFlow;
-      }
-      
-      // Note: there is a possibility that  establishedFlow === newFlow at this stage. Perhaps a key were used!
-      // Change might already be triggered when a key-flow , but replacing flows at this stage could revert back to the way it was. 
-      
-      for (let property in newFlow.causality.target) {
-        const newChildFlow = newFlow.causality.target[property]; 
-        if (isObservable(newChildFlow) && creations[newChildFlow.causality.id]) {
-          const establishedChildFlow = newChildFlow.causality.forwardTo ? newChildFlow : establishedFlow.causality.target[property];
-          if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
-            this.findEquivalents(establishedChildFlow, newChildFlow, visited, creations)
-          }  
-        }
-      }
-    }
-  }
 
 
   getPrimitive() {
@@ -294,23 +332,26 @@ export class Flow {
         this.toString() + ".buildRepeater",
         (repeater) => {
           console.group(repeater.causalityString());
-
-          // Track creations
+          
+          // Pushing
           collectingCreationsStack.push([]);
-
-          // Build this one step
+          targetStack.push(this.target);
           creators.push(me);
-          let build = me.build(repeater);
-          creators.pop();
 
-          // Reuse flows without keys
+          let build = me.build(repeater);
+          
+          // Popping
+          creators.pop();
+          targetStack.pop();
           const creations = collectingCreationsStack.pop();
+
+          // Reuse flows without keys depending on their placement in data structure.
           if (me.previousBuild) {
-            build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
+            // build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
           }
           me.previousBuild = build;
 
-          // Establish relationship between child, creator.
+          // Establish relationship between equivalent child, creator.
           if (build !== null) {
             build.equivalentCreator = me;
             me.equivalentChild = build;
@@ -343,7 +384,8 @@ function argumentsToArray(functionArguments) {
 export function readFlowProperties(functionArguments) {
   // Shortcut
   if (
-    typeof functionArguments[0] === "object" &&
+    typeof functionArguments[0] === "object" &&  
+    functionArguments[0] !== null &&
     !functionArguments[0].causality &&
     typeof functionArguments[1] === "undefined"
   )
@@ -374,18 +416,30 @@ export function readFlowProperties(functionArguments) {
   return properties;
 }
 
-export function readFlowProperties2(arglist) {
+export function readFlowProperties2(arglist, config) {
+  let singleStringAsText = config ? config.singleStringAsText : null;
   // Shortcut
   //if (typeof(arglist[0]) === "object" && !arglist[0].causality && typeof(arglist[1]) === "undefined") return arglist[0]
 
   // The long way
   let properties = {};
+  let readOneString = false; 
   while (arglist.length > 0) {
     if (typeof arglist[0] === "function" && !arglist[0].causality) {
       properties.build = arglist.shift();
     }
     if (typeof arglist[0] === "string" && !arglist[0].causality) {
-      properties.key = arglist.shift();
+      if (singleStringAsText) {
+        if (!readOneString) {
+          properties.text = arglist.shift();
+        } else {
+          properties.key = properties.text; 
+          properties.text = arglist.shift();
+        }
+      } else {
+        properties.key = arglist.shift();
+      }
+      readOneString = true;
     }
     if (arglist[0] === null) {
       arglist.shift();
@@ -471,3 +525,6 @@ function collectEvent(event) {
     collectingCreations[object.causality.id] = object;
   }
 }
+
+
+let targetStack = [];

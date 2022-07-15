@@ -17,7 +17,7 @@ export class SuperSimple extends Flow {
 
   build() {
     console.log("============ BUILDING ============")
-    return row(text("text1", {text: this.foo}), text("text2", {text: this.bar}));
+    return row(text({key: "text1", text: this.foo}), text({key: "text2", text: this.bar}));
   }
 }
 

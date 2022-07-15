@@ -5,18 +5,21 @@ const log = console.log;
 /**
  * Basic flows for your app 
  */
-export function text() {
-  const properties = readFlowProperties(arguments); 
+export function text(...parameters) { //...parameters
+  // let argumentsList = argumentsToArray(arguments);
+  let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+
+  // const properties = readFlowProperties(arguments); 
   // console.log(properties.target);
   const textProperties = {
-    key: properties.key + ".text",
+    key: properties.key ? properties.key + ".text" : null,
     text: properties.text,
   }
   if (properties.target) {
     textProperties.target = properties.target;
   }
 
-  return new BasicElementNode(properties.key + ".span", 
+  return new BasicElementNode(properties.key ? properties.key + ".span" : null, 
     {
       tagName:"span", 
       children: [targetOrBasicText(textProperties)], 
@@ -105,7 +108,7 @@ export class BasicFlow extends Flow {
 }
 
 
- export class BasicElementNode extends BasicFlow { 
+export class BasicElementNode extends BasicFlow { 
   toString() {
     return "BasicElementNode:" + this.tagName + ":" + this.causality.id + "(" + this.buildUniqueName() + ")";     
   }

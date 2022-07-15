@@ -29,7 +29,7 @@ export class HelloWorld extends Flow {
     return myRow(
       "row",
       hello("hello"), // No need to pass parameters as it will be inherited.
-      text("spacer", { text: " " }),
+      text({ key: "spacer", text: " " }),
       new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
     );
   }
@@ -37,7 +37,7 @@ export class HelloWorld extends Flow {
 
 // Stateless child flow (compact definition)
 const hello = flow("hello", ({ helloText }) =>
-  text("text", { text: helloText.withComma })
+  text({ key: "text", text: helloText.withComma })
 );
 
 // Statefull child flow
@@ -55,7 +55,7 @@ class World extends Flow {
   build() {
     return myRow(
       "row",
-      text("text", { text: this.worldText }),
+      text({ key: "text", text: this.worldText }),
       exclamationMark("!", {
         on: this.emphasis,
         character: this.exclamationCharacter,
