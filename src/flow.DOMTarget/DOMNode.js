@@ -18,7 +18,10 @@ const log = console.log;
     }
   
     createEmptyDomNode() {
-      return document.createElement(this.tagName);
+      const result = document.createElement(this.tagName);
+      console.log(this.toString() + ".createEmptyDomNode:");
+      console.log(result);
+      return result;
     }
     
     buildDomNode(element) {

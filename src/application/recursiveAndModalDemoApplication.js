@@ -54,14 +54,13 @@ export class DemoComponent extends Flow {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
     const me = this;
-    let observe = this.count;
     
     const rootText = text({ key: "root-text", text: "My List:"});
     const rootTextNode = rootText.getPrimitive().getDomNode(); 
 
     return (
-      column("root-column",
-        row("top-row", 
+      column(
+        row(
           rootText,
           button("less-button", {onClick: () => {loga("Less");me.count--}, text: "Less"}),
           button("more-button", {onClick: () => {loga("More");me.count++}, text: "More"})
@@ -71,32 +70,6 @@ export class DemoComponent extends Flow {
     );
   }
 }
-
-  // build() {
-  //   this.provide("myModel"); // Give all grand-children access to myModel, they will get this as a property of their own.
-  //   const me = this;
-  //   let observe = this.count;
-    
-  //   const lessButton = button("less-button", {onClick: () => {me.count--}, text: "Less"});
-  //   const lessButtonNode = this.target.getDomNode(lessButton.getPrimitive()); 
-  //   log("Getting dom text node in advance during build!")
-  //   log(lessButtonNode); 
-  //   document.getElementById("flow-root").appendChild(lessButtonNode); // We have to add it to the dom to analyze it.
-  //   const style = window.getComputedStyle(lessButtonNode, null);
-  //   log(style.getPropertyValue("height"));
-
-  //   return (
-  //     column("root-column",
-  //       row("top-row", 
-  //         text("root-text", {text: "My List:"}),
-  //         lessButton,
-  //         button("more-button", {onClick: () => {me.count++}, text: "More"})
-  //       ),
-  //       new List("root-list", {maxCount: this.count, count: 1})
-  //     )
-  //   );
-  // }
-
   
 export class List extends Flow {
   // This is the function setProperties where you declare all properties that a parent can set on its child. This is optional, but is a good place to define default values, modify values given by parent, or document what properties that the component needs.   

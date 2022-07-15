@@ -31,6 +31,17 @@ export function clearNode(node) {
  * DOM Flow Base class
  */
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
+
+  dimensions() {
+    const domNode = this.getDomNode();
+    document.body.appendChild(domNode);
+    console.log(domNode.clientHeight);
+    console.log(domNode.offsetHeight);
+    console.log(domNode.offsetWidth);
+    console.log(domNode.scrollHeight);
+    document.body.removeChild(domNode);
+    return {width: domNode.offsetWidth, height: domNode.offsetHeight };
+  }
   
   getDomNode(domTarget) {
     const me = domTarget; 

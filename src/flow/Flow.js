@@ -458,6 +458,7 @@ export class FlowTargetPrimitive extends Flow {
 
   dimensions() {
     // Should return an object of the form {width: _, height: _}
+    throw new Error("Not implemented yet!");
   }
 }
 
