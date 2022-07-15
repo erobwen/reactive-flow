@@ -231,29 +231,24 @@ export class Flow {
   }
 
   findEquivalentAndReuse(establishedBuild, newBuild, creations) {
-    log("findEquivalentAndReuse");
-
     function hasEquivalentThroughKey(object) {
       if (!object) return false; 
       return !!object.causality.forwardTo;
     }
 
     function findEquivalents(newFlowId, establishedFlow, newFlow) {
-      log("findEquivalents");
       if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
 
       if (visited[newFlowId]) return; // Already done!
       visited[newFlowId] = 1;
     
       if (establishedFlow.className() === newFlow.className()) {
-        console.log("-- Found equivalent! --");
         newFlow.causality.copyToFlow = establishedFlow;
         findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
     }
     
     function findEquivalentsRecursive(newFlowId, establishedTarget, newTarget) {
-      log("findEquivalentsRecursive");
       if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
 
       if (visited[newFlowId] === 2) return; // Already done!
@@ -328,9 +323,6 @@ export class Flow {
 
     return establishedBuild;
   }
-
-
-
 
   getPrimitive() {
     // log("getPrimitive")
