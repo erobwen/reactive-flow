@@ -2,7 +2,7 @@ import { startRecursiveAndModalDemo } from "./application/recursiveAndModalDemoA
 import { startHelloWorld } from "./application/helloWorldApplication.js";
 import { startSuperSimple } from "./application/superSimple.js";
 
-startSuperSimple();
-// startHelloWorld();
+// startSuperSimple();
+startHelloWorld();
 // startRecursiveAndModalDemo();
 

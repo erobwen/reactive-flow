@@ -1,28 +1,23 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, readFlowProperties2 } from "../flow/Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, readFlowProperties2, targetStack } from "../flow/Flow.js";
 const log = console.log;
 
 
 /**
  * Basic flows for your app 
  */
-export function text(...parameters) { //...parameters
-  // let argumentsList = argumentsToArray(arguments);
+export function text(...parameters) {
   let properties = readFlowProperties2(parameters, {singleStringAsText: true}); 
+  const target = targetStack[targetStack.length - 1];
 
-  // const properties = readFlowProperties(arguments); 
-  // console.log(properties.target);
   const textProperties = {
     key: properties.key ? properties.key + ".text" : null,
     text: properties.text,
   }
-  if (properties.target) {
-    textProperties.target = properties.target;
-  }
 
-  return new BasicElementNode(properties.key ? properties.key + ".span" : null, 
+  return target.elementNode(properties.key ? properties.key + ".span" : null, 
     {
       tagName:"span", 
-      children: [targetOrBasicText(textProperties)], 
+      children: [target.textNode(textProperties)], 
       ...properties 
     });
 }

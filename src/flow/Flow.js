@@ -529,4 +529,4 @@ function collectEvent(event) {
 }
 
 
-let targetStack = [];
+export const targetStack = [];
