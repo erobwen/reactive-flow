@@ -234,38 +234,39 @@ export class Flow {
       return !!object.causality.forwardTo;
     }
 
-    function findEquivalents(establishedFlow, newFlow) {
-      if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
+    function findEquivalents(newFlowId, establishedFlow, newFlow) {
+      log("findEquivalents");
+      if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
 
-      if (visited[newFlow.causality.id]) return; // Already done!
-      visited[newFlow.causality.id] = 1;
+      if (visited[newFlowId]) return; // Already done!
+      visited[newFlowId] = 1;
     
       if (establishedFlow.className() === newFlow.className()) {
         console.log("-- Found equivalent! --");
         newFlow.causality.copyToFlow = establishedFlow;
-        findEquivalentPropertiesAndChildren(establishedFlow, null, newFlow);
+        findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
     }
     
-    function findEquivalentPropertiesAndChildren(establishedFlow, establishedTarget, newFlow) {
-      log("findEquivalentPropertiesAndChildren");
-      if (!creations[newFlow.causality.id]) return; // Limit search! otherwise we could go off road!
+    function findEquivalentsRecursive(newFlowId, establishedTarget, newTarget) {
+      log("findEquivalentsRecursive");
+      if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
 
-      if (visited[newFlow.causality.id] === 2) return; // Already done!
-      visited[newFlow.causality.id] = 2;
+      if (visited[newFlowId] === 2) return; // Already done!
+      visited[newFlowId] = 2;
 
-      for (let property in newFlow.causality.target) {
-        const newChildFlow = newFlow.causality.target[property]; 
-        if (isObservable(newChildFlow) && creations[newChildFlow.causality.id]) {
+      for (let property in newTarget) {
+        const newChildFlow = newTarget[property]; 
+        if (isObservable(newChildFlow)) {
           if (hasEquivalentThroughKey(newChildFlow)) {
-            findEquivalentPropertiesAndChildren(null, newChildFlow.causality.target, newChildFlow);
+            findEquivalentsRecursive(newChildFlow.causality.id, target, newChildFlow.causality.forwardTo.causality.target);
           } else {
-            findEquivalents(establishedFlow ? establishedFlow.causality.target[property] : establishedTarget[property], newChildFlow);
+            findEquivalents(newChildFlow.causality.id, establishedTarget[property], newChildFlow);
           }
         }
       }
-      const children = newFlow.causality.target.children; 
-      const establishedChildren = establishedFlow ? establishedFlow.causality.target.children : establishedTarget.children; 
+      const children = newTarget.children; 
+      const establishedChildren = establishedTarget.children; 
       if (children instanceof Array && establishedChildren instanceof Array) {
         let index = 0;
         let establishedIndex = 0;
@@ -276,17 +277,19 @@ export class Flow {
           const newChildFlow = children[index];
           const establishedChildFlow = establishedChildren[establishedIndex];
           if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
-            findEquivalents(establishedChildFlow, newChildFlow)
+            findEquivalents(newChildFlow.causality.id, establishedChildFlow, newChildFlow)
           }
+          index++;
+          establishedIndex++;
         }
       }
     }
 
     let visited = {};
     if (establishedBuild === newBuild) {
-      findEquivalentPropertiesAndChildren(null, establishedBuild.causality.target, newBuild);
+      findEquivalentsRecursive(newBuild.causality.id, establishedBuild.causality.target, newBuild.causality.forwardTo.causality.target);
     } else {
-      findEquivalents(establishedBuild, newBuild);
+      findEquivalents(newBuild.causality.id, establishedBuild, newBuild);
     }
     
     function translateReference(reference) {
@@ -347,7 +350,7 @@ export class Flow {
 
           // Reuse flows without keys depending on their placement in data structure.
           if (me.previousBuild) {
-            // build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
+            build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
           }
           me.previousBuild = build;
 
