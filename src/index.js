@@ -5,7 +5,7 @@ import { setFlowConfiguration } from "./flow/Flow.js";
 
 setFlowConfiguration({
     warnWhenNoKey: false,
-    traceReactivity: false
+    traceReactivity: true
 });
 
 // startSuperSimple();

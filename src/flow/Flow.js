@@ -509,8 +509,13 @@ function collectEvent(event) {
       console.log("Establish a new object:" + event.object.causality.target.constructor.name + ":" +  event.objectId + " buildId: " + event.object.causality.buildId);
     } else if (event.type === "reCreate") {
       console.log("Reuse established object on create:" + event.object.causality.target.constructor.name + ":" +  event.objectId + " buildId: " + event.object.causality.buildId);
-    } else if (event.type === "dispose" && !reusedIds[event.objectId]) {
-      console.log("Dispose object: " + event.object.causality.target.constructor.name + "." + event.objectId);
+    } else if (event.type === "dispose") {
+      if (!reusedIds[event.objectId]) {
+        console.log("Dispose object: " + event.object.causality.target.constructor.name + "." + event.objectId);
+      } else {
+        console.log("Disposed but reused by pattern matching: " + event.object.causality.target.constructor.name + "." + event.objectId)
+      }
+
     } 
   }
     
