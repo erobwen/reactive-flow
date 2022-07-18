@@ -33,81 +33,79 @@ export function clearNode(node) {
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
 
   dimensions() {
-    const domNode = this.getDomNode();
-    document.body.appendChild(domNode);
-    console.log(domNode.clientHeight);
-    console.log(domNode.offsetHeight);
-    console.log(domNode.offsetWidth);
-    console.log(domNode.scrollHeight);
-    document.body.removeChild(domNode);
-    return {width: domNode.offsetWidth, height: domNode.offsetHeight };
+    // const domNode = this.getDomNode(true);
+    // document.body.appendChild(domNode);
+    // // console.log(domNode.clientHeight);
+    // // console.log(domNode.offsetHeight);
+    // // console.log(domNode.offsetWidth);
+    // // console.log(domNode.scrollHeight);
+    // const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
+    // document.body.removeChild(domNode);
+    // //this.domNode = null; this.domNode = domNode; // Trigger change for parent 
+    // return result; 
+    return null;
   }
   
-  getDomNode(domTarget) {
-    const me = domTarget; 
-    const you = this;
-    if (!you.buildElementRepeater) {
-      // you.buildElementRepeater = repeat(mostAbstractFlow(you).toString() + ".buildElementRepeater", (repeater) => {
-      you.buildElementRepeater = repeat(you.toString() + ".buildElementRepeater", (repeater) => {
+  getDomNode() {
+    if (!this.buildElementRepeater) {
+      // this.buildElementRepeater = repeat(mostAbstractFlow(this).toString() + ".buildElementRepeater", (repeater) => {
+      this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
         console.group(repeater.causalityString());
-
-        you.getEmptyDomNode(me);
-        you.buildDomNodeWithChildren(me);
+        
+        this.getEmptyDomNode();
+        this.buildDomNodeWithChildren();
+        console.log(this.domNode);
         console.groupEnd();  
       });
     }
-    return you.domNode;
+    return this.domNode;
   }
 
   createEmptyDomNode() {
     throw new Error("Not implemented yet!");
   }
 
-  buildDomNodeWithChildren(domTarget) {
-    const me = domTarget; 
-    const you = this;
-    const node = you.domNode;
-    you.buildDomNode(node);
+  buildDomNodeWithChildren() {
+    const node = this.domNode;
+    this.buildDomNode(node);
     
     clearNode(node);
-    if (you.children instanceof Array) {
-      for (let child of you.children) {
+    if (this.children instanceof Array) {
+      for (let child of this.children) {
         if (child) {
           const childPrimitive = child.getPrimitive();
           if (childPrimitive) {
-            node.appendChild(childPrimitive.getDomNode(me));
+            node.appendChild(childPrimitive.getDomNode());
           }
         }
       }
-    } else if (you.children instanceof Flow) {
-      const childPrimitive = you.children.getPrimitive();
+    } else if (this.children instanceof Flow) {
+      const childPrimitive = this.children.getPrimitive();
       if (childPrimitive) {
-        node.appendChild(childPrimitive.getDomNode(me));
+        node.appendChild(childPrimitive.getDomNode());
       }
     }  
   }
 
-  getEmptyDomNode(domTarget) {
-    const me = domTarget; 
-    const you = this;
-    if (!you.createElementRepeater) {
-      you.createElementRepeater = repeat(mostAbstractFlow(you).toString() + ".createElementRepeater", (repeater) => {
+  getEmptyDomNode() { 
+    if (!this.createElementRepeater) {
+      this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {
         // log(repeater.causalityString());
 
         // Create empty dom node
-        you.domNode = you.createEmptyDomNode();
-        you.domNode.id = aggregateToString(you);
-        // you.domNode.id = mostAbstractFlow(you).toString()
+        this.domNode = this.createEmptyDomNode();
+        this.domNode.id = aggregateToString(this);
+        // this.domNode.id = mostAbstractFlow(this).toString()
         
         // Decorate all equivalent flows
-        let scanFlow = you.equivalentCreator;
+        let scanFlow = this.equivalentCreator;
         while (scanFlow != null) {
-          scanFlow.domNode = you.domNode;
+          scanFlow.domNode = this.domNode;
           scanFlow = scanFlow.equivalentCreator;
         }
       });
     }
-    return you.domNode;
+    return this.domNode;
   }
 
   buildDomNode(element) {

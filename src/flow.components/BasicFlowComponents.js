@@ -71,11 +71,14 @@ export function button(...parameters) {
   }
 
   // Autogenerate child text node from string.
-  const text = properties.text; delete properties.text; 
-  if (text && !properties.children) {
-    properties.children = [target.textNode(properties.key + ".button-text", {text, textNode:true})]; 
-  }
-  result = target.elementNode(properties.key + ".button", {tagName: "button", attributes, ...properties})
+  let children; 
+  if (properties.text && !properties.children) {
+    children = [target.textNode(properties.key ? properties.key + ".button-text" : null, {text: properties.text})]; 
+  } else {
+    children = properties.children;
+  } 
+  const key = properties.key ? properties.key + ".button" : null; 
+  result = target.elementNode(key, {tagName: "button", attributes, children});
   return result; 
 };
 

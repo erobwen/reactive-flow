@@ -231,10 +231,16 @@ export class Flow {
   }
 
   findEquivalentAndReuse(establishedBuild, newBuild, creations) {
-    function hasEquivalentThroughKey(object) {
+    function isBeeingRebuiltWithKey(object) {
       if (!object) return false; 
       return !!object.causality.forwardTo;
     }
+
+    function isRebuiltAndFinalized(object) {
+      if (!object) return false; 
+      return object.causality.isFinalized
+    }
+    
 
     function findEquivalents(newFlowId, establishedFlow, newFlow) {
       if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
@@ -258,8 +264,11 @@ export class Flow {
       for (let property in newTarget) {
         const newChildFlow = newTarget[property]; 
         if (isObservable(newChildFlow)) {
-          if (hasEquivalentThroughKey(newChildFlow)) {
-            findEquivalentsRecursive(newChildFlow.causality.id, target, newChildFlow.causality.forwardTo.causality.target);
+          const newChildFlowTarget = newChildFlow.causality.target;
+          if (isBeeingRebuiltWithKey(newChildFlow)) {
+            findEquivalentsRecursive(newChildFlow.causality.id, newChildFlowTarget, newChildFlow.causality.forwardTo.causality.target);
+          } else if (isRebuiltAndFinalized(newChildFlow)) {
+            findEquivalentsRecursive(newChildFlow.causality.id, newChildFlowTarget, newChildFlowTarget);
           } else {
             findEquivalents(newChildFlow.causality.id, establishedTarget[property], newChildFlow);
           }
@@ -272,8 +281,8 @@ export class Flow {
         let establishedIndex = 0;
 
         while(index < children.length && establishedIndex < establishedChildren.length) {
-          while(hasEquivalentThroughKey(children[index])) index++;
-          while(hasEquivalentThroughKey(establishedChildren[establishedIndex])) establishedIndex++;
+          while(isBeeingRebuiltWithKey(children[index]) || isRebuiltAndFinalized(children[index])) index++;
+          while(isBeeingRebuiltWithKey(establishedChildren[establishedIndex]) || isRebuiltAndFinalized(establishedChildren[establishedIndex])) establishedIndex++;
           const newChildFlow = children[index];
           const establishedChildFlow = establishedChildren[establishedIndex];
           if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {

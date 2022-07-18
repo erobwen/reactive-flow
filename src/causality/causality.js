@@ -1201,7 +1201,10 @@ function createWorld(configuration) {
 
     for (let buildId in repeater.newBuildIdObjectMap) {
       let created = repeater.newBuildIdObjectMap[buildId];
-      if (created[objectMetaProperty].isFinalized) continue; 
+      if (created[objectMetaProperty].isFinalized) {
+        delete created[objectMetaProperty].isFinalized;
+        continue; 
+      }
 
       const temporaryObject = created[objectMetaProperty].forwardTo;
       if (temporaryObject !== null) {
@@ -1253,6 +1256,7 @@ function createWorld(configuration) {
       if (typeof(object.onEstablish) === "function") object.onEstablish();
     }
     object[objectMetaProperty].isFinalized = true;
+    return object; 
   }
 
   function modifyRepeaterAction(repeaterAction, {throttle=0}) {

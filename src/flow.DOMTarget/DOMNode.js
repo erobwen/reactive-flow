@@ -19,23 +19,24 @@ const log = console.log;
   
     createEmptyDomNode() {
       const result = document.createElement(this.tagName);
-      console.log(this.toString() + ".createEmptyDomNode:");
-      console.log(result);
+      // console.log(this.toString() + ".createEmptyDomNode:");
+      // console.log(result);
       return result;
     }
     
     buildDomNode(element) {
-      console.log(this.toString() + ".buildDomNode:");
-      console.log(element);
+      // console.log(this.toString() + ".buildDomNode:");
+      // console.log(element);
 
       const newAttributes = this.attributes;
+      console.log(newAttributes);
       const newPreviouslySetAttributes = {};
       if (this.tagName.toUpperCase() !== element.tagName) {
         throw new Error("Too high expectations error. Cannot change tagName of existing HTML element. Please do not change the tagName property once set!");
       }
   
       // Clear out styles that will no longer be modified
-      for (let property in this.newPreviouslySetAttributes) {
+      for (let property in this.previouslySetAttributes) {
         if (typeof(newAttributes[property]) === "undefined") {
           if (property === "style") {
             this.updateStyle(element, {}); // Clear style
@@ -57,7 +58,7 @@ const log = console.log;
         }
       }
   
-      this.newPreviouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
+      this.previouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
     }
   
     updateStyle(element, newStyle) {
@@ -93,8 +94,8 @@ const log = console.log;
     }
   
     buildDomNode(element) {
-      console.log(this.toString() + ".buildDomNode:");
-      console.log(element);
+      // console.log(this.toString() + ".buildDomNode:");
+      // console.log(element);
       element.nodeValue = this.text; // toString()
     }
   }
