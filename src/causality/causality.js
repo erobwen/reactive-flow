@@ -814,7 +814,7 @@ function createWorld(configuration) {
         handler.meta.id = "temp-" + state.nextTempObjectId++;
         repeater.newBuildIdObjectMap[buildId] = establishedObject;
         establishedObject[objectMetaProperty].isFinalized = false; 
-        console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
+        // console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
         if (state.context) state.context.createdTemporaryCount++;
         emitReCreationEvent(establishedObject[objectMetaProperty].handler);
         return establishedObject;
@@ -822,7 +822,7 @@ function createWorld(configuration) {
         // Create a new one
         handler.meta.id = state.nextObjectId++;
         handler.meta.isFinalized = false; 
-        console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
+        // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
         repeater.newBuildIdObjectMap[buildId] = proxy;
       }
     } else {
@@ -886,6 +886,12 @@ function createWorld(configuration) {
   function emitCreationEvent(handler) {
     if (emitEvents) {
       emitEvent(handler, {type: 'create'})
+    }
+  }
+  
+  function emitDisposeEvent(handler) {
+    if (emitEvents) {
+      emitEvent(handler, {type: 'dispose'})
     }
   }
 
@@ -1226,6 +1232,7 @@ function createWorld(configuration) {
         repeater.removedCount++;
         const object = repeater.buildIdObjectMap[buildId];
         console.log("Dispose object: " + object.constructor.name + "." + object[objectMetaProperty].id)
+        emitDisposeEvent(object[objectMetaProperty].handler);
         if (typeof(object.onDispose) === "function") object.onDispose();
       }
     }

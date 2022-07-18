@@ -27,9 +27,8 @@ export class HelloWorld extends Flow {
 
   build() {
     return myRow(
-      "row",
-      hello("hello"), // No need to pass parameters as it will be inherited.
-      text({ key: "spacer", text: " " }),
+      hello(), // No need to pass parameters as it will be inherited.
+      text(" "),
       new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
     );
   }
@@ -54,9 +53,8 @@ class World extends Flow {
 
   build() {
     return myRow(
-      "row",
-      text({ key: "text", text: this.worldText }),
-      exclamationMark("!", {
+      text(this.worldText),
+      exclamationMark({
         on: this.emphasis,
         character: this.exclamationCharacter,
       })
@@ -73,7 +71,7 @@ const exclamationMark = flow("exclamationMark", ({ on, character }) =>
 const myRow = flow("myRow", ({ style, children, emphasis }) => {
   if (!style) style = {};
   if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component.
-  return basicRow("primitive", { children, style });
+  return basicRow({ children, style });
 });
 
 /**

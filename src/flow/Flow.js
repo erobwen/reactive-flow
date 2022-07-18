@@ -31,6 +31,8 @@ export function setFlowConfiguration(newConfiguration) {
   trace = configuration.traceReactivity;
 }
 
+let reusedIds = {};
+
 window.allFlows = {};
 export class Flow {
   constructor(...parameters) {
@@ -239,6 +241,7 @@ export class Flow {
   }
 
   findEquivalentAndReuse(establishedBuild, newBuild, creations) {
+    reusedIds = {};
     function isBeeingRebuiltWithKey(object) {
       if (!object) return false; 
       return !!object.causality.forwardTo;
@@ -258,6 +261,8 @@ export class Flow {
     
       if (establishedFlow.className() === newFlow.className()) {
         if (trace) console.log("Matched a reusable flow!");
+        reusedIds[establishedFlow.causality.id] = true;
+
         newFlow.causality.copyToFlow = establishedFlow;
         findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
@@ -498,10 +503,18 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
 
 let collectingCreationsStack = [] 
 function collectEvent(event) {
-  // log("pre collect event..." + event.type);
+
+  if (trace) {
+    if (event.type === "create") {
+      console.log("Establish a new object:" + event.object.causality.target.constructor.name + ":" +  event.objectId + " buildId: " + event.object.causality.buildId);
+    } else if (event.type === "reCreate") {
+      console.log("Reuse established object on create:" + event.object.causality.target.constructor.name + ":" +  event.objectId + " buildId: " + event.object.causality.buildId);
+    } else if (event.type === "dispose" && !reusedIds[event.objectId]) {
+      console.log("Dispose object: " + event.object.causality.target.constructor.name + "." + event.objectId);
+    } 
+  }
+    
   if (collectingCreationsStack.length > 0 && (event.type === "create"  || event.type === "reCreate")) {
-    // log("collectEvent:")
-    // log(event)
     const collectingCreations = collectingCreationsStack[collectingCreationsStack.length - 1];
     const object = event.object;
     collectingCreations[object.causality.id] = object;
