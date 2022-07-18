@@ -77,8 +77,7 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  const key = properties.key ? properties.key + ".button" : null; 
-  result = target.elementNode(key, {tagName: "button", attributes, children});
+  result = target.elementNode(properties.key, {tagName: "button", attributes, children, onClick: properties.onClick});
   return result; 
 };
 

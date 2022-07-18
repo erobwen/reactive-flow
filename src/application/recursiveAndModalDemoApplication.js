@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Flow } from "../flow/Flow";
+import { observable, world, repeat, when, Flow, finalize } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text, row, column, button } from "../flow.components/BasicFlowComponents";
 
@@ -56,7 +56,8 @@ export class DemoComponent extends Flow {
     const me = this;
     
     const rootText = text({ key: "root-text", text: "My List:"});
-    const rootTextNode = rootText.getPrimitive().getDomNode(); 
+    // const moreButton = button("more-button", {onClick: () => {loga("More");me.count++}, text: "More"});
+    // console.log(finalize(moreButton).getPrimitive().dimensions());
 
     return (
       column(
