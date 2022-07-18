@@ -20,7 +20,15 @@ window.observable = observable;
 export let creators = [];
 
 const configuration = {
-  warnWhenNoKey: false
+  warnWhenNoKey: false,
+  traceReactivity: false
+}
+
+export let trace = false;
+
+export function setFlowConfiguration(newConfiguration) {
+  Object.assign(configuration, newConfiguration);
+  trace = configuration.traceReactivity;
 }
 
 window.allFlows = {};
@@ -249,7 +257,7 @@ export class Flow {
       visited[newFlowId] = 1;
     
       if (establishedFlow.className() === newFlow.className()) {
-        console.log("Matched a reusable flow!")
+        if (trace) console.log("Matched a reusable flow!");
         newFlow.causality.copyToFlow = establishedFlow;
         findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
@@ -343,7 +351,7 @@ export class Flow {
       me.buildRepeater = repeat(
         this.toString() + ".buildRepeater",
         (repeater) => {
-          console.group(repeater.causalityString());
+          if (trace) console.group(repeater.causalityString());
           
           // Pushing
           collectingCreationsStack.push([]);
@@ -372,7 +380,7 @@ export class Flow {
           // Recursive call
           me.primitive = build !== null ? build.getPrimitive() : null;
           //log(repeater.description + ":" + repeater.creationString());
-          console.groupEnd();
+          if (trace) console.groupEnd();
         }
       );
     }

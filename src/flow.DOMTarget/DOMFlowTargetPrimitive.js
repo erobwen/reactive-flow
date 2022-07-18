@@ -1,4 +1,4 @@
-import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
+import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive, trace } from "../flow/Flow";
 
 const log = console.log;
 
@@ -50,12 +50,12 @@ export function clearNode(node) {
     if (!this.buildElementRepeater) {
       // this.buildElementRepeater = repeat(mostAbstractFlow(this).toString() + ".buildElementRepeater", (repeater) => {
       this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
-        console.group(repeater.causalityString());
+        if (trace) console.group(repeater.causalityString());
         
         this.getEmptyDomNode();
         this.buildDomNodeWithChildren();
-        console.log(this.domNode);
-        console.groupEnd();  
+        if (trace) log(this.domNode);
+        if (trace) console.groupEnd();  
       });
     }
     return this.domNode;

@@ -1,3 +1,4 @@
+import { trace } from "../flow/Flow";
 import { DOMFlowTarget } from "./DOMFlowTarget";
 import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";    
 const log = console.log;
@@ -29,7 +30,6 @@ const log = console.log;
       // console.log(element);
 
       const newAttributes = this.attributes;
-      console.log(newAttributes);
       const newPreviouslySetAttributes = {};
       if (this.tagName.toUpperCase() !== element.tagName) {
         throw new Error("Too high expectations error. Cannot change tagName of existing HTML element. Please do not change the tagName property once set!");
@@ -119,8 +119,8 @@ const log = console.log;
     }
   
     buildDomNode(element) {
-      console.log(this.toString() + ".buildDomNode:");
-      console.log(element);
+      if (trace) console.log(this.toString() + ".buildDomNode:");
+      if (trace) console.log(element);
       element.style.display = "none";
     }
   }

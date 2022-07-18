@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators } from "../flow/Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators, trace } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -62,7 +62,7 @@ export function button(...parameters) {
   const target = targetStack[targetStack.length - 1];
 
   // Inject debug printout in click.
-  if (properties.onClick) {
+  if (trace && properties.onClick) {
     const onClick = properties.onClick;
     properties.onClick = () => {
       log("clicked at: " + JSON.stringify(result.getPath()));
