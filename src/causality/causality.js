@@ -971,6 +971,7 @@ function createWorld(configuration) {
         // blockSideEffects(function() {
         observer.invalidateAction(key);
         // });
+        // });
       }
     }
   }
@@ -1069,6 +1070,11 @@ function createWorld(configuration) {
       repeaterAction : modifyRepeaterAction(repeaterAction, options),
       nonRecordedAction: repeaterNonRecordingAction,
       options: options ? options : {},
+      finishRebuilding() {
+        if (this.newBuildIdObjectMap && Object.keys(this.newBuildIdObjectMap).length > 0) {
+          finishRebuilding(this);
+        }
+      },
       causalityString() {
         const context = this.invalidatedInContext;
         const object = this.invalidatedByObject;
@@ -1140,7 +1146,8 @@ function createWorld(configuration) {
         const repeater = this; 
         const options = repeater.options;
         if (options.onRefresh) options.onRefresh(repeater);
-            
+        
+        repeater.finishedRebuilding = false; 
         repeater.createdCount = 0;
         repeater.createdTemporaryCount = 0;
         repeater.removedCount = 0; 
@@ -1202,6 +1209,8 @@ function createWorld(configuration) {
   }
 
   function finishRebuilding(repeater) {
+    if (repeater.finishedRebuilding) return; 
+    
     const options = repeater.options;
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
@@ -1231,9 +1240,10 @@ function createWorld(configuration) {
       if (typeof(repeater.newBuildIdObjectMap[buildId]) === "undefined") {
         repeater.removedCount++;
         const object = repeater.buildIdObjectMap[buildId];
-        console.log("Dispose object: " + object.constructor.name + "." + object[objectMetaProperty].id)
+        const objectTarget = object[objectMetaProperty].target;
+        // console.log("Dispose object: " + objectTarget.constructor.name + "." + object[objectMetaProperty].id)
         emitDisposeEvent(object[objectMetaProperty].handler);
-        if (typeof(object.onDispose) === "function") object.onDispose();
+        if (typeof(objectTarget.onDispose) === "function") objectTarget.onDispose();
       }
     }
     
@@ -1241,11 +1251,8 @@ function createWorld(configuration) {
     repeater.buildIdObjectMap = repeater.newBuildIdObjectMap;
     repeater.newBuildIdObjectMap = {};
     
+    repeater.finishedRebuilding = true;
     if (options.onEndBuildUpdate) options.onEndBuildUpdate();
-  }
-
-  function finishRebuildingObject(newOrEstablishedObject) {
-
   }
 
   function finishRebuildInAdvance(object) {

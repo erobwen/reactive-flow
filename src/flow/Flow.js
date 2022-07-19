@@ -251,7 +251,6 @@ export class Flow {
       if (!object) return false; 
       return object.causality.isFinalized
     }
-    
 
     function findEquivalents(newFlowId, establishedFlow, newFlow) {
       if (!creations[newFlowId]) return; // Limit search! otherwise we could go off road!
@@ -363,17 +362,13 @@ export class Flow {
           targetStack.push(this.target);
           creators.push(me);
 
-          let build = me.build(repeater);
-          
-          // Popping
-          creators.pop();
-          targetStack.pop();
-          const creations = collectingCreationsStack.pop();
-
-          // Reuse flows without keys depending on their placement in data structure.
+          // Build and rebuild
+          let build = me.build(repeater);          
           if (me.previousBuild) {
-            build = me.findEquivalentAndReuse(me.previousBuild, build, creations);
+            // Reuse flows without keys depending on their placement in data structure.
+            build = me.findEquivalentAndReuse(me.previousBuild, build, collectingCreationsStack[collectingCreationsStack.length - 1]);
           }
+          repeater.finishRebuilding();
           me.previousBuild = build;
 
           // Establish relationship between equivalent child, creator.
@@ -381,10 +376,17 @@ export class Flow {
             build.equivalentCreator = me;
             me.equivalentChild = build;
           }
-
+          
+          // Popping
+          creators.pop();
+          targetStack.pop();
+          const creations = collectingCreationsStack.pop();
+          finishBuilding();
+         
           // Recursive call
           me.primitive = build !== null ? build.getPrimitive() : null;
           //log(repeater.description + ":" + repeater.creationString());
+
           if (trace) console.groupEnd();
         }
       );
@@ -526,5 +528,9 @@ function collectEvent(event) {
   }
 }
 
+
+function finishBuilding() {
+
+}
 
 export const targetStack = [];
