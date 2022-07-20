@@ -25,20 +25,9 @@ export class DemoComponent extends Flow {
 
   // Lifecycle function onEstablish when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
   setState() {
-    // log("Established:" + this.toString());
-    
-    // Set state
     this.count = 1
     this.myModel = observable({
       value: 42 
-    })
-    
-    // Just a debug causality repeater that writes a debug log whenever count is changed. 
-    const me = this;
-    repeat(this.toString() + " (count tracker)",repeater => {
-      // log(repeater.causalityString());
-      let observe = me.count;
-      // log("---------- count -------------");
     })
   }
 
@@ -53,22 +42,35 @@ export class DemoComponent extends Flow {
 
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
-    const me = this;
     
-    const rootText = text({ key: "root-text", text: "My List:"});
-    // const moreButton = button("more-button", {onClick: () => {loga("More");me.count++}, text: "More"});
-    // console.log(finalize(moreButton).getPrimitive().dimensions());
-
     return (
       column(
-        row(
-          rootText,
-          button("less-button", {onClick: () => {loga("Less");me.count--}, text: "Less"}),
-          button("more-button", {onClick: () => {loga("More");me.count++}, text: "More"})
-        ),
+        new ControlRow("control-row", {demoComponent: this}),
         new List("root-list", {maxCount: this.count, count: 1})
       )
     );
+  }
+}
+  
+export class ControlRow extends Flow {
+  setProperties({demoComponent}) {
+    this.demoComponent = demoComponent;
+  }
+      
+  build() {
+    const me = this;    
+    const rootText = text({ key: "root-text", text: "My Recursive List:"});
+    const moreButton = button("more-button", {onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
+
+    // Early finalization of sub-component, and dimension analysis of it while building 
+    console.log(finalize(moreButton).getPrimitive().dimensions());
+
+    return row(
+      rootText,
+      button("less-button", {onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
+      moreButton,
+      {style: {padding: "10px"}} // Reactive programmatic styling! 
+    )
   }
 }
   
@@ -81,7 +83,7 @@ export class List extends Flow {
 
   build() {
     const children = [];
-    children.push(new Item("first-item", {text: "Foo " +  this.count}));
+    children.push(new Item("first-item", {text: "Item " +  this.count}));
     if (this.count < this.maxCount) {
       children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
@@ -95,24 +97,11 @@ export class Item extends Flow {
   }
   
   setState() {
-    // log("Established:" + this.toString());
-
     // This is the place to define view model variables. In this case the "on" property is defined. 
-    // Note: Do NOT  do this in the constructor or setProperties as then the established value might be overwritten by the default value!   
     this.on = true;
-    this.showModal = false; 
-    
-    // This is a reactivley triggered repeater that reacts when me.domNode is set. This is a way to catch a reference to the actual DOM element of this component.
-    const me = this;
-    // when(() => me.domNode, 
-    //   node => { 
-    //     // log("Got a node!");
-    //     // log(node);
-    //   });
+    this.showModal = false;     
   }
-
-  // If we define keys for all created children in the render function, Flow will optimally preserve the state for all of these components from previous renderers. 
-  // For stateless components such as Row and Text it would be possible to omit the key and it would still work, however it would be vasteful as components can no longer be reused. 
+ 
   build() {
     const me = this; 
 
@@ -137,6 +126,7 @@ export class Item extends Flow {
   }
 }
 
+
 /**
  * This is how to declare a simple function flow without state
  */
@@ -144,10 +134,10 @@ function frame(...parameters) {
   return new Flow({
     build: ({children}) => {
       return new Div({children: [
-        row({children})
+        column({children})
       ]});
     },
-    ... readFlowProperties(parameters)
+    ...readFlowProperties(parameters)
   })
 }
 
@@ -179,7 +169,7 @@ export function startRecursiveAndModalDemo() {
 
   // Emulated user interaction.
   console.log(root.buildRepeater.buildIdObjectMap);
-  root.getChild("more-button").onClick();
+  root.getChild("control-row").getChild("more-button").onClick();
   root.findChild("more-button").onClick();
   root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
 }

@@ -33,16 +33,16 @@ export function clearNode(node) {
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
 
   dimensions() {
-    // const domNode = this.getDomNode(true);
-    // document.body.appendChild(domNode);
-    // // console.log(domNode.clientHeight);
-    // // console.log(domNode.offsetHeight);
-    // // console.log(domNode.offsetWidth);
-    // // console.log(domNode.scrollHeight);
-    // const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
-    // document.body.removeChild(domNode);
-    // //this.domNode = null; this.domNode = domNode; // Trigger change for parent 
-    // return result; 
+    const domNode = this.getDomNode(true).cloneNode(true);;
+    document.body.appendChild(domNode);
+    // console.log(domNode.clientHeight);
+    // console.log(domNode.offsetHeight);
+    // console.log(domNode.offsetWidth);
+    // console.log(domNode.scrollHeight);
+    const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
+    document.body.removeChild(domNode);
+    //this.domNode = null; this.domNode = domNode; // Trigger change for parent 
+    return result; 
     return null;
   }
   
