@@ -2,6 +2,7 @@ import { startRecursiveAndModalDemo } from "./application/recursiveAndModalDemoA
 import { startHelloWorld } from "./application/helloWorldApplication.js";
 import { startSuperSimple } from "./application/superSimple.js";
 import { setFlowConfiguration } from "./flow/Flow.js";
+import { startProgrammaticReactiveLayout } from "./application/programmaticReactiveLayout.js";
 
 setFlowConfiguration({
     warnWhenNoKey: false,
@@ -11,4 +12,5 @@ setFlowConfiguration({
 // startSuperSimple();
 // startHelloWorld();
 startRecursiveAndModalDemo();
+// startProgrammaticReactiveLayout();
 

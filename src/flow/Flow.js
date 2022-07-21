@@ -6,6 +6,7 @@ export const world = getWorld({
   onEventGlobal: event => collectEvent(event)
 });
 export const {
+  transaction,
   observable,
   isObservable, 
   repeat,
@@ -165,7 +166,11 @@ export class Flow {
   className() {
     let result;
     withoutRecording(() => {
-      result = this.constructor.name;
+      if (this.classNameOverride) {
+        result = this.classNameOverride;
+      } else {
+        result = this.constructor.name;
+      }
     });
     return result;
   }
@@ -178,9 +183,7 @@ export class Flow {
       classDescription +
       ":" +
       this.causality.id +
-      "(" +
-      this.buildUniqueName() +
-      ")"
+      this.buildUniqueName()
     );
   }
 
@@ -195,9 +198,10 @@ export class Flow {
   buildUniqueName() {
     let result;
     withoutRecording(() => {
-      result = this.key ? this.key : this.causality.id;
+      result = this.key ? this.key : null;
     });
-    return result;
+    if (!result) return "";
+    return "(" + result + ")";
   }
 
   findChild(key) {
@@ -416,7 +420,7 @@ export function readFlowProperties(arglist, config) {
     if (typeof arglist[0] === "function" && !arglist[0].causality) {
       properties.build = arglist.shift();
     }
-    if (typeof arglist[0] === "string" && !arglist[0].causality) {
+    if ((typeof arglist[0] === "string" || typeof arglist[0] === "number") && !arglist[0].causality) {
       if (singleStringAsText) {
         if (!readOneString) {
           properties.text = arglist.shift();

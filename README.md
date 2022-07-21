@@ -2,7 +2,7 @@ Note: This is a compound repository where I experiment with Flow together with o
 
 # Flow - Reactive DOM Rendering and State Management
 
-![Alt text](/src/flow/flow.PNG?raw=true "Flow Logotype")
+![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
 * State of the art reactive technologies, with several technical advantages over frameworks such as VueX and React. 
 * Very little boilerplate code. 

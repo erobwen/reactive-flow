@@ -1,4 +1,4 @@
-import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive } from "../flow/Flow";
+import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive, transaction } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
@@ -6,19 +6,45 @@ import { FlowTarget } from "../flow/FlowTarget";
 const log = console.log;
 
 export class DOMFlowTarget extends FlowTarget {
-  constructor(rootElement, creator=null){
+  constructor(rootElement, configuration={}){
+    const {creator=null, fullWindow=true} = configuration;
     super();
     this.creator = creator;
     this.rootElement = rootElement;
-    this.rootElement.style.width = "100%";
-    this.rootElement.style.height = "100%";
+    if (fullWindow) {
+      document.body.style.margin = "0px"; 
+      document.body.style.width = "100%"; //window.innerWidth + "px"; 
+      document.body.style.height = window.innerHeight + "px";
+      this.rootElement.style.width = "100%";
+      this.rootElement.style.height = "100%";
+      this.rootElement.style.overflow = "hidden";
+      window.addEventListener("resize", () => {
+        if (document.body.style.height != window.innerHeight + "px")
+          document.body.style.height = window.innerHeight + "px";
+          transaction(() => {
+            if (this.content) {
+              this.content.bounds = {width: window.innerHeight, height: window.innerWidth}
+            }
+          });
+      });
+    }
+    // setTimeout(()=> {
+    //   log("DIMENSIONS");
+    //   log(this.rootElement.offsetHeight);
+    //   log(this.rootElement.offsetWidth);
+    //   log("---")
+    //   log(this.rootElement.scrollHeight);
+    //   log(this.rootElement.scrollWidth);
+    // }, 0);
     this.state = observable({
       modalDiv: null
     });
   }
 
   integrate(flow) {
+    log("INTEGRATE");
     this.content = flow;
+    this.content.bounds = {width: window.innerHeight, height: window.innerWidth}
     flow.target = this;
     // console.log("integrate----");
     const me = this; 
@@ -72,7 +98,7 @@ export class DOMFlowTarget extends FlowTarget {
     this.modalFlow = flow;
     this.modalFlowClose = close; 
     const modalDiv = this.setupModalDiv();
-    this.modalTarget = new DOMFlowTarget(modalDiv, this);
+    this.modalTarget = new DOMFlowTarget(modalDiv, {creator: this});
     this.modalTarget.integrate(this.modalFlow);
 
     // Display modal flow

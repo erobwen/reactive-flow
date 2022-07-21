@@ -48,6 +48,7 @@ export function text(...parameters) {
 
   return target.elementNode(properties.key ? properties.key + ".span" : null, 
     {
+      classNameOverride: "text",
       tagName:"span",
       attributes, 
       children: [target.textNode(textProperties)], 
@@ -77,7 +78,7 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  result = target.elementNode(properties.key, {tagName: "button", attributes, children, onClick: properties.onClick});
+  result = target.elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick});
   return result; 
 };
 
@@ -109,7 +110,7 @@ export function row(...parameters) {
   // if (!properties.key) properties.key = creator.causality.target.key + "->";
 
   attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return target.elementNode({tagName: "div", attributes, ...properties }); 
+  return target.elementNode({classNameOverride: "row", tagName: "div", attributes, ...properties }); 
 };
 
 export function column(...parameters) { 
@@ -120,7 +121,7 @@ export function column(...parameters) {
   // if (!properties.key) properties.key = creator.causality.target.key + "->";
 
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
-  return target.elementNode({tagName: "div", attributes, ...properties }); 
+  return target.elementNode({classNameOverride: "column", tagName: "div", attributes, ...properties }); 
 };
 
 
