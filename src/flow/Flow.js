@@ -538,3 +538,8 @@ function finishBuilding() {
 }
 
 export const targetStack = [];
+
+
+export function getTarget() {
+  return targetStack[targetStack.length - 1];
+}

@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators, trace } from "../flow/Flow.js";
+import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators, trace, getTarget } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -102,10 +102,16 @@ export const columnStyle = {
   flexDirection: "column" 
 };
 
+export const centerMiddleStyle = {
+  ...flexContainerStyle,
+  justifyContent:"center",
+  alignItems: "center"
+} 
+
 export function row(...parameters) { 
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
-  const target = targetStack[targetStack.length - 1];
+  const target = getTarget();
   attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
   return target.elementNode({key: properties.key, classNameOverride: "row", tagName: "div", attributes, children: properties.children }); 
 };
@@ -113,15 +119,33 @@ export function row(...parameters) {
 export function column(...parameters) { 
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
-  const target = targetStack[targetStack.length - 1];
+  const target = getTarget();
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
   return target.elementNode({key: properties.key, classNameOverride: "column", tagName: "div", attributes, children: properties.children }); 
 };
 
+
+export function centerMiddle(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...centerMiddleStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "centerMiddle", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function wrapper(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "wrapper", tagName: "div", attributes, children: properties.children }); 
+}
+
+
 /**
  * Element Node Attributes 
  */
-function extractAttributes(properties) {
+export function extractAttributes(properties) {
   const attributes = {};
   eventHandlerContentElementAttributes.forEach(
     attribute => {

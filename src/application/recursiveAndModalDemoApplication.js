@@ -1,6 +1,6 @@
-import { observable, world, repeat, when, Flow, finalize } from "../flow/Flow";
+import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, flexContainerStyle, extractAttributes, wrapper, centerMiddle } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
@@ -116,17 +116,60 @@ export class Item extends Flow {
       text( { key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
-        button("close-button", {
-          text: "close " + me.text + " modal",
-          style: {opacity: 1},
-          onClick: () => {loga("Close modal");close()},
-        })
+        modalBackdrop(
+          button("close-button", {
+            text: "close " + me.text + " modal",
+            style: {opacity: 1},
+            onClick: () => {loga("Close modal");close()},
+          }), 
+          {close}
+        )
       ) // text( { key: "item-text", text: me.text})
     );
   }
 }
 
+function shadePanel(close) {
+  const target = getTarget();
+  return target.elementNode({
+    tagName: "div", 
+    classNameOverride: "shadePanel",
+    attributes: {
+      onclick: () => {close();},
+      style:{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%", 
+        height: "100%", 
+        backgroundColor: "black", 
+        opacity: 0.2
+      }
+    }, 
+  });
+}
 
+function modalBackdrop(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  // Inject style!
+  properties.children[0].style = {pointerEvents:"auto", ...properties.children[0].style}; 
+
+  const children = [
+    shadePanel(properties.close),
+    centerMiddle(
+      wrapper({style: {pointerEvents: "auto"}, children: properties.children}),
+      {style: {position: "absolute", width: "100%", height: "100%", top: 0, left: 0, pointerEvents: "none"}})
+  ]
+  attributes.style = {width: "100%", height: "100%", ...attributes.style}; // Inject column style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "modalBackdrop", tagName: "div", attributes, children }); 
+} 
+
+
+/**
+ * Start the demo
+ */
   
 export function startRecursiveAndModalDemo() {
   const root = new DemoComponent({
