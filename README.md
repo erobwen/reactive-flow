@@ -5,17 +5,18 @@ Note: This is a compound repository where I experiment with Flow together with o
 ![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
 * State of the art reactive technologies, with several technical advantages over frameworks such as VueX and React. 
-* Very little boilerplate code. 
-* A very flexible component model. No arbitrary rules about what code can change what state. Components are javascript objects, and changing their javascript properties is the same as changing their Flow properties. 
+* Very simple, easy to use and very little boilerplate code. 
+* A very flexible component model. No arbitrary rules about what code can change what state. Components are javascript objects (ES6 Proxies really), and changing their javascript properties is the same as changing their Flow properties. 
 * Property inheritance for making it simple to pass down properties in the component hierarchy.  
-* Integrated and fully automated state handling (equivalent to MobX / causalityjs). Modify any state anywhere at any time with consistent updates.
-* Minimal updates of DOM
-* No dependency on template litterals, jsx or CSS, just plain Javascript with direct DOM manipulation! 
-* Powerful bottom up rendering. Render a child before a parent is rendered to take measures for fine layout. Can be used for WYSIWYG word-processing and advanced responsive UI-behaviors.  
+* Integrated and fully automated state handling (equivalent to MobX / causalityjs). Modify any state anywhere at any time.
+* Consistent and minimal updates of stte and DOM
+* No dependency on template litterals, jsx, Typescript or CSS, just plain Javascript with direct DOM manipulation! 
+* Bottom up rendering capabilities: Finalize and render a child before a parent is rendered to take measures for fine layout. Can be used for WYSIWYG word-processing and advanced responsive UI-behaviors.  
 * DOM independent component model, future potential for portability to other platforms besides Web. 
-* Component key-paths, for convenient UI test automation and debugging.
+* Component key-paths, for convenient programmatic manipulation of components, UI test automation and debugging.
 * Based on causalityjs (similar to MobX).  
-* Probably very lightweight? (I haven´t tried ot minimize it yet). In full text it is only around 10kb for Flow (250 lines of code) and an additional 50kb for causality. 
+* Lightweight < 100 kb.
+* Open source 
 
 
 # Running the demo
@@ -156,12 +157,12 @@ When build is run for a component, child objects are created, but in the case wh
 # TODO
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
-
-TODO: Make it possible to not use keys
+TODO: Integrate shape analysis into causality rebuild functionality. 
+TODO: Additional work on modals and popovers 
+TODO: Programmatic Reactive Layout demo
 TODO: Animaiton Demo
-TODO: Programmatic-Bottom Up Hybrid Layout  PBUHL Demo
 TODO: Alternative Flow Target Demo  
-TODO: Priority in causality.
+TODO: Priority levels in causality.
 
 
 # Random Notes

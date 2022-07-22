@@ -9,14 +9,14 @@ export function elemenNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
-  return target.elementNode({key: properties.key, attributes});
+  return target.elementNode({key: properties.key, attributes, children: parameters.children});
 }
 
 export function textNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
-  return target.textNode({key: properties.key, attributes});
+  return target.textNode({key: properties.key, attributes, children: parameters.children});
 }
 
 export function modalNode(...parameters) {
@@ -29,7 +29,7 @@ export function div(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
   const target = targetStack[targetStack.length - 1];
-  return target.elementNode({tagName: "div", key: properties.key, attributes});
+  return target.elementNode({tagName: "div", key: properties.key, attributes, children: parameters.children});
 }
 
 
@@ -106,24 +106,17 @@ export function row(...parameters) {
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
-  // const creator = creators[creators.length - 1];
-  // if (!properties.key) properties.key = creator.causality.target.key + "->";
-
   attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return target.elementNode({classNameOverride: "row", tagName: "div", attributes, ...properties }); 
+  return target.elementNode({key: properties.key, classNameOverride: "row", tagName: "div", attributes, children: properties.children }); 
 };
 
 export function column(...parameters) { 
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties); 
   const target = targetStack[targetStack.length - 1];
-  // const creator = creators[creators.length - 1];
-  // if (!properties.key) properties.key = creator.causality.target.key + "->";
-
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
-  return target.elementNode({classNameOverride: "column", tagName: "div", attributes, ...properties }); 
+  return target.elementNode({key: properties.key, classNameOverride: "column", tagName: "div", attributes, children: properties.children }); 
 };
-
 
 /**
  * Element Node Attributes 
