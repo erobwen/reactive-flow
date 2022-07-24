@@ -115,6 +115,7 @@ export class Item extends Flow {
       button("toggle-button", {onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
       text( { key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button("modal-button", {onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
+      text(" Answer: " + me.myModel.value),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
         modalBackdrop(
           button("close-button", {
