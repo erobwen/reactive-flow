@@ -3,8 +3,9 @@ const log = console.log;
 
 
 /**
- * HTML Node building 
+ * Basic HTML Node building 
  */
+
 export function elemenNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
@@ -34,8 +35,103 @@ export function div(...parameters) {
 
 
 /**
- * Basic flows for your app 
+ * Basic layout styles
  */
+
+ export const flexContainerStyle = {
+  overflow: "hidden",
+  boxSizing: "border-box",
+  display:"flex",
+  alignItems: "stretch", 
+  justifyContent: "flexStart",
+  whiteSpace: "pre"
+};
+
+export const rowStyle = {
+  ...flexContainerStyle,
+  flexDirection: "row"
+};
+
+export const columnStyle = {
+  ...flexContainerStyle,
+  flexDirection: "column" 
+};
+
+export const centerStyle = {
+  ...rowStyle,
+  justifyContent:"center",
+  alignItems: "stretch"
+} 
+
+export const middleStyle = {
+  ...columnStyle,
+  justifyContent:"center",
+  alignItems: "stretch"
+}
+
+export const centerMiddleStyle = {
+  ...rowStyle,
+  justifyContent:"center",
+  alignItems: "center"
+} 
+
+
+/**
+ * Basic basic layout  
+ */
+
+export function wrapper(...parameters) { // I.e. a plain div, but with a classNameOverride.
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  return target.elementNode({key: properties.key, classNameOverride: "wrapper", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function row(...parameters) { 
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "row", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function column(...parameters) { 
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "column", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function center(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...centerStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "center", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function middle(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...middleStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "center", tagName: "div", attributes, children: properties.children }); 
+}
+
+export function centerMiddle(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties); 
+  const target = getTarget();
+  attributes.style = {...centerMiddleStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return target.elementNode({key: properties.key, classNameOverride: "centerMiddle", tagName: "div", attributes, children: properties.children }); 
+}
+
+
+/**
+ * Basic widget  
+ */
+
 export function text(...parameters) {
   let properties = readFlowProperties(parameters, {singleStringAsText: true}); 
   const attributes = extractAttributes(properties); 
@@ -81,65 +177,6 @@ export function button(...parameters) {
   result = target.elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick});
   return result; 
 };
-
-export const flexContainerStyle = {
-  overflow: "hidden",
-  boxSizing: "border-box",
-  display:"flex", 
-  flexDirection: "row", 
-  alignItems: "stretch", 
-  justifyContent: "flexStart",
-  whiteSpace: "pre"
-};
-
-export const rowStyle = {
-  ...flexContainerStyle,
-  flexDirection: "row"
-};
-
-export const columnStyle = {
-  ...flexContainerStyle,
-  flexDirection: "column" 
-};
-
-export const centerMiddleStyle = {
-  ...flexContainerStyle,
-  justifyContent:"center",
-  alignItems: "center"
-} 
-
-export function row(...parameters) { 
-  const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = getTarget();
-  attributes.style = {...rowStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return target.elementNode({key: properties.key, classNameOverride: "row", tagName: "div", attributes, children: properties.children }); 
-};
-
-export function column(...parameters) { 
-  const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = getTarget();
-  attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
-  return target.elementNode({key: properties.key, classNameOverride: "column", tagName: "div", attributes, children: properties.children }); 
-};
-
-
-export function centerMiddle(...parameters) {
-  const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = getTarget();
-  attributes.style = {...centerMiddleStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return target.elementNode({key: properties.key, classNameOverride: "centerMiddle", tagName: "div", attributes, children: properties.children }); 
-}
-
-export function wrapper(...parameters) {
-  const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = getTarget();
-  attributes.style = {...attributes.style}; // Inject row style (while making it possible to override)
-  return target.elementNode({key: properties.key, classNameOverride: "wrapper", tagName: "div", attributes, children: properties.children }); 
-}
 
 
 /**

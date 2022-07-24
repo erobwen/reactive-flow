@@ -158,6 +158,7 @@ When build is run for a component, child objects are created, but in the case wh
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
 TODO: Integrate shape analysis into causality rebuild functionality. 
+TODO: Improve debug printouts on rebuild. (disposed and established objects)
 TODO: Additional work on modals and popovers 
 TODO: Programmatic Reactive Layout demo
 TODO: Animaiton Demo
