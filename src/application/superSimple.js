@@ -17,7 +17,7 @@ export class SuperSimple extends Flow {
 
   build() {
     console.log("============ BUILDING ============")
-    return column(text(this.foo), text(this.bar));
+    return column(text(this.foo), text(this.bar), {style: {fontSize: "40px", padding: "20px"}});
   }
 }
 

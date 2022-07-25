@@ -154,6 +154,13 @@ To handle the state of a javascript object, just call the function "observable(o
 ## Render engine and build function
 When build is run for a component, child objects are created, but in the case where they use the same key as a child object from a previous run of build, the new object will assume the identity of the previously created object. This way, even if build is run many times, re-creating the same child components identified by key, the established object identities for these children will always be maintained, so that children can maintain their state even if the parent is running build.  
 
+## Programmatic Reactive Layout Theory
+
+The following slide shows the theory and philosopy behind Flow, in particular the idea behind Programmatic Reactive Layout and the No CSS principles.
+ 
+https://docs.google.com/presentation/d/13E7E8TzRBoGBJ5BhVV78-s73AnYHnI4MrQ233xihZdY/edit?usp=sharing
+
+
 # TODO
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
