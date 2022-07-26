@@ -1,4 +1,5 @@
 import getWorld from "../causality/causality.js";
+import { mostAbstractFlow } from "../flow.DOMTarget/DOMFlowTargetPrimitive.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
@@ -246,6 +247,13 @@ export class Flow {
 
   findEquivalentAndReuse(establishedBuild, newBuild, creations) {
     reusedIds = {};
+
+    function foundMatch(establishedObject, newObject) {
+      if (trace) console.log("Matched a reusable flow!");
+      reusedIds[establishedFlow.causality.id] = true;
+      newFlow.causality.copyToFlow = establishedFlow;
+    }
+
     function isBeeingRebuiltWithKey(object) {
       if (!object) return false; 
       return !!object.causality.forwardTo;
@@ -263,10 +271,7 @@ export class Flow {
       visited[newFlowId] = 1;
     
       if (establishedFlow.className() === newFlow.className()) {
-        if (trace) console.log("Matched a reusable flow!");
-        reusedIds[establishedFlow.causality.id] = true;
-
-        newFlow.causality.copyToFlow = establishedFlow;
+        foundMatch(establishedFlow, newFlow);
         findEquivalentsRecursive(newFlow.causality.id, establishedFlow.causality.target, newFlow.causality.target);
       }
     }
@@ -367,18 +372,15 @@ export class Flow {
           creators.push(me);
 
           // Build and rebuild
-          let build = me.build(repeater);          
-          if (me.previousBuild) {
-            // Reuse flows without keys depending on their placement in data structure.
-            build = me.findEquivalentAndReuse(me.previousBuild, build, collectingCreationsStack[collectingCreationsStack.length - 1]);
-          }
+          me.newBuild = me.build(repeater);
           repeater.finishRebuilding();
-          me.previousBuild = build;
+
+          me.previousBuild = me.newBuild;
 
           // Establish relationship between equivalent child, creator.
-          if (build !== null) {
-            build.equivalentCreator = me;
-            me.equivalentChild = build;
+          if (me.newBuild !== null) {
+            me.newBuild.equivalentCreator = me;
+            me.equivalentChild = me.newBuild;
           }
           
           // Popping
@@ -388,10 +390,72 @@ export class Flow {
           finishBuilding();
          
           // Recursive call
-          me.primitive = build !== null ? build.getPrimitive() : null;
+          me.primitive = me.newBuild !== null ? me.newBuild.getPrimitive() : null;
           //log(repeater.description + ":" + repeater.creationString());
 
           if (trace) console.groupEnd();
+        }, 
+        {
+          shapeFinder: (wasCreatedInRepeater, isBeingRebuiltWithOldIndentity, getOriginalState, getState, foundMatch) => {
+
+            const visited = [];
+            
+            function findEquivalentsInSamePosition(newFlowId, establishedFlow, newFlow) {
+              if (!wasCreatedInRepeater(newFlowId)) return; // Limit search! otherwise we could go off road!
+
+              if (visited[newFlowId]) return; // Already done!
+              visited[newFlowId] = 1;
+            
+              if (getState(establishedFlow).className() === getState(newFlow).className()) {
+                foundMatch(establishedFlow, newFlow);
+                findEquivalentsRecursive(newFlow.causality.id, getState(establishedFlow), getState(newFlow));
+              }
+            }
+
+            function findEquivalentsRecursive(newFlowId, establishedState, newState) {
+              if (!wasCreatedInRepeater(newFlowId)) return; // Limit search! otherwise we could go off road!
+
+              if (visited[newFlowId] === 2) return; // Already done!
+              visited[newFlowId] = 2;
+        
+              for (let property in newTarget) {
+                const newChildFlow = newTarget[property]; 
+                if (isObservable(newChildFlow)) {
+                  const newChildFlowTarget = newChildFlow.causality.target;
+                  if (isBeingRebuiltWithOldIndentity(newChildFlow)) {
+                    findEquivalentsRecursive(newChildFlow.causality.id, newChildFlowTarget, newChildFlow.causality.forwardTo.causality.target);
+                  } else if (isRebuiltAndFinalized(newChildFlow)) {
+                    findEquivalentsRecursive(newChildFlow.causality.id, newChildFlowTarget, newChildFlowTarget);
+                  } else {
+                    findEquivalentsInSamePosition(newChildFlow.causality.id, establishedState[property], newChildFlow);
+                  }
+                }
+              }
+              const children = newTarget.children; 
+              const establishedChildren = establishedState.children; 
+              if (children instanceof Array && establishedChildren instanceof Array) {
+                let index = 0;
+                let establishedIndex = 0;
+        
+                while(index < children.length && establishedIndex < establishedChildren.length) {
+                  while(isBeeingRebuiltWithKey(children[index]) || isRebuiltAndFinalized(children[index])) index++;
+                  while(isBeeingRebuiltWithKey(establishedChildren[establishedIndex]) || isRebuiltAndFinalized(establishedChildren[establishedIndex])) establishedIndex++;
+                  const newChildFlow = children[index];
+                  const establishedChildFlow = establishedChildren[establishedIndex];
+                  if (newChildFlow instanceof Flow && establishedChildFlow instanceof Flow) {
+                    findEquivalentsInSamePosition(newChildFlow.causality.id, establishedChildFlow, newChildFlow)
+                  }
+                  index++;
+                  establishedIndex++;
+                }
+            }
+
+            if (isBeingRebuiltWithOldIndentity(me.newBuild)) {
+              findEquivalentsRecursive(me.newBuild.causality.buildId, getOriginalState(me.newBuild), getCurrentState(me.newBuild));
+            } else {
+              findEquivalentsInSamePosition(me.newBuild.causality.buildId, me.previousBuild, me.newBuild)
+            }
+          }
         }
       );
     }

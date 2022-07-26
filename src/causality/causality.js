@@ -800,37 +800,41 @@ function createWorld(configuration) {
       isBeingRebuilt: false, 
     };
 
-    if (state.inRepeater !== null && buildId !== null) {
-      const repeater = state.inRepeater;
-      if (!repeater.newBuildIdObjectMap) repeater.newBuildIdObjectMap = {};
-      if (!repeater.newIdObjectMap) repeater.newIdObjectMap = {};
-      
-      if (repeater.buildIdObjectMap && typeof(repeater.buildIdObjectMap[buildId]) !== 'undefined') {
-        // Object identity previously created
-        handler.meta.isBeingRebuilt = true;
-        let establishedObject = repeater.buildIdObjectMap[buildId];
-        establishedObject[objectMetaProperty].forwardTo = proxy;
-        
-        handler.meta.id = "temp-" + state.nextTempObjectId++;
-        repeater.newBuildIdObjectMap[buildId] = establishedObject;
-        establishedObject[objectMetaProperty].isFinalized = false; 
-        // console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
-        if (state.context) state.context.createdTemporaryCount++;
-        emitReCreationEvent(establishedObject[objectMetaProperty].handler);
-        return establishedObject;
+    if (state.inRepeater !== null) {
+      if (buildId !== null) {
+        const repeater = state.inRepeater;
+        if (!repeater.newBuildIdObjectMap) repeater.newBuildIdObjectMap = {};
+        if (repeater.buildIdObjectMap && typeof(repeater.buildIdObjectMap[buildId]) !== 'undefined') {
+          // Object identity previously created
+          handler.meta.isBeingRebuilt = true;
+          let establishedObject = repeater.buildIdObjectMap[buildId];
+          establishedObject[objectMetaProperty].forwardTo = proxy;
+          
+          handler.meta.id = "temp-" + state.nextTempObjectId++;
+          repeater.newBuildIdObjectMap[buildId] = establishedObject;
+          establishedObject[objectMetaProperty].isFinalized = false; 
+          // console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
+          if (state.context) state.context.createdTemporaryCount++;
+          emitReCreationEvent(establishedObject[objectMetaProperty].handler);
+          return establishedObject;
+        } else {
+          // Create a new one
+          handler.meta.id = state.nextObjectId++;
+          handler.meta.isFinalized = false; 
+          // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
+          repeater.newBuildIdObjectMap[buildId] = proxy;
+        }
       } else {
-        // Create a new one
+        if (!repeater.newIdObjectMap) repeater.newIdObjectMap = {};
         handler.meta.id = state.nextObjectId++;
-        handler.meta.isFinalized = false; 
-        // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
-        repeater.newBuildIdObjectMap[buildId] = proxy;
+        repeater.newIdObjectMap[handler.meta.id] = proxy
+        if (state.context) state.context.createdCount++;
       }
     } else {
       handler.meta.id = state.nextObjectId++;
+      emitCreationEvent(handler);
     }
     // console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
-    if (state.context) state.context.createdCount++;
-    emitCreationEvent(handler);
     return proxy;
   }
 
@@ -1071,7 +1075,8 @@ function createWorld(configuration) {
       nonRecordedAction: repeaterNonRecordingAction,
       options: options ? options : {},
       finishRebuilding() {
-        if (this.newBuildIdObjectMap && Object.keys(this.newBuildIdObjectMap).length > 0) {
+        if (this.newBuildIdObjectMap && Object.keys(this.newBuildIdObjectMap).length > 0
+          ||this.newIdObjectMap && Object.keys(this.newIdObjectMap).length > 0) {
           finishRebuilding(this);
         }
       },
@@ -1176,7 +1181,7 @@ function createWorld(configuration) {
         }
 
         // Finish rebuilding
-        if (repeater.newBuildIdObjectMap && Object.keys(repeater.newBuildIdObjectMap).length > 0) finishRebuilding(this);
+        finishRebuilding(this);
 
         this.firstTime = false; 
         leaveContext( activeContext );
@@ -1214,6 +1219,14 @@ function createWorld(configuration) {
     const options = repeater.options;
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
+    // Do shape analysis to find additional matches. 
+    if (repeater.options.shapeFinder) {
+      
+    }
+
+
+
+    // Merge those with build ids. 
     for (let buildId in repeater.newBuildIdObjectMap) {
       let created = repeater.newBuildIdObjectMap[buildId];
       if (created[objectMetaProperty].isFinalized) {
