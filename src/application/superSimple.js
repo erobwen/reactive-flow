@@ -8,7 +8,10 @@ const log = console.log;
  * Flow definitions
  */
 
-// Parent flow
+// A very simple model
+const model = observable({value: ""});
+
+// A very simple view component
 export class SuperSimple extends Flow {
   setState() {
     this.foo = "foo";
@@ -16,8 +19,12 @@ export class SuperSimple extends Flow {
   }
 
   build() {
-    console.log("============ BUILDING ============")
-    return column(text(this.foo), text(this.bar), {style: {fontSize: "40px", padding: "20px"}});
+    return column(
+      text(this.foo), 
+      text(this.bar), 
+      text(this.model.value), 
+      {style: {fontSize: "40px", padding: "20px"}}
+    );
   }
 }
 
@@ -27,6 +34,7 @@ export class SuperSimple extends Flow {
 export function startSuperSimple() {
   const simple = new SuperSimple({
     key: "root",
+    model, 
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
 
@@ -39,4 +47,9 @@ export function startSuperSimple() {
     log("----------------------------------");
     simple.bar = "BAR";
   }, 2000);
+
+  setTimeout(() => {
+    log("----------------------------------");
+    model.value = "FUM";
+  }, 3000);
 }
