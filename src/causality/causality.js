@@ -800,37 +800,54 @@ function createWorld(configuration) {
       isBeingRebuilt: false, 
     };
 
-    if (state.inRepeater !== null && buildId !== null) {
+    if (state.inRepeater !== null) {
       const repeater = state.inRepeater;
-      if (!repeater.newBuildIdObjectMap) repeater.newBuildIdObjectMap = {};
-      if (!repeater.newIdObjectMap) repeater.newIdObjectMap = {};
-      
-      if (repeater.buildIdObjectMap && typeof(repeater.buildIdObjectMap[buildId]) !== 'undefined') {
-        // Object identity previously created
-        handler.meta.isBeingRebuilt = true;
-        let establishedObject = repeater.buildIdObjectMap[buildId];
-        establishedObject[objectMetaProperty].forwardTo = proxy;
-        
-        handler.meta.id = "temp-" + state.nextTempObjectId++;
-        repeater.newBuildIdObjectMap[buildId] = establishedObject;
-        establishedObject[objectMetaProperty].isFinalized = false; 
-        // console.log("Reuse established object on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
-        if (state.context) state.context.createdTemporaryCount++;
-        emitReCreationEvent(establishedObject[objectMetaProperty].handler);
-        return establishedObject;
-      } else {
-        // Create a new one
+      if (buildId !== null) {
+        if (!repeater.newBuildIdObjectMap) repeater.newBuildIdObjectMap = {};
+        if (repeater.buildIdObjectMap && typeof(repeater.buildIdObjectMap[buildId]) !== 'undefined') {
+          // Build identity previously created
+          handler.meta.isBeingRebuilt = true;
+          let establishedObject = repeater.buildIdObjectMap[buildId];
+          establishedObject[objectMetaProperty].forwardTo = proxy;
+          
+          handler.meta.id = "temp-" + state.nextTempObjectId++;
+          repeater.newBuildIdObjectMap[buildId] = establishedObject;
+          establishedObject[objectMetaProperty].isFinalized = false; 
+          // console.log("Reuse established object with buildId on create:" + establishedObject[objectMetaProperty].target.constructor.name + ":" +  establishedObject[objectMetaProperty].id + " buildId: " + buildId);
+          if (state.context) state.context.createdTemporaryCount++;
+          emitReCreationEvent(establishedObject[objectMetaProperty].handler);
+          if (repeater.rebuildShapeAnalysis) {
+            if (!repeater.newIdObjectShapeMap) repeater.newIdObjectShapeMap = {};
+            repeater.newIdObjectShapeMap[establishedObject[objectMetaProperty].id] = proxy
+          }
+          return establishedObject;
+        } else {
+          // Create a new one with build identity
+          handler.meta.id = state.nextObjectId++;
+          handler.meta.isFinalized = false; 
+          // console.log("Establish a new object with buildId:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
+          repeater.newBuildIdObjectMap[buildId] = proxy;
+          emitCreationEvent(handler);  
+          if (repeater.rebuildShapeAnalysis) {
+            if (!repeater.newIdObjectShapeMap) repeater.newIdObjectShapeMap = {};
+            repeater.newIdObjectShapeMap[handler.meta.id] = proxy
+          }
+        }
+      } else if (repeater.rebuildShapeAnalysis){
+        // No build identity but with shape analysis turned on. Could be a creation or recreation, so we have to postpone any event! 
         handler.meta.id = state.nextObjectId++;
-        handler.meta.isFinalized = false; 
-        // console.log("Establish a new object:" + handler.target.constructor.name + ":" +  handler.meta.id + " buildId: " + buildId);
-        repeater.newBuildIdObjectMap[buildId] = proxy;
+        if (!repeater.newIdObjectShapeMap) repeater.newIdObjectShapeMap = {};
+        repeater.newIdObjectShapeMap[handler.meta.id] = proxy
+      } else {
+        // No build identity and no shape analysis! As a normal creation! 
+        handler.meta.id = state.nextObjectId++;
+        emitCreationEvent(handler);  
       }
     } else {
       handler.meta.id = state.nextObjectId++;
+      emitCreationEvent(handler);
     }
     // console.log("Created:" + createdTarget.constructor.name + ":" +  handler.meta.id);
-    if (state.context) state.context.createdCount++;
-    emitCreationEvent(handler);
     return proxy;
   }
 
@@ -1071,7 +1088,8 @@ function createWorld(configuration) {
       nonRecordedAction: repeaterNonRecordingAction,
       options: options ? options : {},
       finishRebuilding() {
-        if (this.newBuildIdObjectMap && Object.keys(this.newBuildIdObjectMap).length > 0) {
+        if (this.newBuildIdObjectMap && Object.keys(this.newBuildIdObjectMap).length > 0
+          ||this.newIdObjectShapeMap && Object.keys(this.newIdObjectShapeMap).length > 0) {
           finishRebuilding(this);
         }
       },
@@ -1176,7 +1194,7 @@ function createWorld(configuration) {
         }
 
         // Finish rebuilding
-        if (repeater.newBuildIdObjectMap && Object.keys(repeater.newBuildIdObjectMap).length > 0) finishRebuilding(this);
+        finishRebuilding(this);
 
         this.firstTime = false; 
         leaveContext( activeContext );
@@ -1208,12 +1226,101 @@ function createWorld(configuration) {
     repeater.previousDirty = null;
   }
 
+  function reBuildShapeAnalysis(repeater, shapeAnalysis) {
+    let visited = {};
+
+    function matchInEquivalentSlot(newObject, establishedObject) {
+      if (!isObservable(newObject)) return; 
+      const newObjectId = newObject[objectMetaProperty].id;
+
+      if (!repeater.newIdObjectShapeMap[newObjectId]) return; // Limit search! otherwise we could go off road!
+      if (visited[newObjectId]) return; // Already done!
+      visited[newObjectId] = 1; // Visited, but no recursive analysis
+
+      if (establishedObject === null) {
+        // Continue to search new data for a non finalized buildId matched object where we can once again find an established data structure.
+        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null)) {
+          matchInEquivalentSlot(slots.newSlot, null);
+        }
+      } else if (newObject !== establishedObject) {
+        // Different in same slot
+        if (!shapeAnalysis.canMatch(newObject, establishedObject)) return;
+
+        // Match up objects!
+        establishedObject[objectMetaProperty].forwardTo = newObject;
+        const buildId = establishedObject[objectMetaProperty].buildId; 
+        if (buildId) {
+          newObject[objectMetaProperty].buildId = buildId;
+          repeater.newBuildIdObjectMap[buildId] = newObject;
+        }
+        repeater.newIdObjectShapeMap[establishedObject[objectMetaProperty].id] = establishedObject;
+        delete repeater.newIdObjectShapeMap[newObject[objectMetaProperty].id];
+
+        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, establishedObject[objectMetaProperty].target)) {
+          matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
+        }
+      } else {
+        // Same in same slot, or no established, a buildId must have been used.
+        if (newObject[objectMetaProperty].isFinalized) {
+          // Is finalized already, no established state available.
+          for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null)) {
+            matchInEquivalentSlot(slots.newSlot, null);
+          }
+        } else {
+          // Not finalized, there is still an established state to compare to
+          for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].forwardTo[objectMetaProperty].target, newObject[objectMetaProperty].target)) {
+            matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
+          }
+        }
+      }
+    }
+    
+    const initialSlots = shapeAnalysis.initialSlots();
+    matchInEquivalentSlot(initialSlots.newSlot, initialSlots.establishedSlot);
+  }
+
+  // function translateReference(reference) {
+  //   if (reference instanceof Flow) {
+  //     if (reference.causality.copyToFlow) {
+  //       const result = reference.causality.copyToFlow;
+  //       delete reference.causality.copyToFlow;
+  //       return result; 
+  //     }
+  //   }
+  //   return reference;
+  // }
+
+  // for (let id in creations) {
+  //   const newFlow = creations[id]; 
+  //   const newTarget = newFlow.causality.target; 
+  //   if (newFlow.causality.copyToFlow) {
+  //     const establishedFlow = newFlow.causality.copyToFlow;
+  //     for (let property in newTarget) { // No observation! 
+  //       establishedFlow[property] = translateReference(newTarget[property]); // Possibly trigger! 
+  //     }
+  //     const children = newTarget.children; // No observation!
+  //     if (children instanceof Array) {
+  //       let index = 0;
+  //       while(index < children.length) {
+  //         children[index] = translateReference(children[index]); // Possibly trigger! (will trigger later on final assignment) 
+  //         index++;
+  //       }
+  //     }
+  //   }
+  // }
+
   function finishRebuilding(repeater) {
     if (repeater.finishedRebuilding) return; 
     
     const options = repeater.options;
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
+    // Do shape analysis to find additional matches. 
+    if (repeater.options.rebuildShapeAnalysis) {
+      reBuildShapeAnalysis(repeater, repeater.options.rebuildShapeAnalysis);
+    }
+
+    // Merge those with build ids. 
     for (let buildId in repeater.newBuildIdObjectMap) {
       let created = repeater.newBuildIdObjectMap[buildId];
       if (created[objectMetaProperty].isFinalized) {
