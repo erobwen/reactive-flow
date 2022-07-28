@@ -63,7 +63,7 @@ export class ControlRow extends Flow {
     const moreButton = button("more-button", {onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
 
     // Early finalization of sub-component, and dimension analysis of it while building 
-    console.log(finalize(moreButton).getPrimitive().dimensions());
+    console.log(moreButton.dimensions());
 
     return row(
       rootText,

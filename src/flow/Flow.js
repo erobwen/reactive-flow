@@ -312,6 +312,11 @@ export class Flow {
     }
     return me.primitive;
   }
+  
+  dimensions() {
+    const primitive = this.getPrimitive();
+    return primitive ? primitive.dimensions() : null;
+  }
 }
 
 export function when(condition, operation) {
