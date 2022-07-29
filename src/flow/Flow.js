@@ -147,6 +147,7 @@ export class Flow {
   }
 
   onDispose() {
+    // Dispose created by repeater in call. 
     if (this.buildRepeater) {
       if (this.buildRepeater.buildIdObjectMap) {
         for (let key in this.buildRepeater.buildIdObjectMap) {
