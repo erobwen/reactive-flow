@@ -1,4 +1,4 @@
-import { observable, repeat, finalize, Flow, flow, withoutRecording, sameAsPreviousDeep, readFlowProperties, targetStack, creators, trace, getTarget } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -9,28 +9,24 @@ const log = console.log;
 export function elemenNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  const target = targetStack[targetStack.length - 1];
-  return target.elementNode({key: properties.key, attributes, children: parameters.children});
+  return getTarget().elementNode({key: properties.key, attributes, children: parameters.children});
 }
 
 export function textNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  const target = targetStack[targetStack.length - 1];
-  return target.textNode({key: properties.key, attributes, children: parameters.children});
+  return getTarget().textNode({key: properties.key, attributes, children: parameters.children});
 }
 
 export function modalNode(...parameters) {
   let properties = readFlowProperties(parameters); 
-  const target = targetStack[targetStack.length - 1];
-  return target.modalNode({key: properties.key});
+  return getTarget().modalNode({key: properties.key});
 }
 
 export function div(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  const target = targetStack[targetStack.length - 1];
-  return target.elementNode({tagName: "div", key: properties.key, attributes, children: parameters.children});
+  return getTarget().elementNode({tagName: "div", key: properties.key, attributes, children: parameters.children});
 }
 
 
@@ -134,20 +130,19 @@ export function centerMiddle(...parameters) {
 
 export function text(...parameters) {
   let properties = readFlowProperties(parameters, {singleStringAsText: true}); 
-  const attributes = extractAttributes(properties); 
-  const target = targetStack[targetStack.length - 1];
+  const attributes = extractAttributes(properties);
 
   const textProperties = {
     key: properties.key ? properties.key + ".text" : null,
     text: properties.text,
   }
 
-  return target.elementNode(properties.key ? properties.key + ".span" : null, 
+  return getTarget().elementNode(properties.key ? properties.key + ".span" : null, 
     {
       classNameOverride: "text",
       tagName:"span",
       attributes, 
-      children: [target.textNode(textProperties)], 
+      children: [getTarget().textNode(textProperties)], 
       ...properties 
     });
 }
@@ -155,8 +150,7 @@ export function text(...parameters) {
 export function button(...parameters) { 
   let result; 
   const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = targetStack[targetStack.length - 1];
+  const attributes = extractAttributes(properties);
 
   // Inject debug printout in click.
   if (trace && properties.onClick) {
@@ -170,11 +164,11 @@ export function button(...parameters) {
   // Autogenerate child text node from string.
   let children; 
   if (properties.text && !properties.children) {
-    children = [target.textNode(properties.key ? properties.key + ".button-text" : null, {text: properties.text})]; 
+    children = [getTarget().textNode(properties.key ? properties.key + ".button-text" : null, {text: properties.text})]; 
   } else {
     children = properties.children;
   } 
-  result = target.elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick});
+  result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick});
   return result; 
 };
 

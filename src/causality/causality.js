@@ -1232,6 +1232,10 @@ function createWorld(configuration) {
       repeater.newIdObjectShapeMap[establishedObject[objectMetaProperty].id] = establishedObject;
     }
 
+    function canMatchAny(entity) {
+      return isObservable(entity) && !entity[objectMetaProperty].buildId;
+    }
+
     function matchInEquivalentSlot(newObject, establishedObject) {
       if (!isObservable(newObject)) return; 
       // if (newObject.buildId)
@@ -1243,7 +1247,7 @@ function createWorld(configuration) {
 
       if (!establishedObject) {
         // Continue to search new data for a non finalized buildId matched object where we can once again find an established data structure.
-        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null)) {
+        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null, canMatchAny)) {
           matchInEquivalentSlot(slots.newSlot, null);
         }
       } else if (newObject !== establishedObject) {
@@ -1258,7 +1262,7 @@ function createWorld(configuration) {
         if (!shapeAnalysis.canMatch(newObject, establishedObject)) return;
         setAsMatch(newObject, establishedObject);
 
-        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, establishedObject[objectMetaProperty].target)) {
+        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, establishedObject[objectMetaProperty].target, canMatchAny)) {
           matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
         }
       } else {
@@ -1266,12 +1270,12 @@ function createWorld(configuration) {
         const temporaryObject = newObject[objectMetaProperty].forwardTo; 
         if (temporaryObject) {
           // Not finalized, there is still an established state to compare to
-          for (let slots of shapeAnalysis.slotsIterator(temporaryObject[objectMetaProperty].target, newObject[objectMetaProperty].target)) {
+          for (let slots of shapeAnalysis.slotsIterator(temporaryObject[objectMetaProperty].target, newObject[objectMetaProperty].target, canMatchAny)) {
             matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
           }
         } else {
           // Is finalized already, no established state available.
-          for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null)) {
+          for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null, canMatchAny)) {
             matchInEquivalentSlot(slots.newSlot, null);
           }
         }

@@ -1,10 +1,9 @@
 import getWorld from "../causality/causality.js";
-import { mostAbstractFlow } from "../flow.DOMTarget/DOMFlowTargetPrimitive.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
   emitReBuildEvents: true, 
-  onEventGlobal: event => collectEvent(event)
+  // onEventGlobal: event => collectEvent(event)
 });
 export const {
   transaction,
@@ -274,22 +273,13 @@ export class Flow {
           // Recursive call
           me.primitive = me.newBuild !== null ? me.newBuild.getPrimitive() : null;
 
-          me.causality.previousBuild = me.newBuild;
           if (trace) console.groupEnd();
         }, 
         {
           rebuildShapeAnalysis: {
-            canMatch: (newFlow, establishedFlow) => {
-              return isObservable(newFlow) && isObservable(establishedFlow) &&
-                newFlow.className() === establishedFlow.className() 
-            },
-            initialSlots: () => {
-              return {
-                newSlot: me.newBuild,
-                establishedSlot: me.causality.previousBuild
-              }
-            },
-            slotsIterator: function*(newFlow, optionalEstablishedFlow) {
+            canMatch: (newFlow, establishedFlow) => newFlow.className() === establishedFlow.className(),
+            shapeRoot: () => me.newBuild,
+            slotsIterator: function*(newFlow, optionalEstablishedFlow, canMatchAny) {
               for (let property in newFlow) {
                 if (property !== "children") {
                   yield {
@@ -297,12 +287,22 @@ export class Flow {
                     establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow[property] : null
                   }
                 } else {
-                  let index = 0;
-                  while(index < newFlow.length()) {
-                    yield {
-                      newSlot: newFlow.children[index],
-                      establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow.children[index] : null
+                  let newIndex = 0;
+                  let establishedIndex = 0;
+                  while(newIndex < newFlow.children.length) {
+                    while(!canMatchAny(newFlow.children[newIndex]) && newIndex < newFlow.children.length) newIndex++;
+                    if (optionalEstablishedFlow) {
+                      while(!canMatchAny(optionalEstablishedFlow.children[establishedIndex]) && establishedIndex < optionalEstablishedFlow.children.length) establishedIndex++;
                     }
+
+                    if (newIndex < newFlow.children.length) {
+                      yield {
+                        newSlot: newFlow.children[newIndex],
+                        establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow.children[establishedIndex] : null
+                      }
+                    }
+
+                    newIndex++;
                   };
                 }
               }
@@ -354,7 +354,7 @@ export function readFlowProperties(arglist, config) {
       }
       readOneString = true;
     }
-    if (arglist[0] === null) {
+    if (!arglist[0]) {
       arglist.shift();
     }
     if (typeof arglist[0] === "object" && !arglist[0].causality) {

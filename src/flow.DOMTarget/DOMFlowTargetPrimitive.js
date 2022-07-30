@@ -1,4 +1,4 @@
-import { observable, world, repeat, readFlowProperties, Flow, FlowTargetPrimitive, trace } from "../flow/Flow";
+import { repeat, Flow, FlowTargetPrimitive, trace } from "../flow/Flow";
 
 const log = console.log;
 
