@@ -1225,6 +1225,7 @@ function createWorld(configuration) {
 
     function setAsMatch(newObject, establishedObject) {
       // console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
+      // console.log("----");
       establishedObject[objectMetaProperty].forwardTo = newObject;
       newObject[objectMetaProperty].copyTo = establishedObject;
       if (newObject[objectMetaProperty].pendingCreationEvent) {
@@ -1251,7 +1252,6 @@ function createWorld(configuration) {
       // console.log("matchInEquivalentSlot");
       // console.log(newObject.toString());
       // console.log(establishedObject ? establishedObject.toString() : null);
-      // console.log("----");
 
       if (!establishedObject) {
         // Continue to search new data for a non finalized buildId matched object where we can once again find an established data structure.
@@ -1323,8 +1323,12 @@ function createWorld(configuration) {
         } else {
           target = object[objectMetaProperty].target;
         }
-        for (let property in target) {
-          target[property] = translateReference(target[property])
+        if (repeater.options.rebuildShapeAnalysis.translateReferences) {
+          repeater.options.rebuildShapeAnalysis.translateReferences(target, translateReference);
+        } else {
+          for (let property in target) {
+            target[property] = translateReference(target[property])
+          }
         }
       }
 
@@ -1411,9 +1415,10 @@ function createWorld(configuration) {
   }
 
   function finishRebuildInAdvance(object) {
+    const temporaryObject = object[objectMetaProperty].forwardTo;
+    if (!temporaryObject) return object; 
     if (!state.inRepeater) throw Error ("Trying to finish rebuild in advance while not being in a repeater!");
     if (!object[objectMetaProperty].buildId) throw Error("Trying to finish rebuild in advance for an object without a buildId. A build id is required for this to work.");
-    const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {
       // Push changes to established object.
       object[objectMetaProperty].forwardTo = null;

@@ -9,8 +9,8 @@ setFlowConfiguration({
     traceReactivity: true
 });
 
-startSuperSimple();
+// startSuperSimple();
 // startHelloWorld();
-// startRecursiveAndModalDemo();
+startRecursiveAndModalDemo();
 // startProgrammaticReactiveLayout();
 

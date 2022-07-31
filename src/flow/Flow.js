@@ -307,7 +307,21 @@ export class Flow {
                     }
 
                     newIndex++;
+                    establishedIndex++;
                   };
+                }
+              }
+            },
+            translateReferences: (flow, translateReference) => {
+              for (let property in flow) {
+                flow[property] = translateReference(flow[property]); 
+              }
+              const children = flow.children;
+              if (children instanceof Array) {
+                let index = 0;
+                while(index < children.length) {
+                  children[index] = translateReference(children[index]);
+                  index++;
                 }
               }
             }
