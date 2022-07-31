@@ -21,8 +21,8 @@ export class SuperSimple extends Flow {
   build() {
     return column(
       text(this.foo), 
-      text(this.bar), 
-      text(this.model.value), 
+      // text(this.bar), 
+      // text(this.model.value), 
       {style: {fontSize: "40px", padding: "20px"}}
     );
   }
@@ -43,13 +43,13 @@ export function startSuperSimple() {
     simple.foo = "FOO";
   }, 1000);
 
-  setTimeout(() => {
-    log("----------------------------------");
-    simple.bar = "BAR";
-  }, 2000);
+  // setTimeout(() => {
+  //   log("----------------------------------");
+  //   simple.bar = "BAR";
+  // }, 2000);
 
-  setTimeout(() => {
-    log("----------------------------------");
-    model.value = "FUM";
-  }, 3000);
+  // setTimeout(() => {
+  //   log("----------------------------------");
+  //   model.value = "FUM";
+  // }, 3000);
 }
