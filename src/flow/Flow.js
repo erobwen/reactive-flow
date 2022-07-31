@@ -140,13 +140,14 @@ export class Flow {
 
   onEstablish() {
     this.setState();
-    // log("Established:" + this.toString());
+    if (trace) log("Established:" + this.toString());
     // Lifecycle, override to do expensive things. Like opening up connections etc.
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process.
   }
 
   onDispose() {
     // Dispose created by repeater in call. 
+    if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
       if (this.buildRepeater.buildIdObjectMap) {
         for (let key in this.buildRepeater.buildIdObjectMap) {
@@ -165,17 +166,18 @@ export class Flow {
   className() {
     let result;
     withoutRecording(() => {
-      if (this.classNameOverride) {
-        result = this.classNameOverride;
-      } else {
-        result = this.constructor.name;
-      }
+      result = this.constructor.name;
     });
     return result;
   }
 
   toString() {
-    let classDescription = this.className();
+    let classNameOverride;
+    withoutRecording(() => {
+      classNameOverride = this.classNameOverride;
+    });
+
+    let classDescription = classNameOverride ? classNameOverride : this.className();
     if (classDescription === "Flow" && this.description)
       classDescription = this.description;
     return (
@@ -239,6 +241,7 @@ export class Flow {
 
   activate() {
     // this.target.integrate(this, this.getPrimitive());
+    this.onEstablish();
     this.target.integrate(this);
     return this;
   }
@@ -260,6 +263,7 @@ export class Flow {
           // Build and rebuild
           me.newBuild = me.build(repeater);
           repeater.finishRebuilding();
+          me.newBuild = repeater.establishedShapeRoot;
 
           // Establish relationship between equivalent child and this (its creator).
           if (me.newBuild !== null) {

@@ -42,7 +42,7 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   integrate(flow) {
-    log("INTEGRATE");
+    // log("INTEGRATE");
     this.content = flow;
     this.content.bounds = {width: window.innerHeight, height: window.innerWidth}
     flow.target = this;

@@ -1221,7 +1221,10 @@ function createWorld(configuration) {
   function reBuildShapeAnalysis(repeater, shapeAnalysis) {
     let visited = {};
     
+    // console.log("reBuildShapeAnalysis");
+
     function setAsMatch(newObject, establishedObject) {
+      // console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
       establishedObject[objectMetaProperty].forwardTo = newObject;
       newObject[objectMetaProperty].copyTo = establishedObject;
       if (newObject[objectMetaProperty].pendingCreationEvent) {
@@ -1244,6 +1247,11 @@ function createWorld(configuration) {
       if (!repeater.newIdObjectShapeMap[newObjectId]) return; // Limit search! otherwise we could go off road!
       if (visited[newObjectId]) return; // Already done!
       visited[newObjectId] = 1; // Visited, but no recursive analysis
+      
+      // console.log("matchInEquivalentSlot");
+      // console.log(newObject.toString());
+      // console.log(establishedObject ? establishedObject.toString() : null);
+      // console.log("----");
 
       if (!establishedObject) {
         // Continue to search new data for a non finalized buildId matched object where we can once again find an established data structure.
@@ -1258,7 +1266,7 @@ function createWorld(configuration) {
           || establishedObject[objectMetaProperty].buildId) {
           return; 
         }
-
+        
         if (!shapeAnalysis.canMatch(newObject, establishedObject)) return;
         setAsMatch(newObject, establishedObject);
 

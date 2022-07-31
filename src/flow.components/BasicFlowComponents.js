@@ -139,7 +139,7 @@ export function text(...parameters) {
 
   return getTarget().elementNode(properties.key ? properties.key + ".span" : null, 
     {
-      classNameOverride: "text",
+      classNameOverride: "text[" + textProperties.text + "]",
       tagName:"span",
       attributes, 
       children: [getTarget().textNode(textProperties)], 
