@@ -130,12 +130,10 @@ export class Flow {
    */
 
   derrive(action) {
-    if (this.derriveRepeater) {
-      throw new Error(
-        "Only one derrive call in setState allowed! But you can do multiple things in that one. Use causality/repeat for more options"
-      );
+    if (!this.derriveRepeaters) {
+      this.derriveRepeaters = [];
     }
-    this.derriveRepeater = repeat(action);
+    this.derriveRepeaters.push(repeat(action));
   }
 
   onEstablish() {
@@ -158,7 +156,7 @@ export class Flow {
 
       this.buildRepeater.dispose();
     } 
-    if (this.derriveRepeater) this.derriveRepeater.dispose(); // Do you want a disposed repeater to nullify all its writed values? Probably not....
+    if (this.derriveRepeaters) this.derriveRepeaters.map(repeater => repeater.dispose()); // Do you want a disposed repeater to nullify all its writed values? Probably not....
 
     this.disposeState();
   }
@@ -293,22 +291,24 @@ export class Flow {
                 } else {
                   let newIndex = 0;
                   let establishedIndex = 0;
-                  while(newIndex < newFlow.children.length) {
-                    while(!canMatchAny(newFlow.children[newIndex]) && newIndex < newFlow.children.length) newIndex++;
-                    if (optionalEstablishedFlow) {
-                      while(!canMatchAny(optionalEstablishedFlow.children[establishedIndex]) && establishedIndex < optionalEstablishedFlow.children.length) establishedIndex++;
-                    }
-
-                    if (newIndex < newFlow.children.length) {
-                      yield {
-                        newSlot: newFlow.children[newIndex],
-                        establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow.children[establishedIndex] : null
+                  if (newFlow.children instanceof Array) {
+                    while(newIndex < newFlow.children.length) {
+                      while(!canMatchAny(newFlow.children[newIndex]) && newIndex < newFlow.children.length) newIndex++;
+                      if (optionalEstablishedFlow) {
+                        while(!canMatchAny(optionalEstablishedFlow.children[establishedIndex]) && establishedIndex < optionalEstablishedFlow.children.length) establishedIndex++;
                       }
-                    }
-
-                    newIndex++;
-                    establishedIndex++;
-                  };
+  
+                      if (newIndex < newFlow.children.length) {
+                        yield {
+                          newSlot: newFlow.children[newIndex],
+                          establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow.children[establishedIndex] : null
+                        }
+                      }
+  
+                      newIndex++;
+                      establishedIndex++;
+                    };  
+                  }
                 }
               }
             },
@@ -349,9 +349,11 @@ export function when(condition, operation) {
 
 export function readFlowProperties(arglist, config) {
   let singleStringAsText = config ? config.singleStringAsText : null;
-  // Shortcut
-  if (typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") return arglist[0]
-
+  // Shortcut if argument is a properties object
+  if (arglist[0] !== null && typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
+    return arglist[0];
+  }
+  
   // The long way
   let properties = {};
   let readOneString = false; 

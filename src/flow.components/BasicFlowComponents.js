@@ -89,7 +89,7 @@ export function row(...parameters) {
   return getTarget().elementNode({key: properties.key, classNameOverride: "row", tagName: "div", attributes, children: properties.children }); 
 }
 
-export function column(...parameters) { 
+export function column(...parameters) {
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties);
   attributes.style = {...columnStyle, ...attributes.style}; // Inject column style (while making it possible to override)
@@ -139,6 +139,10 @@ export function text(...parameters) {
       children: [getTarget().textNode(textProperties)], 
       ...properties 
     });
+}
+
+export function textField(label, getter, setter, ...parameters) {
+  return text("foo");
 }
 
 export function button(...parameters) { 
