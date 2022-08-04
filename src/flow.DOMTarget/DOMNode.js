@@ -24,8 +24,8 @@ const log = console.log;
       return result;
     }
     
-    buildDomNode(element) {
-      // console.log(this.toString() + ".buildDomNode:");
+    reBuildDomNode(element) {
+      // console.log(this.toString() + ".reBuildDomNode:");
       // console.log(element);
 
       const newAttributes = this.attributes;
@@ -92,8 +92,8 @@ const log = console.log;
       return document.createTextNode("");
     }
   
-    buildDomNode(element) {
-      // console.log(this.toString() + ".buildDomNode:");
+    reBuildDomNode(element) {
+      // console.log(this.toString() + ".reBuildDomNode:");
       // console.log(element);
       element.nodeValue = this.text; // toString()
     }
@@ -117,8 +117,8 @@ const log = console.log;
       return document.createElement("div");
     }
   
-    buildDomNode(element) {
-      if (trace) console.log(this.toString() + ".buildDomNode:");
+    reBuildDomNode(element) {
+      if (trace) console.log(this.toString() + ".reBuildDomNode:");
       if (trace) console.log(element);
       element.style.display = "none";
     }

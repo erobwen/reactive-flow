@@ -20,7 +20,7 @@ export function aggregateToString(flow) {
   }
   return id.join(" | ");
 }
-
+   
 export function clearNode(node) {
   while (node.childNodes.length > 0) {
     node.removeChild(node.lastChild);
@@ -52,8 +52,8 @@ export function clearNode(node) {
       this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
         if (trace) console.group(repeater.causalityString());
         
-        this.getEmptyDomNode();
-        this.buildDomNodeWithChildren();
+        this.ensureDomNodeCreated();
+        this.reBuildDomNodeWithChildren();
         if (trace) console.groupEnd();  
       });
     }
@@ -64,29 +64,37 @@ export function clearNode(node) {
     throw new Error("Not implemented yet!");
   }
 
-  buildDomNodeWithChildren() {
+  reBuildDomNodeWithChildren() {
     const node = this.domNode;
-    this.buildDomNode(node);
-    
-    clearNode(node);
+    this.reBuildDomNode(node);
+
+    while (node.childNodes.length > 0) {
+      node.removeChild(node.lastChild);
+    }
+    this.getChildNodes().map(childNode => node.appendChild(childNode));
+  }
+
+  getChildNodes() {
+    const result = [];
     if (this.children instanceof Array) {
       for (let child of this.children) {
         if (child) {
           const childPrimitive = child.getPrimitive();
           if (childPrimitive) {
-            node.appendChild(childPrimitive.getDomNode());
+            result.push(childPrimitive.getDomNode());
           }
         }
       }
     } else if (this.children instanceof Flow) {
       const childPrimitive = this.children.getPrimitive();
       if (childPrimitive) {
-        node.appendChild(childPrimitive.getDomNode());
+        result.push(childPrimitive.getDomNode());
       }
     }  
+    return result;
   }
 
-  getEmptyDomNode() { 
+  ensureDomNodeCreated() { 
     if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {
         if (trace) log(repeater.causalityString());
@@ -109,7 +117,7 @@ export function clearNode(node) {
     return this.domNode;
   }
 
-  buildDomNode(element) {
+  reBuildDomNode(element) {
     throw new Error("Not implemented yet!");
   }
 }
