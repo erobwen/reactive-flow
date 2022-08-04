@@ -68,10 +68,27 @@ export function clearNode(node) {
     const node = this.domNode;
     this.reBuildDomNode(node);
 
-    while (node.childNodes.length > 0) {
-      node.removeChild(node.lastChild);
+    const newChildNodes = this.getChildNodes();
+
+    // Removal pass
+    let index = node.childNodes.length - 1;
+    while(0 <= index) {
+      const existingChild = node.childNodes[index];
+      if (!newChildNodes.includes(existingChild)) {
+        node.removeChild(existingChild);
+      }
+      index--;
     }
-    this.getChildNodes().map(childNode => node.appendChild(childNode));
+    
+    // Adding pass
+    index = 0;
+    while(index < newChildNodes.length) {
+      const existingChild = node.childNodes[index];
+      if (newChildNodes[index] !== existingChild) {
+        node.insertBefore(newChildNodes[index], existingChild);
+      }
+      index++;
+    }
   }
 
   getChildNodes() {
