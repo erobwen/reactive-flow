@@ -54,7 +54,6 @@ export function clearNode(node) {
         
         this.getEmptyDomNode();
         this.buildDomNodeWithChildren();
-        if (trace) log(this.domNode);
         if (trace) console.groupEnd();  
       });
     }
@@ -90,7 +89,7 @@ export function clearNode(node) {
   getEmptyDomNode() { 
     if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {
-        // log(repeater.causalityString());
+        if (trace) log(repeater.causalityString());
 
         // Create empty dom node
         this.domNode = this.createEmptyDomNode();
@@ -103,6 +102,8 @@ export function clearNode(node) {
           scanFlow.domNode = this.domNode;
           scanFlow = scanFlow.equivalentCreator;
         }
+
+        if (trace) log(this.domNode);
       });
     }
     return this.domNode;

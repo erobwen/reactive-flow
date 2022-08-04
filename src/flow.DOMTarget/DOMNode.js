@@ -1,5 +1,4 @@
 import { trace } from "../flow/Flow";
-import { DOMFlowTarget } from "./DOMFlowTarget";
 import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";    
 const log = console.log;
 

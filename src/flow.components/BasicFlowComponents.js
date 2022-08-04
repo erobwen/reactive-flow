@@ -141,8 +141,21 @@ export function text(...parameters) {
     });
 }
 
-export function textField(label, getter, setter, ...parameters) {
-  return text("foo");
+export function textInputField(label, getter, setter, ...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = {
+    ...extractAttributes(properties),
+    oninput: event => setter(event.target.value),
+    value: getter(),
+    type: "text",
+    // onfocusout: event => {debugger}
+  };
+
+  return row(
+    text(label, {style: {paddingRight: "4px"}}),
+    getTarget().elementNode(properties.key, {classNameOverride: "textInputField", tagName: "input", attributes, onClick: properties.onClick}),
+    {style: {padding: "4px"}}
+  );
 }
 
 export function button(...parameters) { 
