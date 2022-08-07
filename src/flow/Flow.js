@@ -20,9 +20,10 @@ window.world = world;
 window.observable = observable;
 export let creators = [];
 
-const configuration = {
+export const configuration = {
   warnWhenNoKey: false,
-  traceReactivity: false
+  traceReactivity: false,
+  animationsByDefault: false
 }
 
 export let trace = false;
@@ -353,7 +354,7 @@ export function readFlowProperties(arglist, config) {
   if (arglist[0] !== null && typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
     return arglist[0];
   }
-  
+
   // The long way
   let properties = {};
   let readOneString = false; 

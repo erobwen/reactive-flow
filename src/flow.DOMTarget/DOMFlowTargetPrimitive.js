@@ -1,4 +1,4 @@
-import { repeat, Flow, FlowTargetPrimitive, trace } from "../flow/Flow";
+import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow/Flow";
 
 const log = console.log;
 
@@ -68,10 +68,53 @@ export function clearNode(node) {
     const node = this.domNode;
     this.reBuildDomNode(node);
 
+    
+    if (this.transitionAnimation || configuration.animationsByDefault) {
+      reBuildDomNodeWithChildrenAnimated()
+    } else {
+      const newChildNodes = this.getChildNodes();
+  
+      // Removal pass
+      let index = node.childNodes.length - 1;
+      while(0 <= index) {
+        const existingChild = node.childNodes[index];
+        if (!newChildNodes.includes(existingChild)) {
+          node.removeChild(existingChild);
+        }
+        index--;
+      }
+      
+      // Adding pass
+      index = 0;
+      while(index < newChildNodes.length) {
+        const existingChild = node.childNodes[index];
+        if (newChildNodes[index] !== existingChild) {
+          node.insertBefore(newChildNodes[index], existingChild);
+        }
+        index++;
+      }
+    }
+  }
+  
+  reBuildDomNodeWithChildrenAnimated() {
     const newChildNodes = this.getChildNodes();
+    let index;
+
+    function setupTransitionCleanup(node) {
+      
+      function onTransitionEnd(event) {
+        node.style.transition = "";
+        node.removeEventListener("transitionend", onTransitionEnd);
+      }
+
+      node.addEventListener("transitionend", onTransitionEnd);
+    }
+
+    // Measure current bounds
+    const boundsBefore = node.childNodes.reduce((result, node) => result.push(node.getBoundingClientRect()), []);
 
     // Removal pass
-    let index = node.childNodes.length - 1;
+    index = node.childNodes.length - 1;
     while(0 <= index) {
       const existingChild = node.childNodes[index];
       if (!newChildNodes.includes(existingChild)) {
@@ -89,6 +132,32 @@ export function clearNode(node) {
       }
       index++;
     }
+
+    // Measure new bounds
+    const boundsAfter = newChildNodes.reduce((result, node) => result.push(node.getBoundingClientRect()), []);
+
+    requestAnimationFrame(() => {
+      // Translate to old position
+      index = 0;
+      while(index < newChildNodes) {
+        const node = newChildNodes[index];
+        const boundBefore = boundsBefore[index];
+        const boundAfter = boundsAfter[index];
+        const deltaX = boundAfter.left - boundBefore.left;
+        const deltaY = boundAfter.top - boundBefore.top;
+        node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+      }
+      
+      // Activate animations 
+      requestAnimationFrame(() => {
+        // Transition to new position
+        newChildNodes.forEach(node => {
+          node.style.transition = "1s ease-in";
+          node.style.transform = "";
+          setupTransitionCleanup(node);
+        });
+      });  
+    });
   }
 
   getChildNodes() {

@@ -45,7 +45,9 @@ export class ComplexForm extends Flow {
         text(person.age >= 18 ? "(Adult)" : "(Child)")
       ),
       person.age >= 18 ? textInputField("Occupation:", () => person.occupation, newOccupation => { person.occupation = newOccupation }) : null, 
-      {style: {padding: "30px"}}
+      {
+        style: {padding: "30px"}
+      }
     );
   }
 }
