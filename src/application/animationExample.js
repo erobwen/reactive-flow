@@ -42,7 +42,7 @@ export class AnimationExample extends Flow {
 
   build() {
     return column({
-        children: this.list.map(item => text(item)),
+        children: this.list.map(item => text({key: item, text: item})),
         style: {fontSize: "40px", padding: "20px"}, 
         transitionAnimations: {
             exit: (flow, oldBound) => ({frames:[], timing: 1000}),
@@ -57,25 +57,25 @@ export class AnimationExample extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startAnimationExample() {
-  const simple = new AnimationExample({
+  const animation = new AnimationExample({
     key: "root",
     items,
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
 
-//   setTimeout(() => {
-//     log("----------------------------------");
-//     simple.foo = "FOO";
-//   }, 1000);
+  setTimeout(() => {
+    log("----------------------------------");
+    animation.list = randomized(animation.items);
+  }, 1000);
 
-//   setTimeout(() => {
-//     log("----------------------------------");
-//     simple.bar = "BAR";
-//   }, 2000);
+  setTimeout(() => {
+    log("----------------------------------");
+    animation.list = randomized(animation.items);
+  }, 2000);
 
-//   setTimeout(() => {
-//     log("----------------------------------");
-//     model.value = "FUM";
-//   }, 3000);
+  setTimeout(() => {
+    log("----------------------------------");
+    animation.list = randomized(animation.items);
+  }, 3000);
 }
        
