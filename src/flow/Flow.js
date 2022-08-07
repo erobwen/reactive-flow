@@ -23,7 +23,7 @@ export let creators = [];
 export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
-  animationsByDefault: false
+  animationsByDefault: true
 }
 
 export let trace = false;

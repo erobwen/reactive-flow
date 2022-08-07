@@ -66,16 +66,16 @@ export function startAnimationExample() {
   setTimeout(() => {
     log("----------------------------------");
     animation.list = randomized(animation.items);
-  }, 1000);
-
-  setTimeout(() => {
-    log("----------------------------------");
-    animation.list = randomized(animation.items);
-  }, 2000);
-
-  setTimeout(() => {
-    log("----------------------------------");
-    animation.list = randomized(animation.items);
   }, 3000);
+
+//   setTimeout(() => {
+//     log("----------------------------------");
+//     animation.list = randomized(animation.items);
+//   }, 2000);
+
+//   setTimeout(() => {
+//     log("----------------------------------");
+//     animation.list = randomized(animation.items);
+//   }, 3000);
 }
        

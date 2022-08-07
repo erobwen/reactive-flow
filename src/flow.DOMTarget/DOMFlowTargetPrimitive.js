@@ -66,38 +66,47 @@ export function clearNode(node) {
 
   reBuildDomNodeWithChildren() {
     const node = this.domNode;
+    log("reBuildDomNodeWithChildren");
+    console.log(node);
     this.reBuildDomNode(node);
+    if (!(node instanceof Element)) return;
 
     
-    if (this.transitionAnimation || configuration.animationsByDefault) {
-      reBuildDomNodeWithChildrenAnimated()
+    if ((this.transitionAnimation || configuration.animationsByDefault) && node.children.length > 2) {
+      this.reBuildDomNodeWithChildrenAnimated(node)
     } else {
-      const newChildNodes = this.getChildNodes();
-  
-      // Removal pass
-      let index = node.childNodes.length - 1;
-      while(0 <= index) {
-        const existingChild = node.childNodes[index];
-        if (!newChildNodes.includes(existingChild)) {
-          node.removeChild(existingChild);
-        }
-        index--;
-      }
-      
-      // Adding pass
-      index = 0;
-      while(index < newChildNodes.length) {
-        const existingChild = node.childNodes[index];
-        if (newChildNodes[index] !== existingChild) {
-          node.insertBefore(newChildNodes[index], existingChild);
-        }
-        index++;
-      }
+      this.reBuildDomNodeWithChildrenWithoutAnimation(node)
     }
   }
-  
-  reBuildDomNodeWithChildrenAnimated() {
+
+  reBuildDomNodeWithChildrenWithoutAnimation(node) {
+    const newChildNodes = this.getChildNodes(node);
+    
+    // Removal pass
+    let index = node.childNodes.length - 1;
+    while(0 <= index) {
+      const existingChild = node.childNodes[index];
+      if (!newChildNodes.includes(existingChild)) {
+        node.removeChild(existingChild);
+      }
+      index--;
+    }
+    
+    // Adding pass
+    index = 0;
+    while(index < newChildNodes.length) {
+      const existingChild = node.childNodes[index];
+      if (newChildNodes[index] !== existingChild) {
+        node.insertBefore(newChildNodes[index], existingChild);
+      }
+      index++;
+    }
+  }
+
+  reBuildDomNodeWithChildrenAnimated(node) {
     const newChildNodes = this.getChildNodes();
+    log([...newChildNodes]);
+    log([...node.childNodes]);
     let index;
 
     function setupTransitionCleanup(node) {
@@ -111,7 +120,14 @@ export function clearNode(node) {
     }
 
     // Measure current bounds
-    const boundsBefore = node.childNodes.reduce((result, node) => result.push(node.getBoundingClientRect()), []);
+    const boundsBefore = [...node.childNodes].reduce(
+      (result, node) => { 
+        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
+        return result; 
+      }, 
+      {}
+    );
+    log(boundsBefore)
 
     // Removal pass
     index = node.childNodes.length - 1;
@@ -134,27 +150,40 @@ export function clearNode(node) {
     }
 
     // Measure new bounds
-    const boundsAfter = newChildNodes.reduce((result, node) => result.push(node.getBoundingClientRect()), []);
+    const boundsAfter = newChildNodes.reduce(
+      (result, node) => { 
+        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
+        return result; 
+      }, 
+      {}
+    );
+    log(boundsAfter)
 
     requestAnimationFrame(() => {
+      log("Translate to old position!!!!")
       // Translate to old position
       index = 0;
-      while(index < newChildNodes) {
+      while(index < newChildNodes.length) {
         const node = newChildNodes[index];
-        const boundBefore = boundsBefore[index];
-        const boundAfter = boundsAfter[index];
+        const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
+        const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
         const deltaX = boundAfter.left - boundBefore.left;
         const deltaY = boundAfter.top - boundBefore.top;
+        console.log("translate(" + -deltaX + "px, " + -deltaY + "px)")
         node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+        index++;
       }
       
       // Activate animations 
       requestAnimationFrame(() => {
+        log("Activate animations!!!!")
         // Transition to new position
         newChildNodes.forEach(node => {
-          node.style.transition = "1s ease-in";
-          node.style.transform = "";
-          setupTransitionCleanup(node);
+          if (node instanceof Element) {            
+            node.style.transition = "1s ease-in";
+            node.style.transform = "";
+            setupTransitionCleanup(node);
+          }
         });
       });  
     });
@@ -188,6 +217,7 @@ export function clearNode(node) {
         // Create empty dom node
         this.domNode = this.createEmptyDomNode();
         this.domNode.id = aggregateToString(this);
+        this.domNode.equivalentCreator = this; 
         // this.domNode.id = mostAbstractFlow(this).toString()
         
         // Decorate all equivalent flows
