@@ -24,29 +24,36 @@ export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
   animationsByDefault: true,
-  defaultAnimations: {
+  defaultAnimations: flow => ({
+    // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
+    // This method is called just before the animation is run so you could examine bounds etc. 
+    // and create the animations depending on that. 
     move: {
-      transition: "0.4s ease-in",
+      transition: "0.4s ease-in-out",
     },
     enter: {
-      transition: "0.4s ease-in",
-      style: {
+      transition: "0.4s ease-in-out",
+      initialStyle: {
         opacity: "0",
-        transform: "scale(0)",
-        // width: "0px"
-        // height: "0px"
+        transform: "scale(0)"
+      },
+      finalStyle: {
+        opacity: "1",
+        transform: "scale(1)"
       },
     }, 
     exit: {
-      transition: "0.4s ease-in",
-      style: {
+      transition: "0.4s ease-in-out",
+      initialStyle: {
+        opacity: "1",
+        transform: "scale(1)"
+      },
+      finalStyle: {
         opacity: "0",
         transform: "scale(0)"
-        // width: "0px"
-        // height: "0px"
       }
     }
-  }
+  })
 }
 
 export let trace = false;
