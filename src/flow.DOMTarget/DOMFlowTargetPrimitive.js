@@ -117,11 +117,15 @@ export function clearNode(node) {
     function setupTransitionCleanup(node, alsoRemoveNode) {
       
       function onTransitionEnd(event) {
-        node.style.transition = "";
-        node.removeEventListener("transitionend", onTransitionEnd);
         if (alsoRemoveNode) {
+          log("REMOVING CHILD!!!")
           node.parentNode.removeChild(node);
         }
+        node.style.transition = "";
+        node.style.width = "";
+        node.style.height = "";
+        node.style.opacity = "";
+        node.removeEventListener("transitionend", onTransitionEnd);
       }
 
       node.addEventListener("transitionend", onTransitionEnd);
@@ -145,6 +149,10 @@ export function clearNode(node) {
       const existingChild = node.childNodes[index];
       if (!newChildNodes.includes(existingChild)) {
         newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
+        existingChild.style.transition = "";
+        existingChild.style.transform = "";
+        // existingChild.style.width = boundsBefore[existingChild.equivalentCreator.causality.id].width + "px";
+        // existingChild.style.height = boundsBefore[existingChild.equivalentCreator.causality.id].height + "px";
         removed.push(existingChild);
       }
       index++;
@@ -160,9 +168,9 @@ export function clearNode(node) {
       const newChild = newChildNodes[index];
       if (!childNodes.includes(newChild)) {
         added.push(newChild);
-        // newChild.style.transform = "scale(0)";
-        newChild.style.width = "0px";
-        newChild.style.height = "0px";
+        newChild.style.transform = "scale(0)";
+        // newChild.style.width = "0px";
+        // newChild.style.height = "0px";
         newChild.style.opacity = "0";
       } 
       if (newChild !== existingChild) {
@@ -191,39 +199,43 @@ export function clearNode(node) {
       index = 0;
       while(index < newChildNodes.length) {
         const node = newChildNodes[index];
-        if (!added.includes(node) && !removed.includes(node)) {
+        if (!added.includes(node)) {  // && !removed.includes(node)
           const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
           const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
           const deltaX = boundAfter.left - boundBefore.left;
           const deltaY = boundAfter.top - boundBefore.top;
-          console.log("translate(" + -deltaX + "px, " + -deltaY + "px)")
-          node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+          console.log("translate(" + -deltaX + "px, " + -deltaY + "px)");
+          node.style.transition = "";
+          node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
         }
         index++;
       }
 
       // Activate animations 
       requestAnimationFrame(() => {
+        // debugger;
         log("Activate animations!!!!")
 
         // Transition all except removed to new position by removing translation
         // Minimize removed by adding scale = 0 transform and at the same time removing the translation
         newChildNodes.forEach(node => {
           if (node instanceof Element) {
+            log(node)
             if (!removed.includes(node)) {
               log("OTHER")
-              node.style.transition = "0.4s ease-in";
-              node.style.transform = "";
-              node.style.width = "";
-              node.style.height = "";
+              node.style.transition = "all 0.4s ease-in-out";
+              node.style.transform = "scale(1)";
+              // node.style.width = "";
+              // node.style.height = "";
               node.style.opacity = "";
               setupTransitionCleanup(node, false);
             } else {
               log("REMOVED")
-              node.style.transition = "0.4s ease-in";
-              node.style.width = "0px";
-              node.style.height = "0px";
-              // node.style.transform = "scale(0)";
+              node.style.transition = "all 0.4s ease-in-out";
+              // node.style.width = "0px";
+              // node.style.height = "0px";
+              node.style.opacity = "0";
+              node.style.transform = "scale(0) translate(0, 0)";
               setupTransitionCleanup(node, true);
             }      
           }

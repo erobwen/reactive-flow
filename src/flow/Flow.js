@@ -23,7 +23,30 @@ export let creators = [];
 export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
-  animationsByDefault: true
+  animationsByDefault: true,
+  defaultAnimations: {
+    move: {
+      transition: "0.4s ease-in",
+    },
+    enter: {
+      transition: "0.4s ease-in",
+      style: {
+        opacity: "0",
+        transform: "scale(0)",
+        // width: "0px"
+        // height: "0px"
+      },
+    }, 
+    exit: {
+      transition: "0.4s ease-in",
+      style: {
+        opacity: "0",
+        transform: "scale(0)"
+        // width: "0px"
+        // height: "0px"
+      }
+    }
+  }
 }
 
 export let trace = false;
