@@ -70,18 +70,23 @@ export function clearNode(node) {
     console.log(node);
     this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
-
+    const newChildNodes = this.getChildNodes(node);
     
-    if ((this.transitionAnimation || configuration.animationsByDefault) && node.children.length > 2) {
-      this.reBuildDomNodeWithChildrenAnimated(node)
+    function allElements(nodeList) {
+      if (!nodeList) return false;
+      let result = true;
+      nodeList.forEach(child => {if (!(child instanceof Element)) result = false; });
+      return result;
+    }
+    
+    if ((this.transitionAnimation || configuration.animationsByDefault) && allElements(node.childNodes) && allElements(newChildNodes)) {
+      this.reBuildDomNodeWithChildrenAnimated(node, newChildNodes)
     } else {
-      this.reBuildDomNodeWithChildrenWithoutAnimation(node)
+      this.reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes)
     }
   }
 
-  reBuildDomNodeWithChildrenWithoutAnimation(node) {
-    const newChildNodes = this.getChildNodes(node);
-    
+  reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes) {
     // Removal pass
     let index = node.childNodes.length - 1;
     while(0 <= index) {
@@ -103,52 +108,68 @@ export function clearNode(node) {
     }
   }
 
-  reBuildDomNodeWithChildrenAnimated(node) {
-    const newChildNodes = this.getChildNodes();
+  reBuildDomNodeWithChildrenAnimated(node, newChildNodes) {
     log([...newChildNodes]);
     log([...node.childNodes]);
+    const childNodes = [...node.childNodes];
     let index;
 
-    function setupTransitionCleanup(node) {
+    function setupTransitionCleanup(node, alsoRemoveNode) {
       
       function onTransitionEnd(event) {
         node.style.transition = "";
         node.removeEventListener("transitionend", onTransitionEnd);
+        if (alsoRemoveNode) {
+          node.parentNode.removeChild(node);
+        }
       }
 
       node.addEventListener("transitionend", onTransitionEnd);
     }
 
     // Measure current bounds
-    const boundsBefore = [...node.childNodes].reduce(
+    const boundsBefore = childNodes.reduce(
       (result, node) => { 
         result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
         return result; 
       }, 
       {}
     );
-    log(boundsBefore)
+    log("boundsBefore:");
+    log(boundsBefore);
 
-    // Removal pass
-    index = node.childNodes.length - 1;
-    while(0 <= index) {
+    // Reintroduced removed, as to be removed
+    index = 0;
+    const removed = [];
+    while(index < node.childNodes.length) {
       const existingChild = node.childNodes[index];
       if (!newChildNodes.includes(existingChild)) {
-        node.removeChild(existingChild);
-      }
-      index--;
-    }
-    
-    // Adding pass
-    index = 0;
-    while(index < newChildNodes.length) {
-      const existingChild = node.childNodes[index];
-      if (newChildNodes[index] !== existingChild) {
-        node.insertBefore(newChildNodes[index], existingChild);
+        newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
+        removed.push(existingChild);
       }
       index++;
     }
-
+    log("removed:");
+    log(removed);
+    
+    // Adding pass
+    index = 0;
+    const added = [];
+    while(index < newChildNodes.length) {
+      const existingChild = node.childNodes[index];
+      const newChild = newChildNodes[index];
+      if (!childNodes.includes(newChild)) {
+        added.push(newChild);
+        newChild.style.transform = "scale(0)";
+      } 
+      if (newChild !== existingChild) {
+        node.insertBefore(newChild, existingChild);
+      }
+      index++;
+    }
+    log("added:");
+    log(added);
+   
     // Measure new bounds
     const boundsAfter = newChildNodes.reduce(
       (result, node) => { 
@@ -157,34 +178,48 @@ export function clearNode(node) {
       }, 
       {}
     );
-    log(boundsAfter)
+    log("boundsAfter:");
+    log(boundsAfter);
 
     requestAnimationFrame(() => {
       log("Translate to old position!!!!")
-      // Translate to old position
+
+      // Translate all except added to their old position (added should have a scale=0 transform)
       index = 0;
       while(index < newChildNodes.length) {
         const node = newChildNodes[index];
-        const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
-        const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
-        const deltaX = boundAfter.left - boundBefore.left;
-        const deltaY = boundAfter.top - boundBefore.top;
-        console.log("translate(" + -deltaX + "px, " + -deltaY + "px)")
-        node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+        if (!added.includes(node)) {
+          const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
+          const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
+          const deltaX = boundAfter.left - boundBefore.left;
+          const deltaY = boundAfter.top - boundBefore.top;
+          console.log("translate(" + -deltaX + "px, " + -deltaY + "px)")
+          node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+        }
         index++;
       }
-      
+
       // Activate animations 
       requestAnimationFrame(() => {
         log("Activate animations!!!!")
-        // Transition to new position
+
+        // Transition all except removed to new position by removing translation
+        // Minimize removed by adding scale = 0 transform and at the same time removing the translation
         newChildNodes.forEach(node => {
-          if (node instanceof Element) {            
-            node.style.transition = "1s ease-in";
-            node.style.transform = "";
-            setupTransitionCleanup(node);
+          if (node instanceof Element) {
+            if (!removed.includes(node)) {
+              node.style.transition = "0.4s ease-in";
+              node.style.transform = "";
+              setupTransitionCleanup(node, false);
+            } else {
+              node.style.transition = "0.4s ease-in";
+              node.style.transform = "scale(0)";
+              setupTransitionCleanup(node, true);
+            }      
           }
         });
+
+        
       });  
     });
   }
