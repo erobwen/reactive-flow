@@ -24,7 +24,7 @@ export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
   animationsByDefault: true,
-  defaultAnimations: flow => ({
+  defaultTransitionAnimations: flow => ({
     // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
     // This method is called just before the animation is run so you could examine bounds etc. 
     // and create the animations depending on that. 
@@ -366,6 +366,17 @@ export class Flow {
   dimensions() {
     const primitive = this.getPrimitive();
     return primitive ? primitive.dimensions() : null;
+  }
+
+  getEquivalentRoot() {
+    if (!this.equivalentCreator) return this;
+    return this.equivalentCreator.getEquivalentRoot();
+  }
+
+  getTransitionAnimations() {
+    if (this.transitionAnimations) return this.transitionAnimations(this.getEquivalentRoot());
+    if (this.getEquivalentRoot) return this.getEquivalentRoot.getTransitionAnimations();
+    return configuration.defaultAnimations(this.getEquivalentRoot());
   }
 }
 
