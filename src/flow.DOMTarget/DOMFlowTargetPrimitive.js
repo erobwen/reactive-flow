@@ -160,7 +160,10 @@ export function clearNode(node) {
       const newChild = newChildNodes[index];
       if (!childNodes.includes(newChild)) {
         added.push(newChild);
-        newChild.style.transform = "scale(0)";
+        // newChild.style.transform = "scale(0)";
+        newChild.style.width = "0px";
+        newChild.style.height = "0px";
+        newChild.style.opacity = "0";
       } 
       if (newChild !== existingChild) {
         node.insertBefore(newChild, existingChild);
@@ -188,7 +191,7 @@ export function clearNode(node) {
       index = 0;
       while(index < newChildNodes.length) {
         const node = newChildNodes[index];
-        if (!added.includes(node)) {
+        if (!added.includes(node) && !removed.includes(node)) {
           const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
           const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
           const deltaX = boundAfter.left - boundBefore.left;
@@ -208,18 +211,23 @@ export function clearNode(node) {
         newChildNodes.forEach(node => {
           if (node instanceof Element) {
             if (!removed.includes(node)) {
+              log("OTHER")
               node.style.transition = "0.4s ease-in";
               node.style.transform = "";
+              node.style.width = "";
+              node.style.height = "";
+              node.style.opacity = "";
               setupTransitionCleanup(node, false);
             } else {
+              log("REMOVED")
               node.style.transition = "0.4s ease-in";
-              node.style.transform = "scale(0)";
+              node.style.width = "0px";
+              node.style.height = "0px";
+              // node.style.transform = "scale(0)";
               setupTransitionCleanup(node, true);
             }      
           }
         });
-
-        
       });  
     });
   }
