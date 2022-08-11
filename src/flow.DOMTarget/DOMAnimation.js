@@ -58,120 +58,113 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     }
     index++;
   }
-  // index = 0;
-  // while(index < newChildNodes.length) {
+  index = 0;
+  while(index < newChildNodes.length) {
+    const newChild = newChildNodes[index];
+    if (!childNodes.includes(newChild)) {
+      added.push(newChild);
+    }
+    index++;
+  }
 
   // Stop any ongoing animation and measure current bounds and transformation
   const boundsBefore = childNodes.reduce(
     (result, node) => {
+      // Stop ongoing animation!
       const computedStyle = getComputedStyle(node);
       // Object.assign(node.style, computedStyle);
-
-      // Stop ongoing animation!
       if (computedStyle.transform !== "") {
         node.style.transform = computedStyle.transform; 
       }
 
+      // Get bounds
       const bounds = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-  
-      const transform = parseMatrix(computedStyle.transform); 
-      log(transform);
-      result[node.equivalentCreator.causality.id] = {
-        top: bounds.top, //+ transform.translateY, 
-        left: bounds.left,// + transform.translateX, 
-        // width: bounds.width, * transform.scaleX, 
-        // height: bounds.height, * transform.scaleY
-      };
+      
+      // Possibly transform bounds? 
+      // const transform = parseMatrix(computedStyle.transform); 
+      // log(transform);
+      // result[node.equivalentCreator.causality.id] = {
+        //   top: bounds.top, //+ transform.translateY, 
+        //   left: bounds.left,// + transform.translateX, 
+        //   width: bounds.width,// * transform.scaleX, 
+        //   height: bounds.height,// * transform.scaleY
+        // };
+      result[node.equivalentCreator.causality.id] = bounds;
 
       return result; 
     }, 
     {}
   );
   
-  // Adding pass
+  // Change all the elements to final state, with minimum changes to dom (to avoid loosing focus etc.)
   index = 0;
-  // const added = [];
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
-    newChild.style.transform = "";
-    if (!childNodes.includes(newChild)) {
-      added.push(newChild);
-      newChild.style.transform = "scale(0)";
-      // newChild.style.width = "0px";
-      // newChild.style.height = "0px";
-      newChild.style.opacity = "0";
-    }
-
     const existingChild = node.childNodes[index];
     if (newChild !== existingChild) {
       node.insertBefore(newChild, existingChild);
     }
     index++;
   }
-  // log("added:");
-  // log(added);
-
-
-  // Modify deleted?    
-  // existingChild.style.transition = "";
-  // existingChild.style.transform = "";
   
-  // Measure new bounds
-  const boundsAfter = newChildNodes.reduce(
-    (result, node) => { 
-      result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
-      return result; 
-    }, 
-    {}
-  );
-  // debugger; 
-  // log("boundsAfter:");
-  // log(boundsAfter);
+  // Setup animation final states for measures
+  for (let node of added) {
+    node.style.transform = "";
+    node.style.opacity = "1";
+  }
+  for (let node of removed) {
+    node.style.transform = "scale(0)";
+    node.style.opacity = "0";
+  }
 
   requestAnimationFrame(() => {
-    // log("Translate to old position!!!!")
 
+    // Measure new bounds
+    const boundsAfter = newChildNodes.reduce(
+      (result, node) => { 
+        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
+        return result; 
+      }, 
+      {}
+    ); 
+  
+    // Setup animation initial states
     // Translate all except added to their old position (added should have a scale=0 transform)
     index = 0;
     while(index < newChildNodes.length) {
       const node = newChildNodes[index];
+      node.style.transition = "";
       if (!added.includes(node)) {  // && !removed.includes(node)
         const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
         const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
         const deltaX = boundAfter.left - boundBefore.left;
         const deltaY = boundAfter.top - boundBefore.top;
-        // console.log("translate(" + -deltaX + "px, " + -deltaY + "px)");
-        node.style.transition = "";
         node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
+        node.style.opacity = "1";      
+      } else {
+        node.style.transform = "scale(0)";
+        node.style.opacity = "0";      
       }
       index++;
     }
 
     // Activate animations 
     requestAnimationFrame(() => {
-      // debugger;
-      // log("Activate animations!!!!")
-
       // Transition all except removed to new position by removing translation
       // Minimize removed by adding scale = 0 transform and at the same time removing the translation
       newChildNodes.forEach(node => {
         if (node instanceof Element) {
-          // log(node)
           if (!removed.includes(node)) {
-            // log("OTHER")
+            // Added or kept node
             node.style.transition = "all 0.4s ease-in-out";
             node.style.transform = "scale(1)";
-            // node.style.width = "";
-            // node.style.height = "";
-            node.style.opacity = "";
+            node.style.opacity = "1";
             setupTransitionCleanup(node, false);
           } else {
-            // log("REMOVED")
+            // Removed node
             node.style.transition = "all 0.4s ease-in-out";
-            // node.style.width = "0px";
-            // node.style.height = "0px";
-            node.style.opacity = "0";
             node.style.transform = "scale(0) translate(0, 0)";
+            node.style.opacity = "0";
             setupTransitionCleanup(node, true);
           }      
         }
