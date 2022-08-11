@@ -99,7 +99,7 @@ export function clearNode(node) {
       return result;
     }
     
-    if ((this.transitionAnimation || configuration.animationsByDefault) && allElements(node.childNodes) && allElements(newChildNodes)) {
+    if ((this.transitionAnimations || configuration.defaultTransitionAnimations) && allElements(node.childNodes) && allElements(newChildNodes)) {
       this.reBuildDomNodeWithChildrenAnimated(node, newChildNodes)
     } else {
       this.reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes)
@@ -129,8 +129,7 @@ export function clearNode(node) {
   }
 
   reBuildDomNodeWithChildrenAnimated(node, newChildNodes) {
-    // log([...newChildNodes]);
-    // log([...node.childNodes]);
+    const transitionAnimations = this.transitionAnimations ? this.transitionAnimations : configuration.defaultTransitionAnimations;
     const childNodes = [...node.childNodes];
     let index;
 
@@ -150,9 +149,24 @@ export function clearNode(node) {
 
       node.addEventListener("transitionend", onTransitionEnd);
     }
-    log();
 
-    // Stop any ongoing animation and measure current bounds
+    // Analyze removed and added
+    // Reintroduced removed, but mark to be removed
+    index = 0;
+    const removed = [];
+    const added = [];
+    while(index < node.childNodes.length) {
+      const existingChild = node.childNodes[index];
+      if (!newChildNodes.includes(existingChild)) {
+        newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
+        removed.push(existingChild);
+      }
+      index++;
+    }
+    // index = 0;
+    // while(index < newChildNodes.length) {
+
+    // Stop any ongoing animation and measure current bounds and transformation
     const boundsBefore = childNodes.reduce(
       (result, node) => {
         const computedStyle = getComputedStyle(node);
@@ -167,8 +181,6 @@ export function clearNode(node) {
     
         const transform = parseMatrix(computedStyle.transform); 
         log(transform);
-        // bounds.top -= transform.translateY;
-        // bounds.left -= transform.translateX;
         result[node.equivalentCreator.causality.id] = {
           top: bounds.top, //+ transform.translateY, 
           left: bounds.left,// + transform.translateX, 
@@ -180,30 +192,12 @@ export function clearNode(node) {
       }, 
       {}
     );
-    // log("boundsBefore:");
-    // log(boundsBefore);
 
-    // Reintroduced removed, as to be removed
-    index = 0;
-    const removed = [];
-    while(index < node.childNodes.length) {
-      const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild)) {
-        newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
-        existingChild.style.transition = "";
-        existingChild.style.transform = "";
-        // existingChild.style.width = boundsBefore[existingChild.equivalentCreator.causality.id].width + "px";
-        // existingChild.style.height = boundsBefore[existingChild.equivalentCreator.causality.id].height + "px";
-        removed.push(existingChild);
-      }
-      index++;
-    }
-    // log("removed:");
-    // log(removed);
+
     
     // Adding pass
     index = 0;
-    const added = [];
+    // const added = [];
     while(index < newChildNodes.length) {
       const newChild = newChildNodes[index];
       newChild.style.transform = "";
@@ -223,6 +217,11 @@ export function clearNode(node) {
     }
     // log("added:");
     // log(added);
+
+
+    // Modify deleted?    
+    // existingChild.style.transition = "";
+    // existingChild.style.transform = "";
    
     // Measure new bounds
     const boundsAfter = newChildNodes.reduce(

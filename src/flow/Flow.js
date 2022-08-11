@@ -23,7 +23,7 @@ export let creators = [];
 export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
-  animationsByDefault: true,
+  // defaultTransitionAnimations: null,
   defaultTransitionAnimations: flow => ({
     // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
     // This method is called just before the animation is run so you could examine bounds etc. 
