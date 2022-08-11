@@ -58,127 +58,120 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     }
     index++;
   }
-  index = 0;
-  while(index < newChildNodes.length) {
-    const newChild = newChildNodes[index];
-    if (!childNodes.includes(newChild)) {
-      added.push(newChild);
-    }
-    index++;
-  }
+  // index = 0;
+  // while(index < newChildNodes.length) {
 
   // Stop any ongoing animation and measure current bounds and transformation
   const boundsBefore = childNodes.reduce(
     (result, node) => {
-      // Stop ongoing animation!
-      // node.style.transition = "";
-      // const computedStyle = getComputedStyle(node);
-      // // Object.assign(node.style, computedStyle);
-      // if (computedStyle.transform !== "") {
-      //   node.style.transform = computedStyle.transform; 
-      // }
+      const computedStyle = getComputedStyle(node);
+      // Object.assign(node.style, computedStyle);
 
-      // Get bounds
+      // Stop ongoing animation!
+      if (computedStyle.transform !== "") {
+        node.style.transform = computedStyle.transform; 
+      }
+
       const bounds = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-      
-      // Possibly transform bounds? 
-      // const transform = parseMatrix(computedStyle.transform); 
-      // log(transform);
-      // result[node.equivalentCreator.causality.id] = {
-        //   top: bounds.top, //+ transform.translateY, 
-        //   left: bounds.left,// + transform.translateX, 
-        //   width: bounds.width,// * transform.scaleX, 
-        //   height: bounds.height,// * transform.scaleY
-        // };
-      result[node.equivalentCreator.causality.id] = bounds;
-      log(bounds);
+  
+      const transform = parseMatrix(computedStyle.transform); 
+      log(transform);
+      result[node.equivalentCreator.causality.id] = {
+        top: bounds.top, //+ transform.translateY, 
+        left: bounds.left,// + transform.translateX, 
+        // width: bounds.width, * transform.scaleX, 
+        // height: bounds.height, * transform.scaleY
+      };
+
       return result; 
     }, 
     {}
   );
   
-  // Change all the elements to final state, with minimum changes to dom (to avoid loosing focus etc.)
+  // Adding pass
   index = 0;
+  // const added = [];
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
+    newChild.style.transform = "";
+    if (!childNodes.includes(newChild)) {
+      added.push(newChild);
+      newChild.style.transform = "scale(0)";
+      // newChild.style.width = "0px";
+      // newChild.style.height = "0px";
+      newChild.style.opacity = "0";
+    }
+
     const existingChild = node.childNodes[index];
     if (newChild !== existingChild) {
       node.insertBefore(newChild, existingChild);
     }
     index++;
   }
+  // log("added:");
+  // log(added);
+
+
+  // Modify deleted?    
+  // existingChild.style.transition = "";
+  // existingChild.style.transform = "";
   
-  // Setup animation final states for measures
-  for (let node of added) {
-    node.style.transform = "";
-    node.style.opacity = "1";
-  }
-  for (let node of removed) {
-    // node.style.width = "0px";
-    // node.style.height = "0px";
-    // node.style.visibility = "collapse";
-    node.style.display = "none";
-    node.style.transform = ""
-    // node.style.transform = "translate(0, 0) scale(0)";
-    node.style.opacity = "0";
-  }
-  
+  // Measure new bounds
+  const boundsAfter = newChildNodes.reduce(
+    (result, node) => { 
+      result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
+      return result; 
+    }, 
+    {}
+  );
+  // debugger; 
+  // log("boundsAfter:");
+  // log(boundsAfter);
+
   requestAnimationFrame(() => {
-    
-    // Measure new bounds
-    const boundsAfter = newChildNodes.reduce(
-      (result, node) => { 
-        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-        log(result[node.equivalentCreator.causality.id]); 
-        return result; 
-      }, 
-      {}
-      ); 
-      
-      // Setup animation initial states
-      // Translate all except added to their old position (added should have a scale=0 transform)
-      index = 0;
-      while(index < newChildNodes.length) {
-        const node = newChildNodes[index];
+    // log("Translate to old position!!!!")
+
+    // Translate all except added to their old position (added should have a scale=0 transform)
+    index = 0;
+    while(index < newChildNodes.length) {
+      const node = newChildNodes[index];
+      if (!added.includes(node)) {  // && !removed.includes(node)
+        const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
+        const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
+        const deltaX = boundAfter.left - boundBefore.left;
+        const deltaY = boundAfter.top - boundBefore.top;
+        // console.log("translate(" + -deltaX + "px, " + -deltaY + "px)");
         node.style.transition = "";
-        if (!added.includes(node)) {
-          const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
-          const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
-          const deltaX = boundAfter.left - boundBefore.left;
-          const deltaY = boundAfter.top - boundBefore.top;
-          node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-          log(node.style.transform)
-          node.style.opacity = "1";
-          if (removed.includes(node)) {
-            node.style.display = "none";
-          }
-          node.style.visibility = "";
-          // node.style.width = "";
-          // node.style.height = "";
-        } else {
-          node.style.transform = "scale(0)";
-          node.style.opacity = "0";      
-        }
-        index++;
+        node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
       }
-      
+      index++;
+    }
+
     // Activate animations 
     requestAnimationFrame(() => {
+      // debugger;
+      // log("Activate animations!!!!")
+
       // Transition all except removed to new position by removing translation
       // Minimize removed by adding scale = 0 transform and at the same time removing the translation
       newChildNodes.forEach(node => {
         if (node instanceof Element) {
+          // log(node)
           if (!removed.includes(node)) {
-            // Added or kept node
+            // log("OTHER")
             node.style.transition = "all 0.4s ease-in-out";
             node.style.transform = "scale(1)";
-            node.style.opacity = "1";
+            // node.style.width = "";
+            // node.style.height = "";
+            node.style.opacity = "";
             setupTransitionCleanup(node, false);
           } else {
-            // Removed node
+            // log("REMOVED")
             node.style.transition = "all 0.4s ease-in-out";
-            node.style.transform = "scale(0) translate(0, 0)";
+            // node.style.width = "0px";
+            // node.style.height = "0px";
             node.style.opacity = "0";
+            node.style.transform = "scale(0) translate(0, 0)";
             setupTransitionCleanup(node, true);
           }      
         }

@@ -28,7 +28,7 @@ export class AnimationExample extends Flow {
   setState() {
     this.list = observable([]);
     transaction(() => {
-      let count = 5; 
+      let count = 1; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.list);
     });
   }
