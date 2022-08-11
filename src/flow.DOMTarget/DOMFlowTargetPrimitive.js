@@ -205,7 +205,6 @@ export function clearNode(node) {
     index = 0;
     const added = [];
     while(index < newChildNodes.length) {
-      const existingChild = node.childNodes[index];
       const newChild = newChildNodes[index];
       newChild.style.transform = "";
       if (!childNodes.includes(newChild)) {
@@ -215,6 +214,8 @@ export function clearNode(node) {
         // newChild.style.height = "0px";
         newChild.style.opacity = "0";
       }
+
+      const existingChild = node.childNodes[index];
       if (newChild !== existingChild) {
         node.insertBefore(newChild, existingChild);
       }

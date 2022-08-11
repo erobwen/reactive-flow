@@ -162,6 +162,7 @@ export function button(...parameters) {
   let result; 
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties);
+  if (properties.disabled) attributes.disabled = true; 
 
   // Inject debug printout in click.
   if (trace && properties.onClick) {
