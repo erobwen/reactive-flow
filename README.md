@@ -162,10 +162,10 @@ https://docs.google.com/presentation/d/13E7E8TzRBoGBJ5BhVV78-s73AnYHnI4MrQ233xih
 
 
 # Ongoing
-TODO: Complex form demo
-TODO: Animaiton Demo
 TODO: Animation configuration
+TODO: Complex form demo
 TODO: Multidemo
+TODO: Improved Animaiton Demo
 
 # TODO
 TODO: Cross container/flow FLIP animations. (joint flip animation start)

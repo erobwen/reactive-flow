@@ -28,28 +28,15 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   const childNodes = [...node.childNodes];
   let index;
 
-  function setupTransitionCleanup(node, alsoRemoveNode) {
-    
-    function onTransitionEnd(event) {
-      if (alsoRemoveNode) {
-        // log("REMOVING CHILD!!!")
-        node.parentNode.removeChild(node);
-      }
-      node.style.transition = "";
-      node.style.width = "";
-      node.style.height = "";
-      node.style.opacity = "";
-      node.removeEventListener("transitionend", onTransitionEnd);
-    }
+  log(transitionAnimations);
 
-    node.addEventListener("transitionend", onTransitionEnd);
-  }
 
   // Analyze removed and added
   // Reintroduced removed, but mark to be removed
   index = 0;
   const removed = [];
   const added = [];
+  const resident = [];
   while(index < node.childNodes.length) {
     const existingChild = node.childNodes[index];
     if (!newChildNodes.includes(existingChild)) {
@@ -58,13 +45,12 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     }
     index++;
   }
-  index = 0;
-  while(index < newChildNodes.length) {
-    const newChild = newChildNodes[index];
+  for(let newChild of newChildNodes) {
     if (!childNodes.includes(newChild)) {
       added.push(newChild);
+    } else if(!removed.includes(newChild)) {
+      resident.push(newChild);
     }
-    index++;
   }
 
   // Stop any ongoing animation and measure current bounds and transformation
@@ -111,18 +97,14 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   // Setup animation final states for measures
   for (let node of added) {
     node.style.transform = "";
-    node.style.opacity = "1";
+  }
+  for (let node of resident) {
+    node.style.transform = "";
   }
   for (let node of removed) {
-    // node.style.width = "0px";
-    // node.style.height = "0px";
-    // node.style.visibility = "collapse";
-    // node.style.maxWidth = "0px";
-    // node.style.maxHeight = "0px";
-    // node.style.display = "none";
-    node.style.transform = ""
-    // node.style.transform = "translate(0, 0) scale(0)";
-    node.style.opacity = "0";
+    node.style.maxHeight = "0px";
+    node.style.maxWidth = "0px";
+    node.style.transform = "" // Should really be something that minimizes the div?
   }
   
   requestAnimationFrame(() => {
@@ -135,58 +117,74 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
         return result; 
       }, 
       {}
-      ); 
+    ); 
       
-      // Setup animation initial states
-      // Translate all except added to their old position (added should have a scale=0 transform)
-      index = 0;
-      while(index < newChildNodes.length) {
-        const node = newChildNodes[index];
-        node.style.transition = "";
-        if (!added.includes(node)) {
-          const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
-          const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
-          const deltaX = boundAfter.left - boundBefore.left;
-          const deltaY = boundAfter.top - boundBefore.top;
-          node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-          log(node.style.transform)
-          node.style.opacity = "1";
-          if (removed.includes(node)) {
-            // node.style.maxWidth = "";
-            // node.style.maxHeight = "";
-            // node.style.display = "none";
-          }
-          node.style.visibility = "";
-          // node.style.width = "";
-          // node.style.height = "";
-        } else {
-          node.style.transform = "scale(0)";
-          node.style.opacity = "0";      
-        }
-        index++;
-      }
+    // Setup animation initial states
+    // Translate all except added to their old position (added should have a scale=0 transform)
+    for (let node of added) {
+      node.style.transition = "";
+      node.style.transform = "scale(0)";
+      node.style.opacity = "0";  
+    }
+    for (let node of resident) {
+      node.style.transition = "";
+      const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
+      const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
+      const deltaX = boundAfter.left - boundBefore.left;
+      const deltaY = boundAfter.top - boundBefore.top;
+      node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
+      node.style.opacity = "1";
+    }
+    for (let node of removed) {
+      node.style.transition = "";
+      const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
+      const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
+      const deltaX = boundAfter.left - boundBefore.left;
+      const deltaY = boundAfter.top - boundBefore.top;
+      node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
+      node.style.opacity = "1";
+    }
       
     // Activate animations 
     requestAnimationFrame(() => {
+
+      function setupTransitionCleanup(node, alsoRemoveNode) {
+    
+        function onTransitionEnd(event) {
+          if (alsoRemoveNode) {
+            // log("REMOVING CHILD!!!")
+            node.parentNode.removeChild(node);
+          }
+          node.style.transition = "";
+          node.style.width = "";
+          node.style.height = "";
+          node.style.opacity = "";
+          node.removeEventListener("transitionend", onTransitionEnd);
+        }
+    
+        node.addEventListener("transitionend", onTransitionEnd);
+      }
+
       // Transition all except removed to new position by removing translation
       // Minimize removed by adding scale = 0 transform and at the same time removing the translation
-      newChildNodes.forEach(node => {
-        if (node instanceof Element) {
-          if (!removed.includes(node)) {
-            // Added or kept node
-            node.style.transition = "all 0.4s ease-in-out";
-            node.style.transform = "scale(1)";
-            node.style.opacity = "1";
-            setupTransitionCleanup(node, false);
-          } else {
-            // Removed node
-            node.style.transition = "all 0.4s ease-in-out";
-            node.style.transform = "scale(0) translate(0, 0)";
-            node.style.opacity = "0";
-            setupTransitionCleanup(node, true);
-          }      
-        }
-      });
+      for (let node of added) {
+        node.style.transition = "all 0.4s ease-in-out";
+        node.style.transform = "scale(1)";
+        node.style.opacity = "1";
+        setupTransitionCleanup(node, false);
+      }
+      for (let node of resident) {
+        node.style.transition = "all 0.4s ease-in-out";
+        node.style.transform = "scale(1)";
+        node.style.opacity = "1";
+        setupTransitionCleanup(node, false);
+      }
+      for (let node of removed) {
+        node.style.transition = "all 0.4s ease-in-out";
+        node.style.transform = "scale(0) translate(0, 0)";
+        node.style.opacity = "0";
+        setupTransitionCleanup(node, true);
+      }
     });  
   });
 }

@@ -28,7 +28,7 @@ export class AnimationExample extends Flow {
   setState() {
     this.list = observable([]);
     transaction(() => {
-      let count = 1; 
+      let count = 5; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.list);
     });
   }
@@ -41,39 +41,40 @@ export class AnimationExample extends Flow {
         button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.list)))}),
       ),
       column({
-        children: this.list.map(item => text({key: item, text: item, style: {textAlign: "center"}})),
-        style: {fontSize: "40px", padding: "20px", maxWidth: "300px"}, 
-        // transitionAnimations: flow => ({
-        //   // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
-        //   // This method is called just before the animation is run so you could examine bounds etc. 
-        //   // and create the animations depending on that. 
-        //   move: {
-        //     transition: "0.4s ease-in-out",
-        //   },
-        //   enter: {
-        //     transition: "0.4s ease-in-out",
-        //     initialStyle: {
-        //       opacity: "0",
-        //       transform: "scale(0)"
-        //     },
-        //     finalStyle: {
-        //       opacity: "1",
-        //       transform: "scale(1)"
-        //     },
-        //   }, 
-        //   exit: {
-        //     transition: "0.4s ease-in-out",
-        //     initialStyle: {
-        //       opacity: "1",
-        //       transform: "scale(1)"
-        //     },
-        //     finalStyle: {
-        //       opacity: "0",
-        //       transform: "scale(0)"
-        //     }
-        //   }
-        // })
-    })
+        children: this.list.map(item => text({key: item, text: item, style: {textAlign: "left"}})),
+        style: {fontSize: "40px", padding: "20px", maxWidth: "300px", overflow: "visible"}, 
+        transitionAnimations: {
+          // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
+          // This method is called just before the animation is run so you could examine bounds etc. 
+          // and create the animations depending on that. 
+          move: {
+            transition: "0.4s ease-in-out",
+          },
+          enter: {
+            transition: "0.4s ease-in-out",
+            initialStyle: {
+              opacity: "0",
+              transform: "scale(0)"
+            },
+            finalStyle: {
+              opacity: "1",
+              transform: "scale(1)"
+            },
+          }, 
+          exit: {
+            transition: "0.4s ease-in-out",
+            initialStyle: {
+              opacity: "1",
+              transform: "scale(1)"
+            },
+            finalStyle: {
+              opacity: "0",
+              transform: "scale(0)"
+            }
+          }
+        }
+      }),
+      {style: {height: "100%"}},
     );
   }
 }
