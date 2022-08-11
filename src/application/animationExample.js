@@ -41,13 +41,13 @@ export class AnimationExample extends Flow {
   build() {
     return column(
       row(
-        button({text: "Randomize", onClick: () => { transaction(() => randomize(this.list));log([...this.list]); }}),
-        button({text: "Add random", disabled: this.store.length === 0, onClick: () => { transaction(() => addRandomly(removeRandom(this.store), this.list)); log([...this.list]); }}),
-        button({text: "Remove random", disabled: this.list.length === 0, onClick: () => { transaction(() => this.store.push(removeRandom(this.list))); log([...this.list]); }})
+        button({text: "Randomize", onClick: () => transaction(() => randomize(this.list))}),
+        button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeRandom(this.store), this.list))}),
+        button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeRandom(this.list)))}),
       ),
       column({
-        children: this.list.map(item => text({key: item, text: item})),
-        style: {fontSize: "40px", padding: "20px"}, 
+        children: this.list.map(item => text({key: item, text: item, style: {textAlign: "center"}})),
+        style: {fontSize: "40px", padding: "20px", maxWidth: "300px"}, 
         // transitionAnimations: flow => ({
         //   // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
         //   // This method is called just before the animation is run so you could examine bounds etc. 
