@@ -2,6 +2,26 @@ import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow
 
 const log = console.log;
 
+function parseMatrix(matrix) {
+  function extractScaleTranslate(matrix) {
+    return {
+      scaleX: matrix[0],
+      scaleY: matrix[3],
+      translateX: matrix[4],
+      translateY: matrix[5],
+    }
+  }
+
+  let matrixPattern = /^\w*\((-?((\d+)|(\d*\.\d+)),\s*)*(-?(\d+)|(\d*\.\d+))\)/i
+  if (matrixPattern.test(matrix)) {
+    let matrixCopy = matrix.replace(/^\w*\(/, '').replace(')', '');
+    // console.log(matrixCopy);
+    let matrixValue = matrixCopy.split(/\s*,\s*/).map(value => parseFloat(value));
+    // log(matrixValue);
+    return extractScaleTranslate(matrixValue);
+  }
+  return extractScaleTranslate([1, 0, 0, 1, 0, 0]);
+}
 
 export function mostAbstractFlow(flow) {
   while (flow.equivalentCreator) flow = flow.equivalentCreator;
@@ -66,8 +86,8 @@ export function clearNode(node) {
 
   reBuildDomNodeWithChildren() {
     const node = this.domNode;
-    log("reBuildDomNodeWithChildren");
-    console.log(node);
+    // log("reBuildDomNodeWithChildren");
+    // console.log(node);
     this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
     const newChildNodes = this.getChildNodes(node);
@@ -109,8 +129,8 @@ export function clearNode(node) {
   }
 
   reBuildDomNodeWithChildrenAnimated(node, newChildNodes) {
-    log([...newChildNodes]);
-    log([...node.childNodes]);
+    // log([...newChildNodes]);
+    // log([...node.childNodes]);
     const childNodes = [...node.childNodes];
     let index;
 
@@ -118,7 +138,7 @@ export function clearNode(node) {
       
       function onTransitionEnd(event) {
         if (alsoRemoveNode) {
-          log("REMOVING CHILD!!!")
+          // log("REMOVING CHILD!!!")
           node.parentNode.removeChild(node);
         }
         node.style.transition = "";
@@ -130,17 +150,38 @@ export function clearNode(node) {
 
       node.addEventListener("transitionend", onTransitionEnd);
     }
+    log();
 
-    // Measure current bounds
+    // Stop any ongoing animation and measure current bounds
     const boundsBefore = childNodes.reduce(
-      (result, node) => { 
-        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect"; 
+      (result, node) => {
+        const computedStyle = getComputedStyle(node);
+        // Object.assign(node.style, computedStyle);
+
+        // Stop ongoing animation!
+        if (computedStyle.transform !== "") {
+          node.style.transform = computedStyle.transform; 
+        }
+
+        const bounds = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
+    
+        const transform = parseMatrix(computedStyle.transform); 
+        log(transform);
+        // bounds.top -= transform.translateY;
+        // bounds.left -= transform.translateX;
+        result[node.equivalentCreator.causality.id] = {
+          top: bounds.top, //+ transform.translateY, 
+          left: bounds.left,// + transform.translateX, 
+          // width: bounds.width, * transform.scaleX, 
+          // height: bounds.height, * transform.scaleY
+        };
+
         return result; 
       }, 
       {}
     );
-    log("boundsBefore:");
-    log(boundsBefore);
+    // log("boundsBefore:");
+    // log(boundsBefore);
 
     // Reintroduced removed, as to be removed
     index = 0;
@@ -157,8 +198,8 @@ export function clearNode(node) {
       }
       index++;
     }
-    log("removed:");
-    log(removed);
+    // log("removed:");
+    // log(removed);
     
     // Adding pass
     index = 0;
@@ -166,20 +207,21 @@ export function clearNode(node) {
     while(index < newChildNodes.length) {
       const existingChild = node.childNodes[index];
       const newChild = newChildNodes[index];
+      newChild.style.transform = "";
       if (!childNodes.includes(newChild)) {
         added.push(newChild);
         newChild.style.transform = "scale(0)";
         // newChild.style.width = "0px";
         // newChild.style.height = "0px";
         newChild.style.opacity = "0";
-      } 
+      }
       if (newChild !== existingChild) {
         node.insertBefore(newChild, existingChild);
       }
       index++;
     }
-    log("added:");
-    log(added);
+    // log("added:");
+    // log(added);
    
     // Measure new bounds
     const boundsAfter = newChildNodes.reduce(
@@ -189,11 +231,12 @@ export function clearNode(node) {
       }, 
       {}
     );
-    log("boundsAfter:");
-    log(boundsAfter);
+    // debugger; 
+    // log("boundsAfter:");
+    // log(boundsAfter);
 
     requestAnimationFrame(() => {
-      log("Translate to old position!!!!")
+      // log("Translate to old position!!!!")
 
       // Translate all except added to their old position (added should have a scale=0 transform)
       index = 0;
@@ -204,7 +247,7 @@ export function clearNode(node) {
           const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
           const deltaX = boundAfter.left - boundBefore.left;
           const deltaY = boundAfter.top - boundBefore.top;
-          console.log("translate(" + -deltaX + "px, " + -deltaY + "px)");
+          // console.log("translate(" + -deltaX + "px, " + -deltaY + "px)");
           node.style.transition = "";
           node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
         }
@@ -214,15 +257,15 @@ export function clearNode(node) {
       // Activate animations 
       requestAnimationFrame(() => {
         // debugger;
-        log("Activate animations!!!!")
+        // log("Activate animations!!!!")
 
         // Transition all except removed to new position by removing translation
         // Minimize removed by adding scale = 0 transform and at the same time removing the translation
         newChildNodes.forEach(node => {
           if (node instanceof Element) {
-            log(node)
+            // log(node)
             if (!removed.includes(node)) {
-              log("OTHER")
+              // log("OTHER")
               node.style.transition = "all 0.4s ease-in-out";
               node.style.transform = "scale(1)";
               // node.style.width = "";
@@ -230,7 +273,7 @@ export function clearNode(node) {
               node.style.opacity = "";
               setupTransitionCleanup(node, false);
             } else {
-              log("REMOVED")
+              // log("REMOVED")
               node.style.transition = "all 0.4s ease-in-out";
               // node.style.width = "0px";
               // node.style.height = "0px";
