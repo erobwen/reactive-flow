@@ -19,7 +19,6 @@ const items = [
     "Fumbar"
 ];
 
-
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
@@ -29,12 +28,8 @@ export class AnimationExample extends Flow {
   setState() {
     this.list = observable([]);
     transaction(() => {
-      addRandomly(removeRandom(this.store), this.list);
-      addRandomly(removeRandom(this.store), this.list);
-      addRandomly(removeRandom(this.store), this.list);
-      addRandomly(removeRandom(this.store), this.list);
-      addRandomly(removeRandom(this.store), this.list);
-      addRandomly(removeRandom(this.store), this.list);
+      let count = 5; 
+      while (count-- > 0) addRandomly(removeOneRandom(this.store), this.list);
     });
   }
 
@@ -42,8 +37,8 @@ export class AnimationExample extends Flow {
     return column(
       row(
         button({text: "Randomize", onClick: () => transaction(() => randomize(this.list))}),
-        button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeRandom(this.store), this.list))}),
-        button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeRandom(this.list)))}),
+        button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeOneRandom(this.store), this.list))}),
+        button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.list)))}),
       ),
       column({
         children: this.list.map(item => text({key: item, text: item, style: {textAlign: "center"}})),
@@ -87,32 +82,19 @@ export class AnimationExample extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startAnimationExample() {
-  const animation = new AnimationExample({
+  new AnimationExample({
     key: "root",
     items,
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
-
-  // setTimeout(() => {
-  //   log("----------------------------------");
-  //   animation.list = randomized(animation.items);
-  // }, 1000);
-
-  // setTimeout(() => {
-  //   log("----------------------------------");
-  //   animation.list = randomized(animation.items);
-  // }, 2000);
-
-  // setTimeout(() => {
-  //   log("----------------------------------");
-  //   animation.list = randomized(animation.items);
-  // }, 4000);
 }
-       
+   
 
+/**
+ * Random stuff
+ */
 
-
-function removeRandom(list) {
+function removeOneRandom(list) {
   const index = Math.floor(Math.random()*(list.length - 1))
   return list.splice(index, 1)[0]; 
 }
@@ -121,7 +103,7 @@ function randomized(list) {
     const listCopy = [...list];
     const newList = [];
     while(listCopy.length > 0) {
-        newList.push(removeRandom(listCopy));
+        newList.push(removeOneRandom(listCopy));
     }
     return newList;
 }
