@@ -117,7 +117,9 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     // node.style.width = "0px";
     // node.style.height = "0px";
     // node.style.visibility = "collapse";
-    node.style.display = "none";
+    // node.style.maxWidth = "0px";
+    // node.style.maxHeight = "0px";
+    // node.style.display = "none";
     node.style.transform = ""
     // node.style.transform = "translate(0, 0) scale(0)";
     node.style.opacity = "0";
@@ -150,7 +152,9 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
           log(node.style.transform)
           node.style.opacity = "1";
           if (removed.includes(node)) {
-            node.style.display = "none";
+            // node.style.maxWidth = "";
+            // node.style.maxHeight = "";
+            // node.style.display = "none";
           }
           node.style.visibility = "";
           // node.style.width = "";
