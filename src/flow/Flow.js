@@ -8,6 +8,7 @@ export const world = getWorld({
 export const {
   transaction,
   observable,
+  observableDeepCopy,
   isObservable, 
   repeat,
   finalize,
@@ -280,7 +281,7 @@ export class Flow {
         }, 
         {
           rebuildShapeAnalysis: {
-            canMatch: (newFlow, establishedFlow) => newFlow.className() === establishedFlow.className(),
+            canMatch: (newFlow, establishedFlow) => (newFlow.className() === establishedFlow.className()) && (newFlow.classNameOverride === establishedFlow.classNameOverride),
             shapeRoot: () => me.newBuild,
             slotsIterator: function*(newFlow, optionalEstablishedFlow, canMatchAny) {
               for (let property in newFlow) {
@@ -295,14 +296,14 @@ export class Flow {
                   if (newFlow.children instanceof Array) {
                     while(newIndex < newFlow.children.length) {
                       while(!canMatchAny(newFlow.children[newIndex]) && newIndex < newFlow.children.length) newIndex++;
-                      if (optionalEstablishedFlow) {
+                      if (optionalEstablishedFlow && optionalEstablishedFlow.children instanceof Array) {
                         while(!canMatchAny(optionalEstablishedFlow.children[establishedIndex]) && establishedIndex < optionalEstablishedFlow.children.length) establishedIndex++;
                       }
   
                       if (newIndex < newFlow.children.length) {
                         yield {
                           newSlot: newFlow.children[newIndex],
-                          establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow.children[establishedIndex] : null
+                          establishedSlot: (optionalEstablishedFlow && optionalEstablishedFlow.children instanceof Array) ? optionalEstablishedFlow.children[establishedIndex] : null
                         }
                       }
   

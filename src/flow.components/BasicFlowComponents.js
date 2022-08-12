@@ -34,7 +34,7 @@ export function div(...parameters) {
  * Basic layout styles
  */
 
- export const flexContainerStyle = {
+export const flexContainerStyle = {
   overflow: "hidden",
   boxSizing: "border-box",
   display:"flex",
@@ -70,6 +70,18 @@ export const centerMiddleStyle = {
   justifyContent:"center",
   alignItems: "center"
 } 
+
+
+/**
+ * Basic element styles
+ */
+ export const flexGrowShrinkStyle = {
+  overflow: "hidden", 
+  boxSizing: "border-box",
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: 1,
+}
 
 
 /**
@@ -151,6 +163,12 @@ export function textInputField(label, getter, setter, ...parameters) {
 }
 
 export function inputField(type, label, getter, setter, ...parameters) {
+  if (typeof(getter) === "object" && typeof(setter) === "string") {
+    const targetObject = getter;
+    const targetProperty = setter; 
+    getter = () => targetObject[targetProperty]
+    setter = newValue => { targetObject[targetProperty] = newValue; }
+  }
   const properties = readFlowProperties(parameters);
   const attributes = {
     oninput: event => setter(event.target.value),

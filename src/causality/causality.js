@@ -92,6 +92,7 @@ function createWorld(configuration) {
     
     // Main API
     observable,
+    observableDeepCopy,
     isObservable,
     create: observable, // observable alias
     invalidateOnChange,
@@ -846,8 +847,16 @@ function createWorld(configuration) {
     return proxy;
   }
 
-
-
+  function observableDeepCopy(object) {
+    if (isObservable(object)) return object; 
+    if (typeof(object) !== "object") return object;  
+    const copy = object instanceof Array ? [] : {};
+    for (let property in object) {
+      copy[property] = observableDeepCopy(object[property]);
+    }
+    return observable(copy);
+  }
+  
   /**********************************
    *
    *  Emit events & onChange

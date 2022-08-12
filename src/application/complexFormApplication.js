@@ -1,5 +1,5 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, textInputField, row, numberInputField } from "../flow.components/BasicFlowComponents";
+import { observable, Flow, flow, repeat, observableDeepCopy } from "../flow/Flow";
+import { text, column, textInputField, row, numberInputField, button, flexGrowShrinkStyle } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation";
 
@@ -9,54 +9,59 @@ const log = console.log;
  * Flow definitions
  */
 
-const model = observable({
-  person: observable({
+const serverData = {
+  person: {
     name: "Some Name",
-    adress: observable({
+    adress: {
         street: "",
         number: "",
         zipCode: "", 
         city: ""
-    }),
+    },
     age: 18,
     occupation: ""
-  })
-});
+  }
+};
+
 
 export class ComplexForm extends Flow {
 
-  setProperties({model}) {
-    this.model = model;
-    // this.transitionAnimations = reBuildDomNodeWithChildrenAnimated; 
+  setProperties({serverData}) {
+    this.editData = observableDeepCopy(serverData);
+    log(this.editData);
   }
 
   setState() {
     this.showAdress = false; 
     this.derrive(() => {
-      this.isAdult = typeof(this.model.person.age) === "number" && this.model.person.age >= 18; 
+      this.isAdult = this.editData.person.age >= 18; 
     });
   }
 
-  // provide() {
-  //   return ["transitionAnimations"];
-  // }
+  getSaveData() {
+    // const edited = edited.name
+    // return {
+    //   person: editData.name
+    // }
+  }
 
   build() {
-    const person = this.model.person;
-
+    const person = this.editData.person;
     return column(
-      textInputField("Name", () => person.name, newName => { person.name = newName }),
+      textInputField("Name", person, "name"),
       row(
-        numberInputField(
-          "Age", 
-          () => person.age.toString(), 
-          newAge => { person.age = parseInt(newAge) }, 
-          {inputProperties: {style: {width: "50px"}}}),
-        text(person.age >= 18 ? "(Adult)" : "(Child)", {style: {padding: "4px"}})
+        numberInputField("Age", person, "age", {inputProperties: {style: {width: "50px"}}}),
+        text(this.isAdult ? "(Adult)" : "(Child)", {style: {padding: "4px"}})
       ),
-      person.age >= 18 && textInputField("Occupation", () => person.occupation, newOccupation => { person.occupation = newOccupation }), 
+      this.isAdult && textInputField("Occupation", () => person.occupation, newOccupation => { person.occupation = newOccupation }), 
+      row(
+        button({text: "Send", onClick: () => { alert("sending: \n" + JSON.stringify(this.getSaveData()))}}, ),
+      ),
+      row(
+        {style: flexGrowShrinkStyle}
+      ),
       {
-        style: {padding: "30px"}
+        style: {padding: "30px", width: "100%", height: "100%"}
       }
     );
   }
@@ -77,7 +82,7 @@ export class AdressForm extends Flow {
 export function startComplexFormApplication() {
   const complex = new ComplexForm({
     key: "root",
-    model, 
+    serverData, 
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
 }
