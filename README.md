@@ -162,15 +162,16 @@ https://docs.google.com/presentation/d/13E7E8TzRBoGBJ5BhVV78-s73AnYHnI4MrQ233xih
 
 
 # Ongoing
-TODO: Animation configuration
+TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Complex form demo
+TODO: Animation configuration (whole function)
 TODO: Multidemo
-TODO: Improved Animaiton Demo
 
 # TODO
 TODO: Cross container/flow FLIP animations. (joint flip animation start)
 TODO: Priority levels in causality. (use for a FLIP animaiton pass)
 TODO: Programmatic Reactive Layout demo
+TODO: Improved Animaiton Demo
 TODO: Additional work on modals and popovers 
 TODO: Alternative Flow Target Demo  
 

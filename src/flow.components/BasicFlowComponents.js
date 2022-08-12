@@ -141,19 +141,34 @@ export function text(...parameters) {
     });
 }
 
+
+export function numberInputField(label, getter, setter, ...parameters) {
+  log("numberInputField");
+  // log(parameters);
+  return inputField("number", label, getter, setter, ...parameters);
+}
+
 export function textInputField(label, getter, setter, ...parameters) {
+  return inputField("text", label, getter, setter, ...parameters);
+}
+
+export function inputField(type, label, getter, setter, ...parameters) {
+  log(parameters);
   const properties = readFlowProperties(parameters);
+  log(properties);
   const attributes = {
-    ...extractAttributes(properties),
+    ...extractAttributes(properties), // TODO: Extract attribues in primitive instead. 
+    ...properties.inputProperties,
     oninput: event => setter(event.target.value),
     value: getter(),
-    type: "text",
-    // onfocusout: event => {debugger}
+    type
   };
-
+  
+  const inputProperties = {classNameOverride: type + "InputField", tagName: "input", attributes, onClick: properties.onClick}
+  log(inputProperties);
   return row(
-    text(label, {style: {paddingRight: "4px"}}),
-    getTarget().elementNode(properties.key, {classNameOverride: "textInputField", tagName: "input", attributes, onClick: properties.onClick}),
+    text(label, {style: {paddingRight: "4px"}, ...properties.labelProperties}),
+    getTarget().elementNode(properties.key, inputProperties),
     {style: {padding: "4px"}}
   );
 }

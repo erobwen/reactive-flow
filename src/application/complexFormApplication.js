@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, textInputField, row } from "../flow.components/BasicFlowComponents";
+import { text, column, textInputField, row, numberInputField } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
 const log = console.log;
@@ -26,6 +26,7 @@ export class ComplexForm extends Flow {
 
   setProperties({model}) {
     this.model = model;
+    this.transitionAnimations = true; 
   }
 
   setState() {
@@ -35,14 +36,22 @@ export class ComplexForm extends Flow {
     });
   }
 
+  provide() {
+    return ["transitionAnimations"];
+  }
+
   build() {
     const person = this.model.person;
 
     return column(
       textInputField("Name:", () => person.name, newName => { person.name = newName }),
       row(
-        textInputField("Age:", () => person.age.toString(), newAge => { person.age = parseInt(newAge) }),
-        text(person.age >= 18 ? "(Adult)" : "(Child)")
+        numberInputField(
+          "Age:", 
+          () => person.age.toString(), 
+          newAge => { person.age = parseInt(newAge) }, 
+          {inputProperties: {style: {width: "50px"}}}),
+        text(person.age >= 18 ? "(Adult)" : "(Child)", {style: {padding: "4px"}})
       ),
       person.age >= 18 ? textInputField("Occupation:", () => person.occupation, newOccupation => { person.occupation = newOccupation }) : null, 
       {
