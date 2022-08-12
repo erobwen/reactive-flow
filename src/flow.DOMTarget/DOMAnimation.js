@@ -28,9 +28,6 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   const childNodes = [...node.childNodes];
   let index;
 
-  log(transitionAnimations);
-
-
   // Analyze removed and added
   // Reintroduced removed, but mark to be removed
   index = 0;
@@ -77,7 +74,6 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
         //   height: bounds.height,// * transform.scaleY
         // };
       result[node.equivalentCreator.causality.id] = bounds;
-      log(bounds);
       return result; 
     }, 
     {}
@@ -96,15 +92,19 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   
   // Setup animation final states for measures
   for (let node of added) {
-    node.style.transform = "";
+    node.style.transform = "scale(1)";
+    node.style.opacity = "1";
   }
   for (let node of resident) {
-    node.style.transform = "";
+    node.style.transform = "scale(1)";
+    node.style.opacity = "1";
   }
   for (let node of removed) {
     node.style.maxHeight = "0px";
     node.style.maxWidth = "0px";
-    node.style.transform = "" // Should really be something that minimizes the div?
+    // node.style.transform = "" // Should really be something that minimizes the div?
+    node.style.transform = "scale(0) translate(0, 0)";
+    node.style.opacity = "0";
   }
   
   requestAnimationFrame(() => {
@@ -113,7 +113,6 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     const boundsAfter = newChildNodes.reduce(
       (result, node) => { 
         result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-        log(result[node.equivalentCreator.causality.id]); 
         return result; 
       }, 
       {}
@@ -133,7 +132,6 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       const deltaX = boundAfter.left - boundBefore.left;
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-      node.style.opacity = "1";
     }
     for (let node of removed) {
       node.style.transition = "";
@@ -176,11 +174,12 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       for (let node of resident) {
         node.style.transition = "all 0.4s ease-in-out";
         node.style.transform = "scale(1)";
-        node.style.opacity = "1";
         setupTransitionCleanup(node, false);
       }
       for (let node of removed) {
         node.style.transition = "all 0.4s ease-in-out";
+        node.style.maxHeight = "0px";
+        node.style.maxWidth = "0px";
         node.style.transform = "scale(0) translate(0, 0)";
         node.style.opacity = "0";
         setupTransitionCleanup(node, true);
