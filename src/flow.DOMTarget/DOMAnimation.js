@@ -187,3 +187,53 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     });  
   });
 }
+
+
+
+
+/**
+ * Configuration musings... 
+ * How could we condense the above code into a configuration? 
+ */
+
+//  {
+  // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
+  // This method is called just before the animation is run so you could examine bounds etc. 
+  // and create the animations depending on that. 
+//   enter: {
+//     transition: "0.4s ease-in-out",
+//     initialStyle: {
+//       opacity: "0",
+//       transform: {
+//         scale: 0
+//       }
+//     },
+//     finalStyle: {
+//       opacity: "1",
+//       transform: {
+//         scale: 1 
+//       }
+//     },
+//   }, 
+//   move: {
+//     transition: "0.4s ease-in-out",
+//   },
+//   exit: {
+//     transition: "0.4s ease-in-out",
+//     initialStyle: {
+//       opacity: "1",
+//       transform: {
+//         scale: 1 
+//       }
+//     },
+//     finalStyle: {
+//       maxHeight: "0px",
+//       maxWidth: "0px",
+//       opacity: "0",
+//       transform: {
+//         scale: 0,
+//         translate: {x: 0, y: 0}
+//       }
+//     }
+//   }
+// }

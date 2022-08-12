@@ -78,7 +78,8 @@ export function clearNode(node) {
     }
     
     if ((this.transitionAnimations || configuration.defaultTransitionAnimations) && allElements(node.childNodes) && allElements(newChildNodes)) {
-      reBuildDomNodeWithChildrenAnimated(this, node, newChildNodes)
+      const animations = this.transitionAnimations ? this.transitionAnimations : configuration.defaultTransitionAnimations;
+      animations(this, node, newChildNodes)
     } else {
       this.reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes)
     }

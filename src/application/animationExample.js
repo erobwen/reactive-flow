@@ -1,6 +1,7 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { text, column, row, button } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
+import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation";
 
 const log = console.log;
 
@@ -43,47 +44,7 @@ export class AnimationExample extends Flow {
       column({
         children: this.list.map(item => text({key: item, text: item, style: {textAlign: "left"}})),
         style: {fontSize: "40px", padding: "20px", maxWidth: "300px", overflow: "visible"}, 
-        transitionAnimations: {
-          // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
-          // This method is called just before the animation is run so you could examine bounds etc. 
-          // and create the animations depending on that. 
-          enter: {
-            transition: "0.4s ease-in-out",
-            initialStyle: {
-              opacity: "0",
-              transform: {
-                scale: 0
-              }
-            },
-            finalStyle: {
-              opacity: "1",
-              transform: {
-                scale: 1 
-              }
-            },
-          }, 
-          move: {
-            transition: "0.4s ease-in-out",
-          },
-          exit: {
-            transition: "0.4s ease-in-out",
-            initialStyle: {
-              opacity: "1",
-              transform: {
-                scale: 1 
-              }
-            },
-            finalStyle: {
-              maxHeight: "0px",
-              maxWidth: "0px",
-              opacity: "0",
-              transform: {
-                scale: 0,
-                translate: {x: 0, y: 0}
-              }
-            }
-          }
-        }
+        transitionAnimations: reBuildDomNodeWithChildrenAnimated        
       }),
       {style: {height: "100%"}},
     );

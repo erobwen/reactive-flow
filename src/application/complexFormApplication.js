@@ -1,6 +1,7 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { text, column, textInputField, row, numberInputField } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
+import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation";
 
 const log = console.log;
 
@@ -26,7 +27,7 @@ export class ComplexForm extends Flow {
 
   setProperties({model}) {
     this.model = model;
-    this.transitionAnimations = true; 
+    // this.transitionAnimations = reBuildDomNodeWithChildrenAnimated; 
   }
 
   setState() {
