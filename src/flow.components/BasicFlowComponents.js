@@ -143,8 +143,6 @@ export function text(...parameters) {
 
 
 export function numberInputField(label, getter, setter, ...parameters) {
-  log("numberInputField");
-  // log(parameters);
   return inputField("number", label, getter, setter, ...parameters);
 }
 
@@ -153,23 +151,20 @@ export function textInputField(label, getter, setter, ...parameters) {
 }
 
 export function inputField(type, label, getter, setter, ...parameters) {
-  log(parameters);
   const properties = readFlowProperties(parameters);
-  log(properties);
   const attributes = {
-    ...extractAttributes(properties), // TODO: Extract attribues in primitive instead. 
-    ...properties.inputProperties,
     oninput: event => setter(event.target.value),
     value: getter(),
-    type
+    type,
+    ...extractAttributes(properties.inputProperties)
   };
+  delete properties.inputProperties;
   
   const inputProperties = {classNameOverride: type + "InputField", tagName: "input", attributes, onClick: properties.onClick}
-  log(inputProperties);
   return row(
     text(label, {style: {paddingRight: "4px"}, ...properties.labelProperties}),
     getTarget().elementNode(properties.key, inputProperties),
-    {style: {padding: "4px"}}
+    {style: {padding: "4px", ...properties.style}, ...properties},   
   );
 }
 
@@ -205,6 +200,7 @@ export function button(...parameters) {
  */
 export function extractAttributes(properties) {
   const attributes = {};
+  if (!properties) return attributes;
   eventHandlerContentElementAttributes.forEach(
     attribute => {
       if (typeof(properties[attribute.camelCase]) !== "undefined") {

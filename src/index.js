@@ -15,6 +15,6 @@ setFlowConfiguration({
 // startHelloWorld();
 // startRecursiveAndModalDemo();
 // startProgrammaticReactiveLayout();
-// startComplexFormApplication();
-startAnimationExample();
+startComplexFormApplication();
+// startAnimationExample();
 

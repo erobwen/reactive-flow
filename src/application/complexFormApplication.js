@@ -36,24 +36,24 @@ export class ComplexForm extends Flow {
     });
   }
 
-  provide() {
-    return ["transitionAnimations"];
-  }
+  // provide() {
+  //   return ["transitionAnimations"];
+  // }
 
   build() {
     const person = this.model.person;
 
     return column(
-      textInputField("Name:", () => person.name, newName => { person.name = newName }),
+      textInputField("Name", () => person.name, newName => { person.name = newName }),
       row(
         numberInputField(
-          "Age:", 
+          "Age", 
           () => person.age.toString(), 
           newAge => { person.age = parseInt(newAge) }, 
           {inputProperties: {style: {width: "50px"}}}),
         text(person.age >= 18 ? "(Adult)" : "(Child)", {style: {padding: "4px"}})
       ),
-      person.age >= 18 ? textInputField("Occupation:", () => person.occupation, newOccupation => { person.occupation = newOccupation }) : null, 
+      person.age >= 18 && textInputField("Occupation", () => person.occupation, newOccupation => { person.occupation = newOccupation }), 
       {
         style: {padding: "30px"}
       }
