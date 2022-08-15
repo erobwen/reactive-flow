@@ -140,6 +140,8 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       const deltaX = boundAfter.left - boundBefore.left;
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
+      node.style.maxHeight = boundsBefore.height + "px";
+      node.style.maxWidth = boundsBefore.width + "px";
       node.style.opacity = "1";
     }
       

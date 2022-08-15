@@ -5,6 +5,7 @@ import { setFlowConfiguration } from "./flow/Flow.js";
 import { startProgrammaticReactiveLayout } from "./application/programmaticReactiveLayout.js";
 import { startComplexFormApplication } from "./application/complexFormApplication.js";
 import { startAnimationExample } from "./application/animationExample.js";
+import { startDemo } from "./application/demo.js";
 
 setFlowConfiguration({
     warnWhenNoKey: false,
@@ -15,6 +16,7 @@ setFlowConfiguration({
 // startHelloWorld();
 // startRecursiveAndModalDemo();
 // startProgrammaticReactiveLayout();
-startComplexFormApplication();
 // startAnimationExample();
+// startComplexFormApplication();
+startDemo();
 

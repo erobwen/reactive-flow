@@ -23,10 +23,11 @@ const items = [
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
-    this.store = observable([...items]);
+    this.items = items; 
   }
 
   setState() {
+    this.store = observable([...this.items]);
     this.list = observable([]);
     transaction(() => {
       let count = 5; 

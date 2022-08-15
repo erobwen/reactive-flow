@@ -809,6 +809,8 @@ function createWorld(configuration) {
           // Build identity previously created
           handler.meta.isBeingRebuilt = true;
           let establishedObject = repeater.buildIdObjectMap[buildId];
+          // TODO: How to detect when the same build-id is used twice?
+          // if (establishedObject[objectMetaProperty].isBeingRebuilt) throw new Error("Cannot reuse same build-id in the same build!");
           establishedObject[objectMetaProperty].forwardTo = proxy;
           if (repeater.options.rebuildShapeAnalysis) handler.meta.copyTo = establishedObject;
           

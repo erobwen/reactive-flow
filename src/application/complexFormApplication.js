@@ -39,15 +39,21 @@ export class ComplexForm extends Flow {
   }
 
   getSaveData() {
-    // const edited = edited.name
-    // return {
-    //   person: editData.name
-    // }
+    const editedPerson = this.editData.person;
+    const saveData = {
+      person: {
+        name: editedPerson.name,
+        age: editedPerson.age,
+      } 
+    }
+    if (this.isAdult) saveData.person.occupation = editedPerson.occupation;
+    return saveData; 
   }
 
   build() {
     const person = this.editData.person;
     return column(
+      text("Guest Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
       textInputField("Name", person, "name"),
       row(
         numberInputField("Age", person, "age", {inputProperties: {style: {width: "50px"}}}),
