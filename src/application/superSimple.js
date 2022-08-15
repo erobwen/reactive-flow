@@ -19,12 +19,39 @@ export class SuperSimple extends Flow {
   }
 
   build() {
+    log("BUILD");
+    log(this.model.value)
     return column(
       text(this.foo), 
+
       text(this.bar), 
       text(this.model.value), 
       {style: {fontSize: "40px", padding: "20px"}}
     );
+  }
+
+  reset() {
+    this.model.value = "";
+    this.foo = "foo";
+    this.bar = "bar";
+  }
+
+  timedChanges() {
+    this.reset();
+    setTimeout(() => {
+      log("----------------------------------");
+      this.foo = "FOO";
+    }, 1000);
+  
+    setTimeout(() => {
+      log("----------------------------------");
+      this.bar = "BAR";
+    }, 2000);
+  
+    setTimeout(() => {
+      log("----------------------------------");
+      this.model.value = "FUM";
+    }, 3000);  
   }
 }
 
@@ -37,19 +64,5 @@ export function startSuperSimple() {
     model, 
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
-
-  setTimeout(() => {
-    log("----------------------------------");
-    simple.foo = "FOO";
-  }, 1000);
-
-  setTimeout(() => {
-    log("----------------------------------");
-    simple.bar = "BAR";
-  }, 2000);
-
-  setTimeout(() => {
-    log("----------------------------------");
-    model.value = "FUM";
-  }, 3000);
+  simple.timedChanges();
 }

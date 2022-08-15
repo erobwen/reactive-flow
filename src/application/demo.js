@@ -14,17 +14,28 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
-    
+    // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
+    this.superSimple = new SuperSimple({model: observable({value: ""})});
+    this.animationExample = new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]});
+    this.choosen = this.superSimple;
+  }
+  
+  onEstablish() {
+    super.onEstablish();
+    this.animationExample.onEstablish();
+  }
+  
+  onDispose() {
+    super.onDispose();
+    this.animationExample.onDispose();
   }
   
   build() {
-    this.superSimple = new SuperSimple("super-simple", {model: observable({value: ""})});
-    this.animationExample = new AnimationExample("animation-example", {items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]});
-    if (!this.choosen) this.choosen = this.superSimple;
+    this.superSimple.timedChanges();
     return row(
       column(
-        button({text: "Super Simple", onClick: () => {log("clicked!");this.choosen = this.superSimple}}), 
-        button({text: "Animation Example", onClick: () => {log("clicked!");log(this); this.choosen = this.animationExample}}),
+        button({text: "Super Simple", onClick: () => { this.choosen = this.superSimple; this.superSimple.timedChanges() }}), 
+        button({text: "Animation Example", onClick: () => { this.choosen = this.animationExample }}),
         {style: {borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
       ),
       this.choosen, 

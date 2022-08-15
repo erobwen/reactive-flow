@@ -1,3 +1,7 @@
+# Needs examination
+CONSIDER What happens with a model built in the build function of a flow. Will it be re-created using shape analysis... it will be re-created and re set!... So you cant do it?
+CONSIDER Investigate possibility of creating child flows in the state callback. 
+
 
 # Ongoing
 TODO: Multidemo
