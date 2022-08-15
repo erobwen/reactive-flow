@@ -13,19 +13,22 @@ const log = console.log;
 
 // A very simple view component
 export class Demo extends Flow {
-  setState() {}
+  setState() {
+    
+  }
   
   build() {
     this.superSimple = new SuperSimple("super-simple", {model: observable({value: ""})});
     this.animationExample = new AnimationExample("animation-example", {items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]});
     if (!this.choosen) this.choosen = this.superSimple;
-    return column(
-      row(
+    return row(
+      column(
         button({text: "Super Simple", onClick: () => {log("clicked!");this.choosen = this.superSimple}}), 
         button({text: "Animation Example", onClick: () => {log("clicked!");log(this); this.choosen = this.animationExample}}),
-        {style: {borderBottom: "1px", borderBottomStyle: "solid"}}
+        {style: {borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
       ),
-      this.choosen
+      this.choosen, 
+      {style: {height: "100%"}}
     )
   }
 }

@@ -44,7 +44,7 @@ export class AnimationExample extends Flow {
       ),
       column({
         children: this.list.map(item => text({key: item, text: item, style: {textAlign: "left"}})),
-        style: {fontSize: "40px", padding: "20px", maxWidth: "300px", overflow: "visible"}, 
+        style: {fontSize: "40px", padding: "20px", maxWidth: "300px", overflow: "visible", height: "100%"}, 
         transitionAnimations: reBuildDomNodeWithChildrenAnimated        
       }),
       {style: {height: "100%"}},
