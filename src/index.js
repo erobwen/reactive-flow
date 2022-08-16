@@ -7,9 +7,21 @@ import { startComplexFormApplication } from "./application/complexFormApplicatio
 import { startAnimationExample } from "./application/animationExample.js";
 import { startDemo } from "./application/demo.js";
 
+Array.prototype.remove = function(target) {
+  const index = this.findIndex((element) => {
+    return element === target;
+  });
+  if (index >= 0) {
+    this.splice(index, 1);
+    return true;
+  } else {
+    return false; 
+  }
+}
+
 setFlowConfiguration({
-    warnWhenNoKey: false,
-    traceReactivity: true
+  warnWhenNoKey: false,
+  traceReactivity: true
 });
 
 // startSuperSimple();

@@ -9,13 +9,13 @@ const log = console.log;
 export function elemenNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({key: properties.key, attributes, children: parameters.children});
+  return getTarget().elementNode({key: properties.key, attributes, children: properties.children});
 }
 
 export function textNode(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  return getTarget().textNode({key: properties.key, attributes, children: parameters.children});
+  return getTarget().textNode({key: properties.key, attributes, children: properties.children});
 }
 
 export function modalNode(...parameters) {
@@ -26,7 +26,7 @@ export function modalNode(...parameters) {
 export function div(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({tagName: "div", key: properties.key, attributes, children: parameters.children});
+  return getTarget().elementNode({tagName: "div", key: properties.key, attributes, children: properties.children});
 }
 
 
@@ -85,7 +85,7 @@ export const centerMiddleStyle = {
 
 
 /**
- * Basic basic layout  
+ * Basic basic layout containers
  */
 
 export function wrapper(...parameters) { // I.e. a plain div, but with a classNameOverride.
@@ -129,6 +129,15 @@ export function centerMiddle(...parameters) {
   return getTarget().elementNode({key: properties.key, classNameOverride: "centerMiddle", tagName: "div", attributes, ...properties }); 
 }
 
+/**
+ * Basic basic layout fillers
+ */
+ export function filler(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const attributes = extractAttributes(properties);
+  attributes.style = {...flexGrowShrinkStyle, ...attributes.style}; // Inject row style (while making it possible to override)
+  return getTarget().elementNode({key: properties.key, classNameOverride: "center", tagName: "div", attributes, ...properties }); 
+}
 
 /**
  * Basic widget  
@@ -143,16 +152,20 @@ export function text(...parameters) {
     text: properties.text,
   }
 
-  return getTarget().elementNode(properties.key ? properties.key + ".span" : null, 
+  return getTarget().elementNode(properties.key ? properties.key + ".label" : null, 
     {
       classNameOverride: "text[" + textProperties.text + "]",
-      tagName:"span",
+      tagName:"label",
       attributes, 
       children: [getTarget().textNode(textProperties)], 
       ...properties 
     });
 }
 
+
+export function checkboxInputField(label, getter, setter, ...parameters) {
+  return inputField("checkbox", label, getter, setter, ...parameters);
+}
 
 export function numberInputField(label, getter, setter, ...parameters) {
   return inputField("number", label, getter, setter, ...parameters);
@@ -167,28 +180,44 @@ export function inputField(type, label, getter, setter, ...parameters) {
     const targetObject = getter;
     const targetProperty = setter; 
     getter = () => targetObject[targetProperty]
-    setter = newValue => { targetObject[targetProperty] = newValue; }
+    setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue; }
   }
   const properties = readFlowProperties(parameters);
-  const attributes = {
-    oninput: event => setter(event.target.value),
-    value: getter(),
-    type,
-    ...extractAttributes(properties.inputProperties)
-  };
-  delete properties.inputProperties;
   
-  const inputProperties = {classNameOverride: type + "InputField", tagName: "input", attributes, onClick: properties.onClick}
-  return row(
-    text(label, {style: {paddingRight: "4px"}, ...properties.labelProperties}),
-    getTarget().elementNode(properties.key, inputProperties),
-    {style: {padding: "4px", ...properties.style}, ...properties},   
-  );
+  const inputAttributes = extractAttributes(properties.inputProperties);
+  delete properties.inputProperties;
+  if (type === "number") {
+    if (!inputAttributes.style) inputAttributes.style = {};
+    if (!inputAttributes.style.width) inputAttributes.style.width = "50px"; 
+  } 
+  const attributes = {
+    oninput: event => setter(type === "checkbox" ? event.target.checked : event.target.value),
+    value: getter(),
+    checked: getter(),
+    type,
+    ...inputAttributes
+  };
+  
+  
+  const children = [getTarget().elementNode({
+    key: properties.key, 
+    classNameOverride: type + "InputField", 
+    tagName: "input", 
+    attributes, 
+    onClick: properties.onClick})];
+  const labelChild = text(label, {style: {paddingRight: "4px"}, ...properties.labelProperties}); 
+  if (type === "checkbox") {
+    children.push(labelChild);
+  } else {
+    children.unshift(labelChild);
+  }
+  
+  return row({style: {padding: "4px", ...properties.style}, children, ...properties}, );
 }
 
 export function button(...parameters) { 
   let result; 
-  const properties = readFlowProperties(parameters);
+  const properties = readFlowProperties(parameters, {singleStringAsText: true});
   const attributes = extractAttributes(properties);
   if (properties.disabled) attributes.disabled = true; 
 

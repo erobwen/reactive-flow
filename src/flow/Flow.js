@@ -376,6 +376,8 @@ export function readFlowProperties(arglist, config) {
     if (typeof arglist[0] === "function" && !arglist[0].causality) {
       properties.build = arglist.shift();
     }
+
+    // String or numbers
     if ((typeof arglist[0] === "string" || typeof arglist[0] === "number") && !arglist[0].causality) {
       if (singleStringAsText) {
         if (!readOneString) {
@@ -385,16 +387,27 @@ export function readFlowProperties(arglist, config) {
           properties.text = arglist.shift();
         }
       } else {
-        properties.key = arglist.shift();
+        properties.key = arglist.shift(); // Dissaloww... ? 
       }
       readOneString = true;
     }
     if (!arglist[0]) {
       arglist.shift();
     }
+
+    // Not a flow object
     if (typeof arglist[0] === "object" && !arglist[0].causality) {
-      Object.assign(properties, arglist.shift());
+      if (arglist[0] instanceof Array) {
+        if (!properties.children) properties.children = [];
+        for (let child of arglist.shift()) {
+          properties.children.push(child);
+        }
+      } else {
+        Object.assign(properties, arglist.shift());
+      }
     }
+
+    // A flow object
     if (typeof arglist[0] === "object" && arglist[0].causality) {
       if (!properties.children) properties.children = [];
       properties.children.push(arglist.shift());

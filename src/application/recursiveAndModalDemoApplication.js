@@ -60,14 +60,14 @@ export class ControlRow extends Flow {
   build() {
     const me = this;    
     const rootText = text({ key: "root-text", text: "My Recursive List:"});
-    const moreButton = button("more-button", {onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
+    const moreButton = button({key: "more-button", onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
 
     // Early finalization of sub-component, and dimension analysis of it while building 
     console.log(moreButton.dimensions());
 
     return row(
       rootText,
-      button("less-button", {onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
+      button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
       moreButton,
       {style: {padding: "10px"}} // Reactive programmatic styling! 
     )
@@ -112,13 +112,14 @@ export class Item extends Flow {
 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
       text({ key: "item-text", text: me.text}),
-      button("toggle-button", {onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
-      text( { key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      button("modal-button", {onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
+      button({key: "toggle-button", onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
+      text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
+      button({key: "modal-button", onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
       text(" Answer: " + me.myModel.value),
       !me.showModal ? null : this.target.modalNode("modal-node", {close},
         modalBackdrop(
-          button("close-button", {
+          button({
+            key: "close-button",
             text: "close " + me.text + " modal",
             style: {opacity: 1},
             onClick: () => {loga("Close modal");close()},
