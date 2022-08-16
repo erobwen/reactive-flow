@@ -9,80 +9,68 @@ const log = console.log;
  * Flow definitions
  */
 
-export const serverData = {
-  person: {
+export const initialData = {
+  traveler: {
     name: "Some Name",
+    passportNumber: "",
     adress: {
-        adress: "Some Street 42",
-        zipCode: "1234", 
-        city: "Smartville"
+      adress: "Some Street 42",
+      zipCode: "1234", 
+      city: "Smartville"
     },
-    age: 18,
-    luggages: [],
-    fellowTravellers: false
+    isChild: false,
+    luggages: []
   },
   fellowTravellers: []
 };
 
+const initialTraveler = {
+  name: "", 
+  passportNumber: "",
+  adress: {
+    adress: "",
+    zipCode: "", 
+    city: ""
+  },
+  isFellowTraveller: false,
+  isChild: false,
+  age: 1,
+  luggages: []
+};
+
+function createTraveler(isFellowTraveller) {
+  const result = observableDeepCopy(initialTraveler);
+  result.isFellowTraveller = isFellowTraveller;
+  return result; 
+}
+
 const panel = flow("panel", ({ children }) =>
-  div({key: "panel", children, style: {borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+  div({key: "panel", children, style: {marginBottom: "10px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
 );
 
 export class ComplexForm extends Flow {
 
-  setProperties({serverData}) {
-    this.editData = observableDeepCopy(serverData);
+  setProperties({initialData}) {
+    this.editData = observableDeepCopy(initialData);
     log(this.editData);
-  }
-
-  setState() {
-    this.showAdress = false; 
-    this.derrive(() => {
-      this.isAdult = this.editData.person.age >= 18; 
-    });
-  }
-
-  getSaveData() {
-    const editedPerson = this.editData.person;
-    const saveData = {
-      person: {
-        name: editedPerson.name,
-        age: editedPerson.age,
-      } 
-    }
-    if (this.isAdult) saveData.person.occupation = editedPerson.occupation;
-    return saveData; 
   }
 
   build() {
     const data = this.editData;
-    const person = data.person;
+    const traveler = data.traveler;
     return row(
       column(
         text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
-        new TravelerForm({traveler: person, isFellowTraveller: false}),
+        new TravelerForm({traveler, isFellowTraveller: false}),
+        this.editData.fellowTravellers.map(traveler => new TravelerForm({traveler, isFellowTraveller: true})),
         row(
           filler(),
-          button({text: "Add fellow traveller", onClick: () => {}}),
+          button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(observable(createTraveler(true)))}}),
           {style: {marginTop: "30px"}}
         ),
-
-        // row(
-        //   button({text: "Send", onClick: () => { alert("sending: \n" + JSON.stringify(this.getSaveData()))}}, ),
-        //   {style: {marginTop: "30px"}}
-        // ),
         filler(),
-        {
-          style: {padding: "30px", height: "100%"}
-        }
-        // (person.fellowTravellers) &&
-        //   text("Fellow Travelers", {style: {fontSize: "20px", paddingBottom: "10px", paddingTop: "10px"}}),
-        // this.isAdult && textInputField("Occupation", () => person.occupation, newOccupation => { person.occupation = newOccupation }), 
-        // row(
-        //   text(this.isAdult ? "(Adult)" : "(Child)", {style: {padding: "4px"}})
-        // ),
-        // , {inputProperties: {style: {width: "50px"}}
-      ), 
+        { style: {padding: "30px", height: "100%"}}
+      ),
       filler(),
       column(
         text(JSON.stringify(this.editData, null, 4)),
@@ -102,16 +90,35 @@ export class TravelerForm extends Flow {
   build() {
     const traveler = this.traveler;
     return panel(
+      traveler.isFellowTraveller &&
+        row(
+          filler(),
+          button("x", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
+        ),
       textInputField("Name", traveler, "name"),
+      textInputField("Passport", traveler, "passportNumber"),
+      this.isFellowTraveller && checkboxInputField("Is Child", traveler, "isChild"),
+      traveler.isChild && numberInputField("Age", traveler, "age", {unit: "years"}),
       column(
-        textInputField("Adress", traveler.adress, "adress"),
-        textInputField("Zip code", traveler.adress, "zipCode"),
-        textInputField("City", traveler.adress, "city"),
+        !traveler.isFellowTraveller &&
+          column(
+            textInputField("Adress", traveler.adress, "adress"),
+            textInputField("Zip code", traveler.adress, "zipCode"),
+            textInputField("City", traveler.adress, "city")
+          ),
         this.traveler.luggages.map(luggage => new LuggageForm({luggage})),
-        row(filler(), button("Add Luggage", {onClick: () => {this.traveler.luggages.push({weight: 1, type: "bag"})}}), {style: {marginTop: "10px"}}),
+        row(
+          filler(), 
+          button(
+            "Add Luggage", 
+            {
+              key: "add-luggage",
+              onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
+            }
+          ),
         {style: {paddingTop: "10px"}}
-      ),
-      // !this.isFellowTraveller && checkboxInputField("Fellow Travellers", traveler, "fellowTravellers"),
+        ),
+      )
     );
   }
 }
@@ -139,7 +146,7 @@ export class LuggageForm extends Flow {
 export function startComplexFormApplication() {
   const complex = new ComplexForm({
     key: "root",
-    serverData, 
+    initialData, 
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
 }

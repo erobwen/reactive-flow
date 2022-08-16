@@ -1,4 +1,5 @@
 import getWorld from "../causality/causality.js";
+import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
@@ -25,6 +26,7 @@ export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
   defaultTransitionAnimations: null
+  // defaultTransitionAnimations: reBuildDomNodeWithChildrenAnimated
 }
 
 export let trace = false;

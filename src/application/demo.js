@@ -3,7 +3,7 @@ import { text, column, row, button } from "../flow.components/BasicFlowComponent
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
-import { ComplexForm, serverData } from "./complexFormApplication";
+import { ComplexForm, initialData } from "./complexFormApplication";
 
 const log = console.log;
 
@@ -18,7 +18,7 @@ export class Demo extends Flow {
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.superSimple = new SuperSimple({model: observable({value: ""})});
     this.animationExample = new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]});
-    this.complexFormApplication = new ComplexForm({serverData});
+    this.complexFormApplication = new ComplexForm({initialData});
     this.choosen = this.complexFormApplication;
   }
   
