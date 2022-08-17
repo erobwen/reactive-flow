@@ -62,7 +62,10 @@ export class ComplexForm extends Flow {
       column(
         text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
         new TravelerForm({traveler, isFellowTraveller: false}),
-        this.editData.fellowTravellers.map(traveler => new TravelerForm({traveler, isFellowTraveller: true})),
+        column({
+          children: this.editData.fellowTravellers.map(traveler => new TravelerForm({traveler, isFellowTraveller: true})),
+          // transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+        }),
         row(
           filler(),
           button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(observable(createTraveler(true)))}}),
@@ -106,7 +109,10 @@ export class TravelerForm extends Flow {
             textInputField("Zip code", traveler.adress, "zipCode"),
             textInputField("City", traveler.adress, "city")
           ),
-        this.traveler.luggages.map(luggage => new LuggageForm({luggage})),
+        column({
+          children: this.traveler.luggages.map(luggage => new LuggageForm({luggage})),
+          // transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+        }),
         row(
           filler(), 
           button(
