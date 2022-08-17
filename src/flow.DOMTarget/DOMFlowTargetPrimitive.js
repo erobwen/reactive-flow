@@ -1,3 +1,4 @@
+import { flexAutoStyle } from "../flow.components/BasicFlowComponents";
 import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow/Flow";
 import { reBuildDomNodeWithChildrenAnimated } from "./DOMAnimation";
 
@@ -33,7 +34,13 @@ export function clearNode(node) {
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
 
   dimensions() {
-    const domNode = this.getDomNode(true).cloneNode(true);;
+    const domNode = this.getDomNode(true).cloneNode(true);
+    domNode.style.position = "absolute"; 
+    domNode.style.top = "0";
+    domNode.style.left = "0";
+    domNode.style.width = "auto";
+    domNode.style.height = "auto";
+    Object.assign(domNode.style, flexAutoStyle);
     document.body.appendChild(domNode);
     // console.log(domNode.clientHeight);
     // console.log(domNode.offsetHeight);

@@ -23,7 +23,7 @@ export class DOMFlowTarget extends FlowTarget {
           document.body.style.height = window.innerHeight + "px";
           transaction(() => {
             if (this.content) {
-              this.content.bounds = {width: window.innerHeight, height: window.innerWidth}
+              this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
             }
           });
       });
@@ -44,7 +44,7 @@ export class DOMFlowTarget extends FlowTarget {
   integrate(flow) {
     // log("INTEGRATE");
     this.content = flow;
-    this.content.bounds = {width: window.innerHeight, height: window.innerWidth}
+    this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
     flow.target = this;
     // console.log("integrate----");
     const me = this; 

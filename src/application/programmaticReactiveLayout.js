@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, row } from "../flow.components/BasicFlowComponents";
+import { text, row, div, centerMiddle } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
 const log = console.log;
@@ -21,7 +21,10 @@ export class ProgrammaticReactiveLayout extends Flow {
 
   build() {
     console.log();
-    return text("bounds: [" + this.bounds.width + " x " + this.bounds.height + "]"); 
+    return centerMiddle(
+      text("bounds: [" + this.bounds.width + " x " + this.bounds.height + "]"), 
+      {style: {height: "100%", width: "100%"}}
+    );
     // return row(text(this.bounds.toString()), );
   }
 }
