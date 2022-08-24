@@ -23,10 +23,11 @@ function parseMatrix(matrix) {
   return extractScaleTranslate([1, 0, 0, 1, 0, 0]);
 }
 
-export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNodes) {
-  const transitionAnimations = primitive.transitionAnimations ? primitive.transitionAnimations : configuration.defaultTransitionAnimations;
-  const childNodes = [...node.childNodes];
+export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, newChildNodes) {
+  const transitionAnimations = parentPrimitive.transitionAnimations ? parentPrimitive.transitionAnimations : configuration.defaultTransitionAnimations;
+  const childNodes = [...parentNode.childNodes];
   let index;
+  log("=========================================")
 
   // Analyze removed and added
   // Reintroduced removed, but mark to be removed
@@ -34,8 +35,8 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   const removed = [];
   const added = [];
   const resident = [];
-  while(index < node.childNodes.length) {
-    const existingChild = node.childNodes[index];
+  while(index < parentNode.childNodes.length) {
+    const existingChild = parentNode.childNodes[index];
     if (!newChildNodes.includes(existingChild)) {
       newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
       removed.push(existingChild);
@@ -85,16 +86,23 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
   index = 0;
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
-    const existingChild = node.childNodes[index];
+    const existingChild = parentNode.childNodes[index];
     if (newChild !== existingChild) {
-      node.insertBefore(newChild, existingChild);
+      parentNode.insertBefore(newChild, existingChild);
     }
     index++;
   }
   
-  // // Setup animation final structure with initial measures, measures
+  // // Setup animation final structure with initial measures.
   for (let node of added) {
-    node.rememberedStyle = {...getComputedStyle(node)};
+    node.rememberedStyle = {...node.style};
+    node.targetDimensions = node.equivalentCreator.dimensions();
+    log("target dimensions.");
+    log(node.targetDimensions);
+    log("remembered padding etc.");
+    log(node.rememberedStyle.padding);
+    log(node.rememberedStyle.margin);
+    // node.style.transition = "";
     node.style.transform = "scale(0)";
     node.style.maxHeight = "0px"
     node.style.maxWidth = "0px"
@@ -128,13 +136,7 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     // Setup animation initial states
     // Translate all except added to their old position (added should have a scale=0 transform)
     for (let node of added) {
-      node.style.transition = "";
-      // node.style.transform = "scale(0)";
-      // node.style.maxHeight = "0px";
-      // node.style.maxWidth = "0px";
-      // node.style.margin = "0px"
-      // node.style.padding = "0px"
-      // node.style.opacity = "0";  
+      
     }
     for (let node of resident) {
       node.style.transition = "";
@@ -184,8 +186,9 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       for (let node of added) {
         node.style.transition = "all 0.4s ease-in-out";
         node.style.transform = "scale(1)";
-        node.style.maxHeight = node.rememberedStyle.height;
-        node.style.maxWidth = node.rememberedStyle.width;
+        node.style.maxHeight = node.targetDimensions.height + "px"
+        node.style.maxWidth = node.targetDimensions.width + "px"
+        delete node.targetDimensions;
         node.style.padding = node.rememberedStyle.padding;
         node.style.margin = node.rememberedStyle.margin; 
         node.style.opacity = "1";
