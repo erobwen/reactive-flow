@@ -97,17 +97,26 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   for (let node of added) {
     node.rememberedStyle = {...node.style};
     node.targetDimensions = node.equivalentCreator.dimensions();
-    log("target dimensions.");
+    // log("target dimensions.");
     log(node.targetDimensions);
-    log("remembered padding etc.");
-    log(node.rememberedStyle.padding);
-    log(node.rememberedStyle.margin);
+    // log("remembered padding etc.");
+    // log(node.rememberedStyle.padding);
+    // log(node.rememberedStyle.padding);
+    // log(node.rememberedStyle.margin);
     // node.style.transition = "";
     node.style.transform = "scale(0)";
     node.style.maxHeight = "0px"
     node.style.maxWidth = "0px"
     node.style.margin = "0px"
+    node.style.marginTop = "0px"
+    node.style.marginBottom = "0px"
+    node.style.marginLeft = "0px"
+    node.style.marginRight = "0px"
     node.style.padding = "0px"
+    node.style.paddingTop = "0px"
+    node.style.paddingBottom = "0px"
+    node.style.paddingLeft = "0px"
+    node.style.paddingRight = "0px"
     node.style.opacity = "0";
   }
   for (let node of resident) {
@@ -189,8 +198,16 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
         node.style.maxHeight = node.targetDimensions.height + "px"
         node.style.maxWidth = node.targetDimensions.width + "px"
         delete node.targetDimensions;
-        node.style.padding = node.rememberedStyle.padding;
         node.style.margin = node.rememberedStyle.margin; 
+        node.style.marginTop = node.rememberedStyle.marginTop; 
+        node.style.marginBottom = node.rememberedStyle.marginBottom; 
+        node.style.marginLeft = node.rememberedStyle.marginLeft; 
+        node.style.marginRight = node.rememberedStyle.marginRight; 
+        node.style.padding = node.rememberedStyle.padding;
+        node.style.paddingTop = node.rememberedStyle.paddingTop;
+        node.style.paddingBottom = node.rememberedStyle.paddingBottom;
+        node.style.paddingLeft = node.rememberedStyle.paddingLeft;
+        node.style.paddingRight = node.rememberedStyle.paddingRight;
         node.style.opacity = "1";
         delete node.rememberedStyle;
         setupTransitionCleanup(node, false);
@@ -207,7 +224,15 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
         node.style.transform = "scale(0) translate(0, 0)";
         node.style.opacity = "0";
         node.style.margin = "0px"
+        node.style.marginTop = "0px"
+        node.style.marginBottom = "0px"
+        node.style.marginLeft = "0px"
+        node.style.marginRight = "0px"
         node.style.padding = "0px"
+        node.style.paddingTop = "0px"
+        node.style.paddingBottom = "0px"
+        node.style.paddingLeft = "0px"
+        node.style.paddingRight = "0px"
         setupTransitionCleanup(node, true);
       }
     });  
