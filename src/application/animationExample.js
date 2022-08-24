@@ -8,6 +8,11 @@ const log = console.log;
 /**
  * Flow definitions
  */
+const smallSpace = "10px";
+// const largeSpace = "20px";
+// const smallSpace = "0px";
+const largeSpace = "0px";
+
 
 // A very simple model
 const items = [
@@ -30,7 +35,7 @@ export class AnimationExample extends Flow {
     this.store = observable([...this.items]);
     this.list = observable([]);
     transaction(() => {
-      let count = 5; 
+      let count = 3; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.list);
     });
   }
@@ -43,8 +48,8 @@ export class AnimationExample extends Flow {
         button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.list)))}),
       ),
       column({
-        children: this.list.map(item => text({key: item, text: item, style: {textAlign: "left"}})),
-        style: {fontSize: "40px", padding: "20px", maxWidth: "300px", overflow: "visible", height: "100%"}, 
+        children: this.list.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+        style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%"}, 
         transitionAnimations: reBuildDomNodeWithChildrenAnimated        
       }),
       {style: {height: "100%"}},
@@ -69,7 +74,8 @@ export function startAnimationExample() {
  */
 
 function removeOneRandom(list) {
-  const index = Math.floor(Math.random()*(list.length - 1))
+  // const index = Math.floor(Math.random()*(list.length - 1))
+  const index = 0;
   return list.splice(index, 1)[0]; 
 }
 

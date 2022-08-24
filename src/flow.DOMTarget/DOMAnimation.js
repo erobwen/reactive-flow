@@ -78,8 +78,10 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     }, 
     {}
   );
+  log(boundsBefore);
+  // debugger; 
   
-  // Change all the elements to final state, with minimum changes to dom (to avoid loosing focus etc.)
+  // Change all the elements to final structure, with minimum changes to dom (to avoid loosing focus etc.)
   index = 0;
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
@@ -90,22 +92,26 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
     index++;
   }
   
-  // Setup animation final states for measures
+  // // Setup animation final structure with initial measures, measures
   for (let node of added) {
-    node.style.transform = "scale(1)";
-    node.style.opacity = "1";
+    node.rememberedStyle = {...getComputedStyle(node)};
+    node.style.transform = "scale(0)";
+    node.style.maxHeight = "0px"
+    node.style.maxWidth = "0px"
+    node.style.margin = "0px"
+    node.style.padding = "0px"
+    node.style.opacity = "0";
   }
   for (let node of resident) {
     node.style.transform = "scale(1)";
     node.style.opacity = "1";
   }
   for (let node of removed) {
-    node.style.maxHeight = "0px";
-    node.style.maxWidth = "0px";
-    // node.style.transform = "" // Should really be something that minimizes the div?
-    node.style.transform = "scale(0) translate(0, 0)";
-    node.style.opacity = "0";
+    node.style.transform = "scale(1)";
+    node.style.opacity = "1";
+    node.rememberedStyle = {...getComputedStyle(node)};
   }
+ 
   
   requestAnimationFrame(() => {
     
@@ -116,14 +122,19 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
         return result; 
       }, 
       {}
-    ); 
-      
+    );
+    log(boundsAfter);
+  
     // Setup animation initial states
     // Translate all except added to their old position (added should have a scale=0 transform)
     for (let node of added) {
       node.style.transition = "";
-      node.style.transform = "scale(0)";
-      node.style.opacity = "0";  
+      // node.style.transform = "scale(0)";
+      // node.style.maxHeight = "0px";
+      // node.style.maxWidth = "0px";
+      // node.style.margin = "0px"
+      // node.style.padding = "0px"
+      // node.style.opacity = "0";  
     }
     for (let node of resident) {
       node.style.transition = "";
@@ -132,6 +143,7 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       const deltaX = boundAfter.left - boundBefore.left;
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
+      log(node.style.transform);
     }
     for (let node of removed) {
       node.style.transition = "";
@@ -140,24 +152,26 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       const deltaX = boundAfter.left - boundBefore.left;
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-      node.style.maxHeight = boundsBefore.height + "px";
-      node.style.maxWidth = boundsBefore.width + "px";
+
+      node.style.maxHeight = node.rememberedStyle.height;
+      node.style.maxWidth = node.rememberedStyle.width;
       node.style.opacity = "1";
+      delete node.rememberedStyle;
     }
       
     // Activate animations 
     requestAnimationFrame(() => {
-
       function setupTransitionCleanup(node, alsoRemoveNode) {
     
         function onTransitionEnd(event) {
           if (alsoRemoveNode) {
-            // log("REMOVING CHILD!!!")
             node.parentNode.removeChild(node);
           }
           node.style.transition = "";
           node.style.width = "";
           node.style.height = "";
+          node.style.maxWidth = "";
+          node.style.maxHeight = "";
           node.style.opacity = "";
           node.removeEventListener("transitionend", onTransitionEnd);
         }
@@ -170,7 +184,12 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
       for (let node of added) {
         node.style.transition = "all 0.4s ease-in-out";
         node.style.transform = "scale(1)";
+        node.style.maxHeight = node.rememberedStyle.height;
+        node.style.maxWidth = node.rememberedStyle.width;
+        node.style.padding = node.rememberedStyle.padding;
+        node.style.margin = node.rememberedStyle.margin; 
         node.style.opacity = "1";
+        delete node.rememberedStyle;
         setupTransitionCleanup(node, false);
       }
       for (let node of resident) {
@@ -184,6 +203,8 @@ export function reBuildDomNodeWithChildrenAnimated(primitive, node, newChildNode
         node.style.maxWidth = "0px";
         node.style.transform = "scale(0) translate(0, 0)";
         node.style.opacity = "0";
+        node.style.margin = "0px"
+        node.style.padding = "0px"
         setupTransitionCleanup(node, true);
       }
     });  

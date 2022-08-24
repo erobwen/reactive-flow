@@ -3,17 +3,18 @@ CONSIDER What happens with a model built in the build function of a flow. Will i
 CONSIDER Investigate possibility of creating child flows in the state callback. 
 
 
-# Ongoing
+# Next
+TODO: Cross container/flow FLIP animations. (joint flip animation start)
+TODO: Priority levels in causality. (use for a FLIP animaiton pass)
+TODO: Programmatic Reactive Layout demo
+
+# TODO
 TODO: Multidemo
 TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Complex form demo
 TODO: Animation configuration (whole function)
-
-# TODO
+TODO: Support fragmented flows (flows corresponding to several divs).
 TODO: Make causality throw an error if same build id is used in the same build. 
-TODO: Cross container/flow FLIP animations. (joint flip animation start)
-TODO: Priority levels in causality. (use for a FLIP animaiton pass)
-TODO: Programmatic Reactive Layout demo
 TODO: Improved Animaiton Demo
 TODO: Additional work on modals and popovers 
 TODO: Alternative Flow Target Demo  

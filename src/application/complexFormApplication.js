@@ -63,8 +63,8 @@ export class ComplexForm extends Flow {
         text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
         new TravelerForm({traveler, isFellowTraveller: false}),
         column({
-          children: this.editData.fellowTravellers.map(traveler => new TravelerForm({traveler, isFellowTraveller: true})),
-          // transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+          children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: traveler.causality.id, traveler, isFellowTraveller: true})),
+          transitionAnimations: reBuildDomNodeWithChildrenAnimated  
         }),
         row(
           filler(),
@@ -110,8 +110,8 @@ export class TravelerForm extends Flow {
             textInputField("City", traveler.adress, "city")
           ),
         column({
-          children: this.traveler.luggages.map(luggage => new LuggageForm({luggage})),
-          // transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+          children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
+          transitionAnimations: reBuildDomNodeWithChildrenAnimated  
         }),
         row(
           filler(), 
@@ -150,7 +150,7 @@ export class LuggageForm extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startComplexFormApplication() {
-  const complex = new ComplexForm({
+  new ComplexForm({
     key: "root",
     initialData, 
     target: new DOMFlowTarget(document.getElementById("flow-root")),

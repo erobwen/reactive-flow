@@ -28,7 +28,8 @@ export class Demo extends Flow {
       "Programmatic Reactive Layout": new ProgrammaticReactiveLayout()
     }
 
-    this.choosen = this.components["Complex Form Example"];
+    this.choosen = this.components["Animation Example"];
+    // this.choosen = this.components["Complex Form Example"];
   }
   
   onEstablish() {
@@ -82,5 +83,4 @@ export function startDemo() {
     key: "root",
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
-
 }
