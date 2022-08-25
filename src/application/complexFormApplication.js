@@ -100,7 +100,7 @@ export class TravelerForm extends Flow {
   }  
 
   setState() {
-    this.showLuggage = false; 
+    this.showLuggage = true; 
   }
   
   build() {
@@ -123,28 +123,33 @@ export class TravelerForm extends Flow {
             textInputField("City", traveler.adress, "city")
           ),
       ),
-      new SimpleDrawer({
-        closeButtonLabel: "Hide luggage",
-        openButtonLabel: "Show luggage",
-        toggleOpen: () => { this.showLuggage = !this.showLuggage },
-        isOpen: this.showLuggage,
-        content: column({key: "luggage-panel"},
-          column({
-            key: "luggage-list",
-            children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
-            transitionAnimations: reBuildDomNodeWithChildrenAnimated  
-          }),
-          row({key: "add-luggage-row"}, 
-            button("Add Luggage", 
-              {
-                key: "add-luggage",
-                onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
-              }
-            ),
-            filler()
-          )
-        )
-      })
+      {
+        luggages: 
+          new SimpleDrawer({
+            key: "luggages-drawer",
+            closeButtonLabel: "Hide luggage",
+            openButtonLabel: "Show luggage",
+            toggleOpen: () => { this.showLuggage = !this.showLuggage },
+            isOpen: this.showLuggage,
+            content: column({key: "luggage-panel"},
+              column({
+                key: "luggage-list",
+                children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
+                transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+              }),
+              row({key: "add-luggage-row"}, 
+                button("Add Luggage", 
+                  {
+                    key: "add-luggage",
+                    onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
+                  }
+                ),
+                filler()
+              )
+            )
+          }), 
+        button: button("Add luggages", {key: "add-first-luggage", onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}));this.showLuggage = true;}}) 
+      }[this.traveler.luggages.length ? "luggages" : "button"]
     );
   }
 }
