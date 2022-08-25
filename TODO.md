@@ -4,18 +4,15 @@ CONSIDER Investigate possibility of creating child flows in the state callback.
 
 
 # Next
-TODO: Cross container/flow FLIP animations. (joint flip animation start)
+TODO: Cross container/flow FLIP animations. (joint flip animation start) + improved animation demo
 TODO: Priority levels in causality. (use for a FLIP animaiton pass)
 TODO: Programmatic Reactive Layout demo
 
 # TODO
-TODO: Multidemo
 TODO: Move attribute extraction to primtives + warning of unused property?
-TODO: Complex form demo
 TODO: Animation configuration (whole function)
 TODO: Support fragmented flows (flows corresponding to several divs).
 TODO: Make causality throw an error if same build id is used in the same build. 
-TODO: Improved Animaiton Demo
 TODO: Additional work on modals and popovers 
 TODO: Alternative Flow Target Demo  
 
