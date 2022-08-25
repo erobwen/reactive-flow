@@ -74,8 +74,8 @@ export function startAnimationExample() {
  */
 
 function removeOneRandom(list) {
-  // const index = Math.floor(Math.random()*(list.length - 1))
-  const index = 0;
+  const index = Math.floor(Math.random()*(list.length - 1))
+  // const index = 0;
   return list.splice(index, 1)[0]; 
 }
 
