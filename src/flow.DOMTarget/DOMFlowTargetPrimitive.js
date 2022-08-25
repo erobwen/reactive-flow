@@ -34,7 +34,8 @@ export function clearNode(node) {
  export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
 
   dimensions() {
-    console.warn("Excessive calls to dimensions could lead to performance issues. Research a way to isolate the reflow used in dimensions to a wecomponent?");
+    //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
+    console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
     const domNode = this.getDomNode(true).cloneNode(true);
     domNode.style.position = "absolute"; 
     domNode.style.top = "0";

@@ -28,7 +28,6 @@ export const initialData = {
   fellowTravellers: []
 };
 
-
 function createTraveler(isFellowTraveller) {
   const result = observableDeepCopy(initialTraveler);
   result.isFellowTraveller = isFellowTraveller;
@@ -50,20 +49,23 @@ export class ComplexForm extends Flow {
     const data = this.editData;
     const traveler = data.traveler;
     return row(
-      column(
-        text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
-        new TravelerForm({traveler, isFellowTraveller: false}),
-        column({
-          children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: traveler.causality.id, traveler, isFellowTraveller: true})),
-          transitionAnimations: reBuildDomNodeWithChildrenAnimated  
-        }),
-        row(
+      div(
+        div(
+          text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
+          new TravelerForm({traveler, isFellowTraveller: false}),
+          column({
+            children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: traveler.causality.id, traveler, isFellowTraveller: true})),
+            transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+          }),
+          row(
+            filler(),
+            button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(observable(createTraveler(true)))}}),
+            {style: {marginTop: "30px"}}
+          ),
           filler(),
-          button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(observable(createTraveler(true)))}}),
-          {style: {marginTop: "30px"}}
+          { style: {padding: "30px"}}
         ),
-        filler(),
-        { style: {padding: "30px", height: "100%"}}
+        { style: {boxSizing: "border-box", height: "100%", overflowY: "scroll"}}
       ),
       filler(),
       column(
@@ -75,6 +77,22 @@ export class ComplexForm extends Flow {
   }
 }
 
+export class SimpleDrawer extends Flow {
+  setProperties({openButtonLabel = "Open", closeButtonLabel = "Close", isOpen, toggleOpen, content}) {
+    this.openButtonLabel = openButtonLabel,
+    this.closeButtonLabel = closeButtonLabel,
+    this.isOpen = isOpen,
+    this.toggleOpen = toggleOpen,
+    this.content = content;
+  }
+  build() {
+    return column(
+      button(this.isOpen ? this.closeButtonLabel : this.openButtonLabel, {style: {margin: "5px"}, onClick: () => this.toggleOpen()}),
+      column({key: "luggage", children: [this.isOpen ? this.content : null], transitionAnimations: reBuildDomNodeWithChildrenAnimated })
+    );
+  }
+}
+
 export class TravelerForm extends Flow {
   setProperties({traveler, isFellowTraveller}) {
     this.traveler = traveler; 
@@ -82,29 +100,10 @@ export class TravelerForm extends Flow {
   }  
 
   setState() {
-    this.showLuggage = true; 
+    this.showLuggage = false; 
   }
   
   build() {
-    const luggageList = column({
-      key: "luggage-list",
-      children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
-      transitionAnimations: reBuildDomNodeWithChildrenAnimated  
-    });
-
-    const addLuggage = row({key: "add-luggage-row"}, button("Add Luggage", 
-      {
-        key: "add-luggage",
-        onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
-      }
-    ), filler())
-
-    const luggageChildren = [];
-    if (this.showLuggage) {
-      luggageChildren.push(luggageList);
-      luggageChildren.push(addLuggage);
-    }      
-
     const traveler = this.traveler;
     return panel(
       traveler.isFellowTraveller &&
@@ -123,9 +122,29 @@ export class TravelerForm extends Flow {
             textInputField("Zip code", traveler.adress, "zipCode"),
             textInputField("City", traveler.adress, "city")
           ),
-        button(this.showLuggage ? "Hide luggage" : "Show luggage", {style: {margin: "5px"}, onClick: () => {this.showLuggage = !this.showLuggage;}}),
-        column({key: "luggage", children: luggageChildren, transitionAnimations: reBuildDomNodeWithChildrenAnimated })
-      )
+      ),
+      new SimpleDrawer({
+        closeButtonLabel: "Hide luggage",
+        openButtonLabel: "Show luggage",
+        toggleOpen: () => { this.showLuggage = !this.showLuggage },
+        isOpen: this.showLuggage,
+        content: column({key: "luggage-panel"},
+          column({
+            key: "luggage-list",
+            children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
+            transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+          }),
+          row({key: "add-luggage-row"}, 
+            button("Add Luggage", 
+              {
+                key: "add-luggage",
+                onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
+              }
+            ),
+            filler()
+          )
+        )
+      })
     );
   }
 }
@@ -139,7 +158,7 @@ export class LuggageForm extends Flow {
     return panel(
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
-        
+        filler(),
         button("x", {onClick: () => {this.creator.traveler.luggages.remove(this.luggage)}})
       )
     );

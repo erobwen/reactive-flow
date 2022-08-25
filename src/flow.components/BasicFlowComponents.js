@@ -202,7 +202,7 @@ export function middle(...parameters) {
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties);
   attributes.style = {...middleStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return getTarget().elementNode({key: properties.key, classNameOverride: "center", tagName: "div", attributes, ...properties }); 
+  return getTarget().elementNode({key: properties.key, classNameOverride: "middle", tagName: "div", attributes, ...properties }); 
 }
 
 export function centerMiddle(...parameters) {
@@ -219,7 +219,7 @@ export function centerMiddle(...parameters) {
   const properties = readFlowProperties(parameters);
   const attributes = extractAttributes(properties);
   attributes.style = {...flexGrowShrinkStyle, ...attributes.style}; // Inject row style (while making it possible to override)
-  return getTarget().elementNode({key: properties.key, classNameOverride: "center", tagName: "div", attributes, ...properties }); 
+  return getTarget().elementNode({key: properties.key, classNameOverride: "filler", tagName: "div", attributes, ...properties }); 
 }
 
 /**
