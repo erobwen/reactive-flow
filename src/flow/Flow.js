@@ -4,6 +4,7 @@ export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
   emitReBuildEvents: true, 
+  priorityLevels: 2,
   onFinishedPriorityLevel: (level, finishedAllLevels) => {
     log("finished priority: " + level);
     if (finishedAllLevels) log("no more repeaters...");

@@ -18,6 +18,8 @@ const defaultConfiguration = {
   warnOnNestedRepeater: true,
   alwaysDependOnParentRepeater: false,
 
+  priorityLevels: 4, 
+
   objectMetaProperty: "causality",
 
   useNonObservablesAsValues: false, 
@@ -74,18 +76,8 @@ function createWorld(configuration) {
 
     // Repeaters
     inRepeater: null,
-    dirtyRepeaters: [
-      // 8 priority levels
-      {first: null, last: null}, 
-      {first: null, last: null}, 
-      {first: null, last: null}, 
-      {first: null, last: null}, 
-      {first: null, last: null}, 
-      {first: null, last: null},
-      {first: null, last: null},
-      {first: null, last: null}
-    ],
-    refreshingAllDirtyRepeaters: false,
+    dirtyRepeaters: [...Array(10).keys()].map(_ => ({first: null, last: null})),
+    refreshingAllDirtyRepeaters: false
   };
 
 
