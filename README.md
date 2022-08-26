@@ -8,10 +8,12 @@ Note: This is a compound repository where I experiment with Flow together with o
 * Very simple, easy to use and very little boilerplate code. 
 * A very flexible component model. No arbitrary rules about what code can change what state. Components are javascript objects (ES6 Proxies really), and changing their javascript properties is the same as changing their Flow properties. 
 * Property inheritance for making it simple to pass down properties in the component hierarchy.  
-* Integrated and fully automated state handling (equivalent to MobX / causalityjs). Modify any state anywhere at any time.
+* Safe direct manipulation of state and model.
+* Integrated, transparent and fully automated state handling (equivalent to MobX / causalityjs). 
 * Consistent and minimal updates of stte and DOM
 * No dependency on template litterals, jsx, Typescript or CSS, just plain Javascript with direct DOM manipulation! 
-* Bottom up rendering capabilities: Finalize and render a child before a parent is rendered to take measures for fine layout. Can be used for WYSIWYG word-processing and advanced responsive UI-behaviors.  
+* Bottom up rendering capabilities: Finalize and force reflow of a child before a parent is rendered to take measures for fine control layout. Can be used for WYSIWYG word-processing and advanced responsive UI-behaviors.  
+* Integrated FLIP animations for all transitions, simply activate, or customize to fit your specific needs.
 * DOM independent component model, future potential for portability to other platforms besides Web. 
 * Component key-paths, for convenient programmatic manipulation of components, UI test automation and debugging.
 * Based on causalityjs (similar to MobX).  

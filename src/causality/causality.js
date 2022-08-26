@@ -74,8 +74,17 @@ function createWorld(configuration) {
 
     // Repeaters
     inRepeater: null,
-    firstDirtyRepeater: null,
-    lastDirtyRepeater: null,
+    dirtyRepeaters: [
+      // 8 priority levels
+      {first: null, last: null}, 
+      {first: null, last: null}, 
+      {first: null, last: null}, 
+      {first: null, last: null}, 
+      {first: null, last: null}, 
+      {first: null, last: null},
+      {first: null, last: null},
+      {first: null, last: null}
+    ],
     refreshingAllDirtyRepeaters: false,
   };
 
@@ -809,8 +818,6 @@ function createWorld(configuration) {
           // Build identity previously created
           handler.meta.isBeingRebuilt = true;
           let establishedObject = repeater.buildIdObjectMap[buildId];
-          // TODO: How to detect when the same build-id is used twice?
-          // if (establishedObject[objectMetaProperty].isBeingRebuilt) throw new Error("Cannot reuse same build-id in the same build!");
           establishedObject[objectMetaProperty].forwardTo = proxy;
           if (repeater.options.rebuildShapeAnalysis) handler.meta.copyTo = establishedObject;
           
@@ -859,6 +866,8 @@ function createWorld(configuration) {
     return observable(copy);
   }
   
+
+
   /**********************************
    *
    *  Emit events & onChange
@@ -1096,6 +1105,9 @@ function createWorld(configuration) {
       finishRebuilding() {
           finishRebuilding(this);
       },
+      priority() {
+        return typeof(this.options.priority) !== "undefined" ? this.options.priority : 0; 
+      },
       causalityString() {
         const context = this.invalidatedInContext;
         const object = this.invalidatedByObject;
@@ -1204,29 +1216,6 @@ function createWorld(configuration) {
         return repeater;
       }
     }
-  }
-
-  function clearRepeaterLists() {
-    state.observerId = 0;
-    state.firstDirtyRepeater = null;
-    state.lastDirtyRepeater = null;
-  }
-
-  function detatchRepeater(repeater) {
-    if (state.lastDirtyRepeater === repeater) {
-      state.lastDirtyRepeater = repeater.previousDirty;
-    }
-    if (state.firstDirtyRepeater === repeater) {
-      state.firstDirtyRepeater = repeater.nextDirty;
-    }
-    if (repeater.nextDirty) {
-      repeater.nextDirty.previousDirty = repeater.previousDirty;
-    }
-    if (repeater.previousDirty) {
-      repeater.previousDirty.nextDirty = repeater.nextDirty;
-    }
-    repeater.nextDirty = null;
-    repeater.previousDirty = null;
   }
 
   function reBuildShapeAnalysis(repeater, shapeAnalysis) {
@@ -1518,26 +1507,84 @@ function createWorld(configuration) {
     // disposeChildContexts(repeater);
     // disposeSingleChildContext(repeater);
 
-    if (state.lastDirtyRepeater === null) {
-      state.lastDirtyRepeater = repeater;
-      state.firstDirtyRepeater = repeater;
+    const priorityList = state.dirtyRepeaters; 
+    const index = repeater.priority(); 
+    const list = priorityList[index];
+    if (list.last === null) {
+      list.last = repeater;
+      list.first = repeater;
     } else {
-      state.lastDirtyRepeater.nextDirty = repeater;
-      repeater.previousDirty = state.lastDirtyRepeater;
-      state.lastDirtyRepeater = repeater;
+      list.last.nextDirty = repeater;
+      repeater.previousDirty = list.last;
+      list.last = repeater;
     }
 
     refreshAllDirtyRepeaters();
   }
+  
+  function clearRepeaterLists() {
+    state.observerId = 0;
+    state.dirtyRepeaters.map(list => {list.first = null; list.last = null;});
+  }
+
+  function detatchRepeater(repeater) {
+    const priority = repeater.priority(); // repeater
+    const list = state.dirtyRepeaters[priority];
+    if (list.last === repeater && list.first === repeater && repeater.nextDirty === null && repeater.previousDirty === null) {
+      state.justLeftPriorityLevel = priority;
+    }
+    if (list.last === repeater) {
+      list.last = repeater.previousDirty;
+    }
+    if (list.first === repeater) {
+      list.first = repeater.nextDirty;
+    }
+    if (repeater.nextDirty) {
+      repeater.nextDirty.previousDirty = repeater.previousDirty;
+    }
+    if (repeater.previousDirty) {
+      repeater.previousDirty.nextDirty = repeater.nextDirty;
+    }
+    repeater.nextDirty = null;
+    repeater.previousDirty = null;
+  }
+
+  function anyDirtyRepeater(start=0) {
+    const priorityList = state.dirtyRepeaters; 
+    let priority = start; 
+    while(priority < priorityList.length) {
+      if (priorityList[priority].first !== null) {
+        return true; 
+      }
+      priority++;
+    }
+    return false; 
+  }
+
+  function firstDirtyRepeater() {
+    const priorityList = state.dirtyRepeaters; 
+    let priority = 0; 
+    while (priority < priorityList.length) {
+      if (priorityList[priority].first) {
+        return priorityList[priority].first;
+      }
+      priority++;
+    }
+    return null; 
+  }
 
   function refreshAllDirtyRepeaters() {
     if (!state.refreshingAllDirtyRepeaters) {
-      if (state.firstDirtyRepeater !== null) {
+      if (anyDirtyRepeater()) {
         state.refreshingAllDirtyRepeaters = true;
-        while (state.firstDirtyRepeater !== null) {
-          let repeater = state.firstDirtyRepeater;
-          detatchRepeater(repeater);
+        while (anyDirtyRepeater()) {
+          let repeater = firstDirtyRepeater();
           repeater.refresh();
+          detatchRepeater(repeater);
+          if (typeof(state.justLeftPriorityLevel) !== "undefined" && configuration.onFinishedPriorityLevel) {
+            configuration.onFinishedPriorityLevel(state.justLeftPriorityLevel, !anyDirtyRepeater());
+            delete state.justLeftPriorityLevel;
+          }
         }
 
         state.refreshingAllDirtyRepeaters = false;

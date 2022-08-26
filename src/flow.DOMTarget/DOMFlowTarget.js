@@ -71,7 +71,7 @@ export class DOMFlowTarget extends FlowTarget {
           me.rootElement.appendChild(domNode);
           if (this.state.modalDiv) me.rootElement.appendChild(this.state.modalDiv);
         }
-      });
+      }, {priority: 1});
     }
   }
 
