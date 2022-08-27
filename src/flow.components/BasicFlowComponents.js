@@ -282,7 +282,6 @@ export function inputField(type, label, getter, setter, ...parameters) {
     ...inputAttributes
   };
   
-  
   const children = [getTarget().elementNode({
     key: properties.key, 
     classNameOverride: type + "InputField", 

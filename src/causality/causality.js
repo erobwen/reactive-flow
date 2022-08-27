@@ -60,6 +60,7 @@ function createWorld(configuration) {
     recordingPaused : 0,
     blockInvalidation : 0,
     postponeInvalidation : 0,
+    postponeRefreshRepeaters: 0, 
   
     // Object creation
     nextObjectId: 1,
@@ -76,7 +77,7 @@ function createWorld(configuration) {
 
     // Repeaters
     inRepeater: null,
-    dirtyRepeaters: [...Array(10).keys()].map(_ => ({first: null, last: null})),
+    dirtyRepeaters: [...Array(10).keys()].map(() => ({first: null, last: null})),
     refreshingAllDirtyRepeaters: false
   };
 
@@ -126,6 +127,7 @@ function createWorld(configuration) {
     enterContext,
     leaveContext,
     invalidateObserver, 
+    proceedWithPostponedInvalidations, 
     nextObserverId: () => { return state.observerId++ },
 
     // Libraries
@@ -945,6 +947,7 @@ function createWorld(configuration) {
 
   function proceedWithPostponedInvalidations() {
     if (state.postponeInvalidation == 0) {
+      state.postponeRefreshRepeaters++;
       while (state.nextObserverToInvalidate !== null) {
         let observer = state.nextObserverToInvalidate;
         state.nextObserverToInvalidate = state.nextObserverToInvalidate.nextToNotify;
@@ -953,6 +956,8 @@ function createWorld(configuration) {
         // });
       }
       state.lastObserverToInvalidate = null;
+      state.postponeRefreshRepeaters--;
+      refreshAllDirtyRepeaters();
     }
   }
 
@@ -1566,21 +1571,23 @@ function createWorld(configuration) {
   }
 
   function refreshAllDirtyRepeaters() {
-    if (!state.refreshingAllDirtyRepeaters) {
-      if (anyDirtyRepeater()) {
-        state.refreshingAllDirtyRepeaters = true;
-        while (anyDirtyRepeater()) {
-          let repeater = firstDirtyRepeater();
-          repeater.refresh();
-          detatchRepeater(repeater);
-          if (typeof(state.justLeftPriorityLevel) !== "undefined" && configuration.onFinishedPriorityLevel) {
-            configuration.onFinishedPriorityLevel(state.justLeftPriorityLevel, !anyDirtyRepeater());
-            delete state.justLeftPriorityLevel;
+    if (state.postponeRefreshRepeaters === 0) {
+      if (!state.refreshingAllDirtyRepeaters) {
+        if (anyDirtyRepeater()) {
+          state.refreshingAllDirtyRepeaters = true;
+          while (anyDirtyRepeater()) {
+            let repeater = firstDirtyRepeater();
+            repeater.refresh();
+            detatchRepeater(repeater);
+            if (typeof(state.justLeftPriorityLevel) !== "undefined" && configuration.onFinishedPriorityLevel) {
+              configuration.onFinishedPriorityLevel(state.justLeftPriorityLevel, !anyDirtyRepeater());
+              delete state.justLeftPriorityLevel;
+            }
           }
+  
+          state.refreshingAllDirtyRepeaters = false;
         }
-
-        state.refreshingAllDirtyRepeaters = false;
-      }
+      }  
     }
   }
 

@@ -79,6 +79,8 @@ export function defaultDependencyInterfaceCreator(causality) {
   }
 
   function invalidateObservers(observers, proxy, key) {
+    state.postponeInvalidation++;
+
     if (state.blockInvalidation > 0) {
       return;
     }
@@ -98,6 +100,9 @@ export function defaultDependencyInterfaceCreator(causality) {
         chainedObserverChunk = chainedObserverChunk.next;
       }
     }
+
+    state.postponeInvalidation--;
+    causality.proceedWithPostponedInvalidations();
   }
 
   function removeFromObserverSet(id, observerSet) {
