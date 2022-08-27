@@ -23,15 +23,9 @@ export function defaultDependencyInterfaceCreator(causality) {
     }
   }
 
-  function recordDependency(observer, observerSet, optionalKey) {
+  function recordDependency(observer, observerSet) {
     let observerId = observer.id;
-
-    if (!observerSet.contents) {
-      console.log("Observer set has no set for property " + optionalKey)
-      console.log(observer);
-      console.log(observerSet);
-      throw new Error("No observer set!")
-    }
+    //console.log("recordDependency", observer, observerSet);
     if (typeof(observerSet.contents[observerId]) !== 'undefined') {
       return;
     }
@@ -78,7 +72,7 @@ export function defaultDependencyInterfaceCreator(causality) {
     }
   }
 
-  function invalidateObservers(observers, proxy, key) {
+  function invalidateObservers(observers) {
     state.postponeInvalidation++;
 
     if (state.blockInvalidation > 0) {
@@ -87,7 +81,7 @@ export function defaultDependencyInterfaceCreator(causality) {
 
     let contents = observers.contents;
     for (let id in contents) {
-      invalidateObserver(contents[id], proxy, key);
+      invalidateObserver(contents[id]);
     }
 
     if (typeof(observers.first) !== 'undefined') {
@@ -95,7 +89,7 @@ export function defaultDependencyInterfaceCreator(causality) {
       while(chainedObserverChunk !== null) {
         let contents = chainedObserverChunk.contents;
         for (let id in contents) {
-          invalidateObserver(contents[id], proxy, key);
+          invalidateObserver(contents[id]);
         }
         chainedObserverChunk = chainedObserverChunk.next;
       }
@@ -147,9 +141,9 @@ export function defaultDependencyInterfaceCreator(causality) {
         }
       }
 
-      // if (noMoreObservers && typeof(observerSet.handler.proxy.onRemovedLastObserver) === "function") {
-      //   observerSet.handler.proxy.onRemovedLastObserver(observerSet.description, observerSet.key)
-      // }
+      if (noMoreObservers && typeof(observerSet.handler.proxy.onRemovedLastObserver) === "function") {
+        observerSet.handler.proxy.onRemovedLastObserver(observerSet.description, observerSet.key)
+      }
     }
   }
 
@@ -169,34 +163,37 @@ export function defaultDependencyInterfaceCreator(causality) {
       recordDependency(observer, handler._enumerateObservers);
     },
 
-    recordDependencyOnProperty: (observer, handler, key) => {   
-      // Note: if key == toString this will break!!!
-      if (key === "toString") return;
+    recordDependencyOnProperty: (observer, handler, key) => {
+      const metaKey = "_" +key; // To avoid problems with "toSring" and similar. 
       if (typeof(handler._propertyObservers) ===  'undefined') {
         handler._propertyObservers = {};
       }
-      if (typeof(handler._propertyObservers[key]) ===  'undefined') {
-        handler._propertyObservers[key] = createObserverSet("propertyDependees", key, handler);
+      if (typeof(handler._propertyObservers[metaKey]) ===  'undefined') {
+        handler._propertyObservers[metaKey] = createObserverSet("propertyDependees", key, handler);
+        //console.log("observerSet", key, "set to", typeof handler._propertyObservers[metaKey]);
       }
-      recordDependency(observer, handler._propertyObservers[key], key);
+
+      //console.log("call recordDependency", typeof key, key, "with", typeof handler._propertyObservers[metaKey] );
+      recordDependency(observer, handler._propertyObservers[metaKey]);
     },
 
-    invalidateArrayObservers: (handler, key) => {  
+    invalidateArrayObservers: (handler) => {  
       if (handler._arrayObservers !== null) {
-        invalidateObservers(handler._arrayObservers, handler.proxy, key);
+        invalidateObservers(handler._arrayObservers);
       }
     },
 
     invalidatePropertyObservers: (handler, key) => {
+      const metaKey = "_" +key; // To avoid problems with "toSring" and similar.
       if (typeof(handler._propertyObservers) !== 'undefined' &&
-          typeof(handler._propertyObservers[key]) !== 'undefined') {
-        invalidateObservers(handler._propertyObservers[key], handler.proxy, key);
+          typeof(handler._propertyObservers[metaKey]) !== 'undefined') {
+        invalidateObservers(handler._propertyObservers[metaKey]);
       }
     },
 
-    invalidateEnumerateObservers: (handler, key) => {
+    invalidateEnumerateObservers: (handler) => {
       if (typeof(handler._enumerateObservers) !== 'undefined') {
-        invalidateObservers(handler._enumerateObservers, handler.proxy, key);
+        invalidateObservers(handler._enumerateObservers);
       }
     }, 
 
