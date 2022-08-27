@@ -6,9 +6,8 @@ export const world = getWorld({
   emitReBuildEvents: true, 
   priorityLevels: 2,
   onFinishedPriorityLevel: (level, finishedAllLevels) => {
-    log("finished priority: " + level);
+    if (trace) log("<<<finished priority: " + level + ">>>");
     if (finishedAllLevels) log("no more repeaters...");
-    log("=========================================================");
   }
   // onEventGlobal: event => collectEvent(event)
 });
@@ -441,29 +440,27 @@ export class FlowTargetPrimitive extends Flow {
 
   getPrimitive() {
     const me = this;
-    // me.primitive = me;
 
-    // finalize(me);
-    // if (!me.expandRepeater) {
-    //   me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
+    finalize(me);
+    if (!me.expandRepeater) {
+      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
 
-    //     // Expand known children (do as much as possible before integration)
-    //     if (me.children) {
-    //       for (let child of me.children) {
-    //         if (child !== null) {
-    //           child.getPrimitive();
-    //         }
-    //       }
-    //     }
-    //   });
-    // }
+        // Expand known children (do as much as possible before integration)
+        if (me.children) {
+          for (let child of me.children) {
+            if (child !== null) {
+              child.getPrimitive();
+            }
+          }
+        }
+      });
+    }
 
     return me;
   }
 
   dimensions() {
-    // Should return an object of the form {width: _, height: _}
-    throw new Error("Not implemented yet!");
+    return this.getPrimitive().dimensions();
   }
 }
 
