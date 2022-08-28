@@ -289,6 +289,7 @@ export class Flow {
           if (trace) console.groupEnd();
         }, 
         {
+          priority: 1, 
           rebuildShapeAnalysis: {
             canMatch: (newFlow, establishedFlow) => (newFlow.className() === establishedFlow.className()) && (newFlow.classNameOverride === establishedFlow.classNameOverride),
             shapeRoot: () => me.newBuild,

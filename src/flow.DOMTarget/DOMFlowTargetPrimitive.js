@@ -64,7 +64,7 @@ export function clearNode(node) {
         this.ensureDomNodeCreated();
         this.reBuildDomNodeWithChildren();
         if (trace) console.groupEnd();  
-      }, {priority: 1});
+      }, {priority: 2});
     }
     return this.domNode;
   }
@@ -156,7 +156,7 @@ export function clearNode(node) {
         }
 
         if (trace) log(this.domNode);
-      }, {priority: 1});
+      }, {priority: 2});
     }
     return this.domNode;
   }

@@ -5,7 +5,6 @@ CONSIDER Investigate possibility of creating child flows in the state callback.
 
 # Next
 TODO: Cross container/flow FLIP animations. (joint flip animation start) + improved animation demo
-TODO: Priority levels in causality. (use for a FLIP animaiton pass)
 TODO: Programmatic Reactive Layout demo
 
 # TODO
