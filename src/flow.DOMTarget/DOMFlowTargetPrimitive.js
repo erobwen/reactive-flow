@@ -116,25 +116,26 @@ export function clearNode(node) {
     }
   }
 
-
-  getChildNodes() {
-    const result = [];
+  * allChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {
-        if (child) {
+        yield child;
+      }
+    } else if (this.children instanceof Flow) {
+      yield child;
+    }
+  }
+
+  getChildNodes() {
+    return [...this.allChildren()].reduce(
+      (result, child) => 
+        {
           const childPrimitive = child.getPrimitive();
           if (childPrimitive) {
             result.push(childPrimitive.getDomNode());
           }
-        }
-      }
-    } else if (this.children instanceof Flow) {
-      const childPrimitive = this.children.getPrimitive();
-      if (childPrimitive) {
-        result.push(childPrimitive.getDomNode());
-      }
-    }  
-    return result;
+          return result;
+        }, []);
   }
 
   ensureDomNodeCreated() { 
