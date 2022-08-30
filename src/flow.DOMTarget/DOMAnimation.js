@@ -28,33 +28,17 @@ function analyzeAddedRemovedResident(oldList, newList) {
 }
 
 export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, newChildNodes) {
-  const transitionAnimations = parentPrimitive.transitionAnimations ? parentPrimitive.transitionAnimations : configuration.defaultTransitionAnimations;
-  const childNodes = [...parentNode.childNodes];
-  let index;
-  log("=========================================")
-
   const animation = new DOMFlipAnimation();
+  const childNodes = [...parentNode.childNodes];
 
+  // Analyze added, removed, resident
   const {removed, added, resident} = analyzeAddedRemovedResident(childNodes, newChildNodes);
 
-  // Stop any ongoing animation and measure current bounds and transformation
-  const boundsBefore = childNodes.reduce(
-    (result, node) => {
-
-      // Get bounds
-      const bounds = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-      
-
-      result[node.equivalentCreator.causality.id] = bounds;
-      return result; 
-    }, 
-    {}
-  );
-  log(boundsBefore);
-  // debugger; 
+  // Record origin positions
+  childNodes.forEach(node => animation.recordOriginalBounds(node));
   
   // Change all the elements to final structure, with minimum changes to dom (to avoid loosing focus etc.)
-  index = 0;
+  let index = 0;
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
     const existingChild = parentNode.childNodes[index];
@@ -64,7 +48,7 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
     index++;
   }
   
-  // // Setup animation final structure with initial style.
+  // Setup initial style.
   for (let node of added) {
     animation.setupInitialStyleForAdded(node);
   }
@@ -78,38 +62,19 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   
   requestAnimationFrame(() => {
     
-    // Measure new bounds
-    const boundsAfter = newChildNodes.reduce(
-      (result, node) => { 
-        result[node.equivalentCreator.causality.id] = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
-        return result; 
-      }, 
-      {}
-    );
-    log(boundsAfter);
+     // Record initial positions
+    childNodes.forEach(node => animation.recordInitialBounds(node));
   
     // Setup animation initial position
     // Translate all except added to their old position (added should have a scale=0 transform)
     for (let node of added) {
-      
+      animation.translateAddedFromInitialToOriginalPosition(node);
     }
     for (let node of resident) {
-      node.style.transition = "";
-      const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
-      const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
-      const deltaX = boundAfter.left - boundBefore.left;
-      const deltaY = boundAfter.top - boundBefore.top;
-      node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-      // log(node.style.transform);
+      animation.translateResidentFromInitialToOriginalPosition(node);
     }
     for (let node of removed) {
-      node.style.transition = "";
-      const boundBefore = boundsBefore[node.equivalentCreator.causality.id];
-      const boundAfter = boundsAfter[node.equivalentCreator.causality.id];
-      const deltaX = boundAfter.left - boundBefore.left;
-      const deltaY = boundAfter.top - boundBefore.top;
-      node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-
+      animation.translateRemovedFromInitialToOriginalPosition(node);
     }
       
     // Activate animations 

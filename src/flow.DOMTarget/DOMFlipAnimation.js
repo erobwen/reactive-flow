@@ -84,11 +84,11 @@ export class DOMFlipAnimation {
   }
 
   translateResidentFromInitialToOriginalPosition(node) {
-    translateFromInitialToOriginalPosition(node); 
+    this.translateFromInitialToOriginalPosition(node); 
   }
 
   translateRemovedFromInitialToOriginalPosition(node) {
-    translateFromInitialToOriginalPosition(node); 
+    this.translateFromInitialToOriginalPosition(node); 
   }
 
   translateFromInitialToOriginalPosition(node) {
