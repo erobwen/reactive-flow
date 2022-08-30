@@ -1,8 +1,6 @@
 
 
 export class DOMFlipAnimation {
-
-
   /**
    * Record original bounds, before anything in the dome has changed
    */
@@ -28,7 +26,7 @@ export class DOMFlipAnimation {
 
 
   setupInitialStyleForRemoved(node) {
-    Object.assign(node.style, this.removedInitialStyle());
+    Object.assign(node.style, this.removedInitialStyle(node));
   }
 
   addedInitialStyle() {

@@ -66,32 +66,13 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   
   // // Setup animation final structure with initial style.
   for (let node of added) {
-    node.rememberedStyle = {...node.style};
-    node.targetDimensions = node.equivalentCreator.dimensions();
-    node.style.transform = "scale(0)";
-    node.style.maxHeight = "0px"
-    node.style.maxWidth = "0px"
-    node.style.margin = "0px"
-    node.style.marginTop = "0px"
-    node.style.marginBottom = "0px"
-    node.style.marginLeft = "0px"
-    node.style.marginRight = "0px"
-    node.style.padding = "0px"
-    node.style.paddingTop = "0px"
-    node.style.paddingBottom = "0px"
-    node.style.paddingLeft = "0px"
-    node.style.paddingRight = "0px"
-    node.style.opacity = "0";
+    animation.setupInitialStyleForAdded(node);
   }
   for (let node of resident) {
-    node.style.transform = "scale(1)";
+    animation.setupInitialStyleForResident(node);
   }
   for (let node of removed) {
-    node.style.transform = "scale(1)";
-    node.style.opacity = "1";
-    const style = {...getComputedStyle(node)};
-    node.style.maxHeight = style.height;
-    node.style.maxWidth = style.width;
+    animation.setupInitialStyleForRemoved(node);
   }
  
   
