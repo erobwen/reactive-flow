@@ -1,26 +1,30 @@
 import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow/Flow";
+import { DOMFlipAnimation } from "./DOMFlipAnimation";
 
 const log = console.log;
 
-function parseMatrix(matrix) {
-  function extractScaleTranslate(matrix) {
-    return {
-    scaleX: matrix[0],
-    scaleY: matrix[3],
-    translateX: matrix[4],
-    translateY: matrix[5],
+
+function analyzeAddedRemovedResident(oldList, newList) {
+  const removed = [];
+  const added = [];
+  const resident = [];
+  let index = 0;
+  while(index < oldList.length) {
+    const existingChild = oldList[index];
+    if (!newList.includes(existingChild)) {
+      newList.splice(index, 0, existingChild); // Heuristic, introduce at old index
+      removed.push(existingChild);
+    }
+    index++;
+  }
+  for(let newChild of newList) {
+    if (!oldList.includes(newChild)) {
+      added.push(newChild);
+    } else if(!removed.includes(newChild)) {
+      resident.push(newChild);
     }
   }
-
-  let matrixPattern = /^\w*\((-?((\d+)|(\d*\.\d+)),\s*)*(-?(\d+)|(\d*\.\d+))\)/i
-  if (matrixPattern.test(matrix)) {
-    let matrixCopy = matrix.replace(/^\w*\(/, '').replace(')', '');
-    // console.log(matrixCopy);
-    let matrixValue = matrixCopy.split(/\s*,\s*/).map(value => parseFloat(value));
-    // log(matrixValue);
-    return extractScaleTranslate(matrixValue);
-  }
-  return extractScaleTranslate([1, 0, 0, 1, 0, 0]);
+  return {removed, added, resident};
 }
 
 export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, newChildNodes) {
@@ -29,51 +33,18 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   let index;
   log("=========================================")
 
-  // Analyze removed and added
-  // Reintroduced removed, but mark to be removed
-  index = 0;
-  const removed = [];
-  const added = [];
-  const resident = [];
-  while(index < parentNode.childNodes.length) {
-    const existingChild = parentNode.childNodes[index];
-    if (!newChildNodes.includes(existingChild)) {
-      newChildNodes.splice(index, 0, existingChild); // Heuristic, introduce at old index
-      removed.push(existingChild);
-    }
-    index++;
-  }
-  for(let newChild of newChildNodes) {
-    if (!childNodes.includes(newChild)) {
-      added.push(newChild);
-    } else if(!removed.includes(newChild)) {
-      resident.push(newChild);
-    }
-  }
+  const animation = new DOMFlipAnimation();
+
+  const {removed, added, resident} = analyzeAddedRemovedResident(childNodes, newChildNodes);
 
   // Stop any ongoing animation and measure current bounds and transformation
   const boundsBefore = childNodes.reduce(
     (result, node) => {
-      // Stop ongoing animation!
-      // node.style.transition = "";
-      // const computedStyle = getComputedStyle(node);
-      // // Object.assign(node.style, computedStyle);
-      // if (computedStyle.transform !== "") {
-      //   node.style.transform = computedStyle.transform; 
-      // }
 
       // Get bounds
       const bounds = (node instanceof Element) ? node.getBoundingClientRect() : "no-bounding-client-rect";
       
-      // Possibly transform bounds? 
-      // const transform = parseMatrix(computedStyle.transform); 
-      // log(transform);
-      // result[node.equivalentCreator.causality.id] = {
-        //   top: bounds.top, //+ transform.translateY, 
-        //   left: bounds.left,// + transform.translateX, 
-        //   width: bounds.width,// * transform.scaleX, 
-        //   height: bounds.height,// * transform.scaleY
-        // };
+
       result[node.equivalentCreator.causality.id] = bounds;
       return result; 
     }, 
@@ -93,17 +64,10 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
     index++;
   }
   
-  // // Setup animation final structure with initial measures.
+  // // Setup animation final structure with initial style.
   for (let node of added) {
     node.rememberedStyle = {...node.style};
     node.targetDimensions = node.equivalentCreator.dimensions();
-    // log("target dimensions.");
-    log(node.targetDimensions);
-    // log("remembered padding etc.");
-    // log(node.rememberedStyle.padding);
-    // log(node.rememberedStyle.padding);
-    // log(node.rememberedStyle.margin);
-    // node.style.transition = "";
     node.style.transform = "scale(0)";
     node.style.maxHeight = "0px"
     node.style.maxWidth = "0px"
@@ -121,12 +85,13 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   }
   for (let node of resident) {
     node.style.transform = "scale(1)";
-    node.style.opacity = "1";
   }
   for (let node of removed) {
     node.style.transform = "scale(1)";
     node.style.opacity = "1";
-    node.rememberedStyle = {...getComputedStyle(node)};
+    const style = {...getComputedStyle(node)};
+    node.style.maxHeight = style.height;
+    node.style.maxWidth = style.width;
   }
  
   
@@ -142,7 +107,7 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
     );
     log(boundsAfter);
   
-    // Setup animation initial states
+    // Setup animation initial position
     // Translate all except added to their old position (added should have a scale=0 transform)
     for (let node of added) {
       
@@ -154,7 +119,7 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
       const deltaX = boundAfter.left - boundBefore.left;
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
-      log(node.style.transform);
+      // log(node.style.transform);
     }
     for (let node of removed) {
       node.style.transition = "";
@@ -164,10 +129,6 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
       const deltaY = boundAfter.top - boundBefore.top;
       node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
 
-      node.style.maxHeight = node.rememberedStyle.height;
-      node.style.maxWidth = node.rememberedStyle.width;
-      node.style.opacity = "1";
-      delete node.rememberedStyle;
     }
       
     // Activate animations 
@@ -288,3 +249,46 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
 //     }
 //   }
 // }
+
+
+
+
+function parseMatrix(matrix) {
+  function extractScaleTranslate(matrix) {
+    return {
+    scaleX: matrix[0],
+    scaleY: matrix[3],
+    translateX: matrix[4],
+    translateY: matrix[5],
+    }
+  }
+
+  let matrixPattern = /^\w*\((-?((\d+)|(\d*\.\d+)),\s*)*(-?(\d+)|(\d*\.\d+))\)/i
+  if (matrixPattern.test(matrix)) {
+    let matrixCopy = matrix.replace(/^\w*\(/, '').replace(')', '');
+    // console.log(matrixCopy);
+    let matrixValue = matrixCopy.split(/\s*,\s*/).map(value => parseFloat(value));
+    // log(matrixValue);
+    return extractScaleTranslate(matrixValue);
+  }
+  return extractScaleTranslate([1, 0, 0, 1, 0, 0]);
+}
+
+      // Possibly transform bounds? 
+      // const transform = parseMatrix(computedStyle.transform); 
+      // log(transform);
+      // result[node.equivalentCreator.causality.id] = {
+        //   top: bounds.top, //+ transform.translateY, 
+        //   left: bounds.left,// + transform.translateX, 
+        //   width: bounds.width,// * transform.scaleX, 
+        //   height: bounds.height,// * transform.scaleY
+        // };
+
+        
+      // Stop ongoing animation!
+      // node.style.transition = "";
+      // const computedStyle = getComputedStyle(node);
+      // // Object.assign(node.style, computedStyle);
+      // if (computedStyle.transform !== "") {
+      //   node.style.transform = computedStyle.transform; 
+      // }

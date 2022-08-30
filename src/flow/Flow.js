@@ -8,6 +8,23 @@ export const world = getWorld({
   onFinishedPriorityLevel: (level, finishedAllLevels) => {
     if (trace) log("<<<finished priority: " + level + ">>>");
     if (finishedAllLevels) log("no more repeaters...");
+
+    if (level === 1) { // Finished re building flow. 
+      // Prepare all animated i
+      for (let flowId in window.allFlows) {
+        const flow = window.allFlows[flowId];
+        if (flow.animate) {
+          flow.animate.recordInitialMeasures(flow);
+        }
+      }
+    }
+    if (level === 2) { // Finished re building dom. (with removed animated still there)
+      // Loop through added and minimize them 
+      
+      // Notify change in structure to animated. 
+
+
+    }
   }
   // onEventGlobal: event => collectEvent(event)
 });

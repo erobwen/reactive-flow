@@ -74,6 +74,15 @@ export function clearNode(node) {
   }
 
   reBuildDomNodeWithChildren() {
+    // Impose animation. CONSIDER: introduce this with more general mechanism?
+    if (this.animateChildren) {
+      for (let child of this.allChildren()) {
+        if (!child.animate) {
+          child.animate = this.animateChildren;
+        }
+      }
+    }
+
     const node = this.domNode;
     this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
