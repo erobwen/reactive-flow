@@ -29,7 +29,7 @@ function analyzeAddedRemovedResident(oldList, newList) {
 
 export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, newChildNodes) {
   const animation = new DOMFlipAnimation();
-  const childNodes = [...parentNode.childNodes];
+  let childNodes = [...parentNode.childNodes];
 
   // Analyze added, removed, resident
   const {removed, added, resident} = analyzeAddedRemovedResident(childNodes, newChildNodes);
@@ -38,6 +38,7 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   childNodes.forEach(node => animation.recordOriginalBounds(node));
   
   // Change all the elements to final structure, with minimum changes to dom (to avoid loosing focus etc.)
+  // Leave removed so far.. 
   let index = 0;
   while(index < newChildNodes.length) {
     const newChild = newChildNodes[index];
@@ -59,10 +60,10 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
     animation.setupInitialStyleForRemoved(node);
   }
  
-  
   requestAnimationFrame(() => {
     
      // Record initial positions
+     // note: childNodes contains resident and removed.
     childNodes.forEach(node => animation.recordInitialBounds(node));
   
     // Setup animation initial position
@@ -79,122 +80,34 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
       
     // Activate animations 
     requestAnimationFrame(() => {
-      function setupTransitionCleanup(node, alsoRemoveNode) {
-    
-        function onTransitionEnd(event) {
-          if (alsoRemoveNode) {
-            node.parentNode.removeChild(node);
-          }
-          node.style.transition = "";
-          node.style.width = "";
-          node.style.height = "";
-          node.style.maxWidth = "";
-          node.style.maxHeight = "";
-          node.style.opacity = "";
-          node.removeEventListener("transitionend", onTransitionEnd);
-        }
-    
-        node.addEventListener("transitionend", onTransitionEnd);
-      }
-
       // Transition all except removed to new position by removing translation
       // Minimize removed by adding scale = 0 transform and at the same time removing the translation
       for (let node of added) {
-        node.style.transition = "all 0.4s ease-in-out";
-        node.style.transform = "scale(1)";
-        node.style.maxHeight = node.targetDimensions.height + "px"
-        node.style.maxWidth = node.targetDimensions.width + "px"
-        delete node.targetDimensions;
-        node.style.margin = node.rememberedStyle.margin; 
-        node.style.marginTop = node.rememberedStyle.marginTop; 
-        node.style.marginBottom = node.rememberedStyle.marginBottom; 
-        node.style.marginLeft = node.rememberedStyle.marginLeft; 
-        node.style.marginRight = node.rememberedStyle.marginRight; 
-        node.style.padding = node.rememberedStyle.padding;
-        node.style.paddingTop = node.rememberedStyle.paddingTop;
-        node.style.paddingBottom = node.rememberedStyle.paddingBottom;
-        node.style.paddingLeft = node.rememberedStyle.paddingLeft;
-        node.style.paddingRight = node.rememberedStyle.paddingRight;
-        node.style.opacity = "1";
-        delete node.rememberedStyle;
-        setupTransitionCleanup(node, false);
+        animation.setupFinalStyleForAdded(node);
       }
       for (let node of resident) {
-        node.style.transition = "all 0.4s ease-in-out";
-        node.style.transform = "scale(1)";
-        setupTransitionCleanup(node, false);
+        animation.setupFinalStyleForResident(node);
       }
       for (let node of removed) {
-        node.style.transition = "all 0.4s ease-in-out";
-        node.style.maxHeight = "0px";
-        node.style.maxWidth = "0px";
-        node.style.transform = "scale(0) translate(0, 0)";
-        node.style.opacity = "0";
-        node.style.margin = "0px"
-        node.style.marginTop = "0px"
-        node.style.marginBottom = "0px"
-        node.style.marginLeft = "0px"
-        node.style.marginRight = "0px"
-        node.style.padding = "0px"
-        node.style.paddingTop = "0px"
-        node.style.paddingBottom = "0px"
-        node.style.paddingLeft = "0px"
-        node.style.paddingRight = "0px"
-        setupTransitionCleanup(node, true);
+        animation.setupFinalStyleForRemoved(node);
+      } 
+
+      // Setup cleanup
+      for (let node of added) {
+        animation.setupAddedAnimationCleanup(node);
       }
+      for (let node of resident) {
+        animation.setupResidentAnimationCleanup(node);
+      }
+      for (let node of removed) {
+        animation.setupRemovedAnimationCleanup(node);
+      } 
     });  
   });
 }
 
 
 
-
-/**
- * Configuration musings... 
- * How could we condense the above code into a configuration? 
- */
-
-//  {
-  // Note: use flow.domNode to access the current state of the dom node associated with the flow. 
-  // This method is called just before the animation is run so you could examine bounds etc. 
-  // and create the animations depending on that. 
-//   enter: {
-//     transition: "0.4s ease-in-out",
-//     initialStyle: {
-//       opacity: "0",
-//       transform: {
-//         scale: 0
-//       }
-//     },
-//     finalStyle: {
-//       opacity: "1",
-//       transform: {
-//         scale: 1 
-//       }
-//     },
-//   }, 
-//   move: {
-//     transition: "0.4s ease-in-out",
-//   },
-//   exit: {
-//     transition: "0.4s ease-in-out",
-//     initialStyle: {
-//       opacity: "1",
-//       transform: {
-//         scale: 1 
-//       }
-//     },
-//     finalStyle: {
-//       maxHeight: "0px",
-//       maxWidth: "0px",
-//       opacity: "0",
-//       transform: {
-//         scale: 0,
-//         translate: {x: 0, y: 0}
-//       }
-//     }
-//   }
-// }
 
 
 

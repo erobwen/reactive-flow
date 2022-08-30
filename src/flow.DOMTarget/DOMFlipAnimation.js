@@ -189,15 +189,15 @@ export class DOMFlipAnimation {
    * Setup animation cleanup 
    */
   setupAddedAnimationCleanup(node) {
-    setupAnimationCleanup(node)
+    this.setupAnimationCleanup(node)
   }
 
   setupResidentAnimationCleanup(node) {
-    setupAnimationCleanup(node)
+    this.setupAnimationCleanup(node)
   }
 
   setupRemovedAnimationCleanup(node) {
-    setupAnimationCleanup(node, true)
+    this.setupAnimationCleanup(node, true)
   }
 
   setupAnimationCleanup(node, alsoRemoveNode) {
