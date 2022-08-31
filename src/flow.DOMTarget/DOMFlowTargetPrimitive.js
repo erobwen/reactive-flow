@@ -84,7 +84,7 @@ export function clearNode(node) {
     let index = node.childNodes.length - 1;
     while(0 <= index) {
       const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild) && !existingChild.equivalentCreator.animate) {
+      if (!newChildNodes.includes(existingChild) && !existingChild.equivalentCreator.getAnimation()) {
         node.removeChild(existingChild);
       }
       index--;
@@ -94,7 +94,7 @@ export function clearNode(node) {
     index = 0;
     while(index < node.childNodes.length) {
       const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild) && existingChild.equivalentCreator.animate) {
+      if (!newChildNodes.includes(existingChild) && existingChild.equivalentCreator.getAnimation()) {
         newChildNodes.splice(index, 0, existingChild);
       }
       index++;

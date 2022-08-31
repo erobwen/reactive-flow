@@ -518,8 +518,7 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   if (finishedAllLevels) log("no more repeaters...");
 
   // Finished re building flow. Measure bounds and style before FLIP animation. 
-  if (level === 1) {       
-    log("New flow structure");
+  if (level === 1) {
     onFinishReBuildingFlow();
   }
 
@@ -544,7 +543,6 @@ export function onFinishReBuildingFlow() {
       if (flow.domNode) {
         flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
       }
-      log("record original bounds: " + flow.toString());
     }
   }
 
@@ -554,28 +552,12 @@ export function onFinishReBuildingFlow() {
       flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
-
-  log("----")
-
-  log(updateFrame.previouslyAnimatedFlows.length);
-  log(updateFrame.animatedFlows.length);
 }
 
 export function onFinishReBuildingDOM() {
   if (!updateFrame || !updateFrame.previouslyAnimatedFlows) return;
-
-  log("previously animated:");
-  log(updateFrame.previouslyAnimatedFlows);
-  log("animated:");
-  log(updateFrame.animatedFlows);
   const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.previouslyAnimatedFlows, updateFrame.animatedFlows);
 
-  // log("removed: ");
-  // log(removed);
-  // log("removed: ");
-  // log(removed);
-  // log("removed: ");
-  // log(removed);
   // Setup initial style.
   for (let flow of added) {
     flow.getAnimation().setupInitialStyleForAdded(flow.domNode);
@@ -588,12 +570,10 @@ export function onFinishReBuildingDOM() {
   }
 
   requestAnimationFrame(() => {
-    log("FIRST INITIAL ANIMATION FRAME")
 
     // Record initial positions
     // note: childNodes contains resident and removed.
     updateFrame.previouslyAnimatedFlows.forEach(flow => {
-      log("record initial bounds: " + flow.toString());
       flow.getAnimation().recordInitialBounds(flow.domNode)
     });
  
@@ -611,7 +591,6 @@ export function onFinishReBuildingDOM() {
       
     // Activate animation
     requestAnimationFrame(() => {
-      log("TRANSITION ANIMATION FRAME")
 
       // Transition all except removed to new position by removing translation
       // Minimize removed by adding scale = 0 transform and at the same time removing the translation
@@ -635,7 +614,6 @@ export function onFinishReBuildingDOM() {
       for (let flow of removed) {
         flow.getAnimation().setupRemovedAnimationCleanup(flow.domNode);
       } 
-
    }); 
   })
 }
