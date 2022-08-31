@@ -7,8 +7,8 @@ const log = console.log;
 
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement, configuration={}){
-    const {creator=null, fullWindow=true} = configuration;
     super();
+    const {creator=null, fullWindow=true} = configuration;
     this.creator = creator;
     this.rootElement = rootElement;
     if (fullWindow) {
@@ -117,6 +117,7 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   dispose() {
+    super.dispose();
     this.content.integrationRepeater.dispose();
   }
 

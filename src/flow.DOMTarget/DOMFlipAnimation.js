@@ -1,5 +1,6 @@
 
 
+
 export class DOMFlipAnimation {
   /**
    * Record original bounds, before anything in the dome has changed
@@ -221,3 +222,5 @@ export class DOMFlipAnimation {
     node.addEventListener("transitionend", onTransitionEnd);
   }
 }
+
+export const standardAnimation = new DOMFlipAnimation();

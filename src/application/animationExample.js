@@ -2,6 +2,7 @@ import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { text, column, row, button } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation";
+import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
 
 const log = console.log;
 
@@ -50,7 +51,8 @@ export class AnimationExample extends Flow {
       column({
         children: this.list.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
         style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%"}, 
-        transitionAnimations: reBuildDomNodeWithChildrenAnimated        
+        transitionAnimations: reBuildDomNodeWithChildrenAnimated,
+        animateChildren: standardAnimation       
       }),
       {style: {height: "100%"}},
     );

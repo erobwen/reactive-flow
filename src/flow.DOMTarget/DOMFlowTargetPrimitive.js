@@ -88,33 +88,27 @@ export function clearNode(node) {
     if (!(node instanceof Element)) return;
     const newChildNodes = this.getChildNodes(node);
     
-    function allElements(nodeList) {
-      if (!nodeList) return false;
-      let result = true;
-      nodeList.forEach(child => {if (!(child instanceof Element)) result = false; });
-      return result;
-    }
-    
-    if ((this.transitionAnimations || configuration.defaultTransitionAnimations) && allElements(node.childNodes) && allElements(newChildNodes)) {
-      const animations = this.transitionAnimations ? this.transitionAnimations : configuration.defaultTransitionAnimations;
-      animations(this, node, newChildNodes)
-    } else {
-      this.reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes)
-    }
-  }
-
-  reBuildDomNodeWithChildrenWithoutAnimation(node, newChildNodes) {
-    // Removal pass
+    // Remove non-animated children
     let index = node.childNodes.length - 1;
     while(0 <= index) {
       const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild)) {
+      if (!newChildNodes.includes(existingChild) && !existingChild.equivalentCreator.animate) {
         node.removeChild(existingChild);
       }
       index--;
     }
+
+    // Add back animated to newChildNodes for placement at existing index
+    index = 0;
+    while(index < node.childNodes.length) {
+      const existingChild = node.childNodes[index];
+      if (!newChildNodes.includes(existingChild) && existingChild.equivalentCreator.animate) {
+        newChildNodes.splice(index, 0, existingChild);
+      }
+      index++;
+    }
     
-    // Adding pass
+    // Adding pass, will also rearrange moved elements
     index = 0;
     while(index < newChildNodes.length) {
       const existingChild = node.childNodes[index];
@@ -124,6 +118,7 @@ export function clearNode(node) {
       index++;
     }
   }
+
 
   * allChildren() {
     if (this.children instanceof Array) {

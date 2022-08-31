@@ -6,98 +6,7 @@ export const world = getWorld({
   emitReBuildEvents: true, 
   priorityLevels: 3,
   // onEventGlobal: event => collectEvent(event)
-  onFinishedPriorityLevel: (level, finishedAllLevels) => {
-    if (trace) log("<<<finished priority: " + level + ">>>");
-    if (finishedAllLevels) log("no more repeaters...");
-
-    // Finished re building flow. Measure bounds and style before FLIP animation. 
-    if (level === 1) {       
-      updateFrame = {
-        lastLevel: 1,
-        originalAnimatedFlows: [],
-        newAnimatedFlows: []
-      };
-
-      for (let flowId in window.allFlows) {
-        const flow = window.allFlows[flowId];
-        if (flow instanceof FlowTargetPrimitive && flow.animate) {
-          updateFrame.originalAnimatedFlows.push(flow);
-          flow.animate.recordOriginalBoundsAndStyle(flow.domNode);
-        }
-      }
-    }
-
-    // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
-
-    // Finished re building DOM, proceed with animations.  
-    if (level === 2) {
-      if (!updateFrame) return;
-      for (let flowId in window.allFlows) {
-        const flow = window.allFlows[flowId];
-        if (flow instanceof FlowTargetPrimitive && flow.animate) {
-          updateFrame.newAnimatedFlows.push(flow);
-        }
-      }
-
-      const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.originalAnimatedFlows, updateFrame.newAnimatedFlows);
-
-      // Setup initial style.
-      for (let node of added) {
-        animation.setupInitialStyleForAdded(node);
-      }
-      for (let node of resident) {
-        animation.setupInitialStyleForResident(node);
-      }
-      for (let node of removed) {
-        animation.setupInitialStyleForRemoved(node);
-      }
-
-      requestAnimationFrame(() => {
-    
-        // Record initial positions
-        // note: childNodes contains resident and removed.
-        updateFrame.originalAnimatedFlows.forEach(node => animation.recordInitialBounds(node));
-     
-        // Setup animation initial position
-        // Translate all except added to their old position (added should have a scale=0 transform)
-        for (let node of added) {
-          animation.translateAddedFromInitialToOriginalPosition(node);
-        }
-        for (let node of resident) {
-          animation.translateResidentFromInitialToOriginalPosition(node);
-        }
-        for (let node of removed) {
-          animation.translateRemovedFromInitialToOriginalPosition(node);
-        }
-          
-        // Activate animations 
-        requestAnimationFrame(() => {
-          // Transition all except removed to new position by removing translation
-          // Minimize removed by adding scale = 0 transform and at the same time removing the translation
-          for (let node of added) {
-            animation.setupFinalStyleForAdded(node);
-          }
-          for (let node of resident) {
-            animation.setupFinalStyleForResident(node);
-          }
-          for (let node of removed) {
-            animation.setupFinalStyleForRemoved(node);
-          } 
-    
-          // Setup cleanup
-          for (let node of added) {
-            animation.setupAddedAnimationCleanup(node);
-          }
-          for (let node of resident) {
-            animation.setupResidentAnimationCleanup(node);
-          }
-          for (let node of removed) {
-            animation.setupRemovedAnimationCleanup(node);
-          } 
-       }); 
-      })
-    }
-  }
+  onFinishedPriorityLevel: onFinishedPriorityLevel
 });
 export const {
   transaction,
@@ -178,7 +87,6 @@ export class Flow {
     // }
 
     // Debug & warning
-    window.allFlows[me.causality.id] = me;
     if (configuration.warnWhenNoKey && me.key === null && me.creator)
       console.warn(
         "Component " +
@@ -235,6 +143,7 @@ export class Flow {
   }
 
   onEstablish() {
+    window.allFlows[this.causality.id] = this;
     creators.push(this);
     this.setState();
     creators.pop();
@@ -244,6 +153,9 @@ export class Flow {
   }
 
   onDispose() {
+    log("ON DISPOSE");
+    log(this.toString());
+    delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
@@ -573,4 +485,104 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
 
 export function getTarget() {
   return creators[creators.length - 1].target;
+}
+
+
+function onFinishedPriorityLevel(level, finishedAllLevels) {
+  if (trace) log("<<<finished priority: " + level + ">>>");
+  if (finishedAllLevels) log("no more repeaters...");
+
+  // Finished re building flow. Measure bounds and style before FLIP animation. 
+  if (level === 1) {       
+    updateFrame = {
+      lastLevel: 1,
+      originalAnimatedFlows: [],
+      newAnimatedFlows: []
+    };
+
+    log("collect original");
+    for (let flowId in window.allFlows) {
+      const flow = window.allFlows[flowId];
+      if (flow instanceof FlowTargetPrimitive && flow.animate) {
+        updateFrame.originalAnimatedFlows.push(flow);
+        flow.animate.recordOriginalBoundsAndStyle(flow.domNode);
+      }
+    }
+  }
+
+  // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
+
+  // Finished re building DOM, proceed with animations.  
+  if (level === 2) {
+    if (!updateFrame) return;
+    log("collect new");
+    for (let flowId in window.allFlows) {
+      const flow = window.allFlows[flowId];
+      if (flow instanceof FlowTargetPrimitive && flow.animate) {
+        updateFrame.newAnimatedFlows.push(flow);
+      }
+    }
+    log(updateFrame.originalAnimatedFlows);
+    log(updateFrame.newAnimatedFlows);
+
+    const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.originalAnimatedFlows, updateFrame.newAnimatedFlows);
+
+    log("removed: ");
+    log(removed);
+    // Setup initial style.
+    for (let flow of added) {
+      flow.animate.setupInitialStyleForAdded(flow.domNode);
+    }
+    for (let flow of resident) {
+      flow.animate.setupInitialStyleForResident(flow.domNode);
+    }
+    for (let flow of removed) {
+      flow.animate.setupInitialStyleForRemoved(flow.domNode);
+    }
+
+    requestAnimationFrame(() => {
+  
+      // Record initial positions
+      // note: childNodes contains resident and removed.
+      updateFrame.originalAnimatedFlows.forEach(flow => {flow.animate.recordInitialBounds(flow.domNode)});
+   
+      // Setup flow.animate initial position
+      // Translate all except added to their old position (added should have a scale=0 transform)
+      for (let flow of added) {
+        flow.animate.translateAddedFromInitialToOriginalPosition(flow.domNode);
+      }
+      for (let flow of resident) {
+        flow.animate.translateResidentFromInitialToOriginalPosition(flow.domNode);
+      }
+      for (let flow of removed) {
+        flow.animate.translateRemovedFromInitialToOriginalPosition(flow.domNode);
+      }
+        
+      // Activate animation
+      requestAnimationFrame(() => {
+        // Transition all except removed to new position by removing translation
+        // Minimize removed by adding scale = 0 transform and at the same time removing the translation
+        for (let flow of added) {
+          flow.animate.setupFinalStyleForAdded(flow.domNode);
+        }
+        for (let flow of resident) {
+          flow.animate.setupFinalStyleForResident(flow.domNode);
+        }
+        for (let flow of removed) {
+          flow.animate.setupFinalStyleForRemoved(flow.domNode);
+        } 
+  
+        // Setup cleanup
+        for (let flow of added) {
+          flow.animate.setupAddedAnimationCleanup(flow.domNode);
+        }
+        for (let flow of resident) {
+          flow.animate.setupResidentAnimationCleanup(flow.domNode);
+        }
+        for (let flow of removed) {
+          flow.animate.setupRemovedAnimationCleanup(flow.domNode);
+        } 
+     }); 
+    })
+  }
 }
