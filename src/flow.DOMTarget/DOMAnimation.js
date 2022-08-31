@@ -4,7 +4,7 @@ import { DOMFlipAnimation } from "./DOMFlipAnimation";
 const log = console.log;
 
 
-function analyzeAddedRemovedResident(oldList, newList) {
+export function analyzeAddedRemovedResident(oldList, newList) {
   const removed = [];
   const added = [];
   const resident = [];
@@ -35,8 +35,9 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   const {removed, added, resident} = analyzeAddedRemovedResident(childNodes, newChildNodes);
 
   // Record origin positions
-  childNodes.forEach(node => animation.recordOriginalBounds(node));
+  childNodes.forEach(node => animation.recordOriginalBoundsAndStyle(node));
   
+
   // Change all the elements to final structure, with minimum changes to dom (to avoid loosing focus etc.)
   // Leave removed so far.. 
   let index = 0;
@@ -59,7 +60,7 @@ export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, 
   for (let node of removed) {
     animation.setupInitialStyleForRemoved(node);
   }
- 
+
   requestAnimationFrame(() => {
     
      // Record initial positions

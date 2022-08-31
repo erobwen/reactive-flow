@@ -5,8 +5,9 @@ export class DOMFlipAnimation {
    * Record original bounds, before anything in the dome has changed
    */
 
-  recordOriginalBounds(node) {
+  recordOriginalBoundsAndStyle(node) {
     node.originalBounds = node.getBoundingClientRect();
+    node.originalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
   
 
@@ -49,6 +50,9 @@ export class DOMFlipAnimation {
   }
 
   residentInitialStyle() {
+    // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
+    // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
+    // And we want the change to be gradual. 
     return {
       transform: "scale(1)",
     }
@@ -56,7 +60,7 @@ export class DOMFlipAnimation {
   
   removedInitialStyle(node) {
     // Add pre-set offset for fly-out effect in the opposite direction
-    const style = {...getComputedStyle(node)};
+    const style = node.originalStyle; delete node.originalStyle;
     return {
       transform: "scale(1)",
       opacity: "1",

@@ -1,32 +1,103 @@
 import getWorld from "../causality/causality.js";
-import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation.js";
+import { analyzeAddedRemovedResident, reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
   emitReBuildEvents: true, 
   priorityLevels: 3,
+  // onEventGlobal: event => collectEvent(event)
   onFinishedPriorityLevel: (level, finishedAllLevels) => {
     if (trace) log("<<<finished priority: " + level + ">>>");
     if (finishedAllLevels) log("no more repeaters...");
 
-    if (level === 1) { // Finished re building flow. 
-      // Prepare all animated i
+    // Finished re building flow. Measure bounds and style before FLIP animation. 
+    if (level === 1) {       
+      updateFrame = {
+        lastLevel: 1,
+        originalAnimatedFlows: [],
+        newAnimatedFlows: []
+      };
+
       for (let flowId in window.allFlows) {
         const flow = window.allFlows[flowId];
-        if (flow.animate) {
-          flow.animate.recordInitialMeasures(flow);
+        if (flow instanceof FlowTargetPrimitive && flow.animate) {
+          updateFrame.originalAnimatedFlows.push(flow);
+          flow.animate.recordOriginalBoundsAndStyle(flow.domNode);
         }
       }
     }
-    if (level === 2) { // Finished re building dom. (with removed animated still there)
-      // Loop through added and minimize them 
-      
-      // Notify change in structure to animated. 
 
+    // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
 
+    // Finished re building DOM, proceed with animations.  
+    if (level === 2) {
+      if (!updateFrame) return;
+      for (let flowId in window.allFlows) {
+        const flow = window.allFlows[flowId];
+        if (flow instanceof FlowTargetPrimitive && flow.animate) {
+          updateFrame.newAnimatedFlows.push(flow);
+        }
+      }
+
+      const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.originalAnimatedFlows, updateFrame.newAnimatedFlows);
+
+      // Setup initial style.
+      for (let node of added) {
+        animation.setupInitialStyleForAdded(node);
+      }
+      for (let node of resident) {
+        animation.setupInitialStyleForResident(node);
+      }
+      for (let node of removed) {
+        animation.setupInitialStyleForRemoved(node);
+      }
+
+      requestAnimationFrame(() => {
+    
+        // Record initial positions
+        // note: childNodes contains resident and removed.
+        updateFrame.originalAnimatedFlows.forEach(node => animation.recordInitialBounds(node));
+     
+        // Setup animation initial position
+        // Translate all except added to their old position (added should have a scale=0 transform)
+        for (let node of added) {
+          animation.translateAddedFromInitialToOriginalPosition(node);
+        }
+        for (let node of resident) {
+          animation.translateResidentFromInitialToOriginalPosition(node);
+        }
+        for (let node of removed) {
+          animation.translateRemovedFromInitialToOriginalPosition(node);
+        }
+          
+        // Activate animations 
+        requestAnimationFrame(() => {
+          // Transition all except removed to new position by removing translation
+          // Minimize removed by adding scale = 0 transform and at the same time removing the translation
+          for (let node of added) {
+            animation.setupFinalStyleForAdded(node);
+          }
+          for (let node of resident) {
+            animation.setupFinalStyleForResident(node);
+          }
+          for (let node of removed) {
+            animation.setupFinalStyleForRemoved(node);
+          } 
+    
+          // Setup cleanup
+          for (let node of added) {
+            animation.setupAddedAnimationCleanup(node);
+          }
+          for (let node of resident) {
+            animation.setupResidentAnimationCleanup(node);
+          }
+          for (let node of removed) {
+            animation.setupRemovedAnimationCleanup(node);
+          } 
+       }); 
+      })
     }
   }
-  // onEventGlobal: event => collectEvent(event)
 });
 export const {
   transaction,
@@ -43,6 +114,7 @@ window.sameAsPreviousDeep = sameAsPreviousDeep;
 window.world = world;
 window.observable = observable;
 export let creators = [];
+let updateFrame = null;
 
 export const configuration = {
   warnWhenNoKey: false,
