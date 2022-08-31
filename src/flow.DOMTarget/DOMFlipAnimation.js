@@ -98,10 +98,10 @@ export class DOMFlipAnimation {
 
   translateFromInitialToOriginalPosition(node) {
     node.style.transition = "";
-    const boundBefore = node.originalBounds; delete node.originalBounds;
-    const boundAfter = node.initialBounds; delete node.initialBounds;
-    const deltaX = boundAfter.left - boundBefore.left;
-    const deltaY = boundAfter.top - boundBefore.top;
+    const originalBounds = node.originalBounds; delete node.originalBounds;
+    const initialBounds = node.initialBounds; delete node.initialBounds;
+    const deltaX = initialBounds.left - originalBounds.left;
+    const deltaY = initialBounds.top - originalBounds.top;
     node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
   }
 

@@ -12,7 +12,6 @@ export function analyzeAddedRemovedResident(oldList, newList) {
   while(index < oldList.length) {
     const existingChild = oldList[index];
     if (!newList.includes(existingChild)) {
-      newList.splice(index, 0, existingChild); // Heuristic, introduce at old index
       removed.push(existingChild);
     }
     index++;
