@@ -468,7 +468,7 @@ export class FlowTargetPrimitive extends Flow {
           for (let child of me.children) {
             if (child !== null) {
               const childPrimitive = child.getPrimitive();
-              childPrimitive.parent = this; 
+              childPrimitive.parentPrimitive = this; 
             }
           }
         }
@@ -504,8 +504,8 @@ export class FlowTargetPrimitive extends Flow {
     let result; 
     if (this.animate) {
       result = this.animate;
-    } else if (this.parent && this.parent.animateChildren){
-      result = this.parent.animateChildren;
+    } else if (this.parentPrimitive && this.parentPrimitive.animateChildren){
+      result = this.parentPrimitive.animateChildren;
     } else {
       result = null; 
     }

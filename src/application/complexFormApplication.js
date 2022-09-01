@@ -1,7 +1,6 @@
 import { observable, Flow, flow, repeat, observableDeepCopy } from "../flow/Flow";
 import { text, column, textInputField, row, numberInputField, button, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation";
 
 const log = console.log;
 
@@ -137,7 +136,7 @@ export class TravelerForm extends Flow {
               column({
                 key: "luggage-list",
                 children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
-                // animateChildren: true
+                animateChildren: true
               }),
               row({key: "add-luggage-row"}, 
                 button("Add Luggage", 

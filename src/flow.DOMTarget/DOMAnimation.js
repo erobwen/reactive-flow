@@ -1,4 +1,4 @@
-import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow/Flow";
+import { repeat, Flow, FlowTargetPrimitive, trace, configuration, flow } from "../flow/Flow";
 import { DOMFlipAnimation } from "./DOMFlipAnimation";
 
 const log = console.log;
@@ -14,6 +14,7 @@ export function installDOMAnimation() {
 const domFlowTargets = [];
 
 export function addDOMFlowTarget(target) {
+  // debugger; 
   domFlowTargets.push(target)
 }
 
@@ -25,63 +26,65 @@ export function removeDOMFlowTarget(target) {
 /**
  * DOM animation
  */
-
-
 const updateFrame = {
-  animatedFlows: [],
-  previouslyAnimatedFlows: []
+  animatedFlows: {},
+  previouslyAnimatedFlows: {},
+  measuresDone: false
 };
 
 window.updateFrame = updateFrame;
 
-
 function collectAllAnimated(result, primitiveFlow) {
   if (primitiveFlow.getAnimation()) {
-    result[primitiveFlow.id()] = primitiveFlow;
-    for (let child of primitiveFlow.getChildren()) {
-      collectAllAnimated(result, child);
-    }
+    result[primitiveFlow.id()] = primitiveFlow; 
+  }
+  for (let child of primitiveFlow.getChildren()) {
+    collectAllAnimated(result, child.getPrimitive());
   }
 }
 
 export function onFinishReBuildingFlow() {
   log("onFinishReBuildingFlow");
   updateFrame.previouslyAnimatedFlows = updateFrame.animatedFlows;
-  updateFrame.animatedFlows = [];
-  log(updateFrame.previouslyAnimatedFlows.map(flow => flow.toString()));
-
+  updateFrame.animatedFlows = {};
 
   for (let target of domFlowTargets) {
-    updateFrame.animatedFlows2 = {}
-    collectAllAnimated(updateFrame.animatedFlows2, target.content.getPrimitive());
+    collectAllAnimated(updateFrame.animatedFlows, target.content.getPrimitive());
   }
 
-  for (let flowId in window.allFlows) {
-    const flow = window.allFlows[flowId];
-    // if (flow instanceof FlowTargetPrimitive) log(flow.toString() + ":" + !!flow.getAnimation())
-    if (flow instanceof FlowTargetPrimitive && flow.getAnimation()) {
-      updateFrame.animatedFlows.push(flow);
-      if (flow.domNode) {
-        flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
-      }
-    }
-  }
-  log(updateFrame.animatedFlows.map(flow => flow.toString()))
+  const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.previouslyAnimatedFlows, updateFrame.animatedFlows);
+  updateFrame.removed = removed; 
+  updateFrame.added = added; 
+  updateFrame.resident = resident;
 
-  // Measure removed flows
-  for (let flow of updateFrame.previouslyAnimatedFlows) {
-    if (!updateFrame.animatedFlows.includes(flow)) {
+  // Do to all new animated
+  for (let flow of resident) {
+    if (flow.domNode) {
       flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
+
+  // Do to all removed
+  for (let flow of removed) {
+    if (flow.domNode) {
+      flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
+    }
+  }
+  updateFrame.measuresDone = true;
 }
 
 export function onFinishReBuildingDOM() {
   log("onFinishReBuildingDOM");
-  if (!updateFrame || !updateFrame.previouslyAnimatedFlows) return;
-  const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.previouslyAnimatedFlows, updateFrame.animatedFlows);
-  log("removed")
-  log(removed)
+  if (!updateFrame.measuresDone) return;
+  updateFrame.measuresDone = false; 
+
+  const {removed, added, resident} = updateFrame
+  // log("removed")
+  // log(removed)
+  // log("added")
+  // log(added)
+  // log("resident")
+  // log(resident)
 
   // Setup initial style.
   for (let flow of added) {
@@ -98,7 +101,7 @@ export function onFinishReBuildingDOM() {
 
     // Record initial positions
     // note: childNodes contains resident and removed.
-    updateFrame.previouslyAnimatedFlows.forEach(flow => {
+    Object.values(updateFrame.previouslyAnimatedFlows).forEach(flow => {
       flow.getAnimation().recordInitialBounds(flow.domNode)
     });
  
@@ -148,23 +151,20 @@ export function onFinishReBuildingDOM() {
  * Diff analysis
  */
 
-export function analyzeAddedRemovedResident(oldList, newList) {
+export function analyzeAddedRemovedResident(oldIdMap, newIdMap) {
   const removed = [];
   const added = [];
   const resident = [];
-  let index = 0;
-  while(index < oldList.length) {
-    const existingChild = oldList[index];
-    if (!newList.includes(existingChild)) {
-      removed.push(existingChild);
+  for(let id in oldIdMap) {
+    if (typeof(newIdMap[id]) === "undefined") {
+      removed.push(oldIdMap[id]);
+    } else {
+      resident.push(oldIdMap[id]);
     }
-    index++;
   }
-  for(let newChild of newList) {
-    if (!oldList.includes(newChild)) {
-      added.push(newChild);
-    } else if(!removed.includes(newChild)) {
-      resident.push(newChild);
+  for(let id in newIdMap) {
+    if (typeof(oldIdMap[id]) === "undefined") {
+      added.push(newIdMap[id]);
     }
   }
   return {removed, added, resident};
