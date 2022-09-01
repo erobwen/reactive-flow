@@ -1,5 +1,5 @@
 import getWorld from "../causality/causality.js";
-import { analyzeAddedRemovedResident, reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation.js";
+import { analyzeAddedRemovedResident } from "../flow.DOMTarget/DOMAnimation.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
@@ -30,7 +30,6 @@ export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
   defaultTransitionAnimations: null
-  // defaultTransitionAnimations: reBuildDomNodeWithChildrenAnimated
 }
 
 export let trace = false;
@@ -500,14 +499,6 @@ export function getTarget() {
 
 
 
-const updateFrame = {
-  lastLevel: 1,
-  animatedFlows: [],
-  previouslyAnimatedFlows: []
-};
-
-window.updateFrame = updateFrame;
-
 function onFinishedPriorityLevel(level, finishedAllLevels) {
   if (trace) log("<<<finished priority: " + level + ">>>");
   if (finishedAllLevels) log("no more repeaters...");
@@ -524,6 +515,16 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
     onFinishReBuildingDOM();
   }
 }
+
+
+
+const updateFrame = {
+  lastLevel: 1,
+  animatedFlows: [],
+  previouslyAnimatedFlows: []
+};
+
+window.updateFrame = updateFrame;
 
 export function onFinishReBuildingFlow() {
   log("onFinishReBuildingFlow");

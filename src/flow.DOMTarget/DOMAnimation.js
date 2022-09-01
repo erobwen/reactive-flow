@@ -4,6 +4,10 @@ import { DOMFlipAnimation } from "./DOMFlipAnimation";
 const log = console.log;
 
 
+/**
+ * Diff analysis
+ */
+
 export function analyzeAddedRemovedResident(oldList, newList) {
   const removed = [];
   const added = [];
@@ -26,91 +30,12 @@ export function analyzeAddedRemovedResident(oldList, newList) {
   return {removed, added, resident};
 }
 
-export function reBuildDomNodeWithChildrenAnimated(parentPrimitive, parentNode, newChildNodes) {
-  const animation = new DOMFlipAnimation();
-  let childNodes = [...parentNode.childNodes];
 
-  // Analyze added, removed, resident
-  const {removed, added, resident} = analyzeAddedRemovedResident(childNodes, newChildNodes);
+/**
+ * Animation research
+ */
 
-  // Record origin positions
-  childNodes.forEach(node => animation.recordOriginalBoundsAndStyle(node));
-  
-
-  // Change all the elements to final structure, with minimum changes to dom (to avoid loosing focus etc.)
-  // Leave removed so far.. 
-  let index = 0;
-  while(index < newChildNodes.length) {
-    const newChild = newChildNodes[index];
-    const existingChild = parentNode.childNodes[index];
-    if (newChild !== existingChild) {
-      parentNode.insertBefore(newChild, existingChild);
-    }
-    index++;
-  }
-  
-  // Setup initial style.
-  for (let node of added) {
-    animation.setupInitialStyleForAdded(node);
-  }
-  for (let node of resident) {
-    animation.setupInitialStyleForResident(node);
-  }
-  for (let node of removed) {
-    animation.setupInitialStyleForRemoved(node);
-  }
-
-  requestAnimationFrame(() => {
-    
-     // Record initial positions
-     // note: childNodes contains resident and removed.
-    childNodes.forEach(node => animation.recordInitialBounds(node));
-  
-    // Setup animation initial position
-    // Translate all except added to their old position (added should have a scale=0 transform)
-    for (let node of added) {
-      animation.translateAddedFromInitialToOriginalPosition(node);
-    }
-    for (let node of resident) {
-      animation.translateResidentFromInitialToOriginalPosition(node);
-    }
-    for (let node of removed) {
-      animation.translateRemovedFromInitialToOriginalPosition(node);
-    }
-      
-    // Activate animations 
-    requestAnimationFrame(() => {
-      // Transition all except removed to new position by removing translation
-      // Minimize removed by adding scale = 0 transform and at the same time removing the translation
-      for (let node of added) {
-        animation.setupFinalStyleForAdded(node);
-      }
-      for (let node of resident) {
-        animation.setupFinalStyleForResident(node);
-      }
-      for (let node of removed) {
-        animation.setupFinalStyleForRemoved(node);
-      } 
-
-      // Setup cleanup
-      for (let node of added) {
-        animation.setupAddedAnimationCleanup(node);
-      }
-      for (let node of resident) {
-        animation.setupResidentAnimationCleanup(node);
-      }
-      for (let node of removed) {
-        animation.setupRemovedAnimationCleanup(node);
-      } 
-    });  
-  });
-}
-
-
-
-
-
-
+// Consider: Could parseMatrix be used to catch divs mid air and continue with another animation?  
 
 function parseMatrix(matrix) {
   function extractScaleTranslate(matrix) {
@@ -133,21 +58,21 @@ function parseMatrix(matrix) {
   return extractScaleTranslate([1, 0, 0, 1, 0, 0]);
 }
 
-      // Possibly transform bounds? 
-      // const transform = parseMatrix(computedStyle.transform); 
-      // log(transform);
-      // result[node.equivalentCreator.causality.id] = {
-        //   top: bounds.top, //+ transform.translateY, 
-        //   left: bounds.left,// + transform.translateX, 
-        //   width: bounds.width,// * transform.scaleX, 
-        //   height: bounds.height,// * transform.scaleY
-        // };
+// Possibly transform bounds? 
+// const transform = parseMatrix(computedStyle.transform); 
+// log(transform);
+// result[node.equivalentCreator.causality.id] = {
+//   top: bounds.top, //+ transform.translateY, 
+//   left: bounds.left,// + transform.translateX, 
+//   width: bounds.width,// * transform.scaleX, 
+//   height: bounds.height,// * transform.scaleY
+// };
 
         
-      // Stop ongoing animation!
-      // node.style.transition = "";
-      // const computedStyle = getComputedStyle(node);
-      // // Object.assign(node.style, computedStyle);
-      // if (computedStyle.transform !== "") {
-      //   node.style.transform = computedStyle.transform; 
-      // }
+// Stop ongoing animation!
+// node.style.transition = "";
+// const computedStyle = getComputedStyle(node);
+// // Object.assign(node.style, computedStyle);
+// if (computedStyle.transform !== "") {
+//   node.style.transform = computedStyle.transform; 
+// }
