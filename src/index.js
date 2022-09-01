@@ -6,6 +6,7 @@ import { startProgrammaticReactiveLayout } from "./application/programmaticReact
 import { startComplexFormApplication } from "./application/complexFormApplication.js";
 import { startAnimationExample } from "./application/animationExample.js";
 import { startDemo } from "./application/demo.js";
+import { installDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -23,6 +24,7 @@ setFlowConfiguration({
   warnWhenNoKey: false,
   traceReactivity: true
 });
+installDOMAnimation();
 
 // startSuperSimple();
 // startHelloWorld();

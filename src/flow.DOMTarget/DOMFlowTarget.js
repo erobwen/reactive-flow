@@ -1,7 +1,8 @@
-import { observable, repeat, readFlowProperties, transaction, onFinishReBuildingFlow } from "../flow/Flow";
+import { observable, repeat, readFlowProperties, transaction } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
+import { addDOMFlowTarget, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -9,6 +10,7 @@ export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement, configuration={}){
     super();
     const {creator=null, fullWindow=true} = configuration;
+    this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
     this.creator = creator;
     this.rootElement = rootElement;
     if (fullWindow) {
@@ -73,6 +75,8 @@ export class DOMFlowTarget extends FlowTarget {
         }
       }, {priority: 2});
     }
+    onFinishReBuildingFlow();
+    if (this.animate) addDOMFlowTarget(this);
   }
 
   setupModalDiv() {
@@ -119,6 +123,7 @@ export class DOMFlowTarget extends FlowTarget {
   dispose() {
     super.dispose();
     this.content.integrationRepeater.dispose();
+    if (this.animate) removeDOMFlowTarget(this);
   }
 
   elementNode(...parameters) {
