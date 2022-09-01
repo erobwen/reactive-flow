@@ -34,6 +34,16 @@ const updateFrame = {
 
 window.updateFrame = updateFrame;
 
+
+function collectAllAnimated(result, primitiveFlow) {
+  if (primitiveFlow.getAnimation()) {
+    result[primitiveFlow.id()] = primitiveFlow;
+    for (let child of primitiveFlow.getChildren()) {
+      collectAllAnimated(result, child);
+    }
+  }
+}
+
 export function onFinishReBuildingFlow() {
   log("onFinishReBuildingFlow");
   updateFrame.previouslyAnimatedFlows = updateFrame.animatedFlows;
@@ -41,7 +51,10 @@ export function onFinishReBuildingFlow() {
   log(updateFrame.previouslyAnimatedFlows.map(flow => flow.toString()));
 
 
-  // domFlowTargets
+  for (let target of domFlowTargets) {
+    updateFrame.animatedFlows2 = {}
+    collectAllAnimated(updateFrame.animatedFlows2, target.content.getPrimitive());
+  }
 
   for (let flowId in window.allFlows) {
     const flow = window.allFlows[flowId];

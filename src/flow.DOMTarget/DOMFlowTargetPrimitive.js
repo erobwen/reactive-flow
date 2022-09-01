@@ -110,26 +110,13 @@ export function clearNode(node) {
     }
   }
 
-
-  * allChildren() {
-    if (this.children instanceof Array) {
-      for (let child of this.children) {
-        yield child;
-      }
-    } else if (this.children instanceof Flow) {
-      yield child;
-    }
-  }
-
   getChildNodes() {
-    return [...this.allChildren()].reduce(
+    return this.getChildren().reduce(
       (result, child) => 
         {
-          if (child) {
-            const childPrimitive = child.getPrimitive();
-            if (childPrimitive) {
-              result.push(childPrimitive.getDomNode());
-            }
+          const childPrimitive = child.getPrimitive();
+          if (childPrimitive) {
+            result.push(childPrimitive.getDomNode());
           }
           return result;
         }, []);

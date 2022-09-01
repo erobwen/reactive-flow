@@ -60,6 +60,10 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 
 window.allFlows = {};
 export class Flow {
+  id() {
+    return this.causality.id;
+  }
+
   constructor(...parameters) {
     let properties = readFlowProperties(parameters);
     // log("Flow constructor: " + this.className() + "." + properties.key);
@@ -480,6 +484,21 @@ export class FlowTargetPrimitive extends Flow {
     return this.getPrimitive().dimensions();
   }
 
+  * iterateChildren() {
+    if (this.children instanceof Array) {
+      for (let child of this.children) {
+        if (child instanceof Flow) {
+          yield child;
+        }
+      }
+    } else if (this.children instanceof Flow) {
+      yield child;
+    }
+  }
+
+  getChildren() {
+    return [...this.iterateChildren()];
+  }
 
   getAnimation() {
     let result; 
