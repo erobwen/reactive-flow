@@ -1157,6 +1157,21 @@ function createWorld(configuration) {
         removeAllSources(this);
         this.disposeChildren();
       },
+      notifyDisposeToCreatedObjects() {
+        if (this.idObjectShapeMap) {
+          for(let id in this.idObjectShapeMap) {
+            let object = this.idObjectShapeMap[id];
+  
+            // Send dispose event
+            if (typeof(object[objectMetaProperty].target.onDispose) === "function") object.onDispose();
+          }
+        } else if (this.buildIdObjectMap) {
+          for (let key in this.buildIdObjectMap) {
+            const object = this.buildIdObjectMap[key]; 
+            if (typeof(object.onDispose) === "function") object.onDispose();
+          }
+        }
+      },
       disposeChildren() {
         if (this.children) {
           this.children.forEach(child => child.dispose());
@@ -1352,6 +1367,8 @@ function createWorld(configuration) {
             delete object[objectMetaProperty].pendingCreationEvent;
             emitCreationEvent(object[objectMetaProperty].handler);
           }
+
+          // Send establish event
           if (typeof(object[objectMetaProperty].target.onEstablish) === "function") object.onEstablish();
         }
       }
@@ -1385,7 +1402,7 @@ function createWorld(configuration) {
         }
       }
 
-      // Send on build remove messages
+      // Send dispose messages
       if (repeater.buildIdObjectMap) {
         for (let buildId in repeater.buildIdObjectMap) {
           if (typeof(repeater.newBuildIdObjectMap[buildId]) === "undefined") {

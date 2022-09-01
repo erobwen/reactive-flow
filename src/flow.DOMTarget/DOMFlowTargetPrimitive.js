@@ -126,9 +126,11 @@ export function clearNode(node) {
     return [...this.allChildren()].reduce(
       (result, child) => 
         {
-          const childPrimitive = child.getPrimitive();
-          if (childPrimitive) {
-            result.push(childPrimitive.getDomNode());
+          if (child) {
+            const childPrimitive = child.getPrimitive();
+            if (childPrimitive) {
+              result.push(childPrimitive.getDomNode());
+            }
           }
           return result;
         }, []);

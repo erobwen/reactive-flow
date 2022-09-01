@@ -1,5 +1,6 @@
 import getWorld from "../causality/causality.js";
 import { analyzeAddedRemovedResident, reBuildDomNodeWithChildrenAnimated } from "../flow.DOMTarget/DOMAnimation.js";
+import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation.js";
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
@@ -153,21 +154,13 @@ export class Flow {
   }
 
   onDispose() {
-    log("ON DISPOSE");
-    log(this.toString());
     delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
-      if (this.buildRepeater.buildIdObjectMap) {
-        for (let key in this.buildRepeater.buildIdObjectMap) {
-          const object = this.buildRepeater.buildIdObjectMap[key]; 
-          if (typeof(object.onDispose) === "function") object.onDispose();
-        }
-      }
-
+      this.buildRepeater.notifyDisposeToCreatedObjects();
       this.buildRepeater.dispose();
-    } 
+    }
     if (this.derriveRepeaters) this.derriveRepeaters.map(repeater => repeater.dispose()); // Do you want a disposed repeater to nullify all its writed values? Probably not....
 
     this.disposeState();
@@ -472,13 +465,15 @@ export class FlowTargetPrimitive extends Flow {
 
 
   getAnimation() {
+    let result; 
     if (this.animate) {
-      return this.animate;
+      result = this.animate;
     } else if (this.parent && this.parent.animateChildren){
-      return this.parent.animateChildren;
+      result = this.parent.animateChildren;
     } else {
-      return null; 
+      result = null; 
     }
+    return (result === true) ? standardAnimation : result;  
   }
 }
 
@@ -531,9 +526,10 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 }
 
 export function onFinishReBuildingFlow() {
-  
+  log("onFinishReBuildingFlow");
   updateFrame.previouslyAnimatedFlows = updateFrame.animatedFlows;
   updateFrame.animatedFlows = [];
+  log(updateFrame.previouslyAnimatedFlows.map(flow => flow.toString()));
 
   for (let flowId in window.allFlows) {
     const flow = window.allFlows[flowId];
@@ -545,6 +541,7 @@ export function onFinishReBuildingFlow() {
       }
     }
   }
+  log(updateFrame.animatedFlows.map(flow => flow.toString()))
 
   // Measure removed flows
   for (let flow of updateFrame.previouslyAnimatedFlows) {
@@ -555,8 +552,11 @@ export function onFinishReBuildingFlow() {
 }
 
 export function onFinishReBuildingDOM() {
+  log("onFinishReBuildingDOM");
   if (!updateFrame || !updateFrame.previouslyAnimatedFlows) return;
   const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.previouslyAnimatedFlows, updateFrame.animatedFlows);
+  log("removed")
+  log(removed)
 
   // Setup initial style.
   for (let flow of added) {

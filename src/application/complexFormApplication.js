@@ -54,8 +54,8 @@ export class ComplexForm extends Flow {
           text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
           new TravelerForm({traveler, isFellowTraveller: false}),
           column({
-            children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: traveler.causality.id, traveler, isFellowTraveller: true})),
-            transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+            children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: "id-" + traveler.causality.id, traveler, isFellowTraveller: true})),
+            animateChildren: true  
           }),
           row(
             filler(),
@@ -88,7 +88,7 @@ export class SimpleDrawer extends Flow {
   build() {
     return column(
       button(this.isOpen ? this.closeButtonLabel : this.openButtonLabel, {style: {margin: "5px"}, onClick: () => this.toggleOpen()}),
-      column({key: "luggage", children: [this.isOpen ? this.content : null], transitionAnimations: reBuildDomNodeWithChildrenAnimated })
+      column({key: "luggage", children: [this.isOpen ? this.content : null], animateChildren: true })
     );
   }
 }
@@ -106,6 +106,7 @@ export class TravelerForm extends Flow {
   build() {
     const traveler = this.traveler;
     return panel(
+      // {key: "traveler-pannel"},// TODO: Why will it not dispose this child if no key
       traveler.isFellowTraveller &&
         row(
           filler(),
@@ -120,12 +121,13 @@ export class TravelerForm extends Flow {
           column(
             textInputField("Adress", traveler.adress, "adress"),
             textInputField("Zip code", traveler.adress, "zipCode"),
-            textInputField("City", traveler.adress, "city")
+            textInputField("City", traveler.adress, "city"), 
           ),
       ),
       {
         luggages: 
           new SimpleDrawer({
+            // animate: true,
             key: "luggages-drawer",
             closeButtonLabel: "Hide luggage",
             openButtonLabel: "Show luggage",
@@ -134,8 +136,8 @@ export class TravelerForm extends Flow {
             content: column({key: "luggage-panel"},
               column({
                 key: "luggage-list",
-                children: this.traveler.luggages.map(luggage => new LuggageForm({key: luggage.causality.id, luggage})),
-                transitionAnimations: reBuildDomNodeWithChildrenAnimated  
+                children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
+                // animateChildren: true
               }),
               row({key: "add-luggage-row"}, 
                 button("Add Luggage", 
