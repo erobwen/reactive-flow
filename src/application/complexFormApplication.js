@@ -110,11 +110,13 @@ export class TravelerForm extends Flow {
         row(
           filler(),
           button("x", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
-        ),
+        )
+        ,
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
       this.isFellowTraveller && checkboxInputField("Is Child", traveler, "isChild"),
-      traveler.isChild && numberInputField("Age", traveler, "age", {unit: "years"}),
+      traveler.isChild && 
+        numberInputField("Age", traveler, "age", {unit: "years", animate: true}),
       column(
         !traveler.isFellowTraveller &&
           column(

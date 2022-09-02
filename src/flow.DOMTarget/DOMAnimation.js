@@ -27,45 +27,75 @@ export function removeDOMFlowTarget(target) {
  * DOM animation
  */
 const updateFrame = {
-  animatedFlows: {},
-  previouslyAnimatedFlows: {},
+  added: null,
+  removed: null,
+  resident: null,
   measuresDone: false
 };
 
 window.updateFrame = updateFrame;
 
 function collectAllAnimated(result, primitiveFlow) {
-  if (primitiveFlow.getAnimation()) {
-    result[primitiveFlow.id()] = primitiveFlow; 
+  // This flow had changes
+  if (primitiveFlow.unobservable().flowBuildNumber === configuration.flowBuildNumber) {
+    log()
+    for (let flow of primitiveFlow.unobservable().added) {
+      if (flow.getAnimation()) {
+        result.added[flow.id()] = flow;
+      }
+    }
+    for (let flow of primitiveFlow.unobservable().removed) {
+      if (flow.getAnimation()) {
+        result.removed[flow.id()] = flow;
+      }
+    }
+    for (let flow of primitiveFlow.unobservable().resident) {
+      if (flow.getAnimation()) {
+        result.resident[flow.id()] = flow;
+      }
+    }
   }
+
   for (let child of primitiveFlow.getChildren()) {
     collectAllAnimated(result, child.getPrimitive());
   }
 }
 
 export function onFinishReBuildingFlow() {
-  log("onFinishReBuildingFlow");
-  updateFrame.previouslyAnimatedFlows = updateFrame.animatedFlows;
-  updateFrame.animatedFlows = {};
-
-  for (let target of domFlowTargets) {
-    collectAllAnimated(updateFrame.animatedFlows, target.content.getPrimitive());
+  const result = {
+    added: {}, 
+    removed: {},
+    resident: {}
   }
 
-  const {removed, added, resident} = analyzeAddedRemovedResident(updateFrame.previouslyAnimatedFlows, updateFrame.animatedFlows);
-  updateFrame.removed = removed; 
-  updateFrame.added = added; 
-  updateFrame.resident = resident;
+  for (let target of domFlowTargets) {
+    collectAllAnimated(result, target.content.getPrimitive());
+  }
+  log("collected....");
+  log(result)
+  for(let id in result.removed) {
+    if (typeof(result.added[id]) !== "undefined") {
+      result.resident[id] = result.removed[id];
+      delete result.removed[id];
+      delete result.added[id];
+    }
+  }
+  log(result);
+
+  updateFrame.added = Object.values(result.added);
+  updateFrame.removed = Object.values(result.removed);
+  updateFrame.resident = Object.values(result.resident);
+  log(updateFrame)
 
   // Do to all new animated
-  for (let flow of resident) {
+  for (let flow of updateFrame.resident) {
     if (flow.domNode) {
       flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
 
   // Do to all removed
-  for (let flow of removed) {
+  for (let flow of updateFrame.removed) {
     if (flow.domNode) {
       flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
     }
@@ -74,7 +104,7 @@ export function onFinishReBuildingFlow() {
 }
 
 export function onFinishReBuildingDOM() {
-  log("onFinishReBuildingDOM");
+
   if (!updateFrame.measuresDone) return;
   updateFrame.measuresDone = false; 
 
@@ -101,10 +131,15 @@ export function onFinishReBuildingDOM() {
 
     // Record initial positions
     // note: childNodes contains resident and removed.
-    Object.values(updateFrame.previouslyAnimatedFlows).forEach(flow => {
+    updateFrame.removed.forEach(flow => {
       flow.getAnimation().recordInitialBounds(flow.domNode)
     });
- 
+
+    updateFrame.resident.forEach(flow => {
+      flow.getAnimation().recordInitialBounds(flow.domNode)
+    });
+
+    
     // Setup flow.animate initial position
     // Translate all except added to their old position (added should have a scale=0 transform)
     for (let flow of added) {

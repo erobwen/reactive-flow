@@ -47,6 +47,7 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
+    log("---------------------------------------- onFinishReBuildingFlow ----------------------------------------");
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
     configuration.flowBuildNumber++;
   }
@@ -55,6 +56,7 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 
   // Finished re building DOM, proceed with animations.  
   if (level === 2) {
+    log("---------------------------------------- onFinishReBuildingDOM ----------------------------------------");
     configuration.onFinishReBuildingDOMCallbacks.forEach(callback => callback())
   }
 }

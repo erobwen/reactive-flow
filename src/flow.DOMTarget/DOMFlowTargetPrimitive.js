@@ -33,10 +33,6 @@ export function clearNode(node) {
  */
  export class DOMFlowTargetPrimitive extends FlowPrimitive {
 
-  constructor(...parameters) {
-    super(readFlowProperties(parameters));
-    this.unobservable = {};
-  }
 
   dimensions() {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
