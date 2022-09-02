@@ -1,5 +1,6 @@
 import { flexAutoStyle } from "../flow.components/BasicFlowComponents";
-import { repeat, Flow, FlowTargetPrimitive, trace, configuration } from "../flow/Flow";
+import { repeat, Flow, trace, configuration, readFlowProperties } from "../flow/Flow";
+import { FlowPrimitive } from "../flow/FlowPrimitive";
 
 const log = console.log;
 
@@ -30,7 +31,12 @@ export function clearNode(node) {
 /**
  * DOM Flow Base class
  */
- export class DOMFlowTargetPrimitive extends FlowTargetPrimitive {
+ export class DOMFlowTargetPrimitive extends FlowPrimitive {
+
+  constructor(...parameters) {
+    super(readFlowProperties(parameters));
+    this.unobservable = {};
+  }
 
   dimensions() {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?

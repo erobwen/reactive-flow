@@ -1,4 +1,4 @@
-import { repeat, Flow, FlowTargetPrimitive, trace, configuration, flow } from "../flow/Flow";
+import { repeat, Flow, trace, configuration, flow } from "../flow/Flow";
 import { DOMFlipAnimation } from "./DOMFlipAnimation";
 
 const log = console.log;
@@ -79,12 +79,12 @@ export function onFinishReBuildingDOM() {
   updateFrame.measuresDone = false; 
 
   const {removed, added, resident} = updateFrame
-  // log("removed")
-  // log(removed)
-  // log("added")
-  // log(added)
-  // log("resident")
-  // log(resident)
+  log("removed")
+  log(removed)
+  log("added")
+  log(added)
+  log("resident")
+  log(resident)
 
   // Setup initial style.
   for (let flow of added) {

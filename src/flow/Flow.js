@@ -1,6 +1,5 @@
 import getWorld from "../causality/causality.js";
-import { analyzeAddedRemovedResident } from "../flow.DOMTarget/DOMAnimation.js";
-import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation.js";
+
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
@@ -31,7 +30,8 @@ export const configuration = {
   traceReactivity: false,
   defaultTransitionAnimations: null,
   onFinishReBuildingFlowCallbacks: [],
-  onFinishReBuildingDOMCallbacks:  []
+  onFinishReBuildingDOMCallbacks:  [],
+  flowBuildNumber:0
 }
 
 export let trace = false;
@@ -48,6 +48,7 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
+    configuration.flowBuildNumber++;
   }
 
   // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
@@ -439,78 +440,6 @@ export function readFlowProperties(arglist, config) {
     //if (properties.children && !(typeof(properties.children) instanceof Array)) properties.children = [properties.children];
   }
   return properties;
-}
-
-export class FlowTargetPrimitive extends Flow {
-  findChild(key) {
-    if (this.key === key) return this;
-    if (this.children) {
-      for (let child of this.children) {
-        if (child !== null) {
-          let result = child.findChild(key);
-          if (result !== null) return result;
-        }
-      }
-    }
-    return null;
-  }
-
-  getPrimitive() {
-    const me = this;
-
-    finalize(me);
-    if (!me.expandRepeater) {
-      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
-        if (trace) console.group(repeater.causalityString());
-
-        // Expand known children (do as much as possible before integration)
-        if (me.children) {
-          for (let child of me.children) {
-            if (child !== null) {
-              const childPrimitive = child.getPrimitive();
-              childPrimitive.parentPrimitive = this; 
-            }
-          }
-        }
-
-        if (trace) console.groupEnd();
-      }, {priority: 1});
-    }
-
-    return me;
-  }
-
-  dimensions() {
-    return this.getPrimitive().dimensions();
-  }
-
-  * iterateChildren() {
-    if (this.children instanceof Array) {
-      for (let child of this.children) {
-        if (child instanceof Flow) {
-          yield child;
-        }
-      }
-    } else if (this.children instanceof Flow) {
-      yield child;
-    }
-  }
-
-  getChildren() {
-    return [...this.iterateChildren()];
-  }
-
-  getAnimation() {
-    let result; 
-    if (this.animate) {
-      result = this.animate;
-    } else if (this.parentPrimitive && this.parentPrimitive.animateChildren){
-      result = this.parentPrimitive.animateChildren;
-    } else {
-      result = null; 
-    }
-    return (result === true) ? standardAnimation : result;  
-  }
 }
 
 export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
