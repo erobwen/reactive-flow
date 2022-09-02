@@ -97,6 +97,8 @@ export class FlowPrimitive extends Flow {
       result = this.animate;
     } else if (this.parentPrimitive && this.parentPrimitive.animateChildren){
       result = this.parentPrimitive.animateChildren;
+
+      //TODO: Search equivalent flows as well! 
     } else {
       result = null; 
     }

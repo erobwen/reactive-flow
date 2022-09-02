@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
-import { text, column, row, button } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
 
@@ -33,26 +33,50 @@ export class AnimationExample extends Flow {
 
   setState() {
     this.store = observable([...this.items]);
-    this.list = observable([]);
+    this.listA = observable([]);
+    this.listB = observable([]);
     transaction(() => {
       let count = 3; 
-      while (count-- > 0) addRandomly(removeOneRandom(this.store), this.list);
+      while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listA);
+    });
+  }
+
+  juggle() {
+    transaction(() => {
+      const listALength = this.listA.length;
+      const listBLength = this.listB.length;
+      const aToB = (listALength + 1 >= listBLength && listALength) && removeOneRandom(this.listA);
+      const bToA = (listBLength + 1 >= listALength && listBLength) && removeOneRandom(this.listB);
+      log("juggle")
+      log(aToB);
+      log(bToA);
+      if (aToB) addRandomly(aToB, this.listB);
+      if (bToA) addRandomly(bToA, this.listA);
     });
   }
 
   build() {
     return column(
       row(
-        button({text: "Randomize", onClick: () => transaction(() => randomize(this.list))}),
-        button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeOneRandom(this.store), this.list))}),
-        button({text: "Remove random", disabled: this.list.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.list)))}),
+        button({text: "Randomize", onClick: () => transaction(() => randomize(this.listA))}),
+        button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeOneRandom(this.store), this.listA))}),
+        button({text: "Remove random", disabled: this.listA.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.listA)))}),
+        button({text: "Juggle", onClick: () => this.juggle()}),
       ),
-      column({
-        children: this.list.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-        style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%"}, 
-        animateChildren: standardAnimation       
-      }),
-      {style: {height: "100%"}},
+      row(
+        column({
+          children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px", transition: "all 0.4s ease-in-out"}, 
+          animateChildren: standardAnimation       
+        }),
+        filler(),
+        column({
+          children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px", transition: "all 0.4s ease-in-out"}, 
+          animateChildren: standardAnimation       
+        }),
+      ),
+      {style: {height: "100%", width: "100%"}},
     );
   }
 }
@@ -74,7 +98,7 @@ export function startAnimationExample() {
  */
 
 function removeOneRandom(list) {
-  const index = Math.floor(Math.random()*(list.length - 1))
+  const index = Math.floor(Math.random()*(list.length))
   // const index = 0;
   return list.splice(index, 1)[0]; 
 }
