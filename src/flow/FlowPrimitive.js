@@ -43,7 +43,9 @@ export class FlowPrimitive extends Flow {
         // Expand known children (do as much as possible before integration)
         for (let child of me.iterateChildren()) {
           const childPrimitive = child.getPrimitive();
-          childPrimitive.parentPrimitive = this; 
+          if (childPrimitive) {
+            childPrimitive.parentPrimitive = this; 
+          }
         }
 
         // Accumulate diffs from previous update
@@ -76,11 +78,11 @@ export class FlowPrimitive extends Flow {
   * iterateChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {
-        if (child instanceof Flow) {
+        if (child instanceof Flow && child !== null) {
           yield child;
         }
       }
-    } else if (this.children instanceof Flow) {
+    } else if (this.children instanceof Flow  && child !== null) {
       yield child;
     }
   }
