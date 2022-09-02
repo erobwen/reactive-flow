@@ -38,7 +38,6 @@ window.updateFrame = updateFrame;
 function collectAllAnimated(result, primitiveFlow) {
   // This flow had changes
   if (primitiveFlow.unobservable().flowBuildNumber === configuration.flowBuildNumber) {
-    log()
     for (let flow of primitiveFlow.unobservable().added) {
       if (flow.getAnimation()) {
         result.added[flow.id()] = flow;
@@ -71,8 +70,6 @@ export function onFinishReBuildingFlow() {
   for (let target of domFlowTargets) {
     collectAllAnimated(result, target.content.getPrimitive());
   }
-  log("collected....");
-  log(result)
   for(let id in result.removed) {
     if (typeof(result.added[id]) !== "undefined") {
       result.resident[id] = result.removed[id];
@@ -80,12 +77,10 @@ export function onFinishReBuildingFlow() {
       delete result.added[id];
     }
   }
-  log(result);
 
   updateFrame.added = Object.values(result.added);
   updateFrame.removed = Object.values(result.removed);
   updateFrame.resident = Object.values(result.resident);
-  log(updateFrame)
 
   // Do to all new animated
   for (let flow of updateFrame.resident) {

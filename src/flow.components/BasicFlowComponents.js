@@ -264,7 +264,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     const targetObject = getter;
     const targetProperty = setter; 
     getter = () => targetObject[targetProperty]
-    setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue; }
+    setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}
   }
   const properties = readFlowProperties(parameters);
 

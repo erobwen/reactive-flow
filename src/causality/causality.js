@@ -749,6 +749,9 @@ function createWorld(configuration) {
     if (typeof(buildId) === 'undefined') {
       buildId = null;
     }
+    if (isObservable(createdTarget)) {
+      throw new Error("Cannot observe an already observed object!");
+    }
 
     let handler;
     if (createdTarget instanceof Array) {

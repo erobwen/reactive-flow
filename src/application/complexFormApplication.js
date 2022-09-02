@@ -58,7 +58,7 @@ export class ComplexForm extends Flow {
           }),
           row(
             filler(),
-            button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(observable(createTraveler(true)))}}),
+            button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}}),
             {style: {marginTop: "30px"}}
           ),
           filler(),

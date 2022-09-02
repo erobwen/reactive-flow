@@ -49,16 +49,17 @@ export class FlowPrimitive extends Flow {
         // Accumulate diffs from previous update
         if (this.unobservable().flowBuildNumber !== configuration.flowBuildNumber) {
           this.unobservable().flowBuildNumber = configuration.flowBuildNumber;
+          this.unobservable().lastChildrenBackup = this.unobservable().lastChildren;
+
           const children = this.getChildren().map(flow => flow.getPrimitive());
           Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildren, children));
           this.unobservable().lastChildren = children;
-          log("DIFF")
-          log(this.unobservable());
         } else {
-          log(this.unobservable().flowBuildNumber)
-          log(configuration.flowBuildNumber)
-          log(this.toString())
-          throw new Error("Multiple updates! Not an error really, but it needs handling")
+          const children = this.getChildren().map(flow => flow.getPrimitive());
+          Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildrenBackup, children));
+          this.unobservable().lastChildren = children;
+
+          console.warn("Multiple updates of same primitive!");
         }
         
         if (trace) console.groupEnd();
