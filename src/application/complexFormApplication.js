@@ -67,10 +67,10 @@ export class ComplexForm extends Flow {
         { style: {boxSizing: "border-box", height: "100%", overflowY: "scroll"}}
       ),
       filler(),
-      column(
-        text(JSON.stringify(this.editData, null, 4)),
-        {style: {borderLeft: "1px", borderLeftStyle: "solid", borderLeftColor: "lightgray", backgroundColor: "#eeeeee"}}
-      ),
+      // column(
+      //   text(JSON.stringify(this.editData, null, 4)),
+      //   {style: {borderLeft: "1px", borderLeftStyle: "solid", borderLeftColor: "lightgray", backgroundColor: "#eeeeee"}}
+      // ),
       {style: flexGrowShrinkStyle}
     );
   }

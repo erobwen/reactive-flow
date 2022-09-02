@@ -47,6 +47,8 @@ function collectAllAnimated(result, primitiveFlow) {
       if (flow.getAnimation()) {
         result.removed[flow.id()] = flow;
       }
+      // Collect animations on removed! This is necessary for making recursive removes work properly.  
+      collectAllAnimated(result, flow);
     }
     for (let flow of primitiveFlow.unobservable().resident) {
       if (flow.getAnimation()) {
