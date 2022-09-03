@@ -5,10 +5,10 @@ CONSIDER use setState on primitive?
 
 
 # Next
-TODO: Cross container/flow FLIP animations. (joint flip animation start) + improved animation demo
 TODO: Programmatic Reactive Layout demo
 
 # TODO
+TODO: Container animation when doing flip animation. 
 TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Animation configuration (whole function)
 TODO: Support fragmented flows (flows corresponding to several divs).

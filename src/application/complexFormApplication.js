@@ -103,6 +103,34 @@ export class TravelerForm extends Flow {
   }
   
   build() {
+    const addLuggageButton = button("Add luggage", {
+      animate: true, 
+      key: "add-first-luggage", 
+      onClick: () => {
+        this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
+        this.showLuggage = true;
+      }}) 
+
+    const luggageDrawer = new SimpleDrawer({
+        animate: true,
+        key: "luggages-drawer",
+        closeButtonLabel: "Hide luggage",
+        openButtonLabel: "Show luggage",
+        toggleOpen: () => { this.showLuggage = !this.showLuggage },
+        isOpen: this.showLuggage,
+        content: column({key: "luggage-panel"},
+          column({
+            key: "luggage-list",
+            children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
+            animateChildren: true
+          }),
+          row({key: "add-luggage-row"}, 
+            addLuggageButton,
+            filler()
+          )
+        )
+      });
+
     const traveler = this.traveler;
     return panel(
       // {key: "traveler-pannel"},// TODO: Why will it not dispose this child if no key
@@ -110,8 +138,7 @@ export class TravelerForm extends Flow {
         row(
           filler(),
           button("x", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
-        )
-        ,
+        ),
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
       this.isFellowTraveller && checkboxInputField("Is Child", traveler, "isChild"),
@@ -125,40 +152,10 @@ export class TravelerForm extends Flow {
             textInputField("City", traveler.adress, "city"), 
           ),
       ),
-      {
-        luggages: 
-          new SimpleDrawer({
-            animate: true,
-            key: "luggages-drawer",
-            closeButtonLabel: "Hide luggage",
-            openButtonLabel: "Show luggage",
-            toggleOpen: () => { this.showLuggage = !this.showLuggage },
-            isOpen: this.showLuggage,
-            content: column({key: "luggage-panel"},
-              column({
-                key: "luggage-list",
-                children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
-                animateChildren: true
-              }),
-              row({key: "add-luggage-row"}, 
-                button("Add Luggage", 
-                  {
-                    key: "add-luggage",
-                    onClick: () => {this.traveler.luggages.push(observable({weight: 1, type: "bag"}))}
-                  }
-                ),
-                filler()
-              )
-            )
-          }), 
-        button: button("Add luggages", {
-          animate: true, 
-          key: "add-first-luggage", 
-          onClick: () => {
-            this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
-            this.showLuggage = true;
-          }}) 
-      }[this.traveler.luggages.length ? "luggages" : "button"]
+      this.traveler.luggages.length &&
+        luggageDrawer,
+      (this.showLuggage || !this.traveler.luggages.length) && 
+        addLuggageButton
     );
   }
 }

@@ -113,15 +113,7 @@ export function clearNode(node) {
   }
 
   getChildNodes() {
-    return this.getChildren().reduce(
-      (result, child) => 
-        {
-          const childPrimitive = child.getPrimitive();
-          if (childPrimitive) {
-            result.push(childPrimitive.getDomNode());
-          }
-          return result;
-        }, []);
+    return this.getPrimitiveChildren().map(child => child.getDomNode())
   }
 
   ensureDomNodeCreated() { 

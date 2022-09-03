@@ -427,6 +427,10 @@ export function readFlowProperties(arglist, config) {
       arglist.shift();
     }
 
+    if (arglist[0] === true) {
+      throw new Error("Could not make sense of flow parameter 'true'");
+    }
+
     // Not a flow object
     if (typeof arglist[0] === "object" && !arglist[0].causality) {
       if (arglist[0] instanceof Array) {
