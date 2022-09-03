@@ -373,10 +373,15 @@ export class Flow {
     return this.equivalentCreator.getEquivalentRoot();
   }
 
-  getTransitionAnimations() {
-    if (this.transitionAnimations) return this.transitionAnimations(this.getEquivalentRoot());
-    if (this.getEquivalentRoot) return this.getEquivalentRoot.getTransitionAnimations();
-    return configuration.defaultAnimations(this.getEquivalentRoot());
+  inheritPropertyFromEquivalent(property) {
+    const propertyValue = this[property];
+    if (typeof(propertyValue) !== "undefined") {
+      return this[property]
+    } else if (this.equivalentCreator) {
+      return this.equivalentCreator.inheritPropertyFromEquivalent(property);
+    } else {
+      return null;
+    }
   }
 }
 

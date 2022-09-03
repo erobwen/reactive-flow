@@ -57,8 +57,8 @@ function collectAllAnimated(result, primitiveFlow) {
     }
   }
 
-  for (let child of primitiveFlow.getChildren()) {
-    collectAllAnimated(result, child.getPrimitive());
+  for (let child of primitiveFlow.iteratePrimitiveChildren()) {
+    collectAllAnimated(result, child);
   }
 }
 

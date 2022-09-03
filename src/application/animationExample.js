@@ -66,15 +66,16 @@ export class AnimationExample extends Flow {
       row(
         column({
           children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px", transition: "all 0.4s ease-in-out"}, 
+          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
           animateChildren: standardAnimation       
         }),
         filler(),
         column({
           children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px", transition: "all 0.4s ease-in-out"}, 
+          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
           animateChildren: standardAnimation       
         }),
+        {style: {overflow: "visible"}}
       ),
       {style: {height: "100%", width: "100%"}},
     );

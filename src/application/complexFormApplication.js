@@ -128,6 +128,7 @@ export class TravelerForm extends Flow {
       {
         luggages: 
           new SimpleDrawer({
+            animate: true,
             key: "luggages-drawer",
             closeButtonLabel: "Hide luggage",
             openButtonLabel: "Show luggage",
@@ -151,6 +152,7 @@ export class TravelerForm extends Flow {
             )
           }), 
         button: button("Add luggages", {
+          animate: true, 
           key: "add-first-luggage", 
           onClick: () => {
             this.traveler.luggages.push(observable({weight: 1, type: "bag"}));

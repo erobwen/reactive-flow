@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, row as basicRow } from "../flow.components/BasicFlowComponents";
+import { text, row as basicRow, column, button } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
 const log = console.log;
@@ -26,11 +26,14 @@ export class HelloWorld extends Flow {
   }
 
   build() {
-    return myRow(
-      hello(), // No need to pass parameters as it will be inherited.
-      text(" "),
-      new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
-    );
+    return column(
+      button("Start", {onClick:() => {asyncModifications(this)}}),
+      myRow(
+        hello(), // No need to pass parameters as it will be inherited.
+        text(" "),
+        new World("world", { exclamationCharacter: "!" }) // This is how we create child flow components with a key "world" and pass them properties.
+      )
+    )
   }
 }
 
@@ -84,11 +87,14 @@ export function startHelloWorld() {
     target: new DOMFlowTarget(document.getElementById("flow-root")),
   }).activate();
 
+  asyncModifications(helloWorld);  
+}
 
-  /**
-   * Async modification
-   */
 
+/**
+ * Async modification
+ */
+function asyncModifications(helloWorld) {
   // Set "Hello" deep inside observable data structure
   setTimeout(() => {
     log("----------------------------------");

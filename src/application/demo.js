@@ -20,16 +20,17 @@ export class Demo extends Flow {
   setState() {
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = {
-      "Super Simple": new SuperSimple({model: observable({value: ""})}),
+      "Hello World": new HelloWorld(),
       "Animation Example": new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       "Complex Form Example": new ComplexForm({initialData}),
-      "Hello World": new HelloWorld(),
+      // "Super Simple": new SuperSimple({model: observable({value: ""})}),
       "Recursive and Modal Demo": new DemoComponent(),
       "Programmatic Reactive Layout": new ProgrammaticReactiveLayout()
     }
 
-    this.choosen = this.components["Animation Example"];
+    // this.choosen = this.components["Animation Example"];
     // this.choosen = this.components["Complex Form Example"];
+    this.choosen = this.components["Hello World"];
   }
   
   onEstablish() {

@@ -53,11 +53,11 @@ export class FlowPrimitive extends Flow {
           this.unobservable().flowBuildNumber = configuration.flowBuildNumber;
           this.unobservable().lastChildrenBackup = this.unobservable().lastChildren;
 
-          const children = this.getChildren().map(flow => flow.getPrimitive());
+          const children = this.getPrimitiveChildren();
           Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildren, children));
           this.unobservable().lastChildren = children;
         } else {
-          const children = this.getChildren().map(flow => flow.getPrimitive());
+          const children = this.getPrimitiveChildren();
           Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildrenBackup, children));
           this.unobservable().lastChildren = children;
 
@@ -87,21 +87,28 @@ export class FlowPrimitive extends Flow {
     }
   }
 
+  *iteratePrimitiveChildren() {
+    for(let child of this.iterateChildren()) {
+      let primitive = child.getPrimitive();
+      if (primitive) yield primitive;
+    }
+  }
+
   getChildren() {
     return [...this.iterateChildren()];
   }
 
-  getAnimation() {
-    let result; 
-    if (this.animate) {
-      result = this.animate;
-    } else if (this.parentPrimitive && this.parentPrimitive.animateChildren){
-      result = this.parentPrimitive.animateChildren;
+  getPrimitiveChildren() {
+    return [...this.iteratePrimitiveChildren()];
+  }
 
-      //TODO: Search equivalent flows as well! 
-    } else {
-      result = null; 
+  getAnimation() {
+    let result = this.inheritPropertyFromEquivalent("animate"); 
+
+    if (!result && this.parentPrimitive) {
+      result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
     }
+
     return (result === true) ? standardAnimation : result;  
   }
 }
