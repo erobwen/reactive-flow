@@ -1,5 +1,5 @@
 import { observable, repeat, readFlowProperties, transaction, configuration } from "../flow/Flow";
-import { mostAbstractFlow, clearNode } from "./DOMFlowTargetPrimitive";
+import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";

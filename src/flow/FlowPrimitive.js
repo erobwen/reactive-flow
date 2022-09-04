@@ -9,15 +9,6 @@ export class FlowPrimitive extends Flow {
     super(readFlowProperties(parameters));
   }
   
-  unobservable() {
-    if (!this.causality.unobservable) {
-      this.causality.unobservable = {
-        lastChildren: [],
-        flowBuildNumber: -1
-      };
-    } 
-    return this.causality.unobservable;
-  }
 
   findChild(key) {
     if (this.key === key) return this;
@@ -34,32 +25,36 @@ export class FlowPrimitive extends Flow {
 
   getPrimitive() {
     const me = this;
-
-    finalize(me);
+    const name = this.toString(); // For chrome debugger
+    finalize(me); // Finalize might not work if no key was used, it might not call onEstablish.
     if (!me.expandRepeater) {
       me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
         if (trace) console.group(repeater.causalityString());
 
         // Expand known children (do as much as possible before integration)
-        for (let child of me.iterateChildren()) {
-          const childPrimitive = child.getPrimitive();
-          if (childPrimitive) {
-            childPrimitive.parentPrimitive = this; 
-          }
+        for (let childPrimitive of me.iteratePrimitiveChildren()) {
+          childPrimitive.parentPrimitive = this; 
         }
 
+        // Initialize state if needed
+        if (!this.unobservable.childPrimitives) {
+          this.unobservable.childPrimitives = [];
+          this.unobservable.flowBuildNumber = null;
+        } 
+        
         // Accumulate diffs from previous update
-        if (this.unobservable().flowBuildNumber !== configuration.flowBuildNumber) {
-          this.unobservable().flowBuildNumber = configuration.flowBuildNumber;
-          this.unobservable().lastChildrenBackup = this.unobservable().lastChildren;
+        if (this.unobservable.flowBuildNumber !== configuration.flowBuildNumber) {
+          this.unobservable.flowBuildNumber = configuration.flowBuildNumber;
 
-          const children = this.getPrimitiveChildren();
-          Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildren, children));
-          this.unobservable().lastChildren = children;
+          this.unobservable.previousChildPrimitives = this.unobservable.childPrimitives;
+          const childPrimitives = this.getPrimitiveChildren();
+          this.unobservable.childPrimitives = childPrimitives;
+
+          Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
         } else {
-          const children = this.getPrimitiveChildren();
-          Object.assign(this.unobservable(), analyzeAddedRemovedResident(this.unobservable().lastChildrenBackup, children));
-          this.unobservable().lastChildren = children;
+          const childPrimitives = this.getPrimitiveChildren();
+          this.unobservable.childPrimitives = childPrimitives;
+          Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
 
           console.warn("Multiple updates of same primitive!");
         }
@@ -116,22 +111,22 @@ export class FlowPrimitive extends Flow {
 
 
 export function analyzeAddedRemovedResident(oldList, newList) {
-  const removed = [];
-  const added = [];
-  const resident = [];
+  const removed = {};
+  const added = {};
+  const resident = {};
   let index = 0;
   while(index < oldList.length) {
     const existingChild = oldList[index];
     if (!newList.includes(existingChild)) {
-      removed.push(existingChild);
+      removed[existingChild.id] = existingChild;
     }
     index++;
   }
   for(let newChild of newList) {
     if (!oldList.includes(newChild)) {
-      added.push(newChild);
-    } else if(!removed.includes(newChild)) {
-      resident.push(newChild);
+      added[newChild.id] = newChild;
+    } else if(!removed[newChild.id]) {
+      resident[newChild.id] = newChild;
     }
   }
   return {removed, added, resident};

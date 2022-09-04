@@ -63,8 +63,13 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 
 window.allFlows = {};
 export class Flow {
-  id() {
+  get id() {
     return this.causality.id;
+  }
+
+  get unobservable() {
+    if (!this.causality.unobservable) this.causality.unobservable = {};
+    return this.causality.unobservable;
   }
 
   constructor(...parameters) {
@@ -168,7 +173,14 @@ export class Flow {
     this.derriveRepeaters.push(repeat(action));
   }
 
+  ensureEstablished() {
+    if (!this.unobservable.established) {
+      this.onEstablish();
+    }
+  }
+
   onEstablish() {
+    this.unobservable.established = true; 
     window.allFlows[this.causality.id] = this;
     creators.push(this);
     this.setState();
@@ -277,6 +289,7 @@ export class Flow {
   getPrimitive() {
     // log("getPrimitive")
     const me = this;
+    const name = this.toString(); // For chrome debugger.
 
     finalize(me);
     if (!me.buildRepeater) {
@@ -364,6 +377,7 @@ export class Flow {
   }
   
   dimensions() {
+    if (!this.key) console.warn("It is considered unsafe to use dimensions on a flow without a key. The reason is that a call to dimensions from a parent build function will finalize the flow early, and without a key, causality cannot send proper onEstablish event to your flow component before it is built");
     const primitive = this.getPrimitive();
     return primitive ? primitive.dimensions() : null;
   }

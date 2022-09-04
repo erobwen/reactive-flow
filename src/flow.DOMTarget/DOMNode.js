@@ -1,11 +1,11 @@
 import { trace } from "../flow/Flow";
-import { DOMFlowTargetPrimitive } from "./DOMFlowTargetPrimitive";    
+import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    
 const log = console.log;
 
 /**
  * DOM Flow Target Primitive
  */
- export class DOMElementNode extends DOMFlowTargetPrimitive {
+ export class DOMElementNode extends DOMFlowPrimitive {
     setProperties({children, tagName, attributes}) {
       this.children = children;
       this.tagName =  tagName ? tagName : "div";
@@ -13,6 +13,7 @@ const log = console.log;
     }
   
     setState() {
+      super.setState();
       this.previouslySetStyles = {};
       this.newPreviouslySetAttributes = {};
     }
@@ -83,7 +84,7 @@ const log = console.log;
     }
   }
   
-  export class DOMTextNode extends DOMFlowTargetPrimitive {
+  export class DOMTextNode extends DOMFlowPrimitive {
     setProperties({text}) {
       this.text = text;
     }
@@ -99,7 +100,7 @@ const log = console.log;
     }
   }
   
-  export class DOMModalNode extends DOMFlowTargetPrimitive {
+  export class DOMModalNode extends DOMFlowPrimitive {
     setProperties({children}) {
       this.child = (children instanceof Array) ? children[0] : children;
       this.children = null; // Avoid children for the initiator 

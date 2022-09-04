@@ -37,22 +37,22 @@ window.updateFrame = updateFrame;
 
 function collectAllAnimated(result, primitiveFlow) {
   // This flow had changes
-  if (primitiveFlow.unobservable().flowBuildNumber === configuration.flowBuildNumber) {
-    for (let flow of primitiveFlow.unobservable().added) {
+  if (primitiveFlow.unobservable.flowBuildNumber === configuration.flowBuildNumber) {
+    for (let flow of Object.values(primitiveFlow.unobservable.added)) {
       if (flow.getAnimation()) {
-        result.added[flow.id()] = flow;
+        result.added[flow.id] = flow;
       }
     }
-    for (let flow of primitiveFlow.unobservable().removed) {
+    for (let flow of Object.values(primitiveFlow.unobservable.removed)) {
       if (flow.getAnimation()) {
-        result.removed[flow.id()] = flow;
+        result.removed[flow.id] = flow;
       }
       // Collect animations on removed! This is necessary for making recursive removes work properly.  
       collectAllAnimated(result, flow);
     }
-    for (let flow of primitiveFlow.unobservable().resident) {
+    for (let flow of Object.values(primitiveFlow.unobservable.resident)) {
       if (flow.getAnimation()) {
-        result.resident[flow.id()] = flow;
+        result.resident[flow.id] = flow;
       }
     }
   }
@@ -61,6 +61,38 @@ function collectAllAnimated(result, primitiveFlow) {
     collectAllAnimated(result, child);
   }
 }
+
+// function ajustAllAnimated(result, primitiveFlow) {
+//   // This flow had changes
+//   if (primitiveFlow.unobservable.flowBuildNumber === configuration.flowBuildNumber) {
+//     for (let flow of primitiveFlow.unobservable.added) {
+//       if (result.removed[flow.id]) {
+
+//       }
+//       if (flow.getAnimation()) {
+//         result.added[flow.id] = flow;
+//       }
+//     }
+//     for (let flow of primitiveFlow.unobservable.removed) {
+//       if (flow.getAnimation()) {
+//         result.removed[flow.id] = flow;
+//       }
+//       // Collect animations on removed! This is necessary for making recursive removes work properly.  
+//       ajustAllAnimated(result, flow);
+//     }
+//     for (let flow of primitiveFlow.unobservable.resident) {
+//       if (flow.getAnimation()) {
+//         result.resident[flow.id] = flow;
+//       }
+//     }
+//   }
+
+//   for (let child of primitiveFlow.iteratePrimitiveChildren()) {
+//     ajustAllAnimated(result, child);
+//   }
+// }
+
+
 
 export function onFinishReBuildingFlow() {
   const result = {

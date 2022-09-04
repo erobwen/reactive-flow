@@ -29,8 +29,8 @@ export class Demo extends Flow {
     }
 
     // this.choosen = this.components["Animation Example"];
-    // this.choosen = this.components["Complex Form Example"];
-    this.choosen = this.components["Hello World"];
+    this.choosen = this.components["Complex Form Example"];
+    // this.choosen = this.components["Hello World"];
   }
   
   onEstablish() {
@@ -61,9 +61,9 @@ export class Demo extends Flow {
 
     const leftColumn = column(
       buttons,
-      {style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
+      {key: "left-column", 
+       style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
     );
-    log("BUILD DEMO")
     log(this.bounds);
     log(leftColumn.dimensions());
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
