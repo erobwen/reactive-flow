@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
-import { text, column, row, button, filler } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, filler, div } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
 
@@ -25,6 +25,11 @@ const items = [
     "Fumbar"
 ];
 
+
+const panel = flow("panel", ({ children, style }) =>
+  column({key: "panel", children, style: {marginBottom: "10px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", ...style}})
+);
+
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
@@ -36,7 +41,7 @@ export class AnimationExample extends Flow {
     this.listA = observable([]);
     this.listB = observable([]);
     transaction(() => {
-      let count = 1; 
+      let count = 3; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listA);
     });
   }
@@ -64,13 +69,13 @@ export class AnimationExample extends Flow {
         button({text: "Juggle", onClick: () => this.juggle()}),
       ),
       row(
-        column({
+        panel({
           children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
           style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
           animateChildren: standardAnimation       
         }),
         filler(),
-        column({
+        panel({
           children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
           style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
           animateChildren: standardAnimation       

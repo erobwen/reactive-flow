@@ -73,7 +73,7 @@ function ajustAllAnimated(result, primitiveFlow) {
     }
     for (let flow of Object.values(primitiveFlow.unobservable.removed)) {
       if (result.globallyAdded[flow.id]) {
-        delete primitiveFlow.unobservable.removed;
+        delete primitiveFlow.unobservable.removed[flow.id];
         primitiveFlow.unobservable.outgoing[flow.id] = flow;
       }
       // Ajust animations on removed! This is necessary for making recursive removes work properly.  

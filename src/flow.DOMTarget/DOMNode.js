@@ -6,18 +6,18 @@ const log = console.log;
  * DOM Flow Target Primitive
  */
  export class DOMElementNode extends DOMFlowPrimitive {
+    initialUnobservables() {
+      let result = super.initialUnobservables();
+      result.previouslySetStyles = {};
+      return result;
+    }
+
     setProperties({children, tagName, attributes}) {
       this.children = children;
       this.tagName =  tagName ? tagName : "div";
       this.attributes = attributes ? attributes : {};
     }
-  
-    setState() {
-      super.setState();
-      this.previouslySetStyles = {};
-      this.newPreviouslySetAttributes = {};
-    }
-  
+   
     createEmptyDomNode() {
       const result = document.createElement(this.tagName);
       // console.log(this.toString() + ".createEmptyDomNode:");
@@ -66,7 +66,7 @@ const log = console.log;
       const newPreviouslySetStyles = {};
   
       // Clear out styles that will no longer be modified
-      for (let property in this.previouslySetStyles) {
+      for (let property in this.unobservable.previouslySetStyles) {
         if (typeof(newStyle[property]) === "undefined") {
           elementStyle[property] = "";
         }
@@ -80,7 +80,7 @@ const log = console.log;
         newPreviouslySetStyles[property] = true;
       }
   
-      this.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
+      this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
     }
   }
   

@@ -109,54 +109,53 @@ export function clearNode(node) {
     const node = this.domNode;
     this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
-    const newChildNodes = this.getChildNodes(node);
+    const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
     console.group("reBuildDomNodeWithChildren " + this.toString())
     log({...changes})
-    
+
     // Remove non-animated children
-    let index = node.childNodes.length - 1;
-    while(0 <= index) {
-      const existingChildNode = node.childNodes[index];
-      const existingChild = existingChildNode.equivalentCreator;
-      if (existingChild && !newChildNodes.includes(existingChildNode) && !existingChild.getAnimation()) {
-        node.removeChild(existingChildNode);
+    for(let removed of Object.values(changes.removed)) {
+      if (!removed.getAnimation()) {
+        log(removed.domNode)
+        node.removeChild(removed.domNode);
       }
-      index--;
     }
 
-    // Add back animated to newChildNodes for placement at existing index while being removed.
-    // Outgoing should be replaced with a dissapearing expander.
-    index = 0;
+    // Arrange dissapearing expander for outgoing
+    for(let outgoing of Object.values(changes.outgoing)) {
+      const animation = outgoing.getAnimation(); 
+      if (animation) {
+        // outgoing could already be gone at this stage!
+        if (!outgoing.domNode.disappearingExpander) {
+          node.insertBefore(animation.getDissapearingExpander(outgoing.domNode), outgoing.domNode);
+          node.removeChild(outgoing.domNode);
+        }
+      }
+    }
+
+    // Arrange disappearing expander for incoming
+    for(let incoming of Object.values(changes.incoming)) {
+      const animation = incoming.getAnimation(); 
+      if (animation) {
+        if (!incoming.domNode.disappearingExpander) {
+          incoming.domNode.parentNode.insertBefore(animation.getDissapearingExpander(incoming.domNode), incoming.domNode);
+          incoming.domNode.parentNode.removeChild(incoming.domNode);
+        }
+      }      
+    }
+
+    // Add back nodes that exist in childNodes, since there we have dissapearing expanders and removed nodes
+    let index = 0;
+    const newChildNodes = newChildren.map(child => child.getDomNode());
     while(index < node.childNodes.length) {
       const existingChildNode = node.childNodes[index];
-      const existingChild = existingChildNode.equivalentCreator;
-      log(existingChildNode)
       if (!newChildNodes.includes(existingChildNode)) {
-        if (!existingChild) {
-          // Add back all dissapearing expanders and contractors from previous animations (just let them finish their jurney) 
-          log("adding back dissapearing expander... ? ")
-          newChildNodes.splice(index, 0, existingChildNode);
-          // Will this interrupt animation?
-        } else {
-          log("adding back replacement for " + existingChild.toString());
-          // Add back removed or outgoing elements.       
-          // newChildNodes.splice(index, 0, existingChild.getAnimation().getDissapearingExpander(existingChildNode));
-          if (changes.outgoing[existingChild.id]) {
-            // Add back expander
-            newChildNodes.splice(index, 0, existingChild.getAnimation().getDissapearingExpander(existingChildNode));
-          } else if (changes.removed[existingChild.id]) {
-            // Add back node itself
-            newChildNodes.splice(index, 0, existingChildNode);
-          } else {
-            console.log(changes);
-            throw new Error("Should not happen, existing dom-element not a dissapearing expander/contracter nor a flow domNode");
-          }
-        }
+        newChildNodes.splice(index, 0, existingChildNode);
       }
       index++;
     }
-
+    
     // Add contractors for incoming
     // log(changes);
     index = newChildNodes.length - 1;
@@ -164,7 +163,8 @@ export function clearNode(node) {
       const childNode = newChildNodes[index];
       const child = childNode.equivalentCreator;
       if (child && changes.incoming[child.id]) {
-        log("Adding negative margins to incoming to cancel out its size");
+        childNode.isIncoming;
+        // log("Adding negative margins to incoming to cancel out its size");
         // newChildNodes.splice(index, 0, child.getAnimation().getDisappearingContractor(childNode));
         child.getAnimation().contractIncoming(childNode);
       }

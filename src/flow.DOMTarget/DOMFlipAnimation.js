@@ -6,7 +6,7 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 3s ease-in-out"
+    return "all 1s ease-in-out"
   }
 
   /**
@@ -30,6 +30,7 @@ export class DOMFlipAnimation {
     expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
     expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
     expander.style.opacity = "0";
+    expander.id = "expander"
     node.disappearingExpander = expander;
     return expander;
   }
@@ -42,20 +43,15 @@ export class DOMFlipAnimation {
   }
 
   // getDisappearingContractor(node) {
-  //   const expander = document.createElement("div");
-  //   console.log("asdfsadfsadf")
+  //   const contractor = document.createElement("div");
   //   const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
   //   const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
-  //   console.log(node.originalStyle.margin);
-  //   console.log();
-  //   console.log(node.originalStyle.marginBottom);
-  //   console.log(node.originalStyle.marginLeft);
-  //   console.log(node.originalStyle.marginRight);
-  //   expander.style.marginTop = "-" + (node.originalBounds.height + horizontalMargins) +  "px";
-  //   expander.style.marginLeft = "-" + (node.originalBounds.width + verticalMargins) + "px";
-  //   expander.style.opacity = "0";
-  //   node.disappearingContractor = expander;
-  //   return expander;
+  //   contractor.style.marginTop = "-" + (node.originalBounds.height + horizontalMargins) +  "px";
+  //   contractor.style.marginLeft = "-" + (node.originalBounds.width + verticalMargins) + "px";
+  //   contractor.style.opacity = "0";
+  //   contractor.id = "contractor"
+  //   node.disappearingContractor = contractor;
+  //   return contractor;
   // }
 
   // disappearingContractorFinalStyle() {
@@ -274,11 +270,11 @@ export class DOMFlipAnimation {
   setupResidentAnimationCleanup(node) {
     this.setupAnimationCleanup(node)
     if (node.disappearingExpander) {
-      this.setupAddedAnimationCleanup(node.disappearingExpander, true);
+      this.setupAnimationCleanup(node.disappearingExpander, true);
       delete node.disappearingExpander; 
     }
     // if (node.disappearingContractor) {
-    //   this.setupAddedAnimationCleanup(node.disappearingContractor, true);
+    //   this.setupAnimationCleanup(node.disappearingContractor, true);
     //   delete node.disappearingContractor; 
     // }
   }
