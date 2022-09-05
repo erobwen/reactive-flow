@@ -74,42 +74,114 @@ export function clearNode(node) {
     throw new Error("Not implemented yet!");
   }
 
+  // reBuildDomNodeWithChildren2() {
+  //   const changes = this.unobservable;
+  //   const newChildren = this.getPrimitiveChildren();
+  //   const newChildNodes = newChildren.map(child => child.getDomNode())
+  //   for (let flow of changes.previousChildPrimitives) {
+
+  //   }
+  //   if (changes.removed) { // This will only add back animated removed
+  //     for (let flow of Object.values(changes.removed)) {
+  //       newChildNodes.splice(Math.max(changes.previousChildPrimitives.indexOf(flow), newChildNodes.length), 0, flow.domNode)
+  //     }
+  //   }
+  //   if (changes.outgoing) {
+  //     for (let flow of Object.values(changes.outgoing)) {
+  //       // Use initial bounds
+  //       newChildNodes.splice(Math.max(changes.previousChildPrimitives.indexOf(flow), newChildNodes.length), 0, null); // dissapearing expander
+  //     }
+  //   }
+  //   if (changes.incoming) {
+  //     for (let flow of Object.values(changes.outgoing)) {
+  //       // Use initial bounds 
+  //       newChildNodes.splice(newChildNodes.indexOf(flow), 0, null); // dissapearing contractor
+  //     }
+  //   }
+
+  //   // Remove from node.childNodes those not in end result
+
+  //   // Add and rearrange node.childNodes to match newChildNodes.
+  // }
+    
   reBuildDomNodeWithChildren() {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
     const newChildNodes = this.getChildNodes(node);
+    const changes = this.unobservable;
+    console.group("reBuildDomNodeWithChildren " + this.toString())
+    log({...changes})
     
     // Remove non-animated children
     let index = node.childNodes.length - 1;
     while(0 <= index) {
-      const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild) && !existingChild.equivalentCreator.getAnimation()) {
-        node.removeChild(existingChild);
+      const existingChildNode = node.childNodes[index];
+      const existingChild = existingChildNode.equivalentCreator;
+      if (existingChild && !newChildNodes.includes(existingChildNode) && !existingChild.getAnimation()) {
+        node.removeChild(existingChildNode);
       }
       index--;
     }
 
-    // Add back animated to newChildNodes for placement at existing index
+    // Add back animated to newChildNodes for placement at existing index while being removed.
+    // Outgoing should be replaced with a dissapearing expander.
     index = 0;
     while(index < node.childNodes.length) {
-      const existingChild = node.childNodes[index];
-      if (!newChildNodes.includes(existingChild) && existingChild.equivalentCreator.getAnimation()) {
-        newChildNodes.splice(index, 0, existingChild);
+      const existingChildNode = node.childNodes[index];
+      const existingChild = existingChildNode.equivalentCreator;
+      log(existingChildNode)
+      if (!newChildNodes.includes(existingChildNode)) {
+        if (!existingChild) {
+          // Add back all dissapearing expanders and contractors from previous animations (just let them finish their jurney) 
+          log("adding back dissapearing expander... ? ")
+          newChildNodes.splice(index, 0, existingChildNode);
+          // Will this interrupt animation?
+        } else {
+          log("adding back replacement for " + existingChild.toString());
+          // Add back removed or outgoing elements.       
+          // newChildNodes.splice(index, 0, existingChild.getAnimation().getDissapearingExpander(existingChildNode));
+          if (changes.outgoing[existingChild.id]) {
+            // Add back expander
+            newChildNodes.splice(index, 0, existingChild.getAnimation().getDissapearingExpander(existingChildNode));
+          } else if (changes.removed[existingChild.id]) {
+            // Add back node itself
+            newChildNodes.splice(index, 0, existingChildNode);
+          } else {
+            console.log(changes);
+            throw new Error("Should not happen, existing dom-element not a dissapearing expander/contracter nor a flow domNode");
+          }
+        }
       }
       index++;
     }
-    
+
+    // Add contractors for incoming
+    // log(changes);
+    index = newChildNodes.length - 1;
+    while(0 <= index) {
+      const childNode = newChildNodes[index];
+      const child = childNode.equivalentCreator;
+      if (child && changes.incoming[child.id]) {
+        log("Adding negative margins to incoming to cancel out its size");
+        // newChildNodes.splice(index, 0, child.getAnimation().getDisappearingContractor(childNode));
+        child.getAnimation().contractIncoming(childNode);
+      }
+      index--;
+    }
+
     // Adding pass, will also rearrange moved elements
     index = 0;
     while(index < newChildNodes.length) {
-      const existingChild = node.childNodes[index];
-      if (newChildNodes[index] !== existingChild) {
-        node.insertBefore(newChildNodes[index], existingChild);
+      const existingChildNode = node.childNodes[index];
+      if (newChildNodes[index] !== existingChildNode) {
+        node.insertBefore(newChildNodes[index], existingChildNode);
       }
       index++;
     }
+
+    console.groupEnd();
   }
 
   getChildNodes() {

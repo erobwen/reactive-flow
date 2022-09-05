@@ -68,7 +68,13 @@ export class Flow {
   }
 
   get unobservable() {
-    if (!this.causality.unobservable) this.causality.unobservable = {};
+    if (!this.causality.unobservable) this.causality.unobservable = {
+      removed: {},
+      added: {},
+      resident: {},
+      incoming: {},
+      outgoing: {}
+    };
     return this.causality.unobservable;
   }
 

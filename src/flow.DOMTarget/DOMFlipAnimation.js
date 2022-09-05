@@ -1,7 +1,14 @@
 
-
+const log = console.log;
 
 export class DOMFlipAnimation {
+  /**
+   * Default transition
+   */
+  defaultTransition() {
+    return "all 3s ease-in-out"
+  }
+
   /**
    * Record original bounds, before anything in the dome has changed
    */
@@ -11,6 +18,61 @@ export class DOMFlipAnimation {
     node.originalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
   
+ /**
+   * Dissapearing expander and contractors
+   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
+   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
+   */
+  getDissapearingExpander(node) {
+    const expander = document.createElement("div");
+    const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
+    const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
+    expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
+    expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
+    expander.style.opacity = "0";
+    node.disappearingExpander = expander;
+    return expander;
+  }
+
+  dissapearingExpanderFinalStyle() {
+    return {
+      marginTop: "0px",
+      marginLeft: "0px",
+    }
+  }
+
+  // getDisappearingContractor(node) {
+  //   const expander = document.createElement("div");
+  //   console.log("asdfsadfsadf")
+  //   const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
+  //   const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
+  //   console.log(node.originalStyle.margin);
+  //   console.log();
+  //   console.log(node.originalStyle.marginBottom);
+  //   console.log(node.originalStyle.marginLeft);
+  //   console.log(node.originalStyle.marginRight);
+  //   expander.style.marginTop = "-" + (node.originalBounds.height + horizontalMargins) +  "px";
+  //   expander.style.marginLeft = "-" + (node.originalBounds.width + verticalMargins) + "px";
+  //   expander.style.opacity = "0";
+  //   node.disappearingContractor = expander;
+  //   return expander;
+  // }
+
+  // disappearingContractorFinalStyle() {
+  //   return {
+  //     marginTop: "0px",
+  //     marginLeft: "0px",
+  //   }
+  // }
+
+  contractIncoming(node) {
+    node.isIncoming = true;
+    const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
+    const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
+    node.style.marginTop = (parseInt(node.originalStyle.marginTop, 10) - (node.originalBounds.height + verticalMargins)) + "px";
+    node.style.marginLeft = (parseInt(node.originalStyle.marginLeft, 10) - (node.originalBounds.width + horizontalMargins)) + "px";
+  }
+
 
   /**
    * Initial styles, the styles elements have at the start of the animation 
@@ -117,6 +179,18 @@ export class DOMFlipAnimation {
   setupFinalStyleForResident(node) {
     Object.assign(node.style, this.residentFinalStyle());
     Object.assign(node.style, this.residentTransitionStyle(node));
+    if (node.disappearingExpander) {
+      Object.assign(node.disappearingExpander.style, this.residentTransitionStyle(node));
+      Object.assign(node.disappearingExpander.style, this.dissapearingExpanderFinalStyle());
+    }
+    if (node.isIncoming) {
+      node.style.marginTop = node.originalStyle.marginTop;
+      node.style.marginLeft = node.originalStyle.marginLeft;
+    }
+    // if (node.disappearingContractor) {
+    //   Object.assign(node.disappearingContractor.style, this.residentTransitionStyle(node));
+    //   Object.assign(node.disappearingContractor.style, this.disappearingContractorFinalStyle());
+    // }
   }
   
   setupFinalStyleForRemoved(node) {
@@ -126,7 +200,7 @@ export class DOMFlipAnimation {
   
   addedTransitionStyle() {
     return {
-      transition: "all 0.4s ease-in-out"
+      transition: this.defaultTransition()
     }
   }
 
@@ -154,7 +228,7 @@ export class DOMFlipAnimation {
 
   residentTransitionStyle() {
     return {
-      transition: "all 0.4s ease-in-out"
+      transition: this.defaultTransition()
     }
   }
 
@@ -166,13 +240,13 @@ export class DOMFlipAnimation {
   
   removedTransitionStyle() {
     return {
-      transition: "all 0.4s ease-in-out"
+      transition: this.defaultTransition()
     }
   }
 
   removedFinalStyle(node) {
     return {
-      transition: "all 0.4s ease-in-out",
+      transition: this.defaultTransition(),
       maxHeight: "0px",
       maxWidth: "0px",
       transform: "scale(0) translate(0, 0)",
@@ -199,6 +273,14 @@ export class DOMFlipAnimation {
 
   setupResidentAnimationCleanup(node) {
     this.setupAnimationCleanup(node)
+    if (node.disappearingExpander) {
+      this.setupAddedAnimationCleanup(node.disappearingExpander, true);
+      delete node.disappearingExpander; 
+    }
+    // if (node.disappearingContractor) {
+    //   this.setupAddedAnimationCleanup(node.disappearingContractor, true);
+    //   delete node.disappearingContractor; 
+    // }
   }
 
   setupRemovedAnimationCleanup(node) {

@@ -114,6 +114,8 @@ export function analyzeAddedRemovedResident(oldList, newList) {
   const removed = {};
   const added = {};
   const resident = {};
+  const incoming = {};
+  const outgoing = {};
   let index = 0;
   while(index < oldList.length) {
     const existingChild = oldList[index];
@@ -129,5 +131,5 @@ export function analyzeAddedRemovedResident(oldList, newList) {
       resident[newChild.id] = newChild;
     }
   }
-  return {removed, added, resident};
+  return {removed, added, resident, incoming, outgoing};
 }
