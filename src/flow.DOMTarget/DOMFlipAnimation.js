@@ -6,7 +6,7 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 1s ease-in-out"
+    return "all 0.6s ease-in-out"
   }
 
   /**

@@ -190,6 +190,7 @@ export class Flow {
   }
 
   onEstablish() {
+    this.causality.established = true; 
     this.unobservable.established = true; 
     window.allFlows[this.causality.id] = this;
     creators.push(this);

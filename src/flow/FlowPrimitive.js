@@ -65,11 +65,7 @@ export class FlowPrimitive extends Flow {
 
     return me;
   }
-
-  dimensions() {
-    return this.getPrimitive().dimensions();
-  }
-
+  
   * iterateChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {

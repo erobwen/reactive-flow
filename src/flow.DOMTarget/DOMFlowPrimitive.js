@@ -45,18 +45,18 @@ export function clearNode(node) {
     domNode.style.height = "auto";
     Object.assign(domNode.style, flexAutoStyle);
     document.body.appendChild(domNode);
-    // console.log(domNode.clientHeight);
-    // console.log(domNode.offsetHeight);
-    // console.log(domNode.offsetWidth);
-    // console.log(domNode.scrollHeight);
     const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
     document.body.removeChild(domNode);
-    //this.domNode = null; this.domNode = domNode; // Trigger change for parent 
+    const original = this.getDomNode(true)
+    log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
+    // log(original);
     return result; 
-    return null;
   }
   
   getDomNode() {
+    // if (this.causality.forwardTo !== null)
+    // log("not properly finalized: " + ())
+    finalize(this);
     if (!this.buildElementRepeater) {
       // this.buildElementRepeater = repeat(mostAbstractFlow(this).toString() + ".buildElementRepeater", (repeater) => {
       this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
@@ -74,36 +74,6 @@ export function clearNode(node) {
     throw new Error("Not implemented yet!");
   }
 
-  // reBuildDomNodeWithChildren2() {
-  //   const changes = this.unobservable;
-  //   const newChildren = this.getPrimitiveChildren();
-  //   const newChildNodes = newChildren.map(child => child.getDomNode())
-  //   for (let flow of changes.previousChildPrimitives) {
-
-  //   }
-  //   if (changes.removed) { // This will only add back animated removed
-  //     for (let flow of Object.values(changes.removed)) {
-  //       newChildNodes.splice(Math.max(changes.previousChildPrimitives.indexOf(flow), newChildNodes.length), 0, flow.domNode)
-  //     }
-  //   }
-  //   if (changes.outgoing) {
-  //     for (let flow of Object.values(changes.outgoing)) {
-  //       // Use initial bounds
-  //       newChildNodes.splice(Math.max(changes.previousChildPrimitives.indexOf(flow), newChildNodes.length), 0, null); // dissapearing expander
-  //     }
-  //   }
-  //   if (changes.incoming) {
-  //     for (let flow of Object.values(changes.outgoing)) {
-  //       // Use initial bounds 
-  //       newChildNodes.splice(newChildNodes.indexOf(flow), 0, null); // dissapearing contractor
-  //     }
-  //   }
-
-  //   // Remove from node.childNodes those not in end result
-
-  //   // Add and rearrange node.childNodes to match newChildNodes.
-  // }
-    
   reBuildDomNodeWithChildren() {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
@@ -111,8 +81,7 @@ export function clearNode(node) {
     if (!(node instanceof Element)) return;
     const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
-    console.group("reBuildDomNodeWithChildren " + this.toString())
-    log({...changes})
+    // console.group("reBuildDomNodeWithChildren " + this.toString())
 
     // Remove non-animated children
     for(let removed of Object.values(changes.removed)) {
@@ -163,9 +132,6 @@ export function clearNode(node) {
       const childNode = newChildNodes[index];
       const child = childNode.equivalentCreator;
       if (child && changes.incoming[child.id]) {
-        childNode.isIncoming;
-        // log("Adding negative margins to incoming to cancel out its size");
-        // newChildNodes.splice(index, 0, child.getAnimation().getDisappearingContractor(childNode));
         child.getAnimation().contractIncoming(childNode);
       }
       index--;
@@ -181,7 +147,7 @@ export function clearNode(node) {
       index++;
     }
 
-    console.groupEnd();
+    // console.groupEnd();
   }
 
   getChildNodes() {

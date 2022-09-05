@@ -25,9 +25,20 @@ const items = [
     "Fumbar"
 ];
 
-
 const panel = flow("panel", ({ children, style }) =>
-  column({key: "panel", children, style: {marginBottom: "10px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", ...style}})
+  column({key: "panel", 
+    children, 
+    style: {
+      marginBottom: "10px", 
+      borderRadius: "15px", 
+      backgroundColor: "#eeeeee", 
+      borderColor: "#cccccc", 
+      borderStyle: "solid", 
+      borderWidth: "1px", 
+      padding: "10px", 
+      ...style
+    }
+  })
 );
 
 // A very simple view component
@@ -69,18 +80,26 @@ export class AnimationExample extends Flow {
         button({text: "Juggle", onClick: () => this.juggle()}),
       ),
       row(
-        panel({
-          children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
-          animateChildren: standardAnimation       
-        }),
+        column(
+          panel({
+            children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", borderStyle:"solid", borderWidth: "1px"}, 
+            animateChildren: standardAnimation       
+          }),
+          filler(),
+          {style: {overflow: "visible"}}
+        ),
         filler(),
-        panel({
-          children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-          style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", overflow: "visible", height: "100%", borderStyle:"solid", borderWidth: "1px"}, 
-          animateChildren: standardAnimation       
-        }),
-        {style: {overflow: "visible"}}
+        column(
+          panel({
+            children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", borderStyle:"solid", borderWidth: "1px"},  
+            animateChildren: standardAnimation       
+          }),
+          filler(),
+          {style: {overflow: "visible"}}
+        ),
+        {style: {overflow: "visible", height: "100%"}}
       ),
       {style: {height: "100%", width: "100%"}},
     );
