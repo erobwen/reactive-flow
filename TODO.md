@@ -8,13 +8,16 @@ CONSIDER use setState on primitive?
 TODO: Programmatic Reactive Layout demo
 
 # TODO
-TODO: Animation interruption stability.  
-TODO: Move attribute extraction to primtives + warning of unused property?
-TODO: Animation configuration (whole function)
-TODO: Support fragmented flows (flows corresponding to several divs).
-TODO: Make causality throw an error if same build id is used in the same build. 
+TODO: Animation interruption stability.
+TODO: Animation stability on variation of containers. 
+TODO: Prepare for reused flow targets. 
 TODO: Additional work on modals and popovers 
-TODO: Alternative Flow Target Demo  
+TODO: Move back some functionality from unobservable to state.  
+TODO: Make sure all basic flows support animation
+TODO: Move attribute extraction to primtives + warning of unused property?
+TODO: Make causality throw an error if same build id is used in the same build. 
+TODO: Support fragmented flows (flows corresponding to several divs).
+TODO: Alternative Flow Target Demo, word-processor  
 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?
 TODO: Reconsider use of webpack now that we do not need jsx? Call webpack from within a script instead to avoid global install. 

@@ -180,7 +180,7 @@ export function startRecursiveAndModalDemo() {
   }).activate();
 
   // Emulated user interaction.
-  console.log(root.buildRepeater.buildIdObjectMap);
+  // console.log(root.buildRepeater.buildIdObjectMap);
   root.getChild("control-row").getChild("more-button").onClick();
   root.findChild("more-button").onClick();
   root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();

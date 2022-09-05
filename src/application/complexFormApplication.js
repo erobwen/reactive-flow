@@ -5,10 +5,10 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 const log = console.log;
 
 /**
- * Flow definitions
+ * Data model
  */
 
- const initialTraveler = {
+const initialTraveler = {
   name: "", 
   passportNumber: "",
   adress: {
@@ -33,6 +33,27 @@ function createTraveler(isFellowTraveller) {
   return result; 
 }
 
+function calculateCost(data) {
+  let cost = 0;
+  function addLuggageCost(luggage) {
+    cost += (luggage.weight <= 1) ? 20 : 40; 
+  }
+
+  function addTravelerCost(traveler) {
+    cost += traveler.isChild ? 100 : 200;
+    traveler.luggages.forEach(luggage => addLuggageCost(luggage));
+  }
+
+  addTravelerCost(data.traveler);
+  data.fellowTravellers.forEach(traveler => addTravelerCost(traveler));
+  return cost; 
+}
+
+
+/**
+ * Components
+ */
+
 const panel = flow("panel", ({ children }) =>
   div({key: "panel", children, style: {marginBottom: "10px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
 );
@@ -49,7 +70,8 @@ export class ComplexForm extends Flow {
     const traveler = data.traveler;
     return row(
       div(
-        div(
+        column(
+          text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
           text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
           new TravelerForm({traveler, isFellowTraveller: false}),
           column({
