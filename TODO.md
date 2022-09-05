@@ -8,7 +8,7 @@ CONSIDER use setState on primitive?
 TODO: Programmatic Reactive Layout demo
 
 # TODO
-TODO: Container animation when doing flip animation. 
+TODO: Animation interruption stability.  
 TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Animation configuration (whole function)
 TODO: Support fragmented flows (flows corresponding to several divs).

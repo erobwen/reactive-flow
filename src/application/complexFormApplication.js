@@ -105,7 +105,7 @@ export class TravelerForm extends Flow {
   build() {
     const addLuggageButton = button("Add luggage", {
       animate: true, 
-      key: "add-first-luggage", 
+      key: "add-luggage", 
       onClick: () => {
         transaction(() => {
           this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
@@ -125,17 +125,12 @@ export class TravelerForm extends Flow {
             key: "luggage-list",
             children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
             animateChildren: true
-          }),
-          // row({key: "add-luggage-row"}, 
-          //   addLuggageButton,
-          //   filler()
-          // )
+          })
         )
       });
 
     const traveler = this.traveler;
     return panel(
-      // {key: "traveler-pannel"},// TODO: Why will it not dispose this child if no key
       traveler.isFellowTraveller &&
         row(
           filler(),
