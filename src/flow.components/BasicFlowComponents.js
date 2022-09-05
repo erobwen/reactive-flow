@@ -320,7 +320,7 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick});
+  result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick, animate: properties.animate});
   return result; 
 };
 

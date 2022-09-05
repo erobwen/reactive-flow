@@ -6,7 +6,7 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 0.6s ease-in-out"
+    return "all .6s ease-in-out"
   }
 
   /**
@@ -74,9 +74,13 @@ export class DOMFlipAnimation {
    * Initial styles, the styles elements have at the start of the animation 
    */
 
-  setupInitialStyleForAdded(node) {
+  measureInitialStyleForAdded(contextNode, node) {
     node.rememberedStyle = {...node.style}; // Remember so we can reset it later
-    node.targetDimensions = node.equivalentCreator.dimensions(); // Get a target size for animation, with initial styling. 
+    // TODO: get container specific dimensions? 
+    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. 
+  }
+
+  setupInitialStyleForAdded(node) {
     Object.assign(node.style, this.addedInitialStyle());
   }
 

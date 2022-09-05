@@ -138,6 +138,10 @@ export function onFinishReBuildingDOM() {
 
   // Setup initial style.
   for (let flow of globallyAdded) {
+    flow.getAnimation().measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+  }
+
+  for (let flow of globallyAdded) {
     flow.getAnimation().setupInitialStyleForAdded(flow.domNode);
   }
   for (let flow of globallyResident) {

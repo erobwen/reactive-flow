@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, observableDeepCopy } from "../flow/Flow";
+import { observable, Flow, flow, repeat, observableDeepCopy, transaction } from "../flow/Flow";
 import { text, column, textInputField, row, numberInputField, button, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
@@ -107,8 +107,10 @@ export class TravelerForm extends Flow {
       animate: true, 
       key: "add-first-luggage", 
       onClick: () => {
-        this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
-        this.showLuggage = true;
+        transaction(() => {
+          this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
+          this.showLuggage = true;
+        });
       }}) 
 
     const luggageDrawer = new SimpleDrawer({
@@ -124,10 +126,10 @@ export class TravelerForm extends Flow {
             children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
             animateChildren: true
           }),
-          row({key: "add-luggage-row"}, 
-            addLuggageButton,
-            filler()
-          )
+          // row({key: "add-luggage-row"}, 
+          //   addLuggageButton,
+          //   filler()
+          // )
         )
       });
 
@@ -154,7 +156,7 @@ export class TravelerForm extends Flow {
       ),
       this.traveler.luggages.length &&
         luggageDrawer,
-      (this.showLuggage || !this.traveler.luggages.length) && 
+      (!this.traveler.luggages.length || this.showLuggage) &&
         addLuggageButton
     );
   }

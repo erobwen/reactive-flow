@@ -34,22 +34,32 @@ export function clearNode(node) {
  export class DOMFlowPrimitive extends FlowPrimitive {
 
 
-  dimensions() {
+  dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
     const domNode = this.getDomNode(true).cloneNode(true);
-    domNode.style.position = "absolute"; 
-    domNode.style.top = "0";
-    domNode.style.left = "0";
-    domNode.style.width = "auto";
-    domNode.style.height = "auto";
-    Object.assign(domNode.style, flexAutoStyle);
-    document.body.appendChild(domNode);
+    if (contextNode) {
+      contextNode.appendChild(domNode);
+    } else {
+      domNode.style.position = "absolute"; 
+      domNode.style.top = "0";
+      domNode.style.left = "0";
+      domNode.style.width = "auto";
+      domNode.style.height = "auto";
+      Object.assign(domNode.style, flexAutoStyle);
+      document.body.appendChild(domNode);  
+    }
+
     const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
-    document.body.removeChild(domNode);
     const original = this.getDomNode(true)
     log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
-    // log(original);
+    log(original);
+    // debugger;
+    if (contextNode) {
+      contextNode.removeChild(domNode);
+    } else {
+      document.body.removeChild(domNode);
+    }
     return result; 
   }
   
@@ -81,7 +91,9 @@ export function clearNode(node) {
     if (!(node instanceof Element)) return;
     const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
-    // console.group("reBuildDomNodeWithChildren " + this.toString())
+    console.group("reBuildDomNodeWithChildren " + this.toString())
+    log(node)
+    log({...changes});
 
     // Remove non-animated children
     for(let removed of Object.values(changes.removed)) {
@@ -147,7 +159,7 @@ export function clearNode(node) {
       index++;
     }
 
-    // console.groupEnd();
+    console.groupEnd();
   }
 
   getChildNodes() {
