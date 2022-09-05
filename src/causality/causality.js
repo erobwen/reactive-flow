@@ -106,8 +106,8 @@ function createWorld(configuration) {
     withoutReactions,
 
     // Transaction
-    postponeReactions,
-    transaction : postponeReactions,
+    postponeInvalidations,
+    transaction : postponeInvalidations,
 
     // Debugging and testing
     clearRepeaterLists,
@@ -209,7 +209,7 @@ function createWorld(configuration) {
     updateContextState();
   }
 
-  function postponeReactions(callback) {
+  function postponeInvalidations(callback) {
     state.postponeInvalidation++;
     callback();
     state.postponeInvalidation--;
