@@ -64,8 +64,6 @@ export class Demo extends Flow {
       {key: "left-column", 
        style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
     );
-    log(this.bounds);
-    log(leftColumn.dimensions());
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
 
     return row(

@@ -63,9 +63,6 @@ export class AnimationExample extends Flow {
       const listBLength = this.listB.length;
       const aToB = (listALength + 1 >= listBLength && listALength) && removeOneRandom(this.listA);
       const bToA = (listBLength + 1 >= listALength && listBLength) && removeOneRandom(this.listB);
-      log("juggle")
-      log(aToB);
-      log(bToA);
       if (aToB) addRandomly(aToB, this.listB);
       if (bToA) addRandomly(bToA, this.listA);
     });
@@ -83,7 +80,7 @@ export class AnimationExample extends Flow {
         column(
           panel({
             children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", borderStyle:"solid", borderWidth: "1px"}, 
+            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
             animateChildren: standardAnimation       
           }),
           filler(),
@@ -93,7 +90,7 @@ export class AnimationExample extends Flow {
         column(
           panel({
             children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", maxWidth: "300px", borderStyle:"solid", borderWidth: "1px"},  
+            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
             animateChildren: standardAnimation       
           }),
           filler(),
@@ -124,7 +121,6 @@ export function startAnimationExample() {
 
 function removeOneRandom(list) {
   const index = Math.floor(Math.random()*(list.length))
-  // const index = 0;
   return list.splice(index, 1)[0]; 
 }
 

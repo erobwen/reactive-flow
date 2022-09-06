@@ -6,27 +6,40 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all .6s ease-in-out"
+    return "all .5s ease-in-out"
   }
 
   /**
    * Record original bounds, before anything in the dome has changed
    */
-
   recordOriginalBoundsAndStyle(node) {
     node.originalBounds = node.getBoundingClientRect();
     node.originalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
-  
+    
  /**
    * Dissapearing expander and contractors
    * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
    * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
    */
+  getMeasures(node) {
+    const measures = {
+      marginTop: parseInt(node.originalStyle.marginTop, 10),
+      marginBottom: parseInt(node.originalStyle.marginBottom, 10),
+      marginLeft: parseInt(node.originalStyle.marginLeft, 10),
+      marginRight: parseInt(node.originalStyle.marginRight, 10),
+      width: node.originalBounds.width,
+      height: node.originalBounds.height
+    }
+    measures.totalHeight = measures.height + measures.marginTop + measures.marginBottom;
+    measures.totalWidth = measures.width + measures.marginLeft + measures.marginRight;
+    return measures; 
+  }
+
   getDissapearingExpander(node) {
-    const expander = document.createElement("div");
     const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
     const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
+    const expander = document.createElement("div");
     expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
     expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
     expander.style.opacity = "0";
@@ -42,31 +55,16 @@ export class DOMFlipAnimation {
     }
   }
 
-  // getDisappearingContractor(node) {
-  //   const contractor = document.createElement("div");
-  //   const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
-  //   const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
-  //   contractor.style.marginTop = "-" + (node.originalBounds.height + horizontalMargins) +  "px";
-  //   contractor.style.marginLeft = "-" + (node.originalBounds.width + verticalMargins) + "px";
-  //   contractor.style.opacity = "0";
-  //   contractor.id = "contractor"
-  //   node.disappearingContractor = contractor;
-  //   return contractor;
-  // }
-
-  // disappearingContractorFinalStyle() {
-  //   return {
-  //     marginTop: "0px",
-  //     marginLeft: "0px",
-  //   }
-  // }
-
   contractIncoming(node) {
-    node.isIncoming = true;
-    const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
-    const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
-    node.style.marginTop = (parseInt(node.originalStyle.marginTop, 10) - (node.originalBounds.height + verticalMargins)) + "px";
-    node.style.marginLeft = (parseInt(node.originalStyle.marginLeft, 10) - (node.originalBounds.width + horizontalMargins)) + "px";
+    let measures;
+    if (node.savedIncomingMeasures) {
+      measures = node.savedIncomingMeasures;  
+    } else {
+      measures = this.getMeasures(node);
+      node.savedIncomingMeasures = measures;
+    }
+    node.style.marginTop = (measures.marginTop - measures.totalHeight) + "px";
+    node.style.marginLeft = (measures.marginLeft - measures.totalWidth) + "px";
   }
 
 
@@ -76,7 +74,6 @@ export class DOMFlipAnimation {
 
   measureInitialStyleForAdded(contextNode, node) {
     node.rememberedStyle = {...node.style}; // Remember so we can reset it later
-    // TODO: get container specific dimensions? 
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. 
   }
 
@@ -183,14 +180,10 @@ export class DOMFlipAnimation {
       Object.assign(node.disappearingExpander.style, this.residentTransitionStyle(node));
       Object.assign(node.disappearingExpander.style, this.dissapearingExpanderFinalStyle());
     }
-    if (node.isIncoming) {
-      node.style.marginTop = node.originalStyle.marginTop;
-      node.style.marginLeft = node.originalStyle.marginLeft;
+    if (node.savedIncomingMeasures) {
+      node.style.marginTop = node.savedIncomingMeasures.marginTop + "px";
+      node.style.marginLeft =  node.savedIncomingMeasures.marginLeft + "px";
     }
-    // if (node.disappearingContractor) {
-    //   Object.assign(node.disappearingContractor.style, this.residentTransitionStyle(node));
-    //   Object.assign(node.disappearingContractor.style, this.disappearingContractorFinalStyle());
-    // }
   }
   
   setupFinalStyleForRemoved(node) {
@@ -277,10 +270,6 @@ export class DOMFlipAnimation {
       this.setupAnimationCleanup(node.disappearingExpander, true);
       delete node.disappearingExpander; 
     }
-    // if (node.disappearingContractor) {
-    //   this.setupAnimationCleanup(node.disappearingContractor, true);
-    //   delete node.disappearingContractor; 
-    // }
   }
 
   setupRemovedAnimationCleanup(node) {
@@ -291,6 +280,9 @@ export class DOMFlipAnimation {
     function onTransitionEnd(event) {
       if (alsoRemoveNode) {
         node.parentNode.removeChild(node);
+      }
+      if (node.savedIncomingMeasures) {
+        delete node.savedIncomingMeasures;
       }
       node.style.transition = "";
       node.style.width = "";

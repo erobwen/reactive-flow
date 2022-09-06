@@ -52,8 +52,8 @@ export function clearNode(node) {
 
     const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
     const original = this.getDomNode(true)
-    log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
-    log(original);
+    // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
+    // log(original);
     // debugger;
     if (contextNode) {
       contextNode.removeChild(domNode);
@@ -92,13 +92,13 @@ export function clearNode(node) {
     const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
     console.group("reBuildDomNodeWithChildren " + this.toString())
-    log(node)
-    log({...changes});
+    // log(node)
+    // log({...changes});
 
     // Remove non-animated children
     for(let removed of Object.values(changes.removed)) {
       if (!removed.getAnimation()) {
-        log(removed.domNode)
+        // log(removed.domNode)
         node.removeChild(removed.domNode);
       }
     }
@@ -111,6 +111,7 @@ export function clearNode(node) {
         if (!outgoing.domNode.disappearingExpander) {
           node.insertBefore(animation.getDissapearingExpander(outgoing.domNode), outgoing.domNode);
           node.removeChild(outgoing.domNode);
+          animation.contractIncoming(outgoing.domNode);
         }
       }
     }
@@ -122,6 +123,7 @@ export function clearNode(node) {
         if (!incoming.domNode.disappearingExpander) {
           incoming.domNode.parentNode.insertBefore(animation.getDissapearingExpander(incoming.domNode), incoming.domNode);
           incoming.domNode.parentNode.removeChild(incoming.domNode);
+          animation.contractIncoming(incoming.domNode);
         }
       }      
     }
@@ -139,15 +141,15 @@ export function clearNode(node) {
     
     // Add contractors for incoming
     // log(changes);
-    index = newChildNodes.length - 1;
-    while(0 <= index) {
-      const childNode = newChildNodes[index];
-      const child = childNode.equivalentCreator;
-      if (child && changes.incoming[child.id]) {
-        child.getAnimation().contractIncoming(childNode);
-      }
-      index--;
-    }
+    // index = newChildNodes.length - 1;
+    // while(0 <= index) {
+    //   const childNode = newChildNodes[index];
+    //   const child = childNode.equivalentCreator;
+    //   if (child && changes.incoming[child.id]) {
+    //     child.getAnimation().contractIncoming(childNode);
+    //   }
+    //   index--;
+    // }
 
     // Adding pass, will also rearrange moved elements
     index = 0;
