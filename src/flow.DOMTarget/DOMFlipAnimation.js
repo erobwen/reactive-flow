@@ -36,7 +36,7 @@ export class DOMFlipAnimation {
     return measures; 
   }
 
-  getDissapearingExpander(node) {
+  getDisappearingReplacement(node) {
     const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
     const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
     const expander = document.createElement("div");
@@ -48,14 +48,14 @@ export class DOMFlipAnimation {
     return expander;
   }
 
-  dissapearingExpanderFinalStyle() {
+  disappearingReplacementFinalStyle() {
     return {
       marginTop: "0px",
       marginLeft: "0px",
     }
   }
 
-  contractIncoming(node) {
+  minimizeIncomingFootprint(node) {
     let measures;
     if (node.savedIncomingMeasures) {
       measures = node.savedIncomingMeasures;  
@@ -178,7 +178,7 @@ export class DOMFlipAnimation {
     Object.assign(node.style, this.residentTransitionStyle(node));
     if (node.disappearingExpander) {
       Object.assign(node.disappearingExpander.style, this.residentTransitionStyle(node));
-      Object.assign(node.disappearingExpander.style, this.dissapearingExpanderFinalStyle());
+      Object.assign(node.disappearingExpander.style, this.disappearingReplacementFinalStyle());
     }
     if (node.savedIncomingMeasures) {
       node.style.marginTop = node.savedIncomingMeasures.marginTop + "px";

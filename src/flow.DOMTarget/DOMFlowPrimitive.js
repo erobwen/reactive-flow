@@ -109,9 +109,9 @@ export function clearNode(node) {
       if (animation) {
         // outgoing could already be gone at this stage!
         if (!outgoing.domNode.disappearingExpander) {
-          node.insertBefore(animation.getDissapearingExpander(outgoing.domNode), outgoing.domNode);
+          node.insertBefore(animation.getDisappearingReplacement(outgoing.domNode), outgoing.domNode);
           node.removeChild(outgoing.domNode);
-          animation.contractIncoming(outgoing.domNode);
+          animation.minimizeIncomingFootprint(outgoing.domNode);
         }
       }
     }
@@ -121,9 +121,9 @@ export function clearNode(node) {
       const animation = incoming.getAnimation(); 
       if (animation) {
         if (!incoming.domNode.disappearingExpander) {
-          incoming.domNode.parentNode.insertBefore(animation.getDissapearingExpander(incoming.domNode), incoming.domNode);
+          incoming.domNode.parentNode.insertBefore(animation.getDisappearingReplacement(incoming.domNode), incoming.domNode);
           incoming.domNode.parentNode.removeChild(incoming.domNode);
-          animation.contractIncoming(incoming.domNode);
+          animation.minimizeIncomingFootprint(incoming.domNode);
         }
       }      
     }
@@ -146,7 +146,7 @@ export function clearNode(node) {
     //   const childNode = newChildNodes[index];
     //   const child = childNode.equivalentCreator;
     //   if (child && changes.incoming[child.id]) {
-    //     child.getAnimation().contractIncoming(childNode);
+    //     child.getAnimation().minimizeIncomingFootprint(childNode);
     //   }
     //   index--;
     // }

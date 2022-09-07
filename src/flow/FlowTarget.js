@@ -11,6 +11,7 @@ export class FlowTarget {
     //     super();
     //     flowTargets.push(this);
     // }
+    dispose() {}
 
     setContent(flow) {
       throw new Error("Not implemented yet!");

@@ -202,6 +202,12 @@ export class Flow {
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process.
   }
 
+  onClose() {
+    if (this.onClose) {
+      this.onClose();
+    }
+  }
+
   onDispose() {
     delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 

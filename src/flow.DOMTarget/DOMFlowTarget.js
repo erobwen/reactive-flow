@@ -44,19 +44,20 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   setContent(flow) {
+    if (this.content) this.removeContent();
     // log("INTEGRATE");
-    flow.target = this;
-    flow.ensureEstablished();
     this.content = flow;
     this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
+    this.content.target = this;
+    this.content.ensureEstablished();
     // console.log("integrate----");
     const me = this; 
-    if (!flow.integrationRepeater) {
-      flow.integrationRepeater = repeat(mostAbstractFlow(flow).toString() + ".integrationRepeater", repeater => {
+    if (!this.integrationRepeater) {
+      this.integrationRepeater = repeat(this.toString() + ".integrationRepeater", repeater => {
         // log(repeater.causalityString());
 
         // Get dom node
-        const primitive = flow.getPrimitive(); 
+        const primitive = this.content.getPrimitive(); 
         let domNode;
         if (primitive !== null) {
           domNode = primitive.getDomNode(me);
@@ -78,6 +79,11 @@ export class DOMFlowTarget extends FlowTarget {
     onFinishReBuildingFlow();
     configuration.flowBuildNumber++;
     if (this.animate) addDOMFlowTarget(this);
+  }
+
+  removeContent() {
+    this.content.onClose();
+    this.content = null;
   }
 
   setupModalDiv() {
@@ -123,7 +129,7 @@ export class DOMFlowTarget extends FlowTarget {
 
   dispose() {
     super.dispose();
-    this.content.integrationRepeater.dispose();
+    this.integrationRepeater.dispose();
     if (this.animate) removeDOMFlowTarget(this);
   }
 

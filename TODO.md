@@ -7,7 +7,6 @@ CONSIDER use setState on primitive?
 # Next
 TODO: Move back some functionality from unobservable to state.  
 TODO: Additional work on modals and popovers 
-TODO: Prepare for reused flow targets. 
 TODO: Programmatic Reactive Layout demo
 
 # TODO 
