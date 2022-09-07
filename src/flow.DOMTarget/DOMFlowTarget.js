@@ -9,6 +9,7 @@ const log = console.log;
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement, configuration={}){
     super();
+    if (!this.key) this.key = configuration.key ? configuration.key : null;
     const {creator=null, fullWindow=true} = configuration;
     this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
     this.creator = creator;
@@ -41,6 +42,8 @@ export class DOMFlowTarget extends FlowTarget {
     this.state = observable({
       modalDiv: null
     });
+
+    return observable(this, this.key);
   }
 
   setContent(flow) {

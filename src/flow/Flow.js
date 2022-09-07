@@ -160,6 +160,15 @@ export class Flow {
     return [];
   }
 
+  inherit(property) {
+    if (typeof(this[property]) !== "undefined") {
+      return this[property]
+    } else if (this.creator) {
+      return this.creator.inherit(property);
+    }
+    return null;
+  }
+
   withdraw() {
     return [];
   }

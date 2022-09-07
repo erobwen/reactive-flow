@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, flexAutoStyle, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -42,6 +42,10 @@ export class Demo extends Flow {
     }
   }
   
+  provide() {
+    return ["leftColumnPortal"];
+  }
+
   onDispose() {
     super.onDispose();
     for (let name in this.components) {
@@ -50,6 +54,8 @@ export class Demo extends Flow {
   }
   
   build() {
+    const leftColumnPortalDiv = div({key: "portal-div"});
+
     function buildButton(demo, name) { // Extra function to get a stack frame that provides variables to the lambda function. 
       return button(name, {onClick: () => {demo.choosen =  demo.components[name]}})
     }
@@ -60,6 +66,8 @@ export class Demo extends Flow {
         buildButton(this, name), 
       )
     }
+    buttons.push(filler());
+    buttons.push(leftColumnPortalDiv);
 
     const leftColumn = column(
       buttons,
@@ -67,6 +75,7 @@ export class Demo extends Flow {
        style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
     );
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
+    this.choosen.leftColumnPortal =  new DOMFlowTarget(leftColumnPortalDiv.getDomNode(), {key: "portal"});  
 
     return row(
       leftColumn, 
