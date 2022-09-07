@@ -94,7 +94,7 @@ function createWorld(configuration) {
     
     // Main API
     observable,
-    observableDeepCopy,
+    deeplyObservable,
     isObservable,
     create: observable, // observable alias
     invalidateOnChange,
@@ -854,14 +854,22 @@ function createWorld(configuration) {
     return proxy;
   }
 
-  function observableDeepCopy(object) {
+  function deeplyObservable(object, copy) {
+    // console.log("deeplyObservable");
+    // console.log(object);
     if (isObservable(object)) return object; 
-    if (typeof(object) !== "object") return object;  
-    const copy = object instanceof Array ? [] : {};
-    for (let property in object) {
-      copy[property] = observableDeepCopy(object[property]);
+    if (typeof(object) !== "object") return object;
+    let target; 
+    if (copy) {
+      const objectCopy = object instanceof Array ? [] : {};
+      for (let property in object) {
+        objectCopy[property] = deeplyObservable(object[property], copy);
+      }
+      target = objectCopy; 
+    } else {
+      target = object; 
     }
-    return observable(copy);
+    return observable(target);
   }
   
 

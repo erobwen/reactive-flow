@@ -7,6 +7,7 @@ import { ComplexForm, initialData } from "./complexFormApplication";
 import { HelloWorld } from "./helloWorldApplication";
 import { DemoComponent } from "./recursiveAndModalDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
+import { ToggleView } from "./toggleExample";
 
 const log = console.log;
 
@@ -25,7 +26,8 @@ export class Demo extends Flow {
       "Complex Form Example": new ComplexForm({initialData}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
       "Recursive and Modal Demo": new DemoComponent(),
-      "Programmatic Reactive Layout": new ProgrammaticReactiveLayout()
+      "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
+      "Toggle": new ToggleView()
     }
 
     // this.choosen = this.components["Animation Example"];

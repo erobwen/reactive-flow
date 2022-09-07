@@ -11,13 +11,14 @@ export const world = getWorld({
 export const {
   transaction,
   observable,
-  observableDeepCopy,
+  deeplyObservable,
   isObservable, 
   repeat,
   finalize,
   withoutRecording,
   sameAsPreviousDeep,
 } = world;
+export const model = deeplyObservable;
 const log = console.log;
 window.sameAsPreviousDeep = sameAsPreviousDeep;
 window.world = world;

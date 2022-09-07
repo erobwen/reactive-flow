@@ -5,14 +5,12 @@ CONSIDER use setState on primitive?
 
 
 # Next
+TODO: Move back some functionality from unobservable to state.  
+TODO: Additional work on modals and popovers 
+TODO: Prepare for reused flow targets. 
 TODO: Programmatic Reactive Layout demo
 
-# TODO
-TODO: Animation interruption stability.
-TODO: Animation stability on variation of containers. 
-TODO: Prepare for reused flow targets. 
-TODO: Additional work on modals and popovers 
-TODO: Move back some functionality from unobservable to state.  
+# TODO 
 TODO: Make sure all basic flows support animation
 TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Make causality throw an error if same build id is used in the same build. 

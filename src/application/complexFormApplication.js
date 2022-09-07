@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, observableDeepCopy, transaction } from "../flow/Flow";
+import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
 import { text, column, textInputField, row, numberInputField, button, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
@@ -28,7 +28,7 @@ export const initialData = {
 };
 
 function createTraveler(isFellowTraveller) {
-  const result = observableDeepCopy(initialTraveler);
+  const result = model(initialTraveler, true);
   result.isFellowTraveller = isFellowTraveller;
   return result; 
 }
@@ -61,8 +61,7 @@ const panel = flow("panel", ({ children }) =>
 export class ComplexForm extends Flow {
 
   setProperties({initialData}) {
-    this.editData = observableDeepCopy(initialData);
-    log(this.editData);
+    this.editData = model(initialData, true);
   }
 
   build() {
@@ -100,10 +99,10 @@ export class ComplexForm extends Flow {
 
 export class SimpleDrawer extends Flow {
   setProperties({openButtonLabel = "Open", closeButtonLabel = "Close", isOpen, toggleOpen, content}) {
-    this.openButtonLabel = openButtonLabel,
-    this.closeButtonLabel = closeButtonLabel,
-    this.isOpen = isOpen,
-    this.toggleOpen = toggleOpen,
+    this.openButtonLabel = openButtonLabel;
+    this.closeButtonLabel = closeButtonLabel;
+    this.isOpen = isOpen;
+    this.toggleOpen = toggleOpen;
     this.content = content;
   }
   build() {
@@ -130,7 +129,7 @@ export class TravelerForm extends Flow {
       key: "add-luggage", 
       onClick: () => {
         transaction(() => {
-          this.traveler.luggages.push(observable({weight: 1, type: "bag"}));
+          this.traveler.luggages.push(model({weight: 1, type: "bag"}));
           this.showLuggage = true;
         });
       }}) 
