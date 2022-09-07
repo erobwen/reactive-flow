@@ -199,9 +199,7 @@ export class LuggageForm extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startComplexFormApplication() {
-  new ComplexForm({
-    key: "root",
-    initialData, 
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(
+    new ComplexForm({initialData})
+  );
 }

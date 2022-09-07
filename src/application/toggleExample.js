@@ -1,10 +1,16 @@
 import { button, column } from "../flow.components/BasicFlowComponents";
 import { Flow, model, observable, repeat } from "../flow/Flow";
 
+/*
+* Notes: This file is an experiment in how to compare Flow to the combo of React + StateReducerPattern
+* It is a remake of the contrived example from the following page: 
+* https://kentcdodds.com/blog/the-state-reducer-pattern-with-react-hooks
+*/
+
 class ToggleModel {
   constructor() {
     this.on = true; 
-    return observable(this);
+    return model(this);
   }
 
   toggle() {
@@ -47,7 +53,6 @@ export class ToggleView extends Flow {
     this.toggle = new ExhaustableToggleModel();
   }
   build() {
-    console.log(this.toggle)
     return column(
       button("Switch Off", {onClick: () => {this.toggle.setOff()}}),
       button("Switch On", {onClick: () => {this.toggle.setOn()}}),

@@ -82,11 +82,8 @@ const myRow = flow("myRow", ({ style, children, emphasis }) => {
  */
 export function startHelloWorld() {
   // Activate continous build/integration to DOMFlowTarget.
-  const helloWorld = new HelloWorld({
-    key: "root",
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
-
+  const helloWorld = new HelloWorld();
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(helloWorld);
   asyncModifications(helloWorld);  
 }
 

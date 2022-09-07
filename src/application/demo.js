@@ -80,8 +80,7 @@ export class Demo extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startDemo() {
-  const demo = new Demo({
-    key: "root",
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(
+    new Demo()
+  );
 }

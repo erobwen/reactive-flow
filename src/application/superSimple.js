@@ -59,10 +59,8 @@ export class SuperSimple extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startSuperSimple() {
-  const simple = new SuperSimple({
-    key: "root",
-    model, 
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
+  const simple = new SuperSimple({model})
   simple.timedChanges();
+  
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(simple)
 }

@@ -174,10 +174,8 @@ function modalBackdrop(...parameters) {
  */
   
 export function startRecursiveAndModalDemo() {
-  const root = new DemoComponent({
-    key: "root",
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
+  const root = new DemoComponent();
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(root);
 
   // Emulated user interaction.
   // console.log(root.buildRepeater.buildIdObjectMap);

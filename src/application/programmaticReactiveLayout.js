@@ -33,10 +33,9 @@ export class ProgrammaticReactiveLayout extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startProgrammaticReactiveLayout() {
-  const root = new ProgrammaticReactiveLayout({
-    key: "root",
-    target: new DOMFlowTarget(document.getElementById("flow-root")),
-  }).activate();
+  new DOMFlowTarget(document.getElementById("flow-root")).setContent(
+    new ProgrammaticReactiveLayout()
+  );
 }
 
 

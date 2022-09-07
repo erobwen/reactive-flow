@@ -43,20 +43,20 @@ export class DOMFlowTarget extends FlowTarget {
     });
   }
 
-  integrate(flow) {
+  setContent(flow) {
     // log("INTEGRATE");
+    flow.target = this;
+    flow.ensureEstablished();
     this.content = flow;
     this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
-    flow.target = this;
     // console.log("integrate----");
     const me = this; 
-    const you = flow;
-    if (!you.integrationRepeater) {
-      you.integrationRepeater = repeat(mostAbstractFlow(you).toString() + ".integrationRepeater", repeater => {
+    if (!flow.integrationRepeater) {
+      flow.integrationRepeater = repeat(mostAbstractFlow(flow).toString() + ".integrationRepeater", repeater => {
         // log(repeater.causalityString());
 
         // Get dom node
-        const primitive = you.getPrimitive(); 
+        const primitive = flow.getPrimitive(); 
         let domNode;
         if (primitive !== null) {
           domNode = primitive.getDomNode(me);
@@ -104,7 +104,7 @@ export class DOMFlowTarget extends FlowTarget {
     this.modalFlowClose = close; 
     const modalDiv = this.setupModalDiv();
     this.modalTarget = new DOMFlowTarget(modalDiv, {creator: this});
-    this.modalTarget.integrate(this.modalFlow);
+    this.modalTarget.setContent(this.modalFlow);
 
     // Display modal flow
     this.state.modalDiv = modalDiv;

@@ -291,13 +291,6 @@ export class Flow {
     }
   }
 
-  activate() {
-    // this.target.integrate(this, this.getPrimitive());
-    this.onEstablish();
-    this.target.integrate(this);
-    return this;
-  }
-
   getPrimitive() {
     // log("getPrimitive")
     const me = this;

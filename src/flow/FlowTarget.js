@@ -12,7 +12,7 @@ export class FlowTarget {
     //     flowTargets.push(this);
     // }
 
-    integrate(flow) {
+    setContent(flow) {
       throw new Error("Not implemented yet!");
     }
     
