@@ -1,6 +1,6 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button, extractAttributes, wrapper, centerMiddle } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
@@ -120,16 +120,20 @@ export class Item extends Flow {
       text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
       button({key: "modal-button", onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
       text(" Answer: " + me.myModel.value),
-      !me.showModal ? null : this.target.modalNode("modal-node", {close},
-        modalBackdrop(
-          button({
-            key: "close-button",
-            text: "close " + me.text + " modal",
-            style: {opacity: 1},
-            onClick: () => {loga("Close modal");close()},
-          }), 
-          {close}
-        )
+      !me.showModal ? null : modal("modal-node", 
+        {
+          close,
+          content: 
+            modalBackdrop(
+              button({
+                key: "close-button",
+                text: "close " + me.text + " modal",
+                style: {opacity: 1},
+                onClick: () => {loga("Close modal");close()},
+              }), 
+              {close}
+            )
+        }
       ) // text( { key: "item-text", text: me.text})
     );
   }

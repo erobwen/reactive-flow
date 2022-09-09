@@ -26,12 +26,7 @@ export class FlowTarget {
         // Should return an object of the type: FlowTargetPrimitive
         throw new Error("Not implemented yet!");
     }
-
-    modalNode() {
-        // Should return an object of the type: FlowTargetPrimitive
-        throw new Error("Not implemented yet!");
-    }
-
+    
     // dispose() {
     //     flowTargets.splice(flowTargets.indexOf(this), 1);
     // }

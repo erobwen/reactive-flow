@@ -100,28 +100,4 @@ const log = console.log;
     }
   }
   
-  export class DOMModalNode extends DOMFlowPrimitive {
-    setProperties({children}) {
-      this.child = (children instanceof Array) ? children[0] : children;
-      this.children = null; // Avoid children for the initiator 
-    }
-  
-    setState() {
-      this.target.setModalFlow(this.child, this.close);
-    }
-  
-    disposeState() {
-      this.target.removeModalFlow(this.child); 
-    }
-  
-    createEmptyDomNode() {
-      return document.createElement("div");
-    }
-  
-    reBuildDomNode(element) {
-      if (trace) console.log(this.toString() + ".reBuildDomNode:");
-      if (trace) console.log(element);
-      element.style.display = "none";
-    }
-  }
   

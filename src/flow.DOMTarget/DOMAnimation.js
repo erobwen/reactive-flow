@@ -94,10 +94,10 @@ export function onFinishReBuildingFlow() {
   }
 
   for (let target of domFlowTargets) {
-    collectAllAnimated(result, target.content.getPrimitive());
+    if (target.content) collectAllAnimated(result, target.content.getPrimitive());
   }
   for (let target of domFlowTargets) {
-    ajustAllAnimated(result, target.content.getPrimitive());
+    if (target.content) ajustAllAnimated(result, target.content.getPrimitive());
   }
 
 

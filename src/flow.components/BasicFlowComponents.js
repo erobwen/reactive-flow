@@ -18,11 +18,6 @@ export function textNode(...parameters) {
   return getTarget().textNode({key: properties.key, attributes, children: properties.children});
 }
 
-export function modalNode(...parameters) {
-  let properties = readFlowProperties(parameters); 
-  return getTarget().modalNode({key: properties.key});
-}
-
 export function div(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
@@ -334,6 +329,11 @@ export function modal(...parameters) {
 }
 
 export class Modal extends Flow {
+  // setProperties({children}) {
+  //   this.child = (children instanceof Array) ? children[0] : children;
+  //   this.children = null; // Avoid children for the initiator 
+  // }
+
   setState() {
     this.target.getModalTarget().setContent(this.content);
   }

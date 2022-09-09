@@ -91,7 +91,7 @@ export function clearNode(node) {
     if (!(node instanceof Element)) return;
     const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
-    console.group("reBuildDomNodeWithChildren " + this.toString())
+    // console.group("reBuildDomNodeWithChildren " + this.toString())
     // log(node)
     // log({...changes});
 
@@ -161,7 +161,7 @@ export function clearNode(node) {
       index++;
     }
 
-    console.groupEnd();
+    // console.groupEnd();
   }
 
   getChildNodes() {

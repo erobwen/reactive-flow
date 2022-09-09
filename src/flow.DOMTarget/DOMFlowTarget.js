@@ -46,6 +46,10 @@ export class DOMFlowTarget extends FlowTarget {
     return observable(this, this.key);
   }
 
+  toString() {
+    return "[target]" + (this.content ? this.content.toString() : "null");
+  }
+
   setContent(flow) {
     if (this.content === flow) return;
     if (this.content) this.removeContent();
@@ -58,26 +62,49 @@ export class DOMFlowTarget extends FlowTarget {
     const me = this; 
     if (!this.integrationRepeater) {
       this.integrationRepeater = repeat(this.toString() + ".integrationRepeater", repeater => {
-        // log(repeater.causalityString());
+        console.group(repeater.causalityString());
+        let index = 0;
 
         // Get dom node
-        const primitive = this.content.getPrimitive(); 
-        let domNode;
-        if (primitive !== null) {
-          domNode = primitive.getDomNode(me);
+        if (this.content) {
+          const primitive = this.content.getPrimitive(); 
+          let domNode;
+          if (primitive !== null) {
+            domNode = primitive.getDomNode(me);
+          }
+  
+          if (domNode) {
+            const existingNode = this.rootElement.childNodes[index]; 
+            if (existingNode !== domNode) {
+              this.rootElement.insertBefore(domNode, existingNode);
+            }
+            index++;
+          }  
+        }
+        log(index)
+        if (this.modalTarget) {
+          const modalNode = this.modalTarget.rootElement; 
+          const existingNode = this.rootElement.childNodes[index]; 
+          if (existingNode !== modalNode) {
+            this.rootElement.insertBefore(modalNode, existingNode);
+          }
+          index++;
+        }
+        log(index)
+        log(this.rootElement);
+        log(this.rootElement.childNodes[0])
+        log(this.rootElement.childNodes[1])
+        while(this.rootElement.childNodes[index]) {
+          log("removing a node")
+          this.rootElement.removeChild(this.rootElement.childNodes[index]);
+          index++;
         }
 
         // If inside modal, reactivate mouse events
-        if (this.creator) {
-          domNode.style.pointerEvents = "auto";
-        }
-
-        // Set contents of root
-        clearNode(me.rootElement);
-        if (domNode) {
-          me.rootElement.appendChild(domNode);
-          if (this.state.modalDiv) me.rootElement.appendChild(this.state.modalDiv);
-        }
+        // if (this.creator) {
+        //   domNode.style.pointerEvents = "auto";
+        // }
+        console.groupEnd();
       }, {priority: 1});
     }
     onFinishReBuildingFlow();
@@ -92,7 +119,7 @@ export class DOMFlowTarget extends FlowTarget {
 
   getModalTarget() {
     if (!this.modalTarget) {
-      this.modalDiv = this.setupModalDiv();
+      this.modalTarget = new DOMFlowTarget(this.setupModalDiv(), {creator: this});
     }
     return this.modalTarget; 
   }
@@ -111,33 +138,33 @@ export class DOMFlowTarget extends FlowTarget {
     return div;
   }
 
-  setModalFlow(flow, close) {
-    // Close existing
-    if (this.modalFlow) {
-      this.modalFlowClose();
-    }
+  // setModalFlow(flow, close) {
+  //   // Close existing
+  //   if (this.modalFlow) {
+  //     this.modalFlowClose();
+  //   }
 
-    // Setup modal flow
-    this.modalFlow = flow;
-    this.modalFlowClose = close; 
-    const modalDiv = this.setupModalDiv();
-    this.modalTarget = new DOMFlowTarget(modalDiv, {creator: this});
-    this.modalTarget.setContent(this.modalFlow);
+  //   // Setup modal flow
+  //   this.modalFlow = flow;
+  //   this.modalFlowClose = close; 
+  //   const modalDiv = this.setupModalDiv();
+  //   this.modalTarget = new DOMFlowTarget(modalDiv, {creator: this});
+  //   this.modalTarget.setContent(this.modalFlow);
 
-    // Display modal flow
-    this.state.modalDiv = modalDiv;
-  }
+  //   // Display modal flow
+  //   this.state.modalDiv = modalDiv;
+  // }
 
-  removeModalFlow(flow) {
-    if (this.modalFlow === flow) {
-      // Remove new flow target, hide modal panel
-      this.modalFlow = null;
-      this.modalFlowClose = null;
-      this.modalTarget.dispose();
-      this.modalTarget = null;
-      this.state.modalDiv = null;
-    }
-  }
+  // removeModalFlow(flow) {
+  //   if (this.modalFlow === flow) {
+  //     // Remove new flow target, hide modal panel
+  //     this.modalFlow = null;
+  //     this.modalFlowClose = null;
+  //     this.modalTarget.dispose();
+  //     this.modalTarget = null;
+  //     this.state.modalDiv = null;
+  //   }
+  // }
 
   dispose() {
     super.dispose();
@@ -151,10 +178,6 @@ export class DOMFlowTarget extends FlowTarget {
 
   textNode(...parameters) {
     return new DOMTextNode(readFlowProperties(parameters));
-  }
-
-  modalNode(...parameters) {
-    return new DOMModalNode(readFlowProperties(parameters));
   }
 }
 
