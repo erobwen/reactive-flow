@@ -47,6 +47,7 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   setContent(flow) {
+    if (this.content === flow) return;
     if (this.content) this.removeContent();
     // log("INTEGRATE");
     this.content = flow;
@@ -77,7 +78,7 @@ export class DOMFlowTarget extends FlowTarget {
           me.rootElement.appendChild(domNode);
           if (this.state.modalDiv) me.rootElement.appendChild(this.state.modalDiv);
         }
-      }, {priority: 2});
+      }, {priority: 1});
     }
     onFinishReBuildingFlow();
     configuration.flowBuildNumber++;
@@ -85,9 +86,17 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   removeContent() {
-    this.content.onClose();
+    this.content.onRemoveFromFlowTarget();
     this.content = null;
   }
+
+  getModalTarget() {
+    if (!this.modalTarget) {
+      this.modalDiv = this.setupModalDiv();
+    }
+    return this.modalTarget; 
+  }
+
 
   setupModalDiv() {
     const div = document.createElement("div");

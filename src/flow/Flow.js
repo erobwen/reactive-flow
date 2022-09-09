@@ -211,7 +211,7 @@ export class Flow {
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process.
   }
 
-  onClose() {
+  onRemoveFromFlowTarget() {
     if (this.onClose) {
       this.onClose();
     }

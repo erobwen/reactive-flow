@@ -5,15 +5,16 @@ CONSIDER use setState on primitive?
 
 
 # Next
+TODO: onHide callback
 TODO: Move back some functionality from unobservable to state.  
 TODO: Additional work on modals and popovers 
-TODO: Programmatic Reactive Layout demo
+TODO: Support fragmented flows (flows corresponding to several divs).
 
 # TODO 
+TODO: Programmatic Reactive Layout demo
 TODO: Make sure all basic flows support animation
 TODO: Move attribute extraction to primtives + warning of unused property?
 TODO: Make causality throw an error if same build id is used in the same build. 
-TODO: Support fragmented flows (flows corresponding to several divs).
 TODO: Alternative Flow Target Demo, word-processor  
 
 TODO: Is there a way to avoid observation of temporary objects during rebuild? Is it a problem?

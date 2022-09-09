@@ -5,7 +5,7 @@ import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
 import { HelloWorld } from "./helloWorldApplication";
-import { DemoComponent } from "./recursiveAndModalDemoApplication";
+import { RecursiveAndPortalExample } from "./recursiveAndModalDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
 
@@ -19,42 +19,44 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
+    this.leftColumnPortalDiv = div({key: "portal-div"});
+    this.leftColumnPortal = new DOMFlowTarget(this.leftColumnPortalDiv.getDomNode(), {key: "portal", fullWindow: false});
+
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = {
       "Hello World": new HelloWorld(),
       "Animation Example": new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       "Complex Form Example": new ComplexForm({initialData}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      "Recursive and Modal Demo": new DemoComponent(),
+      "Recursive and Modal Demo": new RecursiveAndPortalExample({leftColumnPortal: this.leftColumnPortal}),
       "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
       "Toggle": new ToggleView()
+    }
+    
+    for (let name in this.components) {
+      this.components[name].onEstablish();
     }
 
     // this.choosen = this.components["Animation Example"];
     this.choosen = this.components["Complex Form Example"];
     // this.choosen = this.components["Hello World"];
-  }
-  
-  onEstablish() {
-    super.onEstablish();
-    for (let name in this.components) {
-      this.components[name].onEstablish();
-    }
-  }
-  
-  provide() {
-    return ["leftColumnPortal"];
-  }
 
-  onDispose() {
+  }
+  
+  disposeState() {
     super.onDispose();
     for (let name in this.components) {
       this.components[name].onDispose();
     }
+    this.leftColumnPortalDiv.onDispose();
+    this.leftColumnPortal.dispose();
   }
-  
+
+  provide() {
+    return ["leftColumnPortal"];
+  }
+
   build() {
-    const leftColumnPortalDiv = div({key: "portal-div"});
 
     function buildButton(demo, name) { // Extra function to get a stack frame that provides variables to the lambda function. 
       return button(name, {onClick: () => {demo.choosen =  demo.components[name]}})
@@ -67,7 +69,7 @@ export class Demo extends Flow {
       )
     }
     buttons.push(filler());
-    buttons.push(leftColumnPortalDiv);
+    buttons.push(this.leftColumnPortalDiv);
 
     const leftColumn = column(
       buttons,
@@ -75,7 +77,7 @@ export class Demo extends Flow {
        style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
     );
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
-    this.choosen.leftColumnPortal =  new DOMFlowTarget(leftColumnPortalDiv.getDomNode(), {key: "portal"});  
+    this.choosen.leftColumnPortal =  this.leftColumnPortal;  
 
     return row(
       leftColumn, 

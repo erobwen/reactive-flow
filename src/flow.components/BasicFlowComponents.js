@@ -1,4 +1,4 @@
-import { readFlowProperties, trace, getTarget } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget, Flow } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -26,7 +26,7 @@ export function modalNode(...parameters) {
 export function div(...parameters) {
   let properties = readFlowProperties(parameters); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({tagName: "div", key: properties.key, attributes, children: properties.children});
+  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children});
 }
 
 
@@ -323,6 +323,29 @@ export function button(...parameters) {
   result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick, animate: properties.animate});
   return result; 
 };
+
+
+/**
+ * Modal
+ */
+export function modal(...parameters) {
+  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  return new Modal(properties);
+}
+
+export class Modal extends Flow {
+  setState() {
+    this.target.getModalTarget().setContent(this.content);
+  }
+
+  disposeState() {
+    this.target.getModalTarget().removeContent();
+  }
+
+  build() {
+    return null;
+  }
+}
 
 
 /**

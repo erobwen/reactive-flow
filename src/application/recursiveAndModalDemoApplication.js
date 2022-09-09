@@ -19,19 +19,23 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-export class DemoComponent extends Flow {
+export class RecursiveAndPortalExample extends Flow {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
   // Lifecycle function onEstablish when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
   setState() {
+    log("SET STATE==========================================================")
     this.count = 1
     this.myModel = observable({
       value: 42 
     })
+    console.log(this.leftColumnPortal);
+    if (this.leftColumnPortal) this.leftColumnPortal.setContent(text("Text from the other side!", {key: "portal-text"}));
   }
 
   disposeState() {
+    if (this.leftColumnPortal) this.leftColumnPortal.removeContent();
       // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
   }
 
@@ -174,7 +178,7 @@ function modalBackdrop(...parameters) {
  */
   
 export function startRecursiveAndModalDemo() {
-  const root = new DemoComponent();
+  const root = new RecursiveAndPortalExample();
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(root);
 
   // Emulated user interaction.
