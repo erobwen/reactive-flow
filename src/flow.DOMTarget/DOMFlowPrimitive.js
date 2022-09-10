@@ -33,11 +33,10 @@ export function clearNode(node) {
  */
  export class DOMFlowPrimitive extends FlowPrimitive {
 
-
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-    const domNode = this.getDomNode(true).cloneNode(true);
+    const domNode = this.ensureDomNodeBuilt(true).cloneNode(true);
     if (contextNode) {
       contextNode.appendChild(domNode);
     } else {
@@ -51,7 +50,7 @@ export function clearNode(node) {
     }
 
     const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
-    const original = this.getDomNode(true)
+    const original = this.ensureDomNodeBuilt(true)
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
     // debugger;
@@ -62,8 +61,13 @@ export function clearNode(node) {
     }
     return result; 
   }
-  
+
   getDomNode() {
+    this.ensureDomNodeBuilt();
+    return this.domNode; 
+  }
+  
+  ensureDomNodeBuilt() {
     // if (this.causality.forwardTo !== null)
     // log("not properly finalized: " + ())
     finalize(this);
@@ -73,7 +77,7 @@ export function clearNode(node) {
         if (trace) console.group(repeater.causalityString());
         
         this.ensureDomNode();
-        if (!this.targetDomNode) this.ensureDomNodeBuilt();
+        if (!this.targetDomNode) this.ensureDomNodeAttributesSet();
         if (!this.isPortal) this.ensureDomNodeChildrenInPlace();
         if (trace) console.groupEnd();  
       }, {priority: 2});
@@ -130,7 +134,7 @@ export function clearNode(node) {
 
     // Add back nodes that exist in childNodes, since there we have dissapearing expanders and removed nodes
     let index = 0;
-    const newChildNodes = newChildren.map(child => child.getDomNode());
+    const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt());
     while(index < node.childNodes.length) {
       const existingChildNode = node.childNodes[index];
       if (!newChildNodes.includes(existingChildNode)) {
@@ -165,7 +169,7 @@ export function clearNode(node) {
   }
 
   getChildNodes() {
-    return this.getPrimitiveChildren().map(child => child.getDomNode())
+    return this.getPrimitiveChildren().map(child => child.ensureDomNodeBuilt())
   }
 
   ensureDomNode() { 
@@ -194,7 +198,7 @@ export function clearNode(node) {
     return this.domNode;
   }
 
-  ensureDomNodeBuilt() {
+  ensureDomNodeAttributesSet() {
     throw new Error("Not implemented yet!");
   }
 }

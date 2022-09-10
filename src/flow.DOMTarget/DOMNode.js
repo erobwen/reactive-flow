@@ -25,9 +25,9 @@ const log = console.log;
       return result;
     }
     
-    ensureDomNodeBuilt() {
+    ensureDomNodeAttributesSet() {
       const element = this.domNode;
-      // console.log(this.toString() + ".ensureDomNodeBuilt:");
+      // console.log(this.toString() + ".ensureDomNodeAttributesSet:");
       // console.log(element);
 
       const newAttributes = this.attributes;
@@ -94,8 +94,8 @@ const log = console.log;
       return document.createTextNode("");
     }
   
-    ensureDomNodeBuilt() {
-      // console.log(this.toString() + ".ensureDomNodeBuilt:");
+    ensureDomNodeAttributesSet() {
+      // console.log(this.toString() + ".ensureDomNodeAttributesSet:");
       // console.log(element);
       this.domNode.nodeValue = this.text; // toString()
     }

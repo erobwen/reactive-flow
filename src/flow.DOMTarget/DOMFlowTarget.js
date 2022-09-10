@@ -12,9 +12,9 @@ export class DOMFlowTarget extends FlowTarget {
     const {creator=null, fullWindow=true} = configuration;
     super();
 
-    if (this.animate) addDOMFlowTarget(this);
     if (!this.key) this.key = configuration.key ? configuration.key : null;
     this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
+    if (this.animate) addDOMFlowTarget(this);
     this.contentHolder = new DOMElementNode({targetDomNode: rootElement, tagName: rootElement.tagName})
     this.creator = creator;
     this.rootElement = rootElement;
@@ -80,8 +80,8 @@ export class DOMFlowTarget extends FlowTarget {
     this.contentHolder.children = children;
 
     this.contentHolder.ensureBuiltRecursive();
-    this.contentHolder.getDomNode();
     onFinishReBuildingFlow();
+    this.contentHolder.ensureDomNodeBuilt();
     configuration.flowBuildNumber++;
   }
 
@@ -111,7 +111,8 @@ export class DOMFlowTarget extends FlowTarget {
 
   dispose() {
     super.dispose();
-    this.integrationRepeater.dispose();
+    this.modalPortal.dispose();
+    this.modalTarget.dispose();
     if (this.animate) removeDOMFlowTarget(this);
   }
 
