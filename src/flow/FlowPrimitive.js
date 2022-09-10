@@ -24,15 +24,19 @@ export class FlowPrimitive extends Flow {
   }
 
   getPrimitive() {
-    const me = this;
+    this.ensureBuiltRecursive();
+    return this;
+  }
+
+  ensureBuiltRecursive() {
     const name = this.toString(); // For chrome debugger
-    finalize(me); // Finalize might not work if no key was used, it might not call onEstablish.
-    if (!me.expandRepeater) {
-      me.expandRepeater = repeat(me.toString() + ".expandRepeater", repeater => {
+    finalize(this); // Finalize might not work if no key was used, it might not call onEstablish.
+    if (!this.expandRepeater) {
+      this.expandRepeater = repeat(this.toString() + ".expandRepeater", repeater => {
         if (trace) console.group(repeater.causalityString());
 
         // Expand known children (do as much as possible before integration)
-        for (let childPrimitive of me.iteratePrimitiveChildren()) {
+        for (let childPrimitive of this.iteratePrimitiveChildren()) {
           childPrimitive.parentPrimitive = this; 
         }
 
@@ -47,12 +51,12 @@ export class FlowPrimitive extends Flow {
           this.unobservable.flowBuildNumber = configuration.flowBuildNumber;
 
           this.unobservable.previousChildPrimitives = this.unobservable.childPrimitives;
-          const childPrimitives = this.getPrimitiveChildren();
+          const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
           this.unobservable.childPrimitives = childPrimitives;
 
           Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
         } else {
-          const childPrimitives = this.getPrimitiveChildren();
+          const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
           this.unobservable.childPrimitives = childPrimitives;
           Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
 
@@ -63,7 +67,6 @@ export class FlowPrimitive extends Flow {
       }, {priority: 1});
     }
 
-    return me;
   }
   
   * iterateChildren() {
@@ -73,8 +76,8 @@ export class FlowPrimitive extends Flow {
           yield child;
         }
       }
-    } else if (this.children instanceof Flow  && child !== null) {
-      yield child;
+    } else if (this.children instanceof Flow  && this.children !== null) {
+      yield this.children;
     }
   }
 

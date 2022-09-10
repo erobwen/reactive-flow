@@ -19,7 +19,7 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
-    this.leftColumnPortalDiv = div({key: "portal-div"});
+    this.leftColumnPortalDiv = div({key: "portal-div", isPortal: true});
     this.leftColumnPortal = new DOMFlowTarget(this.leftColumnPortalDiv.getDomNode(), {key: "portal", fullWindow: false});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose

@@ -1,17 +1,21 @@
-import { observable, repeat, readFlowProperties, transaction, configuration } from "../flow/Flow";
+import { observable, repeat, readFlowProperties, transaction, configuration, Flow } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";
+import { div } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 
 export class DOMFlowTarget extends FlowTarget {
   constructor(rootElement, configuration={}){
-    super();
-    if (!this.key) this.key = configuration.key ? configuration.key : null;
     const {creator=null, fullWindow=true} = configuration;
+    super();
+
+    if (this.animate) addDOMFlowTarget(this);
+    if (!this.key) this.key = configuration.key ? configuration.key : null;
     this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
+    this.contentHolder = new DOMElementNode({targetDomNode: rootElement, tagName: rootElement.tagName})
     this.creator = creator;
     this.rootElement = rootElement;
     if (fullWindow) {
@@ -50,93 +54,95 @@ export class DOMFlowTarget extends FlowTarget {
     return "[target]" + (this.content ? this.content.toString() : "null");
   }
 
-  setContent(flow) {
-    if (this.content === flow) return;
-    if (this.content) this.removeContent();
-    // log("INTEGRATE");
-    this.content = flow;
-    this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
-    this.content.target = this;
-    this.content.ensureEstablished();
-    // console.log("integrate----");
-    const me = this; 
-    if (!this.integrationRepeater) {
-      this.integrationRepeater = repeat(this.toString() + ".integrationRepeater", repeater => {
-        console.group(repeater.causalityString());
-        let index = 0;
+  setContent(children) {
+    this.children = children;
 
-        // Get dom node
-        if (this.content) {
-          const primitive = this.content.getPrimitive(); 
-          let domNode;
-          if (primitive !== null) {
-            domNode = primitive.getDomNode(me);
-          }
-  
-          if (domNode) {
-            const existingNode = this.rootElement.childNodes[index]; 
-            if (existingNode !== domNode) {
-              this.rootElement.insertBefore(domNode, existingNode);
-            }
-            index++;
-          }  
-        }
-        log(index)
-        if (this.modalTarget) {
-          const modalNode = this.modalTarget.rootElement; 
-          const existingNode = this.rootElement.childNodes[index]; 
-          if (existingNode !== modalNode) {
-            this.rootElement.insertBefore(modalNode, existingNode);
-          }
-          index++;
-        }
-        log(index)
-        log(this.rootElement);
-        log(this.rootElement.childNodes[0])
-        log(this.rootElement.childNodes[1])
-        while(this.rootElement.childNodes[index]) {
-          log("removing a node")
-          this.rootElement.removeChild(this.rootElement.childNodes[index]);
-          index++;
-        }
+    this.updateContentHolder();
+  }
 
-        // If inside modal, reactivate mouse events
-        // if (this.creator) {
-        //   domNode.style.pointerEvents = "auto";
-        // }
-        console.groupEnd();
-      }, {priority: 1});
+  updateContentHolder() {
+    let children = [];
+    if (this.children instanceof Array) {
+      this.children.forEach(child => children.push(child));
+    } else if (this.children instanceof Flow){
+      children.push(this.children);
     }
+    if (this.modalPortal) {
+      children.push(this.modalPortal);
+    }
+    children.forEach(
+      child => {
+        child.bounds = {width: window.innerWidth, height: window.innerHeight}
+        child.target = this;  
+        child.ensureEstablished();
+      }
+    )    
+    this.contentHolder.children = children;
+
+    this.contentHolder.ensureBuiltRecursive();
+    this.contentHolder.getDomNode();
     onFinishReBuildingFlow();
     configuration.flowBuildNumber++;
-    if (this.animate) addDOMFlowTarget(this);
   }
 
   removeContent() {
-    this.content.onRemoveFromFlowTarget();
-    this.content = null;
+    this.children = null; 
+    this.updateContentHolder();
   }
 
   getModalTarget() {
     if (!this.modalTarget) {
-      this.modalTarget = new DOMFlowTarget(this.setupModalDiv(), {creator: this});
+      this.modalPortal = new new DOMElementNode({
+        isPortal: true,
+        style: {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          // pointerEvents = "none"
+        }
+      });
+      this.modalTarget = new DOMFlowTarget(this.modalPortal.ensureDomNodeBuilt(), {creator: this});
+      updateContentHolder();
     }
     return this.modalTarget; 
+  } 
+
+  dispose() {
+    super.dispose();
+    this.integrationRepeater.dispose();
+    if (this.animate) removeDOMFlowTarget(this);
   }
 
-
-  setupModalDiv() {
-    const div = document.createElement("div");
-    div.id = "modal-div";
-    div.style.position = "absolute";
-    div.style.top = 0;
-    div.style.left = 0;
-    div.style.width = "100%";
-    div.style.height = "100%";
-    // div.style.opacity = 0;
-    div.style.pointerEvents = "none";
-    return div;
+  elementNode(...parameters) {
+    return new DOMElementNode(readFlowProperties(parameters));
   }
+
+  textNode(...parameters) {
+    return new DOMTextNode(readFlowProperties(parameters));
+  }
+}
+
+
+
+
+    // if (this.contentHolder.children) {
+    //   this.contentHolder.getChildren().forEach(child => child.onRemoveFromFlowTarget()) 
+    // }
+
+  // setupModalDiv() {
+  //   const div = document.createElement("div");
+  //   div.id = "modal-div";
+  //   div.style.position = "absolute";
+  //   div.style.top = 0;
+  //   div.style.left = 0;
+  //   div.style.width = "100%";
+  //   div.style.height = "100%";
+  //   // div.style.opacity = 0;
+  //   div.style.pointerEvents = "none";
+  //   return div;
+  // }
 
   // setModalFlow(flow, close) {
   //   // Close existing
@@ -165,19 +171,3 @@ export class DOMFlowTarget extends FlowTarget {
   //     this.state.modalDiv = null;
   //   }
   // }
-
-  dispose() {
-    super.dispose();
-    this.integrationRepeater.dispose();
-    if (this.animate) removeDOMFlowTarget(this);
-  }
-
-  elementNode(...parameters) {
-    return new DOMElementNode(readFlowProperties(parameters));
-  }
-
-  textNode(...parameters) {
-    return new DOMTextNode(readFlowProperties(parameters));
-  }
-}
-
