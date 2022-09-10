@@ -72,8 +72,9 @@ export function clearNode(node) {
       this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
         if (trace) console.group(repeater.causalityString());
         
-        this.ensureDomNodeCreated();
-        this.reBuildDomNodeWithChildren();
+        this.ensureDomNode();
+        if (!this.targetDomNode) this.ensureDomNodeBuilt();
+        if (!this.isPortal) this.ensureDomNodeChildrenInPlace();
         if (trace) console.groupEnd();  
       }, {priority: 2});
     }
@@ -84,14 +85,13 @@ export function clearNode(node) {
     throw new Error("Not implemented yet!");
   }
 
-  reBuildDomNodeWithChildren() {
+  ensureDomNodeChildrenInPlace() {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
-    this.reBuildDomNode(node);
     if (!(node instanceof Element)) return;
     const newChildren = this.getPrimitiveChildren(node);
     const changes = this.unobservable;
-    // console.group("reBuildDomNodeWithChildren " + this.toString())
+    // console.group("ensureDomNodeChildrenInPlace " + this.toString())
     // log(node)
     // log({...changes});
 
@@ -168,8 +168,10 @@ export function clearNode(node) {
     return this.getPrimitiveChildren().map(child => child.getDomNode())
   }
 
-  ensureDomNodeCreated() { 
-    if (!this.createElementRepeater) {
+  ensureDomNode() { 
+    if (this.targetDomNode) {
+      this.domNode = this.targetDomNode;
+    } else if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {
         if (trace) log(repeater.causalityString());
 
@@ -192,7 +194,7 @@ export function clearNode(node) {
     return this.domNode;
   }
 
-  reBuildDomNode(element) {
+  ensureDomNodeBuilt() {
     throw new Error("Not implemented yet!");
   }
 }
