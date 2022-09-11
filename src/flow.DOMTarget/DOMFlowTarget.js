@@ -78,11 +78,11 @@ export class DOMFlowTarget extends FlowTarget {
       }
     )    
     this.contentHolder.children = children;
-
     this.contentHolder.ensureBuiltRecursive();
     onFinishReBuildingFlow();
-    this.contentHolder.ensureDomNodeBuilt();
     configuration.flowBuildNumber++;
+
+    this.contentHolder.ensureDomNodeBuilt();
   }
 
   removeContent() {
@@ -92,7 +92,7 @@ export class DOMFlowTarget extends FlowTarget {
 
   getModalTarget() {
     if (!this.modalTarget) {
-      this.modalPortal = new new DOMElementNode({
+      this.modalPortal = new DOMElementNode({
         isPortal: true,
         style: {
           position: "absolute",
@@ -104,7 +104,7 @@ export class DOMFlowTarget extends FlowTarget {
         }
       });
       this.modalTarget = new DOMFlowTarget(this.modalPortal.ensureDomNodeBuilt(), {creator: this});
-      updateContentHolder();
+      this.updateContentHolder();
     }
     return this.modalTarget; 
   } 
