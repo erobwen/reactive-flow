@@ -36,7 +36,7 @@ export class FlowPrimitive extends Flow {
         if (trace) console.group(repeater.causalityString());
 
         // Expand known children (do as much as possible before integration)
-        for (let childPrimitive of this.iteratePrimitiveChildren()) {
+        for (let childPrimitive of this.iteratePrimitiveChildren()) { // Will trigger recursive call once it reaches primitive
           childPrimitive.parentPrimitive = this; 
         }
 
@@ -49,20 +49,14 @@ export class FlowPrimitive extends Flow {
         // Accumulate diffs from previous update
         if (this.unobservable.flowBuildNumber !== configuration.flowBuildNumber) {
           this.unobservable.flowBuildNumber = configuration.flowBuildNumber;
-
           this.unobservable.previousChildPrimitives = this.unobservable.childPrimitives;
-          const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
-          this.unobservable.childPrimitives = childPrimitives;
-
-          Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
         } else {
-          const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
-          this.unobservable.childPrimitives = childPrimitives;
-          Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
-
           console.warn("Multiple updates of same primitive!");
         }
-        
+        const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
+        this.unobservable.childPrimitives = childPrimitives;
+        Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
+      
         if (trace) console.groupEnd();
       }, {priority: 1});
     }

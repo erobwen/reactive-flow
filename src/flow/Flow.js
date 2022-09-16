@@ -217,6 +217,14 @@ export class Flow {
     }
   }
 
+  onWillUnmount() {
+    log("UM")
+  }
+  
+  onDidMount() {
+    log("M")
+  }
+
   onDispose() {
     delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 

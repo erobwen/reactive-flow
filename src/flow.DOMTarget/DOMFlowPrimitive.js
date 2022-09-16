@@ -68,12 +68,10 @@ export function clearNode(node) {
   }
   
   ensureDomNodeBuilt() {
-    // if (this.causality.forwardTo !== null)
-    // log("not properly finalized: " + ())
     finalize(this);
-    if (!this.buildElementRepeater) {
-      // this.buildElementRepeater = repeat(mostAbstractFlow(this).toString() + ".buildElementRepeater", (repeater) => {
-      this.buildElementRepeater = repeat(this.toString() + ".buildElementRepeater", (repeater) => {
+    if (!this.buildDOMRepeater) {
+      // this.buildDOMRepeater = repeat(mostAbstractFlow(this).toString() + ".buildDOMRepeater", (repeater) => {
+      this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildDOMRepeater", (repeater) => {
         if (trace) console.group(repeater.causalityString());
         
         this.ensureDomNode();

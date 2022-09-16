@@ -31,12 +31,21 @@ export class RecursiveAndPortalExample extends Flow {
       value: 42 
     })
     console.log(this.leftColumnPortal);
-    if (this.leftColumnPortal) this.leftColumnPortal.setContent(text("Text from the other side!", {key: "portal-text"}));
   }
 
   disposeState() {
     if (this.leftColumnPortal) this.leftColumnPortal.removeContent();
       // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
+  }
+
+  onWillUnmount() {
+    log("UNMOUNT!!")
+    if (this.leftColumnPortal) this.leftColumnPortal.removeContent();
+  }
+  
+  onDidMount() {
+    log("MOUNT!!")
+    if (this.leftColumnPortal) this.leftColumnPortal.setContent(text("Text from the other side!", {key: "portal-text"}));
   }
 
   provide() {

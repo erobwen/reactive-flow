@@ -2,7 +2,7 @@ import { observable, repeat, readFlowProperties, transaction, configuration, Flo
 import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
-import { addDOMFlowTarget, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";
+import { addDOMFlowTarget, onFinishReBuildingDOM, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";
 import { div } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
@@ -81,8 +81,8 @@ export class DOMFlowTarget extends FlowTarget {
     this.contentHolder.ensureBuiltRecursive();
     onFinishReBuildingFlow();
     configuration.flowBuildNumber++;
-
     this.contentHolder.ensureDomNodeBuilt();
+    onFinishReBuildingDOM();
   }
 
   removeContent() {

@@ -87,6 +87,8 @@ function ajustAllAnimated(result, primitiveFlow) {
 }
 
 export function onFinishReBuildingFlow() {
+  log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
+
   const result = {
     globallyAdded: {}, 
     globallyRemoved: {},
@@ -123,12 +125,18 @@ export function onFinishReBuildingFlow() {
   for (let flow of updateFrame.globallyRemoved) {
     if (flow.domNode) {
       flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
+      let scan = flow; 
+      while(scan) {
+        scan.onWillUnmount();
+        scan = scan.equivalentCreator;
+      } 
     }
   }
   updateFrame.measuresDone = true;
 }
 
 export function onFinishReBuildingDOM() {
+  log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
 
   if (!updateFrame.measuresDone) return;
   updateFrame.measuresDone = false; 
@@ -136,8 +144,14 @@ export function onFinishReBuildingDOM() {
   const {globallyRemoved, globallyAdded, globallyResident} = updateFrame
 
   // Setup initial style.
+  log([...globallyAdded]);
   for (let flow of globallyAdded) {
     flow.getAnimation().measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+    let scan = flow; 
+    while(scan) {
+      scan.onDidMount();
+      scan = scan.equivalentCreator;
+    } 
   }
 
   for (let flow of globallyAdded) {
