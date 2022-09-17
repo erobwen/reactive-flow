@@ -113,6 +113,7 @@ export function onFinishReBuildingFlow() {
   updateFrame.globallyAdded = Object.values(result.globallyAdded);
   updateFrame.globallyRemoved = Object.values(result.globallyRemoved);
   updateFrame.globallyResident = Object.values(result.globallyResident);
+  log(updateFrame);
 
   // Do to all new animated
   for (let flow of updateFrame.globallyResident) {

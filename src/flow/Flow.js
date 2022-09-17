@@ -50,7 +50,6 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   if (level === 1) {
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
     configuration.flowBuildNumber++;
-    log("---------------------------------------- onFinishReBuildingFlow ----------------------------------------");
   }
 
   // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
@@ -58,7 +57,6 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   // Finished re building DOM, proceed with animations.  
   if (level === 2) {
     configuration.onFinishReBuildingDOMCallbacks.forEach(callback => callback())
-    log("---------------------------------------- onFinishReBuildingDOM ----------------------------------------");
   }
 }
 
