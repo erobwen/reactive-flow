@@ -1,3 +1,4 @@
+import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation.js";
 import { configuration, finalize, Flow, readFlowProperties, repeat, trace } from "./Flow.js";
 
@@ -9,7 +10,6 @@ export class FlowPrimitive extends Flow {
     super(readFlowProperties(parameters));
   }
   
-
   findChild(key) {
     if (this.key === key) return this;
     if (this.children) {
@@ -90,14 +90,25 @@ export class FlowPrimitive extends Flow {
     return [...this.iteratePrimitiveChildren()];
   }
 
+  isStable() {
+    return !flowChanges.globallyAdded[this.id] && (!this.primitiveParent || this.primitiveParent.isStable());
+  }
+
   getAnimation() {
-    let result = this.inheritPropertyFromEquivalent("animate"); 
-
-    if (!result && this.parentPrimitive) {
-      result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
+    let result; 
+    if (!this.primitiveParent || !this.primitiveParent.isStable()) {
+      result = null; 
+    } else {
+      result = this.inheritPropertyFromEquivalent("animate"); 
+  
+      if (!result && this.parentPrimitive) {
+        result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
+      }
+  
     }
-
-    return (result === true) ? standardAnimation : result;  
+    if (result === true) result = standardAnimation;
+    this.animation = result; // for quick access after call is made
+    return result;   
   }
 }
   

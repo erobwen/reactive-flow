@@ -24,108 +24,86 @@ export function removeDOMFlowTarget(target) {
 
 
 /**
- * DOM animation
+ * Global flow changes tracking
  */
-const updateFrame = {
-  globallyAdded: null,
-  globallyRemoved: null,
-  globallyResident: null,
-  measuresDone: false
+export const flowChanges = {
+  globallyAdded: {},
+  globallyRemoved: {},
+  globallyResident: {}
 };
 
-window.updateFrame = updateFrame;
+window.flowChanges = flowChanges;
 
-function collectAllAnimated(result, primitiveFlow) {
-  // This flow had changes
-  if (primitiveFlow.unobservable.flowBuildNumber === configuration.flowBuildNumber) {
-    for (let flow of Object.values(primitiveFlow.unobservable.added)) {
-      if (flow.getAnimation()) {
-        result.globallyAdded[flow.id] = flow;
-      }
-    }
-    for (let flow of Object.values(primitiveFlow.unobservable.removed)) {
-      if (flow.getAnimation()) {
-        result.globallyRemoved[flow.id] = flow;
-      }
-      // Collect animations on removed! This is necessary for making recursive removes work properly.  
-      collectAllAnimated(result, flow);
-    }
-    for (let flow of Object.values(primitiveFlow.unobservable.resident)) {
-      if (flow.getAnimation()) {
-        result.globallyResident[flow.id] = flow;
-      }
-    }
-  }
-
-  for (let child of primitiveFlow.iteratePrimitiveChildren()) {
-    collectAllAnimated(result, child);
-  }
-}
-
-function ajustAllAnimated(result, primitiveFlow) {
-  // This flow had changes
-  if (primitiveFlow.unobservable.flowBuildNumber === configuration.flowBuildNumber) {
-    for (let flow of Object.values(primitiveFlow.unobservable.added)) {
-      if (result.globallyRemoved[flow.id]) {
-        delete primitiveFlow.unobservable.added;
-        primitiveFlow.unobservable.incoming[flow.id] = flow;
-      }
-    }
-    for (let flow of Object.values(primitiveFlow.unobservable.removed)) {
-      if (result.globallyAdded[flow.id]) {
-        delete primitiveFlow.unobservable.removed[flow.id];
-        primitiveFlow.unobservable.outgoing[flow.id] = flow;
-      }
-      // Ajust animations on removed! This is necessary for making recursive removes work properly.  
-      ajustAllAnimated(result, flow);
-    }
-  }
-
-  for (let child of primitiveFlow.iteratePrimitiveChildren()) {
-    ajustAllAnimated(result, child);
-  }
-}
+let previousIdPrimitiveMap = null;
+let idPrimitiveMap = {};
 
 export function onFinishReBuildingFlow() {
   log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
 
-  const result = {
-    globallyAdded: {}, 
-    globallyRemoved: {},
-    globallyResident: {}
+  previousIdPrimitiveMap = idPrimitiveMap;
+  previousIdPrimitiveMap = idPrimitiveMap;
+  idPrimitiveMap = {};
+  
+  function analyzePrimitives(idPrimitiveMap, primitiveFlow) {
+    idPrimitiveMap[primitiveFlow.id] = primitiveFlow;
+  
+    for (let child of primitiveFlow.iteratePrimitiveChildren()) {
+      analyzePrimitives(idPrimitiveMap, child);
+    }
+  }
+  
+  for (let target of domFlowTargets) {
+    analyzePrimitives(idPrimitiveMap, target.contentHolder);
   }
 
-  for (let target of domFlowTargets) {
-    collectAllAnimated(result, target.contentHolder);
-  }
-  for (let target of domFlowTargets) {
-    ajustAllAnimated(result, target.contentHolder);
-  }
+  flowChanges.globallyAdded = {}; 
+  flowChanges.globallyResident = {}; 
+  flowChanges.globallyRemoved = {};
 
-  for(let id in result.globallyRemoved) {
-    if (typeof(result.globallyAdded[id]) !== "undefined") {
-      result.globallyResident[id] = result.globallyRemoved[id];
-      delete result.globallyRemoved[id];
-      delete result.globallyAdded[id];
+  for (let id in idPrimitiveMap) {
+    const inPreviousMap = previousIdPrimitiveMap[id];
+    if (typeof(inPreviousMap) !== "undefined") {
+      flowChanges.globallyResident[id] = inPreviousMap; 
+    } else {
+      flowChanges.globallyAdded[id] = idPrimitiveMap[id];
     }
   }
 
-  updateFrame.globallyAdded = Object.values(result.globallyAdded);
-  updateFrame.globallyRemoved = Object.values(result.globallyRemoved);
-  updateFrame.globallyResident = Object.values(result.globallyResident);
-  log(updateFrame);
+  for (let id in previousIdPrimitiveMap) {
+    const inPreviousMap = previousIdPrimitiveMap[id];
+    if (typeof(idPrimitiveMap[id]) === "undefined") {
+      flowChanges.globallyRemoved[id] = inPreviousMap; 
+    }
+  }
+
+  function getAnimatedFromMap(map) {
+    return Object.values(map)
+      .reduce((result, flow) => {
+        const animation = flow.getAnimation();
+        if (animation) {
+          result.push(flow);
+        }
+        return result;
+      }, []);
+  }
+
+  flowChanges.globallyAddedAnimated = getAnimatedFromMap(flowChanges.globallyAdded);
+  flowChanges.globallyRemovedAnimated = getAnimatedFromMap(flowChanges.globallyRemoved);
+  flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
+
+  log(flowChanges);
 
   // Do to all new animated
-  for (let flow of updateFrame.globallyResident) {
+  for (let flow of flowChanges.globallyResidentAnimated) {
     if (flow.domNode) {
-      flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
+      animation.recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
-
+  
   // Do to all globallyRemoved
-  for (let flow of updateFrame.globallyRemoved) {
+  for (let flow of flowChanges.globallyRemovedAnimated) {
     if (flow.domNode) {
-      flow.getAnimation().recordOriginalBoundsAndStyle(flow.domNode);
+      flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
       let scan = flow; 
       while(scan) {
         scan.onWillUnmount();
@@ -133,21 +111,22 @@ export function onFinishReBuildingFlow() {
       } 
     }
   }
-  updateFrame.measuresDone = true;
+
+  flowChanges.onFinishReBuildingFlowDone = true;
 }
 
 export function onFinishReBuildingDOM() {
   log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
 
-  if (!updateFrame.measuresDone) return;
-  updateFrame.measuresDone = false; 
+  if (!flowChanges.onFinishReBuildingFlowDone) return;
+  delete flowChanges.onFinishReBuildingFlowDone; 
 
-  const {globallyRemoved, globallyAdded, globallyResident} = updateFrame
-
+  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated} = flowChanges
+log(globallyAddedAnimated)
   // Setup initial style.
-  log([...globallyAdded]);
-  for (let flow of globallyAdded) {
-    flow.getAnimation().measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+  log([...globallyAddedAnimated]);
+  for (let flow of globallyAddedAnimated) {
+    flow.animation.measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
     let scan = flow; 
     while(scan) {
       scan.onDidMount();
@@ -155,38 +134,38 @@ export function onFinishReBuildingDOM() {
     } 
   }
 
-  for (let flow of globallyAdded) {
-    flow.getAnimation().setupInitialStyleForAdded(flow.domNode);
+  for (let flow of globallyAddedAnimated) {
+    flow.animation.setupInitialStyleForAdded(flow.domNode);
   }
-  for (let flow of globallyResident) {
-    flow.getAnimation().setupInitialStyleForResident(flow.domNode);
+  for (let flow of globallyResidentAnimated) {
+    flow.animation.setupInitialStyleForResident(flow.domNode);
   }
-  for (let flow of globallyRemoved) {
-    flow.getAnimation().setupInitialStyleForRemoved(flow.domNode);
+  for (let flow of globallyRemovedAnimated) {
+    flow.animation.setupInitialStyleForRemoved(flow.domNode);
   }
 
   requestAnimationFrame(() => {
 
     // Record initial positions
-    updateFrame.globallyRemoved.forEach(flow => {
-      flow.getAnimation().recordInitialBounds(flow.domNode)
+    globallyRemovedAnimated.forEach(flow => {
+      flow.animation.recordInitialBounds(flow.domNode)
     });
 
-    updateFrame.globallyResident.forEach(flow => {
-      flow.getAnimation().recordInitialBounds(flow.domNode)
+    globallyResidentAnimated.forEach(flow => {
+      flow.animation.recordInitialBounds(flow.domNode)
     });
 
     
     // Setup flow.animate initial position
     // Translate all except globallyAdded to their old position (globallyAdded should have a scale=0 transform)
-    for (let flow of globallyAdded) {
-      flow.getAnimation().translateAddedFromInitialToOriginalPosition(flow.domNode);
+    for (let flow of globallyAddedAnimated) {
+      flow.animation.translateAddedFromInitialToOriginalPosition(flow.domNode);
     }
-    for (let flow of globallyResident) {
-      flow.getAnimation().translateResidentFromInitialToOriginalPosition(flow.domNode);
+    for (let flow of globallyResidentAnimated) {
+      flow.animation.translateResidentFromInitialToOriginalPosition(flow.domNode);
     }
-    for (let flow of globallyRemoved) {
-      flow.getAnimation().translateRemovedFromInitialToOriginalPosition(flow.domNode);
+    for (let flow of globallyRemovedAnimated) {
+      flow.animation.translateRemovedFromInitialToOriginalPosition(flow.domNode);
     }
       
     // Activate animation
@@ -194,25 +173,25 @@ export function onFinishReBuildingDOM() {
 
       // Transition all except globallyRemoved to new position by removing translation
       // Minimize globallyRemoved by adding scale = 0 transform and at the same time removing the translation
-      for (let flow of globallyAdded) {
-        flow.getAnimation().setupFinalStyleForAdded(flow.domNode);
+      for (let flow of globallyAddedAnimated) {
+        flow.animation.setupFinalStyleForAdded(flow.domNode);
       }
-      for (let flow of globallyResident) {
-        flow.getAnimation().setupFinalStyleForResident(flow.domNode);
+      for (let flow of globallyResidentAnimated) {
+        flow.animation.setupFinalStyleForResident(flow.domNode);
       }
-      for (let flow of globallyRemoved) {
-        flow.getAnimation().setupFinalStyleForRemoved(flow.domNode);
+      for (let flow of globallyRemovedAnimated) {
+        flow.animation.setupFinalStyleForRemoved(flow.domNode);
       } 
 
       // Setup cleanup
-      for (let flow of globallyAdded) {
-        flow.getAnimation().setupAddedAnimationCleanup(flow.domNode);
+      for (let flow of globallyAddedAnimated) {
+        flow.animation.setupAddedAnimationCleanup(flow.domNode);
       }
-      for (let flow of globallyResident) {
-        flow.getAnimation().setupResidentAnimationCleanup(flow.domNode);
+      for (let flow of globallyResidentAnimated) {
+        flow.animation.setupResidentAnimationCleanup(flow.domNode);
       }
-      for (let flow of globallyRemoved) {
-        flow.getAnimation().setupRemovedAnimationCleanup(flow.domNode);
+      for (let flow of globallyRemovedAnimated) {
+        flow.animation.setupRemovedAnimationCleanup(flow.domNode);
       } 
    }); 
   })

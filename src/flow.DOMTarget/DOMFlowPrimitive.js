@@ -1,6 +1,7 @@
 import { flexAutoStyle } from "../flow.components/BasicFlowComponents";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
+import { flowChanges } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -91,67 +92,63 @@ export function clearNode(node) {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
-    const newChildren = this.getPrimitiveChildren(node);
-    const changes = this.unobservable;
     // console.group("ensureDomNodeChildrenInPlace " + this.toString())
     // log(node)
     // log({...changes});
-
-    // Remove non-animated children
-    for(let removed of Object.values(changes.removed)) {
-      if (!removed.getAnimation()) {
-        // log(removed.domNode)
-        node.removeChild(removed.domNode);
+    
+    // Get new children list, this is the target
+    const newChildren = this.getPrimitiveChildren(node);
+    const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt());
+    
+    // Iterate and remove things that should be removed or outgoing
+    let index = node.childNodes.length - 1;
+    const existingPrimitives = {};
+    while(index >= 0) {
+      const existingChildNode = node.childNodes[index];
+      const existingPrimitive = existingChildNode.equivalentCreator;
+      existingPrimitives[existingPrimitive.id] = existingPrimitive; 
+      if (!existingPrimitive) {
+        // No creator, probably a disappearing replacement that we want to keep
+        newChildNodes.splice(index, 0, existingChildNode);
+      } else {
+        const animation = existingPrimitive.getAnimation(); 
+        if (flowChanges.globallyRemoved[existingChildNode.equivalentCreator.id]) {
+          // Node will be removed, copy it back to leave it.
+          if (animation) {
+            newChildNodes.splice(index, 0, existingChildNode);
+          } 
+        } else  if (existingPrimitive.parentPrimitive.id !== this.parentPrimitive.id) {
+          // Child will move out from this node
+          if (animation) {
+            // outgoing could already be gone at this stage!
+            if (!existingChildNode.disappearingExpander) {
+              node.insertBefore(animation.getDisappearingReplacement(outgoing.domNode), existingPrimitive);
+              node.removeChild(existingPrimitive);
+              animation.minimizeIncomingFootprint(existingPrimitive);
+            }
+          } else {
+            // No animation, just remove. (do not copy to new)
+          }
+        }  
       }
-    }
-
-    // Arrange dissapearing expander for outgoing
-    for(let outgoing of Object.values(changes.outgoing)) {
-      const animation = outgoing.getAnimation(); 
-      if (animation) {
-        // outgoing could already be gone at this stage!
-        if (!outgoing.domNode.disappearingExpander) {
-          node.insertBefore(animation.getDisappearingReplacement(outgoing.domNode), outgoing.domNode);
-          node.removeChild(outgoing.domNode);
-          animation.minimizeIncomingFootprint(outgoing.domNode);
-        }
-      }
+      index--;
     }
 
     // Arrange disappearing expander for incoming
-    for(let incoming of Object.values(changes.incoming)) {
-      const animation = incoming.getAnimation(); 
-      if (animation) {
-        if (!incoming.domNode.disappearingExpander) {
-          incoming.domNode.parentNode.insertBefore(animation.getDisappearingReplacement(incoming.domNode), incoming.domNode);
-          incoming.domNode.parentNode.removeChild(incoming.domNode);
-          animation.minimizeIncomingFootprint(incoming.domNode);
+    for(let newPrimitive of newChildren) {
+      if (!existingPrimitives[newPrimitive.id] && !flowChanges.globallyAdded[newPrimitive.id]) {
+        // Incoming primitive. We have to replace it with a dissapearing replacement before we add it in this container, since ith will otherwise dissapear from that container without a chance to add the replacement.
+        const animation = newPrimitive.getAnimation(); 
+        if (animation) {
+          const newPrimitiveDomNode = newPrimitive.domNode; 
+          if (!newPrimitiveDomNode.disappearingExpander) {
+            newPrimitiveDomNode.parentNode.insertBefore(animation.getDisappearingReplacement(newPrimitiveDomNode), newPrimitiveDomNode);
+            newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
+            animation.minimizeIncomingFootprint(newPrimitiveDomNode);
+          }
         }
-      }      
-    }
-
-    // Add back nodes that exist in childNodes, since there we have dissapearing expanders and removed nodes
-    let index = 0;
-    const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt());
-    while(index < node.childNodes.length) {
-      const existingChildNode = node.childNodes[index];
-      if (!newChildNodes.includes(existingChildNode)) {
-        newChildNodes.splice(index, 0, existingChildNode);
       }
-      index++;
-    }
-    
-    // Add contractors for incoming
-    // log(changes);
-    // index = newChildNodes.length - 1;
-    // while(0 <= index) {
-    //   const childNode = newChildNodes[index];
-    //   const child = childNode.equivalentCreator;
-    //   if (child && changes.incoming[child.id]) {
-    //     child.getAnimation().minimizeIncomingFootprint(childNode);
-    //   }
-    //   index--;
-    // }
+    }   
 
     // Adding pass, will also rearrange moved elements
     index = 0;
