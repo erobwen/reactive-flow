@@ -107,15 +107,17 @@ export function clearNode(node) {
       const existingPrimitive = existingChildNode.equivalentCreator;
       if (!existingPrimitive) {
         // No creator, probably a disappearing replacement that we want to keep
-        // newChildNodes.splice(index, 0, existingChildNode);
+        newChildNodes.splice(index, 0, existingChildNode);
       } else {
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
-        if (flowChanges.globallyRemoved[existingChildNode.equivalentCreator.id]) {
+        if (flowChanges.globallyRemoved[existingPrimitive.id]) {
           // Node will be removed, copy it back to leave it.
           if (animation) {
             newChildNodes.splice(index, 0, existingChildNode);
-          } 
+          } else {
+            node.removeChild(existingChildNode);
+          }
         } else  if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
           // Child will move out from this node
           if (animation) {

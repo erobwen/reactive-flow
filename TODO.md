@@ -3,9 +3,12 @@ CONSIDER What happens with a model built in the build function of a flow. Will i
 CONSIDER Investigate possibility of creating child flows in the state callback. 
 CONSIDER use setState on primitive?
 
+# Ongoing
+TODO: onHide callback
+TODO: Animation stability
 
 # Next
-TODO: onHide callback
+TODO: Investigate button id-stability.
 TODO: Move back some functionality from unobservable to state.  
 TODO: Additional work on modals and popovers 
 TODO: Support fragmented flows (flows corresponding to several divs).
