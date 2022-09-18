@@ -90,13 +90,13 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyAddedAnimated = getAnimatedFromMap(flowChanges.globallyAdded);
   flowChanges.globallyRemovedAnimated = getAnimatedFromMap(flowChanges.globallyRemoved);
   flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
-
+  log("flowChanges");
   log(flowChanges);
 
   // Do to all new animated
   for (let flow of flowChanges.globallyResidentAnimated) {
     if (flow.domNode) {
-      animation.recordOriginalBoundsAndStyle(flow.domNode);
+      flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
   
@@ -122,9 +122,10 @@ export function onFinishReBuildingDOM() {
   delete flowChanges.onFinishReBuildingFlowDone; 
 
   let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated} = flowChanges
-log(globallyAddedAnimated)
+  log("flowChanges");
+  log(flowChanges);
+
   // Setup initial style.
-  log([...globallyAddedAnimated]);
   for (let flow of globallyAddedAnimated) {
     flow.animation.measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
     let scan = flow; 

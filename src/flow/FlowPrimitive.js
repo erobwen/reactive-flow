@@ -91,12 +91,13 @@ export class FlowPrimitive extends Flow {
   }
 
   isStable() {
+    // return true; 
     return !flowChanges.globallyAdded[this.id] && (!this.primitiveParent || this.primitiveParent.isStable());
   }
 
   getAnimation() {
     let result; 
-    if (!this.primitiveParent || !this.primitiveParent.isStable()) {
+    if (!this.parentPrimitive || !this.parentPrimitive.isStable()) {
       result = null; 
     } else {
       result = this.inheritPropertyFromEquivalent("animate"); 
@@ -104,10 +105,10 @@ export class FlowPrimitive extends Flow {
       if (!result && this.parentPrimitive) {
         result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
       }
-  
     }
     if (result === true) result = standardAnimation;
     this.animation = result; // for quick access after call is made
+    log(result)
     return result;   
   }
 }

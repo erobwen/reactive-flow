@@ -92,9 +92,8 @@ export function clearNode(node) {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
-    // console.group("ensureDomNodeChildrenInPlace " + this.toString())
+    console.group("ensureDomNodeChildrenInPlace " + this.toString())
     // log(node)
-    // log({...changes});
     
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
@@ -106,25 +105,25 @@ export function clearNode(node) {
     while(index >= 0) {
       const existingChildNode = node.childNodes[index];
       const existingPrimitive = existingChildNode.equivalentCreator;
-      existingPrimitives[existingPrimitive.id] = existingPrimitive; 
       if (!existingPrimitive) {
         // No creator, probably a disappearing replacement that we want to keep
-        newChildNodes.splice(index, 0, existingChildNode);
+        // newChildNodes.splice(index, 0, existingChildNode);
       } else {
+        existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
         if (flowChanges.globallyRemoved[existingChildNode.equivalentCreator.id]) {
           // Node will be removed, copy it back to leave it.
           if (animation) {
             newChildNodes.splice(index, 0, existingChildNode);
           } 
-        } else  if (existingPrimitive.parentPrimitive.id !== this.parentPrimitive.id) {
+        } else  if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
           // Child will move out from this node
           if (animation) {
             // outgoing could already be gone at this stage!
             if (!existingChildNode.disappearingExpander) {
-              node.insertBefore(animation.getDisappearingReplacement(outgoing.domNode), existingPrimitive);
-              node.removeChild(existingPrimitive);
-              animation.minimizeIncomingFootprint(existingPrimitive);
+              node.insertBefore(animation.getDisappearingReplacement(existingChildNode), existingChildNode);
+              node.removeChild(existingChildNode);
+              animation.minimizeIncomingFootprint(existingChildNode);
             }
           } else {
             // No animation, just remove. (do not copy to new)
@@ -160,7 +159,7 @@ export function clearNode(node) {
       index++;
     }
 
-    // console.groupEnd();
+    console.groupEnd();
   }
 
   getChildNodes() {
