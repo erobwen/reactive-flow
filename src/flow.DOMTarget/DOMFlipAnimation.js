@@ -157,10 +157,13 @@ export class DOMFlipAnimation {
 
   translateFromInitialToOriginalPosition(node) {
     node.style.transition = "";
-    const originalBounds = node.originalBounds; delete node.originalBounds;
-    const initialBounds = node.initialBounds; delete node.initialBounds;
-    const deltaX = initialBounds.left - originalBounds.left;
-    const deltaY = initialBounds.top - originalBounds.top;
+    const animationOriginNode = node.animationOriginNode; //delete node.animationOriginNode;
+    const originOriginalBounds = animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
+    const originInitialBounds = animationOriginNode.initialBounds; //delete animationOriginNode.initialBounds;
+    const originalBounds = node.originalBounds; //delete node.originalBounds;
+    const initialBounds = node.initialBounds; //delete node.initialBounds;
+    const deltaX = (initialBounds.left - originInitialBounds.left) - (originalBounds.left - originOriginalBounds.left);
+    const deltaY = (initialBounds.top - originInitialBounds.left) - (originalBounds.top - originOriginalBounds.left);
     node.style.transform = "scale(1) translate(" + -deltaX + "px, " + -deltaY + "px)";
   }
 
