@@ -111,14 +111,14 @@ export function clearNode(node) {
       } else {
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
-        if (flowChanges.globallyRemoved[existingPrimitive.id]) {
-          // Node will be removed, copy it back to leave it.
+        if (!newChildNodes.includes(existingChildNode) && flowChanges.globallyRemoved[existingPrimitive.id]) {
+          // Node will be removed locally, copy it back to leave it.
           if (animation) {
             newChildNodes.splice(index, 0, existingChildNode);
           } else {
             node.removeChild(existingChildNode);
           }
-        } else  if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
+        } else if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
           // Child will move out from this node
           if (animation) {
             // outgoing could already be gone at this stage!

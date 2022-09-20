@@ -39,6 +39,30 @@ let idPrimitiveMap = {};
 
 let nextOriginMark = 0;
 
+function findAndRecordOriginalBoundsOfOrigin(flow) {
+  const originMark = nextOriginMark++;
+      
+  // Scan and mark old dom structure
+  let scan = flow.domNode.parentNode; 
+  if (!scan) throw new Error("Did not expect an animated without a parent!")
+  while (scan) {
+    scan.originMark = originMark;
+    scan = scan.parentNode;
+  }
+  
+  // Scan new flow structure and find common ancestor for resident flow
+  scan = flow.parentPrimitive;
+  while (scan) {
+    if (scan.domNode.originMark === originMark) {
+      flow.domNode.animationOriginNode = scan.domNode;
+      break;
+    }
+    scan = scan.parentPrimitive;
+  }
+  
+  standardAnimation.recordOriginalBoundsAndStyle(flow.domNode.animationOriginNode);  
+}
+
 export function onFinishReBuildingFlow() {
   log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
 
@@ -73,7 +97,7 @@ export function onFinishReBuildingFlow() {
 
   for (let id in previousIdPrimitiveMap) {
     const inPreviousMap = previousIdPrimitiveMap[id];
-    if (typeof(idPrimitiveMap[id]) === "undefined") {
+    if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive.getChildNodes().includes(inPreviousMap.domNode)) {
       flowChanges.globallyRemoved[id] = inPreviousMap; 
     }
   }
@@ -99,6 +123,7 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.globallyResidentAnimated) {
     if (flow.domNode) {
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
+      findAndRecordOriginalBoundsOfOrigin(flow); 
     }
   }
   
@@ -106,39 +131,12 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.globallyRemovedAnimated) {
     if (flow.domNode) {
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
+      findAndRecordOriginalBoundsOfOrigin(flow); 
       let scan = flow; 
       while(scan) {
         scan.onWillUnmount();
         scan = scan.equivalentCreator;
       } 
-    }
-  }
-
-  // Do to all resident animated, find origin for recursive concurrent animation. 
-  for (let flow of flowChanges.globallyResidentAnimated) {
-    if (flow.domNode) {
-      const originMark = nextOriginMark++;
-
-      // Scan and mark old dom structure
-      let scan = flow.domNode.parentNode; 
-      if (!scan) throw new Error("Did not expect an animated without a parent!")
-      while (scan) {
-        scan.originMark = originMark;
-        scan = scan.parentNode;
-      }
-
-      // Scan new flow structure and find common ancestor for resident flow
-      scan = flow.parentPrimitive;
-      while (scan) {
-        if (scan.domNode.originMark === originMark) {
-          flow.domNode.animationOriginNode = scan.domNode;
-          break;
-        }
-        scan = scan.parentPrimitive;
-      }
-      
-      log(flow.domNode);
-      standardAnimation.recordOriginalBoundsAndStyle(flow.domNode.animationOriginNode);
     }
   }
 
@@ -180,6 +178,7 @@ export function onFinishReBuildingDOM() {
     // Record initial positions
     globallyRemovedAnimated.forEach(flow => {
       flow.animation.recordInitialBounds(flow.domNode)
+      standardAnimation.recordInitialBounds(flow.domNode.animationOriginNode);
     });
 
     globallyResidentAnimated.forEach(flow => {

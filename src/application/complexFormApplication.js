@@ -108,7 +108,7 @@ export class SimpleDrawer extends Flow {
   build() {
     return column(
       button(this.isOpen ? this.closeButtonLabel : this.openButtonLabel, {style: {margin: "5px"}, onClick: () => this.toggleOpen()}),
-      column({key: "luggage", children: [this.isOpen ? this.content : null], animateChildren: true })
+      column({key: "contents", children: [this.isOpen ? this.content : null], animateChildren: true })
     );
   }
 }

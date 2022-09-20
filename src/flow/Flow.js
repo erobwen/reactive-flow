@@ -36,6 +36,14 @@ export const configuration = {
 }
 
 export let trace = false;
+export let activeTrace = false; 
+export const activeTraceModel = model({
+  on: false 
+})
+window.activeTrace = activeTraceModel;
+repeat(() => {
+  activeTrace = activeTraceModel.on;
+})
 
 export function setFlowConfiguration(newConfiguration) {
   Object.assign(configuration, newConfiguration);

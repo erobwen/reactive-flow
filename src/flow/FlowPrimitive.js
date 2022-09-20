@@ -63,7 +63,7 @@ export class FlowPrimitive extends Flow {
     }
   }
   
-  * iterateChildren() {
+  *iterateChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {
         if (child instanceof Flow && child !== null) {
@@ -108,7 +108,7 @@ export class FlowPrimitive extends Flow {
     }
     if (result === true) result = standardAnimation;
     this.animation = result; // for quick access after call is made
-    log(result)
+    // log(result)
     return result;   
   }
 }
