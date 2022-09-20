@@ -1,6 +1,7 @@
 import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
-import { text, column, textInputField, row, numberInputField, button, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
+import { text, column, textInputField, row, numberInputField, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
+import { button } from "../flow.components/StyledFlowComponents";
 
 const log = console.log;
 
@@ -171,9 +172,10 @@ export class TravelerForm extends Flow {
           ),
       ),
       this.traveler.luggages.length &&
-        luggageDrawer,
+      luggageDrawer,
       (!this.traveler.luggages.length || this.showLuggage) &&
-        addLuggageButton
+        addLuggageButton,
+
     );
   }
 }

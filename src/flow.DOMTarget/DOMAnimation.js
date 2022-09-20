@@ -1,4 +1,4 @@
-import { repeat, Flow, trace, configuration, flow } from "../flow/Flow";
+import { repeat, Flow, trace, configuration, flow, activeTrace } from "../flow/Flow";
 import { DOMFlipAnimation, standardAnimation } from "./DOMFlipAnimation";
 
 const log = console.log;
@@ -116,6 +116,13 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyAddedAnimated = getAnimatedFromMap(flowChanges.globallyAdded);
   flowChanges.globallyRemovedAnimated = getAnimatedFromMap(flowChanges.globallyRemoved);
   flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
+ 
+  // Debug info
+  flowChanges.a_globallyRemoved = Object.values(flowChanges.globallyRemoved).map(flow => flow.domNode);
+  flowChanges.a_added = flowChanges.globallyAddedAnimated.map(flow => flow.domNode);
+  flowChanges.a_removed = flowChanges.globallyRemovedAnimated.map(flow => flow.domNode);
+  flowChanges.a_resident = flowChanges.globallyResidentAnimated.map(flow => flow.domNode);
+ 
   log("flowChanges");
   log(flowChanges);
 
@@ -212,7 +219,7 @@ export function onFinishReBuildingDOM() {
       for (let flow of globallyRemovedAnimated) {
         flow.animation.setupFinalStyleForRemoved(flow.domNode);
       } 
-
+      
       // Setup cleanup
       for (let flow of globallyAddedAnimated) {
         flow.animation.setupAddedAnimationCleanup(flow.domNode);

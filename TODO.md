@@ -5,10 +5,10 @@ CONSIDER use setState on primitive?
 
 # Ongoing
 TODO: onHide callback
-TODO: Animation stability
+TODO: Button breaks if children are not in list 
+TODO: Investigate button id-stability.
 
 # Next
-TODO: Investigate button id-stability.
 TODO: Move back some functionality from unobservable to state.  
 TODO: Additional work on modals and popovers 
 TODO: Support fragmented flows (flows corresponding to several divs).
