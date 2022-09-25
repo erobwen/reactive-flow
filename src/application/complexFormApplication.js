@@ -56,7 +56,7 @@ function calculateCost(data) {
  */
 
 const panel = flow("panel", ({ children }) =>
-  div({key: "panel", children, style: {marginBottom: "10px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
 );
 
 export class ComplexForm extends Flow {
@@ -156,7 +156,7 @@ export class TravelerForm extends Flow {
       traveler.isFellowTraveller &&
         row(
           filler(),
-          button("x", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
+          button(" x ", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
         ),
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
@@ -190,7 +190,7 @@ export class LuggageForm extends Flow {
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
-        button("x", {onClick: () => {this.creator.traveler.luggages.remove(this.luggage)}})
+        button(" x ", {onClick: () => {this.creator.traveler.luggages.remove(this.luggage)}})
       )
     );
   }

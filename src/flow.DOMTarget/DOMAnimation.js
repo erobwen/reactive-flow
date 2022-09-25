@@ -1,4 +1,4 @@
-import { repeat, Flow, trace, configuration, flow, activeTrace } from "../flow/Flow";
+import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from "../flow/Flow";
 import { DOMFlipAnimation, standardAnimation } from "./DOMFlipAnimation";
 
 const log = console.log;
@@ -66,7 +66,6 @@ function findAndRecordOriginalBoundsOfOrigin(flow) {
 export function onFinishReBuildingFlow() {
   log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
 
-  previousIdPrimitiveMap = idPrimitiveMap;
   previousIdPrimitiveMap = idPrimitiveMap;
   idPrimitiveMap = {};
   
@@ -139,12 +138,18 @@ export function onFinishReBuildingFlow() {
     if (flow.domNode) {
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
       findAndRecordOriginalBoundsOfOrigin(flow); 
-      let scan = flow; 
-      while(scan) {
-        scan.onWillUnmount();
-        scan = scan.equivalentCreator;
-      } 
     }
+  }
+  
+  // On will unmount
+  for (let flow of Object.values(flowChanges.globallyRemoved)) {
+    let scan = flow; 
+    while(scan) {
+      creators.push(scan);
+      scan.onWillUnmount();
+      creators.pop();
+      scan = scan.equivalentCreator;
+    } 
   }
 
   flowChanges.onFinishReBuildingFlowDone = true;
@@ -156,16 +161,22 @@ export function onFinishReBuildingDOM() {
   if (!flowChanges.onFinishReBuildingFlowDone) return;
   delete flowChanges.onFinishReBuildingFlowDone; 
 
-  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated} = flowChanges
+  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyAdded} = flowChanges
   log("flowChanges");
   log(flowChanges);
 
   // Setup initial style.
   for (let flow of globallyAddedAnimated) {
     flow.animation.measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+  }
+
+  // On did mount
+  for (let flow of Object.values(globallyAdded)) {
     let scan = flow; 
     while(scan) {
+      creators.push(scan);
       scan.onDidMount();
+      creators.pop();
       scan = scan.equivalentCreator;
     } 
   }

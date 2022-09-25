@@ -11,7 +11,7 @@ export class ModernButton extends Flow {
   build() {
     let children; 
     if (this.children) children = this.children; 
-    if (this.text) children = [text(this.text)];
+    if (this.text) children = [text(this.text)]; // TODO: Breaks if not in a list! 
     return div({
       key: "div",
       style: {

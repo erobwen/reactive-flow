@@ -223,13 +223,9 @@ export class Flow {
     }
   }
 
-  onWillUnmount() {
-    log("UM")
-  }
+  onWillUnmount() {}
   
-  onDidMount() {
-    log("M")
-  }
+  onDidMount() {}
 
   onDispose() {
     delete window.allFlows[this.causality.id];

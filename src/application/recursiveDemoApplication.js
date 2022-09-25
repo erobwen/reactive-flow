@@ -19,7 +19,7 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-export class RecursiveAndPortalExample extends Flow {
+export class RecursiveExample extends Flow {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
@@ -29,23 +29,7 @@ export class RecursiveAndPortalExample extends Flow {
     this.count = 1
     this.myModel = observable({
       value: 42 
-    })
-    console.log(this.leftColumnPortal);
-  }
-
-  disposeState() {
-    if (this.leftColumnPortal) this.leftColumnPortal.removeContent();
-      // Lifecycle function disposeState when parent no longer creates a child with the same key/class. Can be used to deallocate state-related resources.
-  }
-
-  onWillUnmount() {
-    log("UNMOUNT!!")
-    if (this.leftColumnPortal) this.leftColumnPortal.removeContent();
-  }
-  
-  onDidMount() {
-    log("MOUNT!!")
-    if (this.leftColumnPortal) this.leftColumnPortal.setContent(text("Text from the other side!", {key: "portal-text"}));
+    });
   }
 
   provide() {
@@ -127,23 +111,7 @@ export class Item extends Flow {
       text({ key: "item-text", text: me.text}),
       button({key: "toggle-button", onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
       text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      button({key: "modal-button", onClick: () => { loga("Show modal"); me.showModal = true; }, text: "modal"}),
-      text(" Answer: " + me.myModel.value),
-      !me.showModal ? null : modal("modal-node", 
-        {
-          close,
-          content: 
-            modalBackdrop(
-              button({
-                key: "close-button",
-                text: "close " + me.text + " modal",
-                style: {opacity: 1},
-                onClick: () => {loga("Close modal");close()},
-              }), 
-              {close}
-            )
-        }
-      ) // text( { key: "item-text", text: me.text})
+      text(" Answer: " + me.myModel.value)
     );
   }
 }
@@ -168,30 +136,13 @@ function shadePanel(close) {
   });
 }
 
-function modalBackdrop(...parameters) {
-  const properties = readFlowProperties(parameters);
-  const attributes = extractAttributes(properties); 
-  const target = getTarget();
-  // Inject style!
-  properties.children[0].style = {pointerEvents:"auto", ...properties.children[0].style}; 
-
-  const children = [
-    shadePanel(properties.close),
-    centerMiddle(
-      wrapper({style: {pointerEvents: "auto"}, children: properties.children}),
-      {style: {position: "absolute", width: "100%", height: "100%", top: 0, left: 0, pointerEvents: "none"}})
-  ]
-  attributes.style = {width: "100%", height: "100%", ...attributes.style}; // Inject column style (while making it possible to override)
-  return target.elementNode({key: properties.key, classNameOverride: "modalBackdrop", tagName: "div", attributes, children }); 
-} 
-
 
 /**
  * Start the demo
  */
   
-export function startRecursiveAndModalDemo() {
-  const root = new RecursiveAndPortalExample();
+export function startRecursiveDemo() {
+  const root = new RecursiveExample();
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(root);
 
   // Emulated user interaction.

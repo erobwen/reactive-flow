@@ -5,7 +5,7 @@ import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
 import { HelloWorld } from "./helloWorldApplication";
-import { RecursiveAndPortalExample } from "./recursiveAndModalDemoApplication";
+import { RecursiveExample } from "./recursiveDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
 
@@ -28,7 +28,7 @@ export class Demo extends Flow {
       "Animation Example": new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       "Complex Form Example": new ComplexForm({initialData}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      "Recursive and Modal Demo": new RecursiveAndPortalExample({leftColumnPortal: this.leftColumnPortal}),
+      "Recursive Demo": new RecursiveExample({leftColumnPortal: this.leftColumnPortal}),
       "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
       "Toggle": new ToggleView()
     }

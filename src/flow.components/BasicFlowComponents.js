@@ -342,9 +342,10 @@ export class Modal extends Flow {
     this.target.getModalTarget().removeContent();
   }
 
-  build() {
-    return null;
-  }
+  // build() {
+  //   this.target.getModalTarget().setContent(this.content);
+  //   return null;
+  // }
 }
 
 

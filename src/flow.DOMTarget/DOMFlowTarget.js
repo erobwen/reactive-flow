@@ -86,6 +86,7 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   removeContent() {
+    log("REMOVE CONTENT---------------------------------------------------------------====================================")
     this.children = null; 
     this.updateContentHolder();
   }

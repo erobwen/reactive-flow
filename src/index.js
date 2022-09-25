@@ -1,4 +1,4 @@
-import { startRecursiveAndModalDemo } from "./application/recursiveAndModalDemoApplication.js";
+import { startRecursiveDemo } from "./application/recursiveDemoApplication.js";
 import { startHelloWorld } from "./application/helloWorldApplication.js";
 import { startSuperSimple } from "./application/superSimple.js";
 import { setFlowConfiguration } from "./flow/Flow.js";
@@ -28,7 +28,7 @@ installDOMAnimation();
 
 // startSuperSimple();
 // startHelloWorld();
-// startRecursiveAndModalDemo();
+// startRecursiveDemo();
 // startProgrammaticReactiveLayout();
 // startAnimationExample();
 // startComplexFormApplication();
