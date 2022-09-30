@@ -417,6 +417,13 @@ export class Flow {
     return this.equivalentCreator.getEquivalentRoot();
   }
 
+  inherit(property) {
+    if (!this[property]) {
+      this[property] = this.creator.inherit(property);
+    }
+    return this[property];
+  }
+
   inheritPropertyFromEquivalent(property) {
     const propertyValue = this[property];
     if (typeof(propertyValue) !== "undefined") {

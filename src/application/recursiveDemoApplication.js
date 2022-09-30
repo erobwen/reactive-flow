@@ -111,7 +111,7 @@ export class Item extends Flow {
       text({ key: "item-text", text: me.text}),
       button({key: "toggle-button", onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
       text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      text(" Answer: " + me.myModel.value)
+      text(" Shared state: " + me.myModel.value)
     );
   }
 }
