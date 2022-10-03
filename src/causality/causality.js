@@ -99,7 +99,7 @@ function createWorld(configuration) {
     create: observable, // observable alias
     invalidateOnChange,
     repeat,
-    finalize: finishRebuildInAdvance,
+    finalize,
 
     // Modifiers
     withoutRecording,
@@ -1242,12 +1242,11 @@ function createWorld(configuration) {
     }
   }
 
-  function reBuildShapeAnalysis(repeater, shapeAnalysis) {    
-    console.group("reBuildShapeAnalysis");
-  
+  function reBuildShapeAnalysis(repeater) {
+    const shapeAnalysis = repeater.options.rebuildShapeAnalysis
+    
     function setAsMatch(establishedObject, newObject) {
-      console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
-      // console.log("----");
+      //console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
       establishedObject[objectMetaProperty].forwardTo = newObject;
       newObject[objectMetaProperty].copyTo = establishedObject;
       if (newObject[objectMetaProperty].pendingCreationEvent) {
@@ -1260,27 +1259,16 @@ function createWorld(configuration) {
     }
 
     function matchInEquivalentSlot(establishedObject, newObject) {      
-      // console.log("matchInEquivalentSlot");
-      // console.log(newObject ? newObject.toString() : "");
-      // console.log(establishedObject ? establishedObject.toString() : "");
-    
       if (establishedObject !== newObject) { // Could be the same if buildId was used
-        // console.log(" a");
         const newObjectObservable = isObservable(newObject);
         const establishedObjectObservable = isObservable(establishedObject); 
         if (newObjectObservable !== establishedObjectObservable) return;
         if (newObjectObservable && establishedObjectObservable) {
-          // console.log(" b");
           // Two observed objects
-          // console.log({...repeater.newIdObjectShapeMap});
-          // console.log(newObject[objectMetaProperty].id);
           if (!repeater.newIdObjectShapeMap[newObject[objectMetaProperty].id]) return; // Limit search! otherwise we could go off road!
-          // console.log(" b1");
           if (establishedObject[objectMetaProperty].forwardTo === newObject) return; // Already set as match during shape analysis! 
-          // console.log(" b2");
           
           if (shapeAnalysis.allowMatch(establishedObject, newObject)) {
-            // console.log(" d");
             setAsMatch(establishedObject, newObject);
             console.log({...establishedObject[objectMetaProperty].target});
             console.log({...newObject[objectMetaProperty].target});
@@ -1288,12 +1276,10 @@ function createWorld(configuration) {
             matchChildrenInEquivalentSlot(establishedObject[objectMetaProperty].target, newObject[objectMetaProperty].target);
           }
         } else {
-          // console.log(" c");
           // Two unobserved objects
           matchChildrenInEquivalentSlot(establishedObject, newObject)
         }
       }
-      // console.log("....");
     }
 
     function matchChildrenInEquivalentSlot(establishedObjectTarget, newObjectTarget) {
@@ -1301,17 +1287,7 @@ function createWorld(configuration) {
         matchInEquivalentSlot(establishedSlot, newSlot);
       }
     }
-
-    matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
-    for(let id in  repeater.newIdObjectShapeMap) {
-      const newObject = repeater.newIdObjectShapeMap[id];
-      const temporaryObject = newObject[objectMetaProperty].forwardTo;
-      if (temporaryObject) {
-        matchChildrenInEquivalentSlot(newObject[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
-      }
-    }
-
-    console.groupEnd();
+    return {setAsMatch, matchChildrenInEquivalentSlot, matchInEquivalentSlot};
   }
 
   function finishRebuilding(repeater) {
@@ -1331,7 +1307,20 @@ function createWorld(configuration) {
 
     // Do shape analysis to find additional matches. 
     if (repeater.options.rebuildShapeAnalysis) {
-      reBuildShapeAnalysis(repeater, repeater.options.rebuildShapeAnalysis);
+      const {matchChildrenInEquivalentSlot, matchInEquivalentSlot} = reBuildShapeAnalysis(repeater);
+      const shapeAnalysis = repeater.options.rebuildShapeAnalysis;
+      
+      console.group("reBuildShapeAnalysis");
+      matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
+      for(let id in  repeater.newIdObjectShapeMap) {
+        const newObject = repeater.newIdObjectShapeMap[id];
+        const temporaryObject = newObject[objectMetaProperty].forwardTo;
+        if (temporaryObject) {
+          matchChildrenInEquivalentSlot(newObject[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
+        }
+      }
+      console.groupEnd();
+
 
       // Debug printout
       console.log("Reference translatinos: ")
@@ -1456,16 +1445,28 @@ function createWorld(configuration) {
     } 
   }
 
-  function finishRebuildInAdvance(object) {
+  function finalize(object) {
     // Note: We cannot throw error if no build id, as this might be called externally with non-build id objects
     // Note: This might be inside the first run, so we cannot assume a temporary object. 
     // Note: We cannot make any sensible test if we are in a repeater, since we do not know the identity of the repeater anyway 
     const temporaryObject = object[objectMetaProperty].forwardTo;
     if (temporaryObject !== null) {
+      
+      if (state.inRepeater) {
+        const repeater = state.context;
+        const {matchChildrenInEquivalentSlot} = reBuildShapeAnalysis(repeater);
+        console.group("reBuildShapeAnalysis");
+        matchChildrenInEquivalentSlot(object[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
+        console.groupEnd();
+      }
+
       // A re-build, push changes to established object.
       object[objectMetaProperty].forwardTo = null;
       temporaryObject[objectMetaProperty].isBeingRebuilt = false; 
       mergeInto(object, temporaryObject[objectMetaProperty].target);
+
+      
+
     } else {
       // A new build, send create on establish message (if we were just created with key in a repeater)
       sendOnEstablishedEvent(object);

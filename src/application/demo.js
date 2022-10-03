@@ -78,7 +78,7 @@ export class Demo extends Flow {
        style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
     );
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
-    this.choosen.leftColumnPortal =  this.leftColumnPortal;  
+    // this.choosen.leftColumnPortal =  this.leftColumnPortal;  
 
     return row(
       leftColumn, 
