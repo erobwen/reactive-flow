@@ -92,7 +92,7 @@ function verifyData(editData) {
   transaction(() => {
     let anyError = false; 
     anyError = verifyTraveler(editData.traveler, false) || anyError;
-    anyError = editData.fellowTravellers.forEach(traveler => verifyTraveler(traveler), true) || anyError;
+    editData.fellowTravellers.forEach(traveler => {anyError = verifyTraveler(traveler, true) || anyError});
     editData.anyError = anyError;
   });
 }
@@ -143,7 +143,8 @@ export class ComplexForm extends Flow {
             onClick: () => {
               this.shouldVerifyData = true;
               if (!data.anyError) {
-                alert("sent form!");
+                this.shouldVerifyData = false; 
+                alert("Sent form!\n" + JSON.stringify(this.editData, null, 4));
               }
             }, 
             disabled: data.anyError}),

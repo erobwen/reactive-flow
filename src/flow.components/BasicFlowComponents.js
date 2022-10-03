@@ -246,7 +246,8 @@ export function inputField(type, label, getter, setter, ...parameters) {
     checked: getter(),
     type,
     style: {
-      borderColor: error ? "red" : "rgba(0,0,0,0)",
+      backgroundColor: error ? "rgba(255, 240, 240, 255)" : "white",
+      borderColor: "rgba(200, 200, 200, 20)", //error ? "red" : 
       borderStyle: "solid",
       borderWidth: "1px" 
     },
