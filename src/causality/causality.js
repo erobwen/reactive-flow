@@ -961,8 +961,12 @@ function createWorld(configuration) {
     if (state.postponeInvalidation == 0) {
       state.postponeRefreshRepeaters++;
       while (state.nextObserverToInvalidate !== null) {
-        let observer = state.nextObserverToInvalidate;
-        state.nextObserverToInvalidate = state.nextObserverToInvalidate.nextToNotify;
+        let observer = state.nextObserverToInvalidate; state.nextObserverToInvalidate = null; 
+        const nextToNotify = observer.nextToNotify; 
+        if (nextToNotify) {
+          observer.nextToNotify = null;
+          state.nextObserverToInvalidate = nextToNotify;
+        }
         // blockSideEffects(function() {
         observer.invalidateAction();
         // });
@@ -1270,9 +1274,9 @@ function createWorld(configuration) {
           
           if (shapeAnalysis.allowMatch(establishedObject, newObject)) {
             setAsMatch(establishedObject, newObject);
-            console.log({...establishedObject[objectMetaProperty].target});
-            console.log({...newObject[objectMetaProperty].target});
-            console.log(establishedObject[objectMetaProperty].target === newObject[objectMetaProperty].target);
+            // console.log({...establishedObject[objectMetaProperty].target});
+            // console.log({...newObject[objectMetaProperty].target});
+            // console.log(establishedObject[objectMetaProperty].target === newObject[objectMetaProperty].target);
             matchChildrenInEquivalentSlot(establishedObject[objectMetaProperty].target, newObject[objectMetaProperty].target);
           }
         } else {
@@ -1310,7 +1314,7 @@ function createWorld(configuration) {
       const {matchChildrenInEquivalentSlot, matchInEquivalentSlot} = reBuildShapeAnalysis(repeater);
       const shapeAnalysis = repeater.options.rebuildShapeAnalysis;
       
-      console.group("reBuildShapeAnalysis");
+      // console.group("reBuildShapeAnalysis");
       matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
       for(let id in  repeater.newIdObjectShapeMap) {
         const newObject = repeater.newIdObjectShapeMap[id];
@@ -1319,15 +1323,15 @@ function createWorld(configuration) {
           matchChildrenInEquivalentSlot(newObject[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
         }
       }
-      console.groupEnd();
+      // console.groupEnd();
 
 
       // Debug printout
-      console.log("Reference translatinos: ")
+      // console.log("Reference translatinos: ")
       for(let id in  repeater.newIdObjectShapeMap) {
         const newObject = repeater.newIdObjectShapeMap[id];
         if (newObject[objectMetaProperty].forwardTo){
-          console.log(newObject[objectMetaProperty].forwardTo.toString() + "==>" + newObject.toString());
+          // console.log(newObject[objectMetaProperty].forwardTo.toString() + "==>" + newObject.toString());
         }
       }
 
@@ -1453,11 +1457,11 @@ function createWorld(configuration) {
     if (temporaryObject !== null) {
       
       if (state.inRepeater) {
+        // console.group("reBuildShapeAnalysis");
         const repeater = state.context;
         const {matchChildrenInEquivalentSlot} = reBuildShapeAnalysis(repeater);
-        console.group("reBuildShapeAnalysis");
         matchChildrenInEquivalentSlot(object[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
-        console.groupEnd();
+        // console.groupEnd();
       }
 
       // A re-build, push changes to established object.

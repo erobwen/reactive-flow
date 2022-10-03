@@ -34,6 +34,11 @@ function createTraveler(isFellowTraveller) {
   return result; 
 }
 
+/**
+ * Cost calculator
+ */
+
+
 function calculateCost(data) {
   let cost = 0;
   function addLuggageCost(luggage) {
@@ -52,6 +57,48 @@ function calculateCost(data) {
 
 
 /**
+ * Travlers verifier
+ */
+
+function verifyFieldNotEmpty(object, property, requestedDataMessage) {
+  if (object[property] === "") {
+    object[property + "Error"] = "Please enter " + requestedDataMessage + ".";
+    return true;
+  } else {
+    delete object[property + "Error"];
+    return false;
+  }
+}
+
+function verifyAdress(adress) {
+  let anyError = false; 
+  anyError = verifyFieldNotEmpty(adress, "adress", "adress") || anyError;
+  anyError = verifyFieldNotEmpty(adress, "zipCode", "zip code") || anyError;
+  anyError = verifyFieldNotEmpty(adress, "city", "city") || anyError;
+  return anyError; 
+}
+
+function verifyTraveler(traveler, fellowTraveler) {
+  let anyError = false; 
+  if (!fellowTraveler) {
+    anyError = verifyAdress(traveler.adress) || anyError;
+  }
+  anyError = verifyFieldNotEmpty(traveler, "name", "name") || anyError;
+  anyError = verifyFieldNotEmpty(traveler, "passportNumber", "passport number") || anyError;
+  return anyError; 
+}
+
+function verifyData(editData) {
+  transaction(() => {
+    let anyError = false; 
+    anyError = verifyTraveler(editData.traveler, false) || anyError;
+    anyError = editData.fellowTravellers.forEach(traveler => verifyTraveler(traveler), true) || anyError;
+    editData.anyError = anyError;
+  });
+}
+
+
+/**
  * Components
  */
 
@@ -63,6 +110,15 @@ export class ComplexForm extends Flow {
 
   setProperties({initialData}) {
     this.editData = model(initialData, true);
+  }
+  
+  setState() {
+    this.shouldVerifyData = false;
+    this.derrive(() => {
+      if (this.shouldVerifyData) {
+        verifyData(this.editData);
+      }
+    });
   }
 
   build() {
@@ -83,6 +139,14 @@ export class ComplexForm extends Flow {
             button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}}),
             {style: {marginTop: "30px"}}
           ),
+          button("Submit", {
+            onClick: () => {
+              this.shouldVerifyData = true;
+              if (!data.anyError) {
+                alert("sent form!");
+              }
+            }, 
+            disabled: data.anyError}),
           filler(),
           { style: {padding: "30px"}}
         ),

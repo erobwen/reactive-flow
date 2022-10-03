@@ -224,11 +224,13 @@ export function textInputField(label, getter, setter, ...parameters) {
 }
 
 export function inputField(type, label, getter, setter, ...parameters) {
+  let error;
   if (typeof(getter) === "object" && typeof(setter) === "string") {
     const targetObject = getter;
     const targetProperty = setter; 
     getter = () => targetObject[targetProperty]
     setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}
+    error = targetObject[targetProperty + "Error"];
   }
   const properties = readFlowProperties(parameters);
 
@@ -243,6 +245,11 @@ export function inputField(type, label, getter, setter, ...parameters) {
     value: getter(),
     checked: getter(),
     type,
+    style: {
+      borderColor: error ? "red" : "rgba(0,0,0,0)",
+      borderStyle: "solid",
+      borderWidth: "1px" 
+    },
     ...inputAttributes
   };
   
