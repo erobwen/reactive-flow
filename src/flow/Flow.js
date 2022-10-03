@@ -353,35 +353,48 @@ export class Flow {
         {
           priority: 1, 
           rebuildShapeAnalysis: {
-            canMatch: (newFlow, establishedFlow) => (newFlow.className() === establishedFlow.className()) && (newFlow.classNameOverride === establishedFlow.classNameOverride),
+            allowMatch: (establishedFlow, newFlow) => {
+              // log(establishedFlow instanceof Flow);
+              // log(newFlow instanceof Flow);
+              // log(newFlow.className() === establishedFlow.className());
+              // log(newFlow.classNameOverride === establishedFlow.classNameOverride);
+              return (establishedFlow instanceof Flow && newFlow instanceof Flow  
+                && (newFlow.className() === establishedFlow.className()) 
+                && (newFlow.classNameOverride === establishedFlow.classNameOverride));
+            },
             shapeRoot: () => me.newBuild,
-            slotsIterator: function*(newFlow, optionalEstablishedFlow, canMatchAny) {
-              for (let property in newFlow) {
-                if (property !== "children") {
-                  yield {
-                    newSlot: newFlow[property],
-                    establishedSlot: optionalEstablishedFlow ? optionalEstablishedFlow[property] : null
+            slotsIterator: function*(establishedObject, newObject, hasKey) {
+              if (establishedObject instanceof Array && newObject instanceof Array) {
+                let newIndex = 0;
+                let establishedIndex = 0;
+                while(newIndex < newObject.length) {
+                  while(hasKey(newObject[newIndex]) && newIndex < newObject.length) newIndex++;
+                  while(hasKey(establishedObject[establishedIndex]) && establishedIndex < establishedObject.length) establishedIndex++;
+                  const establishedChild = establishedObject[establishedIndex];
+                  const newChild = newObject[newIndex]
+
+                  if (isObservable(newChild) && isObservable(establishedChild)) {
+                    yield [establishedChild, newChild];
                   }
-                } else {
-                  let newIndex = 0;
-                  let establishedIndex = 0;
-                  if (newFlow.children instanceof Array) {
-                    while(newIndex < newFlow.children.length) {
-                      while(!canMatchAny(newFlow.children[newIndex]) && newIndex < newFlow.children.length) newIndex++;
-                      if (optionalEstablishedFlow && optionalEstablishedFlow.children instanceof Array) {
-                        while(!canMatchAny(optionalEstablishedFlow.children[establishedIndex]) && establishedIndex < optionalEstablishedFlow.children.length) establishedIndex++;
-                      }
+
+                  newIndex++;
+                  establishedIndex++;
+                }  
+              } else if (establishedObject instanceof Flow && newObject instanceof Flow) {
+                for (let property in newObject) {
+                  if (property === "children") {
+                    yield * this.slotsIterator(
+                      establishedObject[property], 
+                      newObject[property],
+                      hasKey
+                    )
+                  } else {
+                    const establishedChild = establishedObject[property];
+                    const newChild = newObject[property]
   
-                      if (newIndex < newFlow.children.length) {
-                        yield {
-                          newSlot: newFlow.children[newIndex],
-                          establishedSlot: (optionalEstablishedFlow && optionalEstablishedFlow.children instanceof Array) ? optionalEstablishedFlow.children[establishedIndex] : null
-                        }
-                      }
-  
-                      newIndex++;
-                      establishedIndex++;
-                    };  
+                    if (isObservable(newChild) && isObservable(establishedChild)) {
+                      yield [establishedChild, newChild];
+                    }
                   }
                 }
               }

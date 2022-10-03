@@ -1242,13 +1242,11 @@ function createWorld(configuration) {
     }
   }
 
-  function reBuildShapeAnalysis(repeater, shapeAnalysis) {
-    let visited = {};
-    
-    // console.log("reBuildShapeAnalysis");
-
-    function setAsMatch(newObject, establishedObject) {
-      // console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
+  function reBuildShapeAnalysis(repeater, shapeAnalysis) {    
+    console.group("reBuildShapeAnalysis");
+  
+    function setAsMatch(establishedObject, newObject) {
+      console.log("setAsMatch: " + establishedObject.toString() + " <---- " + newObject.toString());
       // console.log("----");
       establishedObject[objectMetaProperty].forwardTo = newObject;
       newObject[objectMetaProperty].copyTo = establishedObject;
@@ -1261,62 +1259,59 @@ function createWorld(configuration) {
       repeater.newIdObjectShapeMap[establishedObject[objectMetaProperty].id] = establishedObject;
     }
 
-    function canMatchAny(entity) {
-      return isObservable(entity) && !entity[objectMetaProperty].buildId;
-    }
-
-    function matchInEquivalentSlot(newObject, establishedObject) {
-      if (!isObservable(newObject)) return; 
-      // if (newObject.buildId)
-      const newObjectId = newObject[objectMetaProperty].id;
-      
-      if (!repeater.newIdObjectShapeMap[newObjectId]) return; // Limit search! otherwise we could go off road!
-      if (visited[newObjectId]) return; // Already done!
-      visited[newObjectId] = 1; // Visited, but no recursive analysis
-      
+    function matchInEquivalentSlot(establishedObject, newObject) {      
       // console.log("matchInEquivalentSlot");
-      // console.log(newObject.toString());
-      // console.log(establishedObject ? establishedObject.toString() : null);
-
-      if (!establishedObject) {
-        // Continue to search new data for a non finalized buildId matched object where we can once again find an established data structure.
-        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null, canMatchAny)) {
-          matchInEquivalentSlot(slots.newSlot, null);
-        }
-      } else if (newObject !== establishedObject) {
-        // Different in same slot
-        if (!isObservable(newObject)
-          || newObject[objectMetaProperty].buildId
-          || !isObservable(establishedObject)
-          || establishedObject[objectMetaProperty].buildId) {
-          return; 
-        }
-        
-        if (!shapeAnalysis.canMatch(newObject, establishedObject)) return;
-        setAsMatch(newObject, establishedObject);
-
-        for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, establishedObject[objectMetaProperty].target, canMatchAny)) {
-          matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
-        }
-      } else {
-        // Same in same slot, or no established, a buildId must have been used.
-        const temporaryObject = newObject[objectMetaProperty].forwardTo; 
-        if (temporaryObject) {
-          // Not finalized, there is still an established state to compare to
-          for (let slots of shapeAnalysis.slotsIterator(temporaryObject[objectMetaProperty].target, newObject[objectMetaProperty].target, canMatchAny)) {
-            matchInEquivalentSlot(slots.newSlot, slots.establishedSlot);
+      // console.log(newObject ? newObject.toString() : "");
+      // console.log(establishedObject ? establishedObject.toString() : "");
+    
+      if (establishedObject !== newObject) { // Could be the same if buildId was used
+        // console.log(" a");
+        const newObjectObservable = isObservable(newObject);
+        const establishedObjectObservable = isObservable(establishedObject); 
+        if (newObjectObservable !== establishedObjectObservable) return;
+        if (newObjectObservable && establishedObjectObservable) {
+          // console.log(" b");
+          // Two observed objects
+          // console.log({...repeater.newIdObjectShapeMap});
+          // console.log(newObject[objectMetaProperty].id);
+          if (!repeater.newIdObjectShapeMap[newObject[objectMetaProperty].id]) return; // Limit search! otherwise we could go off road!
+          // console.log(" b1");
+          if (establishedObject[objectMetaProperty].forwardTo === newObject) return; // Already set as match during shape analysis! 
+          // console.log(" b2");
+          
+          if (shapeAnalysis.allowMatch(establishedObject, newObject)) {
+            // console.log(" d");
+            setAsMatch(establishedObject, newObject);
+            console.log({...establishedObject[objectMetaProperty].target});
+            console.log({...newObject[objectMetaProperty].target});
+            console.log(establishedObject[objectMetaProperty].target === newObject[objectMetaProperty].target);
+            matchChildrenInEquivalentSlot(establishedObject[objectMetaProperty].target, newObject[objectMetaProperty].target);
           }
         } else {
-          // Is finalized already, no established state available.
-          for (let slots of shapeAnalysis.slotsIterator(newObject[objectMetaProperty].target, null, canMatchAny)) {
-            matchInEquivalentSlot(slots.newSlot, null);
-          }
+          // console.log(" c");
+          // Two unobserved objects
+          matchChildrenInEquivalentSlot(establishedObject, newObject)
         }
       }
+      // console.log("....");
     }
-    
-    const shapeRoot = shapeAnalysis.shapeRoot();
-    matchInEquivalentSlot(shapeRoot, repeater.establishedShapeRoot);
+
+    function matchChildrenInEquivalentSlot(establishedObjectTarget, newObjectTarget) {
+      for (let [establishedSlot, newSlot] of shapeAnalysis.slotsIterator(establishedObjectTarget, newObjectTarget, object => (isObservable(object) && object[objectMetaProperty].buildId))) {
+        matchInEquivalentSlot(establishedSlot, newSlot);
+      }
+    }
+
+    matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
+    for(let id in  repeater.newIdObjectShapeMap) {
+      const newObject = repeater.newIdObjectShapeMap[id];
+      const temporaryObject = newObject[objectMetaProperty].forwardTo;
+      if (temporaryObject) {
+        matchChildrenInEquivalentSlot(newObject[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
+      }
+    }
+
+    console.groupEnd();
   }
 
   function finishRebuilding(repeater) {
@@ -1324,11 +1319,11 @@ function createWorld(configuration) {
     
     const options = repeater.options;
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
-    
+
     function translateReference(reference) {
       if (isObservable(reference)) {
-        if (reference.causality.copyTo) {
-          return reference.causality.copyTo;
+        if (reference[objectMetaProperty].copyTo) {
+          return reference[objectMetaProperty].copyTo;
         }
       }
       return reference;
@@ -1337,6 +1332,15 @@ function createWorld(configuration) {
     // Do shape analysis to find additional matches. 
     if (repeater.options.rebuildShapeAnalysis) {
       reBuildShapeAnalysis(repeater, repeater.options.rebuildShapeAnalysis);
+
+      // Debug printout
+      console.log("Reference translatinos: ")
+      for(let id in  repeater.newIdObjectShapeMap) {
+        const newObject = repeater.newIdObjectShapeMap[id];
+        if (newObject[objectMetaProperty].forwardTo){
+          console.log(newObject[objectMetaProperty].forwardTo.toString() + "==>" + newObject.toString());
+        }
+      }
 
       // Translate references
       for(let id in repeater.newIdObjectShapeMap) {

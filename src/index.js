@@ -7,6 +7,7 @@ import { startComplexFormApplication } from "./application/complexFormApplicatio
 import { startAnimationExample } from "./application/animationExample.js";
 import { startDemo } from "./application/demo.js";
 import { installDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
+import { startPatternMatching } from "./application/patternMatching.js";
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -33,4 +34,5 @@ installDOMAnimation();
 // startAnimationExample();
 // startComplexFormApplication();
 startDemo();
+// startPatternMatching();
 
