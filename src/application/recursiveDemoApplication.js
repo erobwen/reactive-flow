@@ -1,6 +1,6 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal, numberInputField } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
@@ -66,6 +66,7 @@ export class ControlRow extends Flow {
       rootText,
       button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
       moreButton,
+      numberInputField("Shared state", this.myModel, "value"),
       {style: {padding: "10px"}} // Reactive programmatic styling! 
     )
   }

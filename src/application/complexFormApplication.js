@@ -117,6 +117,9 @@ export class ComplexForm extends Flow {
     this.derrive(() => {
       if (this.shouldVerifyData) {
         verifyData(this.editData);
+        if (!this.editData.anyError) {
+          this.shouldVerifyData = false;
+        }
       }
     });
   }
