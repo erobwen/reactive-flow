@@ -127,11 +127,17 @@ export class ComplexForm extends Flow {
   build() {
     const data = this.editData;
     const traveler = data.traveler;
+
+    function travelerString() {
+      const count = data.fellowTravellers.length + 1;
+      return (count === 1) ? "" : ("(" + count + " people)");
+    }
+
     return row(
       div(
         column(
           text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
-          text("Traveler Information", {style: {fontSize: "20px", paddingBottom: "10px"}}),
+          text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
           new TravelerForm({traveler, isFellowTraveller: false}),
           column({
             children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: "id-" + traveler.causality.id, traveler, isFellowTraveller: true})),
@@ -139,8 +145,7 @@ export class ComplexForm extends Flow {
           }),
           row(
             filler(),
-            button({text: "Add fellow traveller", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}}),
-            {style: {marginTop: "30px"}}
+            button({text: "+ Traveler", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}})
           ),
           button("Submit", {
             onClick: () => {
@@ -150,6 +155,7 @@ export class ComplexForm extends Flow {
                 alert("Sent form!\n" + JSON.stringify(this.editData, null, 4));
               }
             }, 
+            style: {marginTop: "30px"},
             disabled: data.anyError}),
           filler(),
           { style: {padding: "30px"}}
@@ -193,21 +199,26 @@ export class TravelerForm extends Flow {
   }
   
   build() {
-    const addLuggageButton = button("Add luggage", {
-      animate: true, 
-      key: "add-luggage", 
-      onClick: () => {
-        transaction(() => {
-          this.traveler.luggages.push(model({weight: 1, type: "bag"}));
-          this.showLuggage = true;
-        });
-      }}) 
+    const addLuggageButton = row(
+      filler(),
+      button(" + Luggage ", {
+        onClick: () => {
+          transaction(() => {
+            this.traveler.luggages.push(model({weight: 1, type: "bag"}));
+            this.showLuggage = true;
+          });
+        }}),
+        {
+          animate: true, 
+          key: "add-luggage"
+        }
+    ); 
 
     const luggageDrawer = new SimpleDrawer({
         animate: true,
         key: "luggages-drawer",
         closeButtonLabel: "Hide luggage",
-        openButtonLabel: "Show luggage",
+        openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
         toggleOpen: () => { this.showLuggage = !this.showLuggage },
         isOpen: this.showLuggage,
         content: column({key: "luggage-panel"},
@@ -228,16 +239,18 @@ export class TravelerForm extends Flow {
         ),
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
+      div({style: {height: "10px"}}),
       this.isFellowTraveller && checkboxInputField("Is Child", traveler, "isChild"),
       traveler.isChild && 
-        numberInputField("Age", traveler, "age", {unit: "years", animate: true}),
+      numberInputField("Age", traveler, "age", {unit: "years", animate: true}),
       column(
         !traveler.isFellowTraveller &&
-          column(
-            textInputField("Adress", traveler.adress, "adress"),
-            textInputField("Zip code", traveler.adress, "zipCode"),
-            textInputField("City", traveler.adress, "city"), 
-          ),
+        column(
+          textInputField("Adress", traveler.adress, "adress"),
+          textInputField("Zip code", traveler.adress, "zipCode"),
+          textInputField("City", traveler.adress, "city"), 
+          div({style: {height: "10px"}}),
+        ),
       ),
       this.traveler.luggages.length &&
       luggageDrawer,

@@ -1328,12 +1328,12 @@ function createWorld(configuration) {
 
       // Debug printout
       // console.log("Reference translatinos: ")
-      for(let id in  repeater.newIdObjectShapeMap) {
-        const newObject = repeater.newIdObjectShapeMap[id];
-        if (newObject[objectMetaProperty].forwardTo){
-          // console.log(newObject[objectMetaProperty].forwardTo.toString() + "==>" + newObject.toString());
-        }
-      }
+      // for(let id in  repeater.newIdObjectShapeMap) {
+      //   const newObject = repeater.newIdObjectShapeMap[id];
+      //   if (newObject[objectMetaProperty].forwardTo){
+      //     // console.log(newObject[objectMetaProperty].forwardTo.toString() + "==>" + newObject.toString());
+      //   }
+      // }
 
       // Translate references
       for(let id in repeater.newIdObjectShapeMap) {

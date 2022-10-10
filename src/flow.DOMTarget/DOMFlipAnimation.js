@@ -1,4 +1,6 @@
 
+// cubic-bezier(0.42,0,1,1)
+
 const log = console.log;
 
 export class DOMFlipAnimation {
@@ -6,7 +8,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all .5s ease-in-out"
+    return "all .5s ease-in-out, opacity 1s ease-in"
+  }
+
+  removeTransition() {
+    return "all .5s ease-in-out, opacity 0.5s ease-out"
   }
 
   /**
@@ -74,11 +80,11 @@ export class DOMFlipAnimation {
 
   measureInitialStyleForAdded(contextNode, node) {
     node.rememberedStyle = {...node.style}; // Remember so we can reset it later
-    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. 
+    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
   }
 
   setupInitialStyleForAdded(node) {
-    Object.assign(node.style, this.addedInitialStyle());
+    Object.assign(node.style, this.addedInitialStyle(node));
   }
 
   setupInitialStyleForResident(node) {
@@ -90,9 +96,11 @@ export class DOMFlipAnimation {
     Object.assign(node.style, this.removedInitialStyle(node));
   }
 
-  addedInitialStyle() {
+  addedInitialStyle(node) {
+    const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
+    const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
-      transform: "scale(0)",
+      transform: transform,
       maxHeight: "0px",
       maxWidth: "0px",
       margin: "0px",
@@ -190,7 +198,7 @@ export class DOMFlipAnimation {
   }
   
   setupFinalStyleForRemoved(node) {
-    Object.assign(node.style, this.removedFinalStyle());
+    Object.assign(node.style, this.removedFinalStyle(node));
     Object.assign(node.style, this.removedTransitionStyle(node));
   }
   
@@ -236,17 +244,19 @@ export class DOMFlipAnimation {
   
   removedTransitionStyle() {
     return {
-      transition: this.defaultTransition()
+      transition: this.removeTransition()
     }
   }
 
   removedFinalStyle(node) {
+    const position = [Math.round(node.offsetWidth / 2), Math.round(node.offsetHeight / 2)];
+    const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
     return {
       transition: this.defaultTransition(),
       maxHeight: "0px",
       maxWidth: "0px",
-      transform: "scale(0) translate(0, 0)",
-      opacity: "0",
+      transform: transform,
+      opacity: "0.001",
       margin: "0px",
       marginTop: "0px",
       marginBottom: "0px",

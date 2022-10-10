@@ -23,7 +23,8 @@ export class ModernButton extends Flow {
         backgroundColor: "rgb(250, 250, 250)", 
         padding: "4px",
         margin: "4px",
-        opacity:  this.disabled ? 0.5 : 1
+        opacity:  this.disabled ? 0.5 : 1,
+        ...this.style
       }, 
       children, 
       onClick: this.onClick
