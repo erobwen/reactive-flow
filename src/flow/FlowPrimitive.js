@@ -23,8 +23,10 @@ export class FlowPrimitive extends Flow {
     return null;
   }
 
-  getPrimitive() {
-    
+  getPrimitive(parentPrimitive) {
+    if (parentPrimitive) {
+      this.parentPrimitive = parentPrimitive;
+    }
     return this;
   }
 
@@ -35,12 +37,20 @@ export class FlowPrimitive extends Flow {
       this.expandRepeater = repeat(this.toString() + ".expandRepeater", repeater => {
         if (trace) console.group(repeater.causalityString());
 
-        this.childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
+        // Check visibility
+        if (this.parentPrimitive) {
+          if (this.parentPrimitive.childPrimitives && this.parentPrimitive.childPrimitives.includes(this)) {
+            this.visibleOnTarget = this.parentPrimitive.visibleOnTarget;
+          } else {
+            this.visibleOnTarget = null;
+          }
+        }
+
+        this.childPrimitives = this.getPrimitiveChildren();
 
         // Expand known children (do as much as possible before integration)
         for (let childPrimitive of this.childPrimitives) { 
           childPrimitive.ensureBuiltRecursive();
-          childPrimitive.parentPrimitive = this; 
         }
       
         if (trace) console.groupEnd();
@@ -62,7 +72,7 @@ export class FlowPrimitive extends Flow {
 
   *iteratePrimitiveChildren() {
     for(let child of this.iterateChildren()) {
-      let primitive = child.getPrimitive();
+      let primitive = child.getPrimitive(this);
       if (primitive) yield primitive;
     }
   }

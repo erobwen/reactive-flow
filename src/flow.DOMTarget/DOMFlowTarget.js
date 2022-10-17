@@ -15,7 +15,8 @@ export class DOMFlowTarget extends FlowTarget {
     if (!this.key) this.key = configuration.key ? configuration.key : null;
     this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
     if (this.animate) addDOMFlowTarget(this);
-    this.contentHolder = new DOMElementNode({targetDomNode: rootElement, tagName: rootElement.tagName})
+    this.contentHolder = new DOMElementNode({targetDomNode: rootElement, tagName: rootElement.tagName});
+    this.contentHolder.visibleOnTarget = this; 
     this.creator = creator;
     this.rootElement = rootElement;
     if (fullWindow) {
