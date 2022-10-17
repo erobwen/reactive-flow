@@ -24,7 +24,7 @@ export class FlowPrimitive extends Flow {
   }
 
   getPrimitive() {
-    this.ensureBuiltRecursive();
+    
     return this;
   }
 
@@ -35,26 +35,11 @@ export class FlowPrimitive extends Flow {
       this.expandRepeater = repeat(this.toString() + ".expandRepeater", repeater => {
         if (trace) console.group(repeater.causalityString());
 
-        // Initialize state if needed
-        if (!this.unobservable.childPrimitives) {
-          this.unobservable.childPrimitives = [];
-          this.unobservable.flowBuildNumber = null;
-        } 
-        
-        // Accumulate diffs from previous update
-        if (this.unobservable.flowBuildNumber !== configuration.flowBuildNumber) {
-          this.unobservable.flowBuildNumber = configuration.flowBuildNumber;
-          this.unobservable.previousChildPrimitives = this.unobservable.childPrimitives;
-        } else {
-          console.warn("Multiple updates of same primitive!");
-        }
-        const childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
-        this.unobservable.childPrimitives = childPrimitives;
-        Object.assign(this.unobservable, analyzeAddedRemovedResident(this.unobservable.previousChildPrimitives, childPrimitives));
-        log(this.unobservable);
+        this.childPrimitives = this.getPrimitiveChildren(); // Will trigger recursive call once it reaches primitive
 
         // Expand known children (do as much as possible before integration)
-        for (let childPrimitive of childPrimitives) { 
+        for (let childPrimitive of this.childPrimitives) { 
+          childPrimitive.ensureBuiltRecursive();
           childPrimitive.parentPrimitive = this; 
         }
       
@@ -113,28 +98,3 @@ export class FlowPrimitive extends Flow {
   }
 }
   
-
-
-export function analyzeAddedRemovedResident(oldList, newList) {
-  const removed = {};
-  const added = {};
-  const resident = {};
-  const incoming = {};
-  const outgoing = {};
-  let index = 0;
-  while(index < oldList.length) {
-    const existingChild = oldList[index];
-    if (!newList.includes(existingChild)) {
-      removed[existingChild.id] = existingChild;
-    }
-    index++;
-  }
-  for(let newChild of newList) {
-    if (!oldList.includes(newChild)) {
-      added[newChild.id] = newChild;
-    } else if(!removed[newChild.id]) {
-      resident[newChild.id] = newChild;
-    }
-  }
-  return {removed, added, resident, incoming, outgoing};
-}

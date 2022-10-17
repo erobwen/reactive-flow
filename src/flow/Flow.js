@@ -316,10 +316,15 @@ export class Flow {
     }
   }
 
-  getPrimitive() {
+  ensureBuiltRecursive() {
+    this.getPrimitive(null).ensureBuiltRecursive();
+  }
+
+  getPrimitive(parentPrimitive) {
     // log("getPrimitive")
     const me = this;
     const name = this.toString(); // For chrome debugger.
+    this.parentPrimitive = parentPrimitive;
 
     finalize(me);
     if (!me.buildRepeater) {
@@ -346,7 +351,7 @@ export class Flow {
           creators.pop();
          
           // Recursive call
-          me.primitive = me.newBuild !== null ? me.newBuild.getPrimitive() : null;
+          me.primitive = me.newBuild !== null ? me.newBuild.getPrimitive(parentPrimitive) : null;
 
           if (trace) console.groupEnd();
         }, 
@@ -415,6 +420,9 @@ export class Flow {
           }
         }
       );
+    } else {
+      // If parent primitive was null on first call.
+      me.newBuild.getPrimitive(parentPrimitive);
     }
     return me.primitive;
   }
