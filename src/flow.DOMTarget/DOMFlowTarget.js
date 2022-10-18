@@ -80,10 +80,10 @@ export class DOMFlowTarget extends FlowTarget {
     )    
     this.contentHolder.children = children;
     this.contentHolder.ensureBuiltRecursive();
-    onFinishReBuildingFlow();
+    // onFinishReBuildingFlow();
     configuration.flowBuildNumber++;
     this.contentHolder.ensureDomNodeBuilt();
-    onFinishReBuildingDOM();
+    // onFinishReBuildingDOM();
   }
 
   removeContent() {

@@ -232,6 +232,14 @@ function createWorld(configuration) {
   function updateContextState() {
     state.inActiveRecording = state.context !== null && state.context.isRecording && state.recordingPaused === 0;
     state.inRepeater = (state.context && state.context.type === "repeater") ? state.context: null;
+    if (configuration.priorityLevels > 1) {
+      let scan = state.context;
+      state.activePriorityLevels = {};
+      while(scan) {
+        if (typeof(scan.priority) === "function") state.activePriorityLevels[scan.priority()] = true;
+        scan = scan.parent;
+      }
+    }
   }
 
   // function stackDescription() {
@@ -260,6 +268,10 @@ function createWorld(configuration) {
       throw new Error("Context missmatch");
     }
     updateContextState();
+    const priority = activeContext.priority();
+    if (!anyActiveRepeaterOfPriority(priority) && !anyDirtyRepeaterOfPriority(priority)) {
+      configuration.onFinishedPriorityLevel(priority, !anyDirtyRepeater());
+    }
   }
 
 
@@ -1570,6 +1582,15 @@ function createWorld(configuration) {
     state.dirtyRepeaters.map(list => {list.first = null; list.last = null;});
   }
 
+  function anyActiveRepeaterOfPriority(priority) {
+    return state.activePriorityLevels[priority];
+  }
+
+  function anyDirtyRepeaterOfPriority(priority) {
+    const list = state.dirtyRepeaters[priority];
+    return !!list.first;
+  }
+
   function detatchRepeater(repeater) {
     const priority = repeater.priority(); // repeater
     const list = state.dirtyRepeaters[priority];
@@ -1625,7 +1646,7 @@ function createWorld(configuration) {
             let repeater = firstDirtyRepeater();
             repeater.refresh();
             detatchRepeater(repeater);
-            if (typeof(state.justLeftPriorityLevel) !== "undefined" && configuration.onFinishedPriorityLevel) {
+            if (typeof(state.justLeftPriorityLevel) !== "undefined" && configuration.onFinishedPriorityLevel && !anyActiveRepeaterOfPriority(state.justLeftPriorityLevel)) {
               configuration.onFinishedPriorityLevel(state.justLeftPriorityLevel, !anyDirtyRepeater());
               delete state.justLeftPriorityLevel;
             }

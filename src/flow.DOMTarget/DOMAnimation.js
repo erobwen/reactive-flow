@@ -156,9 +156,8 @@ export function onFinishReBuildingFlow() {
 }
 
 export function onFinishReBuildingDOM() {
-  log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
-
   if (!flowChanges.onFinishReBuildingFlowDone) return;
+  log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
 
   let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyAdded} = flowChanges
