@@ -316,9 +316,9 @@ export class Flow {
     }
   }
 
-  ensureBuiltRecursive() {
-    this.getPrimitive(null).ensureBuiltRecursive();
-  }
+  // ensureBuiltRecursive() {
+  //   this.getPrimitive(null).ensureBuiltRecursive();
+  // }
 
   getPrimitive(parentPrimitive) {
     // log("getPrimitive")
@@ -422,7 +422,7 @@ export class Flow {
       );
     } else {
       // If parent primitive was null on first call.
-      me.newBuild.getPrimitive(parentPrimitive);
+      if (me.newBuild) me.newBuild.getPrimitive(parentPrimitive);
     }
     return me.primitive;
   }
