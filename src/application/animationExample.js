@@ -52,7 +52,7 @@ export class AnimationExample extends Flow {
     this.listA = observable([]);
     this.listB = observable([]);
     transaction(() => {
-      let count = 3; 
+      let count = 1; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listA);
     });
   }
@@ -90,7 +90,7 @@ export class AnimationExample extends Flow {
         column(
           panel({
             children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
+            style: {fontSize: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
             animateChildren: standardAnimation       
           }),
           filler(),

@@ -37,8 +37,8 @@ export class Demo extends Flow {
       this.components[name].onEstablish();
     }
 
-    // this.choosen = this.components["Animation Example"];
-    this.choosen = this.components["Complex Form Example"];
+    this.choosen = this.components["Animation Example"];
+    // this.choosen = this.components["Complex Form Example"];
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
 

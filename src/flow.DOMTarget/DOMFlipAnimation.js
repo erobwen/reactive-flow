@@ -88,7 +88,7 @@ export class DOMFlipAnimation {
   }
 
   setupInitialStyleForResident(node) {
-    Object.assign(node.style, this.residentInitialStyle());
+    Object.assign(node.style, this.residentInitialStyle(node));
   }
 
 
@@ -117,12 +117,14 @@ export class DOMFlipAnimation {
     } 
   }
 
-  residentInitialStyle() {
+  residentInitialStyle(node) {
     // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
     // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
     // And we want the change to be gradual. 
     return {
-      transform: "scale(1)",
+      transform: node.originalStyle.transform,
+      // color: node.originalStyle.color,
+      // fontSize: node.originalStyle.fontSize
     }
   }
   
@@ -144,6 +146,10 @@ export class DOMFlipAnimation {
 
   recordInitialBounds(node) {
     node.initialBounds = node.getBoundingClientRect();
+  }
+
+  recordInitialStyle(node) {
+    node.initialStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
 
 
@@ -185,7 +191,7 @@ export class DOMFlipAnimation {
   }
 
   setupFinalStyleForResident(node) {
-    Object.assign(node.style, this.residentFinalStyle());
+    Object.assign(node.style, this.residentFinalStyle(node));
     Object.assign(node.style, this.residentTransitionStyle(node));
     if (node.disappearingExpander) {
       Object.assign(node.disappearingExpander.style, this.residentTransitionStyle(node));
@@ -236,9 +242,11 @@ export class DOMFlipAnimation {
     }
   }
 
-  residentFinalStyle() {
+  residentFinalStyle(node) {
     return {
       transform: "scale(1)",
+      // color: node.initialStyle.color,
+      // fontSize: node.initialStyle.fontSize
     }
   }
   
@@ -303,6 +311,8 @@ export class DOMFlipAnimation {
       node.style.maxWidth = "";
       node.style.maxHeight = "";
       node.style.opacity = "";
+      // node.style.color = "";
+      // node.style.fontSize = "";
       node.removeEventListener("transitionend", onTransitionEnd);
     }
 
