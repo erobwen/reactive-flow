@@ -8,11 +8,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all .5s ease-in-out, opacity 1s ease-in"
+    return "all 5s ease-in-out, opacity 1s ease-in"
   }
 
   removeTransition() {
-    return "all .5s ease-in-out, opacity 0.5s ease-out"
+    return "all 5s ease-in-out, opacity 0.5s ease-out"
   }
 
   /**
@@ -20,15 +20,16 @@ export class DOMFlipAnimation {
    */
   recordOriginalBoundsAndStyle(node) {
     node.originalBounds = node.getBoundingClientRect();
-    node.originalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
+    node.originalStyle = {...node.style}
+    node.computedOriginalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
   
   getOriginalMeasures(node) {
     const measures = {
-      marginTop: parseInt(node.originalStyle.marginTop, 10),
-      marginBottom: parseInt(node.originalStyle.marginBottom, 10),
-      marginLeft: parseInt(node.originalStyle.marginLeft, 10),
-      marginRight: parseInt(node.originalStyle.marginRight, 10),
+      marginTop: parseInt(node.computedOriginalStyle.marginTop, 10),
+      marginBottom: parseInt(node.computedOriginalStyle.marginBottom, 10),
+      marginLeft: parseInt(node.computedOriginalStyle.marginLeft, 10),
+      marginRight: parseInt(node.computedOriginalStyle.marginRight, 10),
       width: node.originalBounds.width,
       height: node.originalBounds.height
     }
@@ -43,8 +44,8 @@ export class DOMFlipAnimation {
    * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
    */
   getDisappearingReplacement(node) {
-    const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
-    const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
+    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
+    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
     const expander = document.createElement("div");
     expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
     expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
@@ -79,8 +80,9 @@ export class DOMFlipAnimation {
    */
 
   rememberTargetStyle(node) {
-    node.rememberedStyle = {...node.style}; // Remember so we can reset it later
-    node.rememberedComputedStyle = getComputedStyle(node);
+    node.targetStyle = {...node.style}; // Remember so we can reset it later
+    node.computedTargetStyle = {...getComputedStyle(node)};
+    console.log(node.computedTargetStyle.fontSize);
   }
 
   calculateTargetDimensionsForAdded(contextNode, node) {
@@ -128,16 +130,17 @@ export class DOMFlipAnimation {
     // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
     // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
     // And we want the change to be gradual. 
+    console.log("original: " + node.computedOriginalStyle.fontSize);
     return {
-      transform: node.originalStyle.transform,
-      // color: node.originalStyle.color,
-      // fontSize: node.originalStyle.fontSize
+      transform: node.computedOriginalStyle.transform,
+      color: node.computedOriginalStyle.color,
+      fontSize: node.computedOriginalStyle.fontSize
     }
   }
   
   removedOriginalStyle(node) {
     // Add pre-set offset for fly-out effect in the opposite direction
-    const style = node.originalStyle; delete node.originalStyle;
+    const style = node.computedOriginalStyle; delete node.computedOriginalStyle;
     return {
       transform: "scale(1)",
       opacity: "1",
@@ -218,7 +221,7 @@ export class DOMFlipAnimation {
   }
 
   addedFinalStyle(node) {
-    const rememberedStyle = node.rememberedStyle; delete node.rememberedStyle;
+    const targetStyle = node.targetStyle; delete node.targetStyle;
     const targetDimensions = node.targetDimensions; delete node.targetDimensions;
 
     return {
@@ -226,16 +229,16 @@ export class DOMFlipAnimation {
       opacity: "1",
       maxHeight: targetDimensions.height + "px",
       maxWidth: targetDimensions.width + "px",
-      margin: rememberedStyle.margin, 
-      marginTop: rememberedStyle.marginTop, 
-      marginBottom: rememberedStyle.marginBottom, 
-      marginLeft: rememberedStyle.marginLeft, 
-      marginRight: rememberedStyle.marginRight, 
-      padding: rememberedStyle.padding,
-      paddingTop: rememberedStyle.paddingTop,
-      paddingBottom: rememberedStyle.paddingBottom,
-      paddingLeft: rememberedStyle.paddingLeft,
-      paddingRight: rememberedStyle.paddingRight,
+      margin: targetStyle.margin, 
+      marginTop: targetStyle.marginTop, 
+      marginBottom: targetStyle.marginBottom, 
+      marginLeft: targetStyle.marginLeft, 
+      marginRight: targetStyle.marginRight, 
+      padding: targetStyle.padding,
+      paddingTop: targetStyle.paddingTop,
+      paddingBottom: targetStyle.paddingBottom,
+      paddingLeft: targetStyle.paddingLeft,
+      paddingRight: targetStyle.paddingRight,
     } 
   }
 
@@ -246,10 +249,12 @@ export class DOMFlipAnimation {
   }
 
   residentFinalStyle(node) {
+    console.log("final: " + node.computedTargetStyle.fontSize);
+
     return {
       transform: "scale(1)",
-      // color: node.initialStyle.color,
-      // fontSize: node.initialStyle.fontSize
+      color: node.computedTargetStyle.color,
+      fontSize: node.computedTargetStyle.fontSize
     }
   }
   
@@ -314,8 +319,8 @@ export class DOMFlipAnimation {
       node.style.maxWidth = "";
       node.style.maxHeight = "";
       node.style.opacity = "";
-      // node.style.color = "";
-      // node.style.fontSize = "";
+      node.style.color = "";
+      node.style.fontSize = "";
       node.removeEventListener("transitionend", onTransitionEnd);
     }
 
