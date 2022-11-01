@@ -164,11 +164,6 @@ export function onFinishReBuildingDOM() {
   log("flowChanges");
   log(flowChanges);
 
-  // Setup initial style.
-  for (let flow of globallyAddedAnimated) {
-    flow.animation.measureInitialStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
-  }
-
   // On did mount
   for (let flow of Object.values(globallyAdded)) {
     let scan = flow; 
@@ -180,39 +175,52 @@ export function onFinishReBuildingDOM() {
     } 
   }
 
+  // Target styles
   for (let flow of globallyAddedAnimated) {
-    flow.animation.setupInitialStyleForAdded(flow.domNode);
+    flow.animation.rememberTargetStyle(flow.domNode);
+    flow.animation.calculateTargetDimensionsForAdded(flow.parentPrimitive.domNode, flow.domNode);
   }
   for (let flow of globallyResidentAnimated) {
-    flow.animation.setupInitialStyleForResident(flow.domNode);
+    flow.animation.rememberTargetStyle(flow.domNode);
   }
   for (let flow of globallyRemovedAnimated) {
-    flow.animation.setupInitialStyleForRemoved(flow.domNode);
+    flow.animation.rememberTargetStyle(flow.domNode);
+  }
+    
+  // Reinstate original style.
+  for (let flow of globallyAddedAnimated) {
+    flow.animation.reinstateOriginalStyleForAdded(flow.domNode);
+  }
+  for (let flow of globallyResidentAnimated) {
+    flow.animation.reinstateOriginalStyleForResident(flow.domNode);
+  }
+  for (let flow of globallyRemovedAnimated) {
+    flow.animation.reinstateOriginalStyleForRemoved(flow.domNode);
   }
 
   requestAnimationFrame(() => {
 
     // Record initial positions
     globallyRemovedAnimated.forEach(flow => {
-      flow.animation.recordInitialBounds(flow.domNode)
-      standardAnimation.recordInitialBounds(flow.domNode.animationOriginNode);
+      flow.animation.recordBoundsInNewStructure(flow.domNode)
+      standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
     });
 
     globallyResidentAnimated.forEach(flow => {
-      flow.animation.recordInitialBounds(flow.domNode)
-      standardAnimation.recordInitialBounds(flow.domNode.animationOriginNode);
+      flow.animation.recordBoundsInNewStructure(flow.domNode)
+      standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
     });
     
     // Setup flow.animate initial position
     // Translate all except globallyAdded to their old position (globallyAdded should have a scale=0 transform)
     for (let flow of globallyAddedAnimated) {
-      flow.animation.translateAddedFromInitialToOriginalPosition(flow.domNode);
+      flow.animation.translateAddedFromNewToOriginalPosition(flow.domNode);
     }
     for (let flow of globallyResidentAnimated) {
-      flow.animation.translateResidentFromInitialToOriginalPosition(flow.domNode);
+      flow.animation.translateResidentFromNewToOriginalPosition(flow.domNode);
     }
     for (let flow of globallyRemovedAnimated) {
-      flow.animation.translateRemovedFromInitialToOriginalPosition(flow.domNode);
+      flow.animation.translateRemovedFromNewToOriginalPosition(flow.domNode);
     }
       
     // Activate animation

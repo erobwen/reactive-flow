@@ -22,13 +22,8 @@ export class DOMFlipAnimation {
     node.originalBounds = node.getBoundingClientRect();
     node.originalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
-    
- /**
-   * Dissapearing expander and contractors
-   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
-   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
-   */
-  getMeasures(node) {
+  
+  getOriginalMeasures(node) {
     const measures = {
       marginTop: parseInt(node.originalStyle.marginTop, 10),
       marginBottom: parseInt(node.originalStyle.marginBottom, 10),
@@ -41,7 +36,12 @@ export class DOMFlipAnimation {
     measures.totalWidth = measures.width + measures.marginLeft + measures.marginRight;
     return measures; 
   }
-
+    
+ /**
+   * Dissapearing expander and contractors
+   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
+   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
+   */
   getDisappearingReplacement(node) {
     const verticalMargins = parseInt(node.originalStyle.marginTop) + parseInt(node.originalStyle.marginBottom);
     const horizontalMargins = parseInt(node.originalStyle.marginLeft) + parseInt(node.originalStyle.marginRight);
@@ -66,7 +66,7 @@ export class DOMFlipAnimation {
     if (node.savedIncomingMeasures) {
       measures = node.savedIncomingMeasures;  
     } else {
-      measures = this.getMeasures(node);
+      measures = this.getOriginalMeasures(node);
       node.savedIncomingMeasures = measures;
     }
     node.style.marginTop = (measures.marginTop - measures.totalHeight) + "px";
@@ -75,28 +75,35 @@ export class DOMFlipAnimation {
 
 
   /**
-   * Initial styles, the styles elements have at the start of the animation 
+   * Remember target styles 
    */
 
-  measureInitialStyleForAdded(contextNode, node) {
+  rememberTargetStyle(node) {
     node.rememberedStyle = {...node.style}; // Remember so we can reset it later
+    node.rememberedComputedStyle = getComputedStyle(node);
+  }
+
+  calculateTargetDimensionsForAdded(contextNode, node) {
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
   }
 
-  setupInitialStyleForAdded(node) {
-    Object.assign(node.style, this.addedInitialStyle(node));
+  
+  /**
+   * Reinstated original styles, the styles elements have at the start of the animation 
+   */
+  reinstateOriginalStyleForAdded(node) {
+    Object.assign(node.style, this.addedOriginalStyle(node));
   }
 
-  setupInitialStyleForResident(node) {
-    Object.assign(node.style, this.residentInitialStyle(node));
+  reinstateOriginalStyleForResident(node) {
+    Object.assign(node.style, this.residentOriginalStyle(node));
   }
 
-
-  setupInitialStyleForRemoved(node) {
-    Object.assign(node.style, this.removedInitialStyle(node));
+  reinstateOriginalStyleForRemoved(node) {
+    Object.assign(node.style, this.removedOriginalStyle(node));
   }
 
-  addedInitialStyle(node) {
+  addedOriginalStyle(node) {
     const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
@@ -117,7 +124,7 @@ export class DOMFlipAnimation {
     } 
   }
 
-  residentInitialStyle(node) {
+  residentOriginalStyle(node) {
     // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
     // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
     // And we want the change to be gradual. 
@@ -128,7 +135,7 @@ export class DOMFlipAnimation {
     }
   }
   
-  removedInitialStyle(node) {
+  removedOriginalStyle(node) {
     // Add pre-set offset for fly-out effect in the opposite direction
     const style = node.originalStyle; delete node.originalStyle;
     return {
@@ -141,15 +148,11 @@ export class DOMFlipAnimation {
 
 
   /**
-   * Record Initial bounds, measures after structure change using with initial style  
+   * Record bounds, measures after structure change using original style  
    */
 
-  recordInitialBounds(node) {
+  recordBoundsInNewStructure(node) {
     node.initialBounds = node.getBoundingClientRect();
-  }
-
-  recordInitialStyle(node) {
-    node.initialStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
   }
 
 
@@ -157,19 +160,19 @@ export class DOMFlipAnimation {
    * Translate to original position
    */
 
-  translateAddedFromInitialToOriginalPosition(node) {
+  translateAddedFromNewToOriginalPosition(node) {
     // Potentially add pre-set offset for fly-in effect
   }
 
-  translateResidentFromInitialToOriginalPosition(node) {
-    this.translateFromInitialToOriginalPosition(node); 
+  translateResidentFromNewToOriginalPosition(node) {
+    this.translateFromNewToOriginalPosition(node); 
   }
 
-  translateRemovedFromInitialToOriginalPosition(node) {
-    this.translateFromInitialToOriginalPosition(node); 
+  translateRemovedFromNewToOriginalPosition(node) {
+    this.translateFromNewToOriginalPosition(node); 
   }
 
-  translateFromInitialToOriginalPosition(node) {
+  translateFromNewToOriginalPosition(node) {
     node.style.transition = "";
     const animationOriginNode = node.animationOriginNode; //delete node.animationOriginNode;
     const originOriginalBounds = animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
