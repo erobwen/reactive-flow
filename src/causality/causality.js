@@ -137,6 +137,7 @@ function createWorld(configuration) {
     // Priority levels 
     enterPriorityLevel,
     exitPriorityLevel,
+    workOnPriorityLevel
   }; 
 
 
@@ -253,6 +254,12 @@ function createWorld(configuration) {
       }
     }
   } 
+
+  function workOnPriorityLevel(level, action) {
+    enterPriorityLevel(level);
+    action();
+    exitPriorityLevel(level);
+  }
 
 
   /**********************************

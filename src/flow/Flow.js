@@ -17,6 +17,7 @@ export const {
   finalize,
   withoutRecording,
   sameAsPreviousDeep,
+  workOnPriorityLevel,
 } = world;
 export const model = deeplyObservable;
 const log = console.log;
@@ -32,7 +33,7 @@ export const configuration = {
   defaultTransitionAnimations: null,
   onFinishReBuildingFlowCallbacks: [],
   onFinishReBuildingDOMCallbacks:  [],
-  flowBuildNumber:0
+
 }
 
 export let trace = false;
@@ -57,7 +58,6 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
-    configuration.flowBuildNumber++;
   }
 
   // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
@@ -316,9 +316,10 @@ export class Flow {
     }
   }
 
-  // ensureBuiltRecursive() {
-  //   this.getPrimitive(null).ensureBuiltRecursive();
-  // }
+  ensureBuiltRecursive() {
+    workOnPriorityLevel(1, () => this.getPrimitive(null).ensureBuiltRecursive());
+    return this.getPrimitive();
+  }
 
   getPrimitive(parentPrimitive) {
     // log("getPrimitive")

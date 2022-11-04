@@ -1,4 +1,4 @@
-import { observable, repeat, readFlowProperties, transaction, configuration, Flow } from "../flow/Flow";
+import { observable, repeat, readFlowProperties, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
@@ -79,11 +79,8 @@ export class DOMFlowTarget extends FlowTarget {
       }
     )    
     this.contentHolder.children = children;
-    this.contentHolder.ensureBuiltRecursive();
-    // onFinishReBuildingFlow();
-    configuration.flowBuildNumber++;
-    this.contentHolder.ensureDomNodeBuilt();
-    // onFinishReBuildingDOM();
+    workOnPriorityLevel(1, () => this.contentHolder.ensureBuiltRecursive());
+    workOnPriorityLevel(2, () => this.contentHolder.ensureDomNodeBuilt());
   }
 
   removeContent() {

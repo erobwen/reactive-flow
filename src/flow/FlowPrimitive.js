@@ -56,6 +56,7 @@ export class FlowPrimitive extends Flow {
         if (trace) console.groupEnd();
       }, {priority: 1});
     }
+    return this; 
   }
   
   *iterateChildren() {
