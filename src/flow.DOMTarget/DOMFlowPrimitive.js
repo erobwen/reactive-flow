@@ -111,7 +111,7 @@ export function clearNode(node) {
       } else {
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
-        if (!newChildNodes.includes(existingChildNode) && flowChanges.globallyRemoved[existingPrimitive.id]) {
+        if (!newChildNodes.includes(existingChildNode) && flowChanges && flowChanges.globallyRemoved && flowChanges.globallyRemoved[existingPrimitive.id]) {
           // Node will be removed locally, copy it back to leave it.
           if (animation) {
             newChildNodes.splice(index, 0, existingChildNode);
@@ -125,7 +125,6 @@ export function clearNode(node) {
             if (!existingChildNode.disappearingExpander) {
               node.insertBefore(animation.getDisappearingReplacement(existingChildNode), existingChildNode);
               node.removeChild(existingChildNode);
-              animation.minimizeIncomingFootprint(existingChildNode);
             }
           } else {
             // No animation, just remove. (do not copy to new)
@@ -136,21 +135,22 @@ export function clearNode(node) {
     }
 
     // Arrange disappearing expander for incoming
-    for(let newPrimitive of newChildren) {
-      if (!existingPrimitives[newPrimitive.id] && !flowChanges.globallyAdded[newPrimitive.id]) {
-        // Incoming primitive. We have to replace it with a dissapearing replacement before we add it in this container, since ith will otherwise dissapear from that container without a chance to add the replacement.
-        const animation = newPrimitive.getAnimation(); 
-        if (animation) {
-          const newPrimitiveDomNode = newPrimitive.domNode; 
-          if (!newPrimitiveDomNode.disappearingExpander) {
-            newPrimitiveDomNode.parentNode.insertBefore(animation.getDisappearingReplacement(newPrimitiveDomNode), newPrimitiveDomNode);
-            newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
-            animation.minimizeIncomingFootprint(newPrimitiveDomNode);
+    if (flowChanges && flowChanges.globallyAdded)  {
+      for(let newPrimitive of newChildren) {
+        if (!existingPrimitives[newPrimitive.id] && !flowChanges.globallyAdded[newPrimitive.id]) {
+          // Incoming primitive. We have to replace it with a dissapearing replacement before we add it in this container, since ith will otherwise dissapear from that container without a chance to add the replacement.
+          const animation = newPrimitive.getAnimation(); 
+          if (animation) {
+            const newPrimitiveDomNode = newPrimitive.domNode; 
+            if (!newPrimitiveDomNode.disappearingExpander) {
+              newPrimitiveDomNode.parentNode.insertBefore(animation.getDisappearingReplacement(newPrimitiveDomNode), newPrimitiveDomNode);
+              newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
+            }
           }
         }
-      }
-    }   
-
+      }   
+    }
+      
     // Adding pass, will also rearrange moved elements
     index = 0;
     while(index < newChildNodes.length) {
@@ -171,6 +171,8 @@ export function clearNode(node) {
   ensureDomNode() { 
     if (this.targetDomNode) {
       this.domNode = this.targetDomNode;
+      this.domNode.id = aggregateToString(this);
+      this.domNode.equivalentCreator = this; 
     } else if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {
         if (trace) log(repeater.causalityString());

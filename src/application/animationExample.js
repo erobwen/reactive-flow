@@ -8,7 +8,7 @@ const log = console.log;
 /**
  * Flow definitions
  */
-const smallSpace = "10px";
+const smallSpace = "0px";
 // const largeSpace = "20px";
 // const smallSpace = "0px";
 const largeSpace = "0px";
@@ -29,7 +29,7 @@ const panel = flow("panel", ({ children, style }) =>
   column({key: "panel", 
     children, 
     style: {
-      marginBottom: "10px", 
+      marginBottom: "0px", 
       borderRadius: "15px", 
       backgroundColor: "#eeeeee", 
       borderColor: "#cccccc", 
@@ -78,6 +78,7 @@ export class AnimationExample extends Flow {
       ),
       row(
         column(
+          filler(),
           panel({
             children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
             style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
@@ -88,6 +89,7 @@ export class AnimationExample extends Flow {
         ),
         filler(),
         column(
+          filler(),
           panel({
             children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
             style: {fontSize: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  

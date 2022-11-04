@@ -26,11 +26,13 @@ export function removeDOMFlowTarget(target) {
 /**
  * Global flow changes tracking
  */
+
 export const flowChanges = {
-  globallyAdded: {},
-  globallyRemoved: {},
-  globallyResident: {}
+  globallyAdded: null,
+  globallyRemoved: null,
+  globallyResident: null
 };
+export const previousFlowChanges = {}
 
 window.flowChanges = flowChanges;
 
@@ -81,6 +83,12 @@ export function onFinishReBuildingFlow() {
     analyzePrimitives(idPrimitiveMap, target.contentHolder);
   }
 
+  if (flowChanges.globallyAddedAnimated) {
+    previousFlowChanges.globallyAddedAnimated = flowChanges.globallyAddedAnimated;
+    previousFlowChanges.globallyRemovedAnimated = flowChanges.globallyRemovedAnimated;
+    previousFlowChanges.globallyResidentAnimated = flowChanges.globallyResidentAnimated;
+  }
+
   flowChanges.globallyAdded = {}; 
   flowChanges.globallyResident = {}; 
   flowChanges.globallyRemoved = {};
@@ -117,13 +125,13 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
  
   // Debug info
-  flowChanges.a_globallyRemoved = Object.values(flowChanges.globallyRemoved).map(flow => flow.domNode);
-  flowChanges.a_added = flowChanges.globallyAddedAnimated.map(flow => flow.domNode);
-  flowChanges.a_removed = flowChanges.globallyRemovedAnimated.map(flow => flow.domNode);
-  flowChanges.a_resident = flowChanges.globallyResidentAnimated.map(flow => flow.domNode);
+  // flowChanges.a_globallyRemoved = Object.values(flowChanges.globallyRemoved).map(flow => flow.domNode);
+  // flowChanges.a_added = flowChanges.globallyAddedAnimated.map(flow => flow.domNode);
+  // flowChanges.a_removed = flowChanges.globallyRemovedAnimated.map(flow => flow.domNode);
+  // flowChanges.a_resident = flowChanges.globallyResidentAnimated.map(flow => flow.domNode);
  
-  log("flowChanges");
-  log(flowChanges);
+  // log("flowChanges");
+  // log(flowChanges);
 
   // Do to all new animated
   for (let flow of flowChanges.globallyResidentAnimated) {
@@ -152,8 +160,39 @@ export function onFinishReBuildingFlow() {
     } 
   }
 
+  if (previousFlowChanges.globallyAddedAnimated) {
+    // log("CLEANUP")
+    // debugger;
+    // Cleanup possible animation artefacts, such as set styles (need to do a pass to avoid indirect influence over )
+    for (let flow of previousFlowChanges.globallyAddedAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+    }
+    for (let flow of previousFlowChanges.globallyResidentAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+      flow.animation.undoMinimizeIncomingFootprint(flow.domNode);
+    }
+    for (let flow of previousFlowChanges.globallyRemovedAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+    }
+  }
+
+  // Set in animation
+  for (let flow of flowChanges.globallyAddedAnimated) {
+    if (flow.domNode) flow.domNode.inAnimation = true; 
+  }
+  for (let flow of flowChanges.globallyResidentAnimated) {
+    if (flow.domNode) flow.domNode.inAnimation = true; 
+  }
+  for (let flow of flowChanges.globallyRemovedAnimated) {
+    if (flow.domNode) flow.domNode.inAnimation = true; 
+  }
+
   flowChanges.onFinishReBuildingFlowDone = true;
 }
+
+
+// Add dissapearing expanders. 
+
 
 export function onFinishReBuildingDOM() {
   if (!flowChanges.onFinishReBuildingFlowDone) return;
@@ -161,8 +200,8 @@ export function onFinishReBuildingDOM() {
   delete flowChanges.onFinishReBuildingFlowDone; 
 
   let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyAdded} = flowChanges
-  log("flowChanges");
-  log(flowChanges);
+  // log("flowChanges");
+  // log(flowChanges);
 
   // On did mount
   for (let flow of Object.values(globallyAdded)) {
@@ -174,10 +213,9 @@ export function onFinishReBuildingDOM() {
       scan = scan.equivalentCreator;
     } 
   }
-
   
   requestAnimationFrame(() => {
-    
+
     // Target styles
     for (let flow of globallyAddedAnimated) {
       flow.animation.rememberTargetStyle(flow.domNode);
@@ -196,6 +234,7 @@ export function onFinishReBuildingDOM() {
     }
     for (let flow of globallyResidentAnimated) {
       flow.animation.reinstateOriginalStyleForResident(flow.domNode);
+      flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
     for (let flow of globallyRemovedAnimated) {
       flow.animation.reinstateOriginalStyleForRemoved(flow.domNode);

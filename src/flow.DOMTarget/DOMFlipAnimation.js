@@ -3,6 +3,34 @@
 
 const log = console.log;
 
+var camelCased = (myString) => myString.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+const sizeProperties = [];
+const residentTransitionProperties = ["color", "fontSize"];
+
+
+const firstOfCamelCase = (camelCase) => 
+  camelCase.replace(/([A-Z])/g, " $1").split(" ")[0];
+
+const animatedProperties = [
+  "transform",
+  "maxHeight",
+  "maxWidth",
+  "margin", 
+  "marginTop", 
+  "marginBottom", 
+  "marginLeft", 
+  "marginRight",
+  "padding",
+  "paddingTop", 
+  "paddingBottom", 
+  "paddingLeft",
+  "paddingRight",
+  "opacity",
+  "color", 
+  "fontSize",
+];
+
+
 export class DOMFlipAnimation {
   /**
    * Default transition
@@ -37,52 +65,82 @@ export class DOMFlipAnimation {
     measures.totalWidth = measures.width + measures.marginLeft + measures.marginRight;
     return measures; 
   }
-    
- /**
-   * Dissapearing expander and contractors
-   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
-   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
+
+  /**
+   * Cleanup mid animation. 
    */
-  getDisappearingReplacement(node) {
-    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
-    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
-    const expander = document.createElement("div");
-    expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
-    expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
-    expander.style.opacity = "0";
-    expander.id = "expander"
-    node.disappearingExpander = expander;
-    return expander;
-  }
-
-  disappearingReplacementFinalStyle() {
-    return {
-      marginTop: "0px",
-      marginLeft: "0px",
+  cleanupPossibleAnimation(node) {
+    if (node.inAnimation) {
+      this.cleanupMidAnimation(node);
+      node.inAnimation = false; 
     }
   }
 
-  minimizeIncomingFootprint(node) {
-    let measures;
-    if (node.savedIncomingMeasures) {
-      measures = node.savedIncomingMeasures;  
-    } else {
-      measures = this.getOriginalMeasures(node);
-      node.savedIncomingMeasures = measures;
+  cleanupMidAnimation(node) {
+    for (let property of animatedProperties) {
+      node.style[property] = node.targetStyle[property];
     }
-    node.style.marginTop = (measures.marginTop - measures.totalHeight) + "px";
-    node.style.marginLeft = (measures.marginLeft - measures.totalWidth) + "px";
+    node.inAnimation = false; 
+
+
+    // const previouslySetStyles = node.equivalentCreator && node.equivalentCreator.unobservable.previouslySetStyles;
+    // if (previouslySetStyles) {
+    //   log("this.cleanupAnimation");
+    //   // log(node);
+    //   // log({...node.style})
+    //   let index = 0; 
+    //   while (index < node.style.length) {
+    //     const property = camelCased(node.style.item(index));
+    //     const shorthandProperty = firstOfCamelCase(property);
+    //     log("found " +  property);
+    //     if (!previouslySetStyles[property] && !previouslySetStyles[shorthandProperty]) {
+    //       log("REMOVE ALIEN STYLE:" + property);
+    //       node.style[property] = node.targetStyle[property];
+    //     }
+    //     index++;
+    //   }
+    // } else {
+    //   log("No previous set styles: ")
+    //   console.log(node);
+    // }
+    // log({...node.style})
+    // // All
+    // node.style.transition = node.targetStyle.transition;
+    // node.style.transform = node.targetStyle.transform;
+
+    // // Added cleanup
+    // node.style.width = node.targetStyle.width;
+    // node.style.height = node.targetStyle.height;
+    // node.style.maxWidth = node.targetStyle.maxWidth;
+    // node.style.maxHeight = node.targetStyle.maxHeight;
+    // node.style.opacity = node.targetStyle.opacity;
+    
+    // node.style.margin = node.targetStyle.margin;
+    // node.style.marginTop = node.targetStyle.marginTop;
+    // node.style.marginBottom = node.targetStyle.marginBottom;
+    // node.style.marginLeft = node.targetStyle.marginLeft;
+    // node.style.marginRight = node.targetStyle.marginRight;
+
+    // Resident
+    // node.style.color = "";
+    // node.style.fontSize = "";
+
+    // if (node.savedIncomingMeasures) {
+    //   delete node.savedIncomingMeasures;
+    // }
   }
+
 
 
   /**
    * Remember target styles 
    */
 
+
   rememberTargetStyle(node) {
     node.targetStyle = {...node.style}; // Remember so we can reset it later
     node.computedTargetStyle = {...getComputedStyle(node)};
-    console.log(node.computedTargetStyle.fontSize);
+    // console.log(node.computedTargetStyle.fontSize);
   }
 
   calculateTargetDimensionsForAdded(contextNode, node) {
@@ -127,15 +185,20 @@ export class DOMFlipAnimation {
   }
 
   residentOriginalStyle(node) {
+    // return {...node.computedOriginalStyle}; 
     // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
     // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
     // And we want the change to be gradual. 
-    console.log("original: " + node.computedOriginalStyle.fontSize);
-    return {
-      transform: node.computedOriginalStyle.transform,
-      color: node.computedOriginalStyle.color,
-      fontSize: node.computedOriginalStyle.fontSize
-    }
+    // console.log("original: " + node.computedOriginalStyle.fontSize);
+    const result = {};
+    // console.log(node.computedOriginalStyle);
+    animatedProperties.forEach(property => result[property] = node.computedOriginalStyle[property]);
+    return result; 
+    // return {
+    //   transform: node.computedOriginalStyle.transform,
+    //   color: node.computedOriginalStyle.color,
+    //   fontSize: node.computedOriginalStyle.fontSize,
+    // }
   }
   
   removedOriginalStyle(node) {
@@ -147,6 +210,72 @@ export class DOMFlipAnimation {
       maxHeight: style.height,
       maxWidth: style.width
     }
+  }
+
+ /**
+   * Reinstate original positions and container sizes.
+   * Dissapearing expander and contractors
+   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
+   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
+   */
+  getDisappearingReplacement(node) {
+    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
+    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
+    const expander = document.createElement("div");
+    expander.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
+    expander.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
+    expander.style.opacity = "0";
+    expander.id = "expander"
+    node.disappearingExpander = expander;
+    return expander;
+  }
+
+  disappearingReplacementFinalStyle() {
+    return {
+      marginTop: "0px",
+      marginLeft: "0px",
+    }
+  }
+
+  minimizeIncomingFootprint(node) {
+    // console.log("minimizeIncomingFootprint");
+    // const measures = this.getOriginalMeasures(node);
+    
+    node.animationStartTotalHeight = measures.totalHeight;
+    node.animationStartMarginTop = measures.marginTop;
+    node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
+    node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
+    node.style.marginTop = node.animationStartAjustedMarginTop + "px";
+
+    node.animationStartTotalWidth = measures.totalWidth;
+    node.animationStartMarginLeft = measures.marginLeft;
+    node.animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
+    node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
+    node.style.marginLeft = node.animationStartAjustedMarginLeft + "px";
+
+    // log(node.style.marginTop)
+  }
+
+  undoMinimizeIncomingFootprint(node) {
+    // log("undoMinimizeIncomingFootprint")
+    
+    const marginTop = parseInt(node.computedOriginalStyle.marginTop, 10); 
+    const animationCompleteness = (marginTop - node.animationStartAjustedMarginTop) /
+      (node.animationEndMarginTop - node.animationStartAjustedMarginTop);
+
+    const restoredMarginTop = node.animationStartMarginTop + 
+      animationCompleteness * (node.animationEndMarginTop - node.animationStartMarginTop); 
+    node.style.marginTop = restoredMarginTop + "px";
+    node.computedOriginalStyle.marginTop =  restoredMarginTop + "px";
+    
+    const restoredMarginLeft = node.animationStartMarginLeft + 
+      animationCompleteness * (node.animationEndMarginLeft - node.animationStartMarginLeft); 
+    node.style.marginLeft = restoredMarginLeft + "px";
+    node.computedOriginalStyle.marginLeft =  restoredMarginLeft + "px";
+
+    // log("marginTop: " + marginTop);
+    // log("animationCompleteness: " + animationCompleteness);
+    // log("restored: " + restoredMarginTop);
   }
 
 
@@ -203,10 +332,10 @@ export class DOMFlipAnimation {
       Object.assign(node.disappearingExpander.style, this.residentTransitionStyle(node));
       Object.assign(node.disappearingExpander.style, this.disappearingReplacementFinalStyle());
     }
-    if (node.savedIncomingMeasures) {
-      node.style.marginTop = node.savedIncomingMeasures.marginTop + "px";
-      node.style.marginLeft =  node.savedIncomingMeasures.marginLeft + "px";
-    }
+    // if (node.savedIncomingMeasures) {
+    //   node.style.marginTop = node.savedIncomingMeasures.marginTop + "px";
+    //   node.style.marginLeft =  node.savedIncomingMeasures.marginLeft + "px";
+    // }
   }
   
   setupFinalStyleForRemoved(node) {
@@ -221,12 +350,11 @@ export class DOMFlipAnimation {
   }
 
   addedFinalStyle(node) {
-    const targetStyle = node.targetStyle; delete node.targetStyle;
-    const targetDimensions = node.targetDimensions; delete node.targetDimensions;
+    const targetStyle = node.targetStyle;// delete node.targetStyle;
+    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
 
     return {
       transform: "scale(1)",
-      opacity: "1",
       maxHeight: targetDimensions.height + "px",
       maxWidth: targetDimensions.width + "px",
       margin: targetStyle.margin, 
@@ -239,6 +367,7 @@ export class DOMFlipAnimation {
       paddingBottom: targetStyle.paddingBottom,
       paddingLeft: targetStyle.paddingLeft,
       paddingRight: targetStyle.paddingRight,
+      opacity: "1",
     } 
   }
 
@@ -249,12 +378,24 @@ export class DOMFlipAnimation {
   }
 
   residentFinalStyle(node) {
-    console.log("final: " + node.computedTargetStyle.fontSize);
+    // console.log("final: " + node.computedTargetStyle.fontSize);
+    const targetStyle = node.targetStyle;// delete node.targetStyle;
+    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
 
     return {
       transform: "scale(1)",
+      margin: targetStyle.margin, 
+      marginTop: targetStyle.marginTop, 
+      marginBottom: targetStyle.marginBottom, 
+      marginLeft: targetStyle.marginLeft, 
+      marginRight: targetStyle.marginRight, 
+      padding: targetStyle.padding,
+      paddingTop: targetStyle.paddingTop,
+      paddingBottom: targetStyle.paddingBottom,
+      paddingLeft: targetStyle.paddingLeft,
+      paddingRight: targetStyle.paddingRight,
       color: node.computedTargetStyle.color,
-      fontSize: node.computedTargetStyle.fontSize
+      fontSize: node.computedTargetStyle.fontSize,
     }
   }
   
@@ -306,26 +447,46 @@ export class DOMFlipAnimation {
   }
 
   setupAnimationCleanup(node, alsoRemoveNode) {
+    const me = this; 
     function onTransitionEnd(event) {
+      delete node.inAnimation; 
+      node.removeEventListener("transitionend", onTransitionEnd);
+
       if (alsoRemoveNode) {
+        // For dissapearing replacement
         node.parentNode.removeChild(node);
       }
-      if (node.savedIncomingMeasures) {
-        delete node.savedIncomingMeasures;
-      }
-      node.style.transition = "";
-      node.style.width = "";
-      node.style.height = "";
-      node.style.maxWidth = "";
-      node.style.maxHeight = "";
-      node.style.opacity = "";
-      node.style.color = "";
-      node.style.fontSize = "";
-      node.removeEventListener("transitionend", onTransitionEnd);
+
+      me.cleanupAnimation(node);
     }
 
     node.addEventListener("transitionend", onTransitionEnd);
   }
+
+  cleanupAnimation(node) {
+    // All
+    node.style.transition = "";
+
+    // Added cleanup
+    node.style.width = "";
+    node.style.height = "";
+    node.style.maxWidth = "";
+    node.style.maxHeight = "";
+    node.style.opacity = "";
+    
+    // Resident
+    node.style.color = "";
+    node.style.fontSize = "";
+
+    // if (node.savedIncomingMeasures) {
+    //   delete node.savedIncomingMeasures;
+    // }
+  }
+
+
+
 }
 
 export const standardAnimation = new DOMFlipAnimation();
+
+
