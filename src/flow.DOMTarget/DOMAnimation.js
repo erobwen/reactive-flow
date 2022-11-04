@@ -38,6 +38,8 @@ window.flowChanges = flowChanges;
 
 let previousIdPrimitiveMap = null;
 let idPrimitiveMap = {};
+let previousIdParentIdMap = null;
+let idParentIdMap = {};
 
 let nextOriginMark = 0;
 
@@ -70,9 +72,12 @@ export function onFinishReBuildingFlow() {
 
   previousIdPrimitiveMap = idPrimitiveMap;
   idPrimitiveMap = {};
+  previousIdParentIdMap = idParentIdMap 
+  idParentIdMap = {};
   
   function analyzePrimitives(idPrimitiveMap, primitiveFlow) {
     idPrimitiveMap[primitiveFlow.id] = primitiveFlow;
+    idParentIdMap[primitiveFlow.id] = primitiveFlow.parentPrimitive && primitiveFlow.parentPrimitive.id;
   
     for (let child of primitiveFlow.iteratePrimitiveChildren()) {
       analyzePrimitives(idPrimitiveMap, child);
@@ -123,6 +128,8 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyAddedAnimated = getAnimatedFromMap(flowChanges.globallyAdded);
   flowChanges.globallyRemovedAnimated = getAnimatedFromMap(flowChanges.globallyRemoved);
   flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
+  flowChanges.globallyResidentMovedAnimated = flowChanges.globallyResidentAnimated.filter(flow => idParentIdMap[flow.id] !== previousIdParentIdMap[flow.id]);
+
  
   // Debug info
   // flowChanges.a_globallyRemoved = Object.values(flowChanges.globallyRemoved).map(flow => flow.domNode);
@@ -169,7 +176,6 @@ export function onFinishReBuildingFlow() {
     }
     for (let flow of previousFlowChanges.globallyResidentAnimated) {
       flow.animation.cleanupPossibleAnimation(flow.domNode);
-      flow.animation.undoMinimizeIncomingFootprint(flow.domNode);
     }
     for (let flow of previousFlowChanges.globallyRemovedAnimated) {
       flow.animation.cleanupPossibleAnimation(flow.domNode);
@@ -199,7 +205,7 @@ export function onFinishReBuildingDOM() {
   log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
 
-  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyAdded} = flowChanges
+  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyResidentMovedAnimated, globallyAdded} = flowChanges
   // log("flowChanges");
   // log(flowChanges);
 
@@ -215,6 +221,13 @@ export function onFinishReBuildingDOM() {
   }
   
   requestAnimationFrame(() => {
+
+    // We have to do this after dissapearing replacements have been created with the right size.
+    if (previousFlowChanges.globallyAddedAnimated) {
+      for (let flow of previousFlowChanges.globallyResidentAnimated) {
+        flow.animation.undoMinimizeIncomingFootprint(flow.domNode);
+      }
+    }
 
     // Target styles
     for (let flow of globallyAddedAnimated) {
@@ -234,6 +247,8 @@ export function onFinishReBuildingDOM() {
     }
     for (let flow of globallyResidentAnimated) {
       flow.animation.reinstateOriginalStyleForResident(flow.domNode);
+    }
+    for (let flow of globallyResidentMovedAnimated) {
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
     for (let flow of globallyRemovedAnimated) {

@@ -36,11 +36,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 5s ease-in-out, opacity 1s ease-in"
+    return "all .5s ease-in-out, opacity 1s ease-in"
   }
 
   removeTransition() {
-    return "all 5s ease-in-out, opacity 0.5s ease-out"
+    return "all .5s ease-in-out, opacity 0.5s ease-out"
   }
 
   /**
@@ -257,9 +257,11 @@ export class DOMFlipAnimation {
   }
 
   undoMinimizeIncomingFootprint(node) {
+    return; 
     // log("undoMinimizeIncomingFootprint")
     
     const marginTop = parseInt(node.computedOriginalStyle.marginTop, 10); 
+    const marginLeft = parseInt(node.computedOriginalStyle.marginLeft, 10); 
     const animationCompleteness = (marginTop - node.animationStartAjustedMarginTop) /
       (node.animationEndMarginTop - node.animationStartAjustedMarginTop);
 
@@ -267,12 +269,40 @@ export class DOMFlipAnimation {
       animationCompleteness * (node.animationEndMarginTop - node.animationStartMarginTop); 
     node.style.marginTop = restoredMarginTop + "px";
     node.computedOriginalStyle.marginTop =  restoredMarginTop + "px";
+    const topDelta = restoredMarginTop - marginTop;
     
     const restoredMarginLeft = node.animationStartMarginLeft + 
       animationCompleteness * (node.animationEndMarginLeft - node.animationStartMarginLeft); 
     node.style.marginLeft = restoredMarginLeft + "px";
     node.computedOriginalStyle.marginLeft =  restoredMarginLeft + "px";
+    // log(restoredMarginLeft)
+    // log(marginLeft)
+    const leftDelta = restoredMarginLeft - marginLeft;
 
+    // console.log(node.originalBounds.left);
+    // console.log(node.originalBounds.top);
+    // console.log(node.originalBounds.height);
+
+    // console.log("---")
+    // console.log(topDelta);
+    // console.log(leftDelta);
+
+    // node.originalBounds = new DOMRect(
+    //   node.originalBounds.left + leftDelta, 
+    //   node.originalBounds.top + topDelta, 
+    //   node.originalBounds.width, 
+    //   node.originalBounds.height
+    // );
+    // node.originalBounds = new DOMRect(
+    //   node.originalBounds.left - leftDelta, 
+    //   node.originalBounds.top - topDelta, 
+    //   node.originalBounds.width + leftDelta, 
+    //   node.originalBounds.height + topDelta);
+    // log("---")
+    // console.log(node.originalBounds.left)
+    // console.log(node.originalBounds.top)
+    // console.log(node.originalBounds.height)
+      
     // log("marginTop: " + marginTop);
     // log("animationCompleteness: " + animationCompleteness);
     // log("restored: " + restoredMarginTop);

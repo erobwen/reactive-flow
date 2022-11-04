@@ -8,7 +8,7 @@ const log = console.log;
 /**
  * Flow definitions
  */
-const smallSpace = "0px";
+const smallSpace = "10px";
 // const largeSpace = "20px";
 // const smallSpace = "0px";
 const largeSpace = "0px";
