@@ -239,7 +239,7 @@ export class DOMFlipAnimation {
 
   minimizeIncomingFootprint(node) {
     // console.log("minimizeIncomingFootprint");
-    // const measures = this.getOriginalMeasures(node);
+    const measures = this.getOriginalMeasures(node);
     
     node.animationStartTotalHeight = measures.totalHeight;
     node.animationStartMarginTop = measures.marginTop;
