@@ -8,6 +8,7 @@ import { HelloWorld } from "./helloWorldApplication";
 import { RecursiveExample } from "./recursiveDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
+import { ModalAndPortalExample } from "./modalAndPortalDemo";
 
 const log = console.log;
 
@@ -23,21 +24,22 @@ export class Demo extends Flow {
     this.leftColumnPortal = new DOMFlowTarget(this.leftColumnPortalDiv.getDomNode(), {key: "portal", fullWindow: false});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
-    this.components = {
-      "Hello World": new HelloWorld(),
-      "Animation Example": new AnimationExample({items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
-      "Complex Form Example": new ComplexForm({initialData}),
+    this.components = [
+      new HelloWorld({key: "helloWorld"}),
+      new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
+      new ComplexForm({key: "complexForm", initialData}),
+      new ModalAndPortalExample({key: "modalAndPortalExample"})
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      "Recursive Demo": new RecursiveExample({leftColumnPortal: this.leftColumnPortal}),
-      "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
-      "Toggle": new ToggleView()
-    }
+      // "Recursive Demo": new RecursiveExample({leftColumnPortal: this.leftColumnPortal}),
+      // "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
+      // "Toggle": new ToggleView()
+    ];
     
-    for (let name in this.components) {
-      this.components[name].onEstablish();
+    for (let component of this.components) {
+      component.onEstablish();
     }
 
-    this.choosen = this.components["Animation Example"];
+    this.choosen = this.components.find(component => component.key === "animationExample");
     // this.choosen = this.components["Complex Form Example"];
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
@@ -57,16 +59,15 @@ export class Demo extends Flow {
     return ["leftColumnPortal"];
   }
 
+  buildButton(component) { // Extra function to get a stack frame that provides variables to the lambda function. 
+    return button(component.name, {onClick: () => {this.choosen = component}})
+  }
+
   build() {
-
-    function buildButton(demo, name) { // Extra function to get a stack frame that provides variables to the lambda function. 
-      return button(name, {onClick: () => {demo.choosen =  demo.components[name]}})
-    }
-
     const buttons = [];
-    for (let name in this.components) {
+    for (let component of this.components) {
       buttons.push(
-        buildButton(this, name), 
+        this.buildButton(component), 
       )
     }
     buttons.push(filler());

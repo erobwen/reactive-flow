@@ -44,6 +44,7 @@ const panel = flow("panel", ({ children, style }) =>
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
+    this.name = "AnimationExample"
     this.items = items; 
   }
 

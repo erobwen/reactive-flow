@@ -11,6 +11,7 @@ const log = console.log;
 // Parent flow
 export class HelloWorld extends Flow {
   setState() {
+    this.name = "Hello World";
     this.helloText = observable({ value: "..." });
     this.emphasis = false;
     this.derrive(() => {

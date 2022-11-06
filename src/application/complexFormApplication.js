@@ -109,6 +109,7 @@ const panel = flow("panel", ({ children }) =>
 export class ComplexForm extends Flow {
 
   setProperties({initialData}) {
+    this.name = "Complex Form";
     this.editData = model(initialData, true);
   }
   
