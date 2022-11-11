@@ -9,30 +9,33 @@ const log = console.log;
  * Data model
  */
 
-const initialTraveler = {
-  name: "", 
-  passportNumber: "",
-  adress: {
-    adress: "",
-    zipCode: "", 
-    city: ""
-  },
-  isFellowTraveller: false,
-  isChild: false,
-  age: 1,
-  luggages: []
-};
-
-export const initialData = {
-  traveler: initialTraveler,
+export const initialData = model({
+  traveler: createInitialTraveler(),
   fellowTravellers: []
-};
+}, true);
+
+function createInitialTraveler() {
+  return {
+    name: "", 
+    passportNumber: "",
+    adress: {
+      adress: "",
+      zipCode: "", 
+      city: ""
+    },
+    isFellowTraveller: false,
+    isChild: false,
+    age: 1,
+    luggages: []
+  };
+}
 
 function createTraveler(isFellowTraveller) {
-  const result = model(initialTraveler, true);
+  const result = model(createInitialTraveler(), true);
   result.isFellowTraveller = isFellowTraveller;
   return result; 
 }
+
 
 /**
  * Cost calculator
@@ -60,22 +63,13 @@ function calculateCost(data) {
  * Travlers verifier
  */
 
-function verifyFieldNotEmpty(object, property, requestedDataMessage) {
-  if (object[property] === "") {
-    object[property + "Error"] = "Please enter " + requestedDataMessage + ".";
-    return true;
-  } else {
-    delete object[property + "Error"];
-    return false;
-  }
-}
-
-function verifyAdress(adress) {
-  let anyError = false; 
-  anyError = verifyFieldNotEmpty(adress, "adress", "adress") || anyError;
-  anyError = verifyFieldNotEmpty(adress, "zipCode", "zip code") || anyError;
-  anyError = verifyFieldNotEmpty(adress, "city", "city") || anyError;
-  return anyError; 
+ function verifyData(editData) {
+  transaction(() => {
+    let anyError = false; 
+    anyError = verifyTraveler(editData.traveler, false) || anyError;
+    editData.fellowTravellers.forEach(traveler => {anyError = verifyTraveler(traveler, true) || anyError});
+    editData.anyError = anyError;
+  });
 }
 
 function verifyTraveler(traveler, fellowTraveler) {
@@ -88,13 +82,22 @@ function verifyTraveler(traveler, fellowTraveler) {
   return anyError; 
 }
 
-function verifyData(editData) {
-  transaction(() => {
-    let anyError = false; 
-    anyError = verifyTraveler(editData.traveler, false) || anyError;
-    editData.fellowTravellers.forEach(traveler => {anyError = verifyTraveler(traveler, true) || anyError});
-    editData.anyError = anyError;
-  });
+function verifyAdress(adress) {
+  let anyError = false; 
+  anyError = verifyFieldNotEmpty(adress, "adress", "adress") || anyError;
+  anyError = verifyFieldNotEmpty(adress, "zipCode", "zip code") || anyError;
+  anyError = verifyFieldNotEmpty(adress, "city", "city") || anyError;
+  return anyError; 
+}
+
+function verifyFieldNotEmpty(object, property, requestedDataMessage) {
+  if (object[property] === "") {
+    object[property + "Error"] = "Please enter " + requestedDataMessage + ".";
+    return true;
+  } else {
+    delete object[property + "Error"];
+    return false;
+  }
 }
 
 
@@ -102,15 +105,11 @@ function verifyData(editData) {
  * Components
  */
 
-const panel = flow("panel", ({ children }) =>
-  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
-);
-
 export class ComplexForm extends Flow {
 
   setProperties({initialData}) {
     this.name = "Complex Form";
-    this.editData = model(initialData, true);
+    this.editData = initialData;
   }
   
   setState() {
@@ -278,6 +277,9 @@ export class LuggageForm extends Flow {
   }
 }
 
+const panel = flow("panel", ({ children }) =>
+  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+);
 
 /**
  * This is what you would typically do in index.js to start this app. 

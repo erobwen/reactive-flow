@@ -325,6 +325,13 @@ export class Modal extends Flow {
   // }
 }
 
+/**
+ * Portal
+ */
+ export function portal(...parameters) {
+  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  return new Modal(properties);
+}
 
 /**
  * Element Node Attributes 
