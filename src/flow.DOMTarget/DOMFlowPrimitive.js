@@ -95,6 +95,7 @@ export function clearNode(node) {
   
   ensureDomNodeBuilt() {
     finalize(this);
+    if (this.isPortalEntrance) return null; // TODO: only for some portals? Or all?
     if (!this.buildDOMRepeater) {
       // this.buildDOMRepeater = repeat(mostAbstractFlow(this).toString() + ".buildDOMRepeater", (repeater) => {
       this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildDOMRepeater", (repeater) => {
@@ -122,7 +123,7 @@ export function clearNode(node) {
     
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
-    const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt());
+    const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
     
     // Iterate and remove things that should be removed or outgoing
     let index = node.childNodes.length - 1;
