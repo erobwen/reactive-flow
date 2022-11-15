@@ -19,6 +19,7 @@ Note: This is a compound repository where I experiment with Flow together with o
 * Based on causalityjs (similar to MobX).  
 * Lightweight < 100 kb.
 * Open source 
+* Component stage portals. Since portals works on the component level, the content of a portal can be in place before the portal has mounted. This is an improvement over React that needs to get hold of a node with a ref on mounting, before that node can be used as a portal, this forces React to populate the portal in a second redering pass. This makes the content of a portal work more in line with the contents of any other container.  
 
 
 # Running the demo
