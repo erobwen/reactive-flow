@@ -328,9 +328,17 @@ export class Modal extends Flow {
 /**
  * Portal
  */
- export function portal(...parameters) {
+export function portalEntrance(...parameters) {
   const properties = readFlowProperties(parameters, {singleStringAsText: true});
-  return new Modal(properties);
+  const attributes = extractAttributes(properties);
+  const portalContent = getTarget().elementNode(properties.key + "portalContent", {classNameOverride: "portalContent", tagName: "div", attributes, children: properties.children, portalExit: properties.portalExit, animate: properties.animate});
+  return getTarget().elementNode(properties.key, {classNameOverride: "portalEntrance", tagName: "div", isPortalEntrance: true, portalExit: properties.portalExit, portalContent});
+}
+
+export function portalExit(...parameters) {
+  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const attributes = extractAttributes(properties);
+  return getTarget().elementNode(properties.key, {classNameOverride: "portalExit", tagName: "div", attributes, children: properties.children, isPortalExit: true,  portalContent: null});
 }
 
 /**

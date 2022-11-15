@@ -92,7 +92,7 @@ export class DOMFlowTarget extends FlowTarget {
   getModalTarget() {
     if (!this.modalTarget) {
       this.modalPortal = new DOMElementNode({
-        isPortal: true,
+        isPortalEntrance: true,
         style: {
           position: "absolute",
           top: 0,

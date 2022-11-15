@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle, div, filler } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, flexAutoStyle, div, filler, portalExit } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -20,15 +20,14 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
-    this.leftColumnPortalDiv = div({key: "portal-div", isPortal: true});
-    this.leftColumnPortal = new DOMFlowTarget(this.leftColumnPortalDiv.getDomNode(), {key: "portal", fullWindow: false});
+    this.leftColumnPortal = portalExit({key: "portal", isPortalExit: true});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = [
       new HelloWorld({key: "helloWorld"}),
       new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       new ComplexForm({key: "complexForm", initialData}),
-      new ModalAndPortalExample({key: "modalAndPortalExample"})
+      new ModalAndPortalExample({key: "modalAndPortalExample", portal: this.leftColumnPortal})
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
       // "Recursive Demo": new RecursiveExample({leftColumnPortal: this.leftColumnPortal}),
       // "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
@@ -39,7 +38,7 @@ export class Demo extends Flow {
       component.onEstablish();
     }
 
-    this.choosen = this.components.find(component => component.key === "animationExample");
+    this.choosen = this.components.find(component => component.key === "modalAndPortalExample");
     // this.choosen = this.components["Complex Form Example"];
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
@@ -51,7 +50,7 @@ export class Demo extends Flow {
     for (let name in this.components) {
       this.components[name].onDispose();
     }
-    this.leftColumnPortalDiv.onDispose();
+    this.leftColumnPortal.onDispose();
     this.leftColumnPortal.dispose();
   }
 
@@ -71,7 +70,7 @@ export class Demo extends Flow {
       )
     }
     buttons.push(filler());
-    buttons.push(this.leftColumnPortalDiv);
+    buttons.push(this.leftColumnPortal);
 
     const leftColumn = column(
       buttons,

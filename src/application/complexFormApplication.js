@@ -133,41 +133,43 @@ export class ComplexForm extends Flow {
       return (count === 1) ? "" : ("(" + count + " people)");
     }
 
-    return row(
-      div(
-        column(
-          text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
-          text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
-          new TravelerForm({traveler, isFellowTraveller: false}),
-          column({
-            children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: "id-" + traveler.causality.id, traveler, isFellowTraveller: true})),
-            animateChildren: true  
-          }),
-          row(
+    return (
+      row(
+        div(
+          column(
+            text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
+            text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
+            new TravelerForm({traveler, isFellowTraveller: false}),
+            column({
+              children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: "id-" + traveler.causality.id, traveler, isFellowTraveller: true})),
+              animateChildren: true  
+            }),
+            row(
+              filler(),
+              button({text: "+ Traveler", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}})
+            ),
+            button("Submit", {
+              onClick: () => {
+                this.shouldVerifyData = true;
+                if (!data.anyError) {
+                  this.shouldVerifyData = false; 
+                  alert("Sent form!\n" + JSON.stringify(this.editData, null, 4));
+                }
+              }, 
+              style: {marginTop: "30px"},
+              disabled: data.anyError}),
             filler(),
-            button({text: "+ Traveler", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}})
+            { style: {padding: "30px"}}
           ),
-          button("Submit", {
-            onClick: () => {
-              this.shouldVerifyData = true;
-              if (!data.anyError) {
-                this.shouldVerifyData = false; 
-                alert("Sent form!\n" + JSON.stringify(this.editData, null, 4));
-              }
-            }, 
-            style: {marginTop: "30px"},
-            disabled: data.anyError}),
-          filler(),
-          { style: {padding: "30px"}}
+          { style: {boxSizing: "border-box", height: "100%", overflowY: "scroll"}}
         ),
-        { style: {boxSizing: "border-box", height: "100%", overflowY: "scroll"}}
-      ),
-      filler(),
-      column(
-        text(JSON.stringify(this.editData, null, 4)),
-        {style: {borderLeft: "1px", borderLeftStyle: "solid", borderLeftColor: "lightgray", backgroundColor: "#eeeeee"}}
-      ),
-      {style: flexGrowShrinkStyle}
+        filler(),
+        column(
+          text(JSON.stringify(this.editData, null, 4)),
+          {style: {borderLeft: "1px", borderLeftStyle: "solid", borderLeftColor: "lightgray", backgroundColor: "#eeeeee"}}
+        ),
+        {style: flexGrowShrinkStyle}
+      )
     );
   }
 }
@@ -256,7 +258,6 @@ export class TravelerForm extends Flow {
       luggageDrawer,
       (!this.traveler.luggages.length || this.showLuggage) &&
         addLuggageButton,
-
     );
   }
 }

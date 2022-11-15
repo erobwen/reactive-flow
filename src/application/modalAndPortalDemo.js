@@ -1,6 +1,6 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal, portalEntrance } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
@@ -21,14 +21,27 @@ const loga = (action) => {
  */
 export class ModalAndPortalExample extends Flow {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
-  setState() {
-    this.name = "Modal and Portal Example";
+  setParameters({portal}) {
+    this.portal = portal;
   }
   
+  setState() {
+    this.name = "Modal and Portal Example";
+    this.showPortal = true; 
+    this.portalEntrance = portalEntrance(text("text in portal"), {portalExit: this.portal, key: "portalEntrance", animate: true})
+  }
+
+  disposeState() {
+    this.portalEntrance.onDispose();
+  }
+
   build() {
-    
     return (
-      column(text("portal"))
+      column(
+        button("Toggle", {onClick: ()=> {this.showPortal = !this.showPortal}}),
+        text("portal demo"), 
+        this.showPortal && this.portalEntrance
+      )
     );
   }
 }
@@ -41,10 +54,4 @@ export class ModalAndPortalExample extends Flow {
 export function startModalDemo() {
   const root = new ModalAndPortalExample();
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(root);
-
-  // Emulated user interaction.
-  // console.log(root.buildRepeater.buildIdObjectMap);
-  root.getChild("control-row").getChild("more-button").onClick();
-  root.findChild("more-button").onClick();
-  root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
 }

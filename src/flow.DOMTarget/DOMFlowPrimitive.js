@@ -63,6 +63,31 @@ export function clearNode(node) {
     return result; 
   }
 
+  visibilitySet(isVisible) {
+    if (this.isPortalEntrance) {
+      log("HERE!!!");
+      log("entrance:");
+      log(this);
+      log(this.portalContent);
+      if (isVisible) {
+        if (this.isPortalEntrance) {
+          log("exit:");
+          log(this.portalExit);
+          if (this.portalExit.portalContent !== this.portalContent) {
+            this.portalExit.portalContent = this.portalContent;
+          }
+        }
+      } else {
+        if (this.isPortalEntrance) {
+          if (this.portalExit.portalContent === this.portalContent) {
+            this.portalExit.portalContent = null;
+          }
+        }
+      }
+    } 
+  }
+
+
   getDomNode() {
     this.ensureDomNodeBuilt();
     return this.domNode; 
@@ -77,11 +102,11 @@ export function clearNode(node) {
         
         this.ensureDomNode();
         if (!this.targetDomNode) this.ensureDomNodeAttributesSet();
-        if (!this.isPortal) this.ensureDomNodeChildrenInPlace();
+        if (!this.isPortalEntrance) this.ensureDomNodeChildrenInPlace();
         if (trace) console.groupEnd();  
       }, {priority: 2});
     }
-    return this.domNode;
+    return this.domNode; // Just return null if isPortalEntrance?
   }
 
   createEmptyDomNode() {
@@ -162,6 +187,22 @@ export function clearNode(node) {
     }
 
     console.groupEnd();
+  }
+
+  *iterateChildren() {
+    if (this.isPortalExit) {
+      if (this.portalContent) {
+        yield this.portalContent;
+      }
+    } else if (this.children instanceof Array) {
+      for (let child of this.children) {
+        if (child instanceof Flow && child !== null) {
+          yield child;
+        }
+      }
+    } else if (this.children instanceof Flow  && this.children !== null) {
+      yield this.children;
+    }
   }
 
   getChildNodes() {

@@ -46,6 +46,9 @@ export class FlowPrimitive extends Flow {
           }
         }
 
+        // Populate portals and stuff
+        this.visibilitySet(this.visibleOnTarget);
+
         this.childPrimitives = this.getPrimitiveChildren();
 
         // Expand known children (do as much as possible before integration)
@@ -59,6 +62,8 @@ export class FlowPrimitive extends Flow {
     return this; 
   }
   
+  visibilitySet() {}
+
   *iterateChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {

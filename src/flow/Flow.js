@@ -236,7 +236,11 @@ export class Flow {
       this.buildRepeater.dispose();
     }
     if (this.derriveRepeaters) this.derriveRepeaters.map(repeater => repeater.dispose()); // Do you want a disposed repeater to nullify all its writed values? Probably not....
-
+    if (this.isPortalEntrance) {
+      if (this.portalExit.portalContent === this.portalContent) {
+        this.portalExit.portalContent = null;
+      }
+    }
     this.disposeState();
   }
 
