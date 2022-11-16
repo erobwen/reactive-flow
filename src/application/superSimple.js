@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column } from "../flow.components/BasicFlowComponents";
+import { text, column, button } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 
 const log = console.log;
@@ -22,6 +22,7 @@ export class SuperSimple extends Flow {
     log("BUILD");
     log(this.model.value)
     return column(
+      button("foo", "Foo", ()=> {console.log("pressed Foo!")}),
       text(this.foo), 
 
       text(this.bar), 

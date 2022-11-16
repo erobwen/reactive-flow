@@ -1,3 +1,4 @@
+import { findKeyInProperties } from "../flow/Flow";
 
 /**
  * This is how to declare a simple function flow without state
@@ -9,7 +10,7 @@ export function exampleFlow(...parameters) {
         row({children})
       ]});
     },
-    ...readFlowProperties(parameters)
+    ...findKeyInProperties(readFlowProperties(parameters))
   })
 }
   
@@ -54,7 +55,7 @@ export class ExmapleFlow extends Flow {
         column({children})
       ]});
     },
-    ...readFlowProperties(parameters)
+    ...findKeyInProperties(readFlowProperties(parameters))
   })
 }
 
@@ -62,7 +63,7 @@ export class ExmapleFlow extends Flow {
  * This is how to package a class component in a way so that it can be used without "new".
  * One way is to do this to primitive flows only, so they are easy to distinguish from compound/stateful flows. 
  */
-export const MyComponent = (...parameters) => new MyComponentFlow(readFlowProperties(parameters)); // lean constructor
+export const MyComponent = (...parameters) => new MyComponentFlow(findKeyInProperties(readFlowProperties(parameters))); // lean constructor
 export class MyComponentFlow extends Flow {
   setProperties({count}) {
     this.count = count;

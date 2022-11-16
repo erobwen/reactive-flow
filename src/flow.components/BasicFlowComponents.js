@@ -1,4 +1,4 @@
-import { readFlowProperties, trace, getTarget, Flow } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -7,25 +7,25 @@ const log = console.log;
  */
 
 export function elemenNode(...parameters) {
-  let properties = readFlowProperties(parameters); 
+  let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
   return getTarget().elementNode({key: properties.key, attributes, children: properties.children});
 }
 
 export function textNode(...parameters) {
-  let properties = readFlowProperties(parameters); 
+  let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
   return getTarget().textNode({key: properties.key, attributes, children: properties.children});
 }
 
 export function div(...parameters) {
-  let properties = readFlowProperties(parameters); 
+  let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
   return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children});
 }
 
  function styledDiv(classNameOverride, style, parameters) { 
-  const properties = readFlowProperties(parameters);
+  const properties = findKeyInProperties(readFlowProperties(parameters));
   const attributes = extractAttributes(properties);
   attributes.style = {...style, ...attributes.style}; // Inject row style (while making it possible to override)
   return getTarget().elementNode({key: properties.key, classNameOverride, tagName: "div", attributes, ...properties }); 
@@ -191,7 +191,8 @@ export const filler = (...parameters) => styledDiv("filler", flexGrowShrinkStyle
  */
 
 export function text(...parameters) {
-  let properties = readFlowProperties(parameters, {singleStringAsText: true}); 
+  let properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties);
   const attributes = extractAttributes(properties);
 
   const textProperties = {
@@ -232,7 +233,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}
     error = targetObject[targetProperty + "Error"];
   }
-  const properties = readFlowProperties(parameters);
+  const properties = findKeyInProperties(readFlowProperties(parameters));
 
   const inputAttributes = extractAttributes(properties.inputProperties);
   delete properties.inputProperties;
@@ -272,7 +273,8 @@ export function inputField(type, label, getter, setter, ...parameters) {
 
 export function button(...parameters) { 
   let result; 
-  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const properties = readFlowProperties(parameters);
+  findTextKeyAndOnClickInProperties(properties);
   const attributes = extractAttributes(properties);
   if (properties.disabled) attributes.disabled = true; 
 
@@ -301,7 +303,8 @@ export function button(...parameters) {
  * Modal
  */
 export function modal(...parameters) {
-  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties);
   return new Modal(properties);
 }
 
@@ -329,12 +332,14 @@ export class Modal extends Flow {
  * Portal
  */
 export function portalEntrance(...parameters) {
-  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties);
   return getTarget().elementNode(properties.key, {classNameOverride: "portalEntrance", tagName: "div", isPortalEntrance: true, portalExit: properties.portalExit, portalContent: properties.portalContent});
 }
 
 export function portalExit(...parameters) {
-  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties);
   const attributes = extractAttributes(properties);
   return getTarget().elementNode(properties.key, {classNameOverride: "portalExit", tagName: "div", attributes, children: properties.children, isPortalExit: true,  portalContent: null});
 }

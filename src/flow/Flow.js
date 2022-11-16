@@ -90,7 +90,7 @@ export class Flow {
   }
 
   constructor(...parameters) {
-    let properties = readFlowProperties(parameters);
+    let properties = findKeyInProperties(readFlowProperties(parameters));
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
     // Key & Creator
@@ -471,8 +471,64 @@ export function when(condition, operation) {
   });
 }
 
+export function findKeyInProperties(properties) {
+  if (!properties.stringsAndNumbers) return properties;
+  if (properties.stringsAndNumbers.length) {
+    properties.key = properties.stringsAndNumbers.pop();
+  }
+  if (properties.stringsAndNumbers.length) {
+    throw new Error("Found too many loose strings in flow parameters");
+  }
+  delete properties.stringsAndNumbers;
+  return properties; 
+}
+
+export function findTextAndKeyInProperties(properties) {
+  log("findText and... ")
+  console.log(properties)
+  if (!properties.stringsAndNumbers) return properties;
+  if (properties.stringsAndNumbers.length) {
+    properties.text = properties.stringsAndNumbers.pop();
+  }
+  if (properties.stringsAndNumbers.length) {
+    properties.key = properties.stringsAndNumbers.pop();
+  }
+  if (properties.stringsAndNumbers.length) {
+    throw new Error("Found too many loose strings in flow parameters");
+  }
+  delete properties.stringsAndNumbers;
+  return properties;
+}
+
+export function findTextKeyAndOnClickInProperties(properties) {
+  log("-------------------")
+  findTextAndKeyInProperties(properties);
+  log({...properties});
+  if (!properties.functions) return properties;
+  if (properties.functions.length) {
+    properties.onClick = properties.functions.pop();
+  }
+  if (properties.functions.length) {
+    throw new Error("Found too many loose functions in flow parameters");
+  }
+  delete properties.functions;
+  return properties;
+}
+
+export function findBuildInProperties(properties) {
+  findKeyInProperties(properties);
+  if (!properties.functions) return properties;
+  if (properties.functions.length) {
+    properties.buildFunction = properties.functions.pop();
+  }
+  if (properties.functions.length) {
+    throw new Error("Found too many loose functions in flow parameters");
+  }
+  delete properties.functions;
+  return properties;
+}
+
 export function readFlowProperties(arglist, config) {
-  let singleStringAsText = config ? config.singleStringAsText : null;
   // Shortcut if argument is a properties object
   if (arglist[0] !== null && typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
     return arglist[0];
@@ -480,26 +536,23 @@ export function readFlowProperties(arglist, config) {
 
   // The long way
   let properties = {};
-  let readOneString = false; 
   while (arglist.length > 0) {
     if (typeof arglist[0] === "function" && !arglist[0].causality) {
-      properties.build = arglist.shift();
+      if (!properties.functions) {
+        properties.functions = [];
+      }
+      properties.functions.push(arglist.shift());
     }
 
     // String or numbers
     if ((typeof arglist[0] === "string" || typeof arglist[0] === "number") && !arglist[0].causality) {
-      if (singleStringAsText) {
-        if (!readOneString) {
-          properties.text = arglist.shift();
-        } else {
-          properties.key = properties.text; 
-          properties.text = arglist.shift();
-        }
-      } else {
-        properties.key = arglist.shift(); // Dissaloww... ? 
+      if (!properties.stringsAndNumbers) {
+        properties.stringsAndNumbers = [];
       }
-      readOneString = true;
+      properties.stringsAndNumbers.push(arglist.shift());
     }
+
+    // No argument, skip!
     if (!arglist[0]) {
       arglist.shift();
     }
@@ -540,7 +593,9 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
     buildFunction = descriptionOrBuildFunction;
   }
   function flowBuilder(...parameters) {
-    const flow = new Flow(readFlowProperties(parameters), buildFunction);
+    const properties = findKeyInProperties(readFlowProperties(parameters));
+    properties.buildFunction = buildFunction;
+    const flow = new Flow(properties);
     if (description) flow.description = description;
     return flow;
   }

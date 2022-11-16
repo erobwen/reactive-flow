@@ -40,7 +40,7 @@ export class ModalAndPortalExample extends Flow {
   build() {
     return (
       column(
-        button("Toggle", {onClick: ()=> {this.showPortal = !this.showPortal}}),
+        button("toggle-button", "Toggle", ()=> {this.showPortal = !this.showPortal}),
         text("portal demo"), 
         this.showPortal && this.portalEntrance
       )

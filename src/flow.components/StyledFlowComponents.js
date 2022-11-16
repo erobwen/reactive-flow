@@ -1,8 +1,8 @@
-import { Flow, readFlowProperties } from "../flow/Flow";
+import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
 import { div, text } from "./BasicFlowComponents";
 
 export function button(...parameters) { 
-  const properties = readFlowProperties(parameters, {singleStringAsText: true});
+  const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
   return new ModernButton(properties);
 };
 

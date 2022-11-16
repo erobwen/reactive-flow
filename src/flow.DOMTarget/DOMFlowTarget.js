@@ -1,4 +1,4 @@
-import { observable, repeat, readFlowProperties, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel } from "../flow/Flow";
+import { observable, repeat, readFlowProperties, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel, findKeyInProperties } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
@@ -116,11 +116,11 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   elementNode(...parameters) {
-    return new DOMElementNode(readFlowProperties(parameters));
+    return new DOMElementNode(findKeyInProperties(readFlowProperties(parameters)));
   }
 
   textNode(...parameters) {
-    return new DOMTextNode(readFlowProperties(parameters));
+    return new DOMTextNode(findKeyInProperties(readFlowProperties(parameters)));
   }
 }
 
