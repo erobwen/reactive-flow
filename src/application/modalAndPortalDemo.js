@@ -28,11 +28,13 @@ export class ModalAndPortalExample extends Flow {
   setState() {
     this.name = "Modal and Portal Example";
     this.showPortal = true; 
-    this.portalEntrance = portalEntrance(text("text in portal"), {portalExit: this.portal, key: "portalEntrance", animate: true})
+    this.portalContent = text("text in portal", {key: "content", animate: true});
+    this.portalEntrance = portalEntrance({portalExit: this.portal, key: "portalEntrance", portalContent: this.portalContent})
   }
 
   disposeState() {
     this.portalEntrance.onDispose();
+    this.portalContent.onDispose();
   }
 
   build() {

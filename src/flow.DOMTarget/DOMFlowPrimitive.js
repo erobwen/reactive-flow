@@ -193,7 +193,13 @@ export function clearNode(node) {
   *iterateChildren() {
     if (this.isPortalExit) {
       if (this.portalContent) {
-        yield this.portalContent;
+        if (this.portalContent instanceof Array) {
+          for (let content of this.portalContent) {
+            if (content) yield content;
+          }
+        } else {
+          yield this.portalContent;
+        }
       }
     } else if (this.children instanceof Array) {
       for (let child of this.children) {
