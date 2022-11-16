@@ -27,9 +27,9 @@ export class Demo extends Flow {
       new HelloWorld({key: "helloWorld"}),
       new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       new ComplexForm({key: "complexForm", initialData}),
-      new ModalAndPortalExample({key: "modalAndPortalExample", portal: this.leftColumnPortal})
+      new ModalAndPortalExample({key: "modalAndPortalExample", portal: this.leftColumnPortal}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      // "Recursive Demo": new RecursiveExample({leftColumnPortal: this.leftColumnPortal}),
+      new RecursiveExample({key: "recursiveDemo", name: "RecursiveExample"})
       // "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
       // "Toggle": new ToggleView()
     ];
@@ -69,8 +69,8 @@ export class Demo extends Flow {
         this.buildButton(component), 
       )
     }
-    buttons.push(filler());
     buttons.push(this.leftColumnPortal);
+    buttons.push(filler());
 
     const leftColumn = column(
       buttons,
