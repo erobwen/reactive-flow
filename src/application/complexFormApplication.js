@@ -102,6 +102,32 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
 
 
 /**
+ * Reusable components 
+ */
+
+const panel = flow("panel", ({ children }) =>
+  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+);
+
+export class SimpleDrawer extends Flow {
+ setProperties({openButtonLabel = "Open", closeButtonLabel = "Close", isOpen, toggleOpen, content}) {
+    this.openButtonLabel = openButtonLabel;
+    this.closeButtonLabel = closeButtonLabel;
+    this.isOpen = isOpen;
+    this.toggleOpen = toggleOpen;
+    this.content = content;
+ }
+ build() {
+  const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
+  return column(
+    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}}),
+    column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
+  );
+ }
+}
+
+
+/**
  * Components
  */
 
@@ -146,18 +172,20 @@ export class ComplexForm extends Flow {
             }),
             row(
               filler(),
-              button({text: "+ Traveler", onClick: () => {this.editData.fellowTravellers.push(createTraveler(true))}})
+              button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)))
             ),
-            button("Submit", {
-              onClick: () => {
+            button("Submit", 
+              () => {
                 this.shouldVerifyData = true;
                 if (!data.anyError) {
                   this.shouldVerifyData = false; 
                   alert("Sent form!\n" + JSON.stringify(this.editData, null, 4));
                 }
               }, 
-              style: {marginTop: "30px"},
-              disabled: data.anyError}),
+              {
+                style: {marginTop: "30px"},
+                disabled: data.anyError
+              }),
             filler(),
             { style: {padding: "30px"}}
           ),
@@ -174,22 +202,6 @@ export class ComplexForm extends Flow {
   }
 }
 
-export class SimpleDrawer extends Flow {
-  setProperties({openButtonLabel = "Open", closeButtonLabel = "Close", isOpen, toggleOpen, content}) {
-    this.openButtonLabel = openButtonLabel;
-    this.closeButtonLabel = closeButtonLabel;
-    this.isOpen = isOpen;
-    this.toggleOpen = toggleOpen;
-    this.content = content;
-  }
-  build() {
-    const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
-    return column(
-      button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}}),
-      column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
-    );
-  }
-}
 
 export class TravelerForm extends Flow {
   setProperties({traveler, isFellowTraveller}) {
@@ -204,41 +216,41 @@ export class TravelerForm extends Flow {
   build() {
     const addLuggageButton = row(
       filler(),
-      button(" + Luggage ", {
-        onClick: () => {
+      button(" + Luggage ", 
+        () => {
           transaction(() => {
             this.traveler.luggages.push(model({weight: 1, type: "bag"}));
             this.showLuggage = true;
           });
-        }}),
-        {
-          animate: true, 
-          key: "add-luggage"
-        }
+        }),
+      {
+        animate: true, 
+        key: "add-luggage"
+      }
     ); 
 
     const luggageDrawer = new SimpleDrawer({
-        animate: true,
-        key: "luggages-drawer",
-        closeButtonLabel: "Hide luggage",
-        openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
-        toggleOpen: () => { this.showLuggage = !this.showLuggage },
-        isOpen: this.showLuggage,
-        content: column({key: "luggage-panel"},
-          column({
-            key: "luggage-list",
-            children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
-            animateChildren: true
-          })
-        )
-      });
+      animate: true,
+      key: "luggages-drawer",
+      closeButtonLabel: "Hide luggage",
+      openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
+      toggleOpen: () => { this.showLuggage = !this.showLuggage },
+      isOpen: this.showLuggage,
+      content: column({key: "luggage-panel"},
+        column({
+          key: "luggage-list",
+          children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
+          animateChildren: true
+        })
+      )
+    });
 
     const traveler = this.traveler;
     return panel(
       traveler.isFellowTraveller &&
         row(
           filler(),
-          button(" x ", {onClick: () => {this.creator.editData.fellowTravellers.remove(this.traveler)}})
+          button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)})
         ),
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
@@ -255,10 +267,10 @@ export class TravelerForm extends Flow {
           div({style: {height: "10px"}}),
         ),
       ),
-      this.traveler.luggages.length &&
-      luggageDrawer,
+      this.traveler.luggages.length && 
+        luggageDrawer,
       (!this.traveler.luggages.length || this.showLuggage) &&
-        addLuggageButton,
+        addLuggageButton
     );
   }
 }
@@ -273,19 +285,17 @@ export class LuggageForm extends Flow {
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
-        button(" x ", {onClick: () => {this.creator.traveler.luggages.remove(this.luggage)}})
+        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)})
       )
     );
   }
 }
 
-const panel = flow("panel", ({ children }) =>
-  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
-);
 
 /**
  * This is what you would typically do in index.js to start this app. 
  */
+
 export function startComplexFormApplication() {
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(
     new ComplexForm({initialData})
