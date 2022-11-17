@@ -228,18 +228,18 @@ export class TravelerForm extends Flow {
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
       div({style: {height: "10px"}}),
-      this.isFellowTraveller && checkboxInputField("Is Child", traveler, "isChild"),
-      traveler.isChild && 
-      numberInputField("Age", traveler, "age", {unit: "years", animate: true}),
+
+      // Child info
+      checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
+      numberInputField("Age", traveler, "age", {unit: "years", animate: true}).show(traveler.isChild),
+      
+      // Adress
       column(
-        !traveler.isFellowTraveller &&
-        column(
-          textInputField("Adress", traveler.adress, "adress"),
-          textInputField("Zip code", traveler.adress, "zipCode"),
-          textInputField("City", traveler.adress, "city"), 
-          div({style: {height: "10px"}}),
-        ),
-      ),
+        textInputField("Adress", traveler.adress, "adress"),
+        textInputField("Zip code", traveler.adress, "zipCode"),
+        textInputField("City", traveler.adress, "city"), 
+        div({style: {height: "10px"}}),
+      ).show(!traveler.isFellowTraveller),
 
       // Luggages 
       new SimpleDrawer("luggages-drawer", {

@@ -559,6 +559,7 @@ export function readFlowProperties(arglist, config) {
     // No argument, skip!
     if (!arglist[0]) {
       arglist.shift();
+      continue;
     }
 
     if (arglist[0] === true) {
