@@ -183,9 +183,10 @@ export class SimpleDrawer extends Flow {
     this.content = content;
   }
   build() {
+    const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
     return column(
-      button(this.isOpen ? this.closeButtonLabel : this.openButtonLabel, {style: {margin: "5px"}, onClick: () => this.toggleOpen()}),
-      column({key: "contents", children: [this.isOpen ? this.content : null], animateChildren: true })
+      button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}}),
+      column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
     );
   }
 }

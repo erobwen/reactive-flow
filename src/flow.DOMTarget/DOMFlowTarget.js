@@ -56,62 +56,26 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   setContent(children) {
-    this.children = children;
-
-    this.updateContentHolder();
-  }
-
-  updateContentHolder() {
-    let children = [];
-    if (this.children instanceof Array) {
-      this.children.forEach(child => children.push(child));
-    } else if (this.children instanceof Flow){
-      children.push(this.children);
-    }
-    if (this.modalPortal) {
-      children.push(this.modalPortal);
-    }
-    children.forEach(
+    this.contentHolder.children = children;
+    this.contentHolder.getChildren().forEach(
       child => {
         child.bounds = {width: window.innerWidth, height: window.innerHeight}
         child.target = this;  
         child.ensureEstablished();
       }
-    )    
-    this.contentHolder.children = children;
+    )
     workOnPriorityLevel(1, () => this.contentHolder.ensureBuiltRecursive());
     workOnPriorityLevel(2, () => this.contentHolder.ensureDomNodeBuilt());
   }
 
   removeContent() {
-    log("REMOVE CONTENT---------------------------------------------------------------====================================")
-    this.children = null; 
-    this.updateContentHolder();
+    this.contentHolder.children = null;
+    workOnPriorityLevel(1, () => this.contentHolder.ensureBuiltRecursive());
+    workOnPriorityLevel(2, () => this.contentHolder.ensureDomNodeBuilt());
   }
-
-  getModalTarget() {
-    if (!this.modalTarget) {
-      this.modalPortal = new DOMElementNode({
-        isPortalEntrance: true,
-        style: {
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          // pointerEvents = "none"
-        }
-      });
-      this.modalTarget = new DOMFlowTarget(this.modalPortal.ensureDomNodeBuilt(), {creator: this});
-      this.updateContentHolder();
-    }
-    return this.modalTarget; 
-  } 
 
   dispose() {
     super.dispose();
-    this.modalPortal.dispose();
-    this.modalTarget.dispose();
     if (this.animate) removeDOMFlowTarget(this);
   }
 

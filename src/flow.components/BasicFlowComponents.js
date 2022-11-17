@@ -265,6 +265,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
   if (type === "checkbox") {
     children.push(labelChild);
   } else {
+    children.unshift(filler());
     children.unshift(labelChild);
   }
   
