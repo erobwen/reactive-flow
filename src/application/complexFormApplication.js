@@ -106,7 +106,7 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
  */
 
 const panel = flow("panel", ({ children }) =>
-  div({key: "panel", children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+  div("panel", {children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
 );
 
 export class SimpleDrawer extends Flow {
@@ -167,7 +167,7 @@ export class ComplexForm extends Flow {
             text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
             new TravelerForm({traveler, isFellowTraveller: false}),
             column({
-              children: this.editData.fellowTravellers.map(traveler => new TravelerForm({key: "id-" + traveler.causality.id, traveler, isFellowTraveller: true})),
+              children: this.editData.fellowTravellers.map(traveler => new TravelerForm("id-" + traveler.causality.id, {traveler, isFellowTraveller: true})),
               animateChildren: true  
             }),
             row(
@@ -242,24 +242,22 @@ export class TravelerForm extends Flow {
       ),
 
       // Luggages 
-      new SimpleDrawer({
+      new SimpleDrawer("luggages-drawer", {
         animate: true,
-        key: "luggages-drawer",
         closeButtonLabel: "Hide luggage",
         openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
         toggleOpen: () => { this.showLuggage = !this.showLuggage },
         isOpen: this.showLuggage,
-        content: column({key: "luggage-panel"},
-          column({
-            key: "luggage-list",
-            children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
+        content: column("luggage-panel",
+          column("luggage-list", {
+            children: this.traveler.luggages.map(luggage => new LuggageForm("id-" + luggage.causality.id, {luggage})),
             animateChildren: true
           })
         )
       }).show(this.traveler.luggages.length),
 
       // Add luggages button
-      row(
+      row("add-luggage",
         filler(),
         button(" + Luggage ", 
           () => {
@@ -269,8 +267,7 @@ export class TravelerForm extends Flow {
             });
           }),
         {
-          animate: true, 
-          key: "add-luggage"
+          animate: true
         }
       ).show(!this.traveler.luggages.length || this.showLuggage)
     );
