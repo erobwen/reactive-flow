@@ -460,6 +460,10 @@ export class Flow {
       return null;
     }
   }
+
+  show(value) {
+    return value ? this : null; 
+  }
 }
 
 export function when(condition, operation) {

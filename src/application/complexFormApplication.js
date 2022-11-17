@@ -161,7 +161,7 @@ export class ComplexForm extends Flow {
 
     return (
       row(
-        div(
+        div("scrollPanel",
           column(
             text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
             text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
@@ -191,7 +191,10 @@ export class ComplexForm extends Flow {
           ),
           { style: {boxSizing: "border-box", height: "100%", overflowY: "scroll"}}
         ),
+
         filler(),
+
+        // Model Data Display 
         column(
           text(JSON.stringify(this.editData, null, 4)),
           {style: {borderLeft: "1px", borderLeftStyle: "solid", borderLeftColor: "lightgray", backgroundColor: "#eeeeee"}}
@@ -214,44 +217,14 @@ export class TravelerForm extends Flow {
   }
   
   build() {
-    const addLuggageButton = row(
-      filler(),
-      button(" + Luggage ", 
-        () => {
-          transaction(() => {
-            this.traveler.luggages.push(model({weight: 1, type: "bag"}));
-            this.showLuggage = true;
-          });
-        }),
-      {
-        animate: true, 
-        key: "add-luggage"
-      }
-    ); 
-
-    const luggageDrawer = new SimpleDrawer({
-      animate: true,
-      key: "luggages-drawer",
-      closeButtonLabel: "Hide luggage",
-      openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
-      toggleOpen: () => { this.showLuggage = !this.showLuggage },
-      isOpen: this.showLuggage,
-      content: column({key: "luggage-panel"},
-        column({
-          key: "luggage-list",
-          children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
-          animateChildren: true
-        })
-      )
-    });
-
     const traveler = this.traveler;
     return panel(
-      traveler.isFellowTraveller &&
-        row(
-          filler(),
-          button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)})
-        ),
+      row(
+        filler(),
+        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)})
+      ).show(traveler.isFellowTraveller),
+
+      // Traveler inforation
       textInputField("Name", traveler, "name"),
       textInputField("Passport", traveler, "passportNumber"),
       div({style: {height: "10px"}}),
@@ -267,10 +240,39 @@ export class TravelerForm extends Flow {
           div({style: {height: "10px"}}),
         ),
       ),
-      this.traveler.luggages.length && 
-        luggageDrawer,
-      (!this.traveler.luggages.length || this.showLuggage) &&
-        addLuggageButton
+
+      // Luggages 
+      new SimpleDrawer({
+        animate: true,
+        key: "luggages-drawer",
+        closeButtonLabel: "Hide luggage",
+        openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
+        toggleOpen: () => { this.showLuggage = !this.showLuggage },
+        isOpen: this.showLuggage,
+        content: column({key: "luggage-panel"},
+          column({
+            key: "luggage-list",
+            children: this.traveler.luggages.map(luggage => new LuggageForm({key: "id-" + luggage.causality.id, luggage})),
+            animateChildren: true
+          })
+        )
+      }).show(this.traveler.luggages.length),
+
+      // Add luggages button
+      row(
+        filler(),
+        button(" + Luggage ", 
+          () => {
+            transaction(() => {
+              this.traveler.luggages.push(model({weight: 1, type: "bag"}));
+              this.showLuggage = true;
+            });
+          }),
+        {
+          animate: true, 
+          key: "add-luggage"
+        }
+      ).show(!this.traveler.luggages.length || this.showLuggage)
     );
   }
 }
