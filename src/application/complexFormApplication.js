@@ -163,17 +163,24 @@ export class ComplexForm extends Flow {
       row(
         div("scrollPanel",
           column(
+            // Header            
             text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
             text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
+
+            // Traveler forms
             new TravelerForm({traveler, isFellowTraveller: false}),
             column({
               children: this.editData.fellowTravellers.map(traveler => new TravelerForm("id-" + traveler.causality.id, {traveler, isFellowTraveller: true})),
               animateChildren: true  
             }),
+
+            // Add traveler button
             row(
               filler(),
               button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)))
             ),
+
+            // Submit button
             button("Submit", 
               () => {
                 this.shouldVerifyData = true;
@@ -219,6 +226,7 @@ export class TravelerForm extends Flow {
   build() {
     const traveler = this.traveler;
     return panel(
+      // Remove button
       row(
         filler(),
         button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)})
