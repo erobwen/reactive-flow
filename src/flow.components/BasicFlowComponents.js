@@ -303,44 +303,81 @@ export function button(...parameters) {
 /**
  * Modal
  */
-export function modal(...parameters) {
-  const properties = readFlowProperties(parameters);
-  findTextAndKeyInProperties(properties);
-  return new Modal(properties);
-}
+// export function modal(...parameters) {
+//   const properties = readFlowProperties(parameters);
+//   findTextAndKeyInProperties(properties);
+//   return new Modal(properties);
+// }
 
-export class Modal extends Flow {
-  // setProperties({children}) {
-  //   this.child = (children instanceof Array) ? children[0] : children;
-  //   this.children = null; // Avoid children for the initiator 
-  // }
+// export class Modal extends Flow {
+//   // setProperties({children}) {
+//   //   this.child = (children instanceof Array) ? children[0] : children;
+//   //   this.children = null; // Avoid children for the initiator 
+//   // }
 
-  setState() {
-  }
+//   setState() {
+//     this.target.getModalTarget().setContent(this.content);
+//   }
 
-  disposeState() {
-  }
+//   disposeState() {
+//     this.target.getModalTarget().removeContent();
+//   }
 
-  // build() {
-  //   this.target.getModalTarget().setContent(this.content);
-  //   return null;
-  // }
-}
+//   // build() {
+//   //   this.target.getModalTarget().setContent(this.content);
+//   //   return null;
+//   // }
+// }
 
 /**
- * Portal
+ * Portals
  */
 export function portalEntrance(...parameters) {
   const properties = readFlowProperties(parameters);
-  findTextAndKeyInProperties(properties);
-  return getTarget().elementNode(properties.key, {classNameOverride: "portalEntrance", tagName: "div", isPortalEntrance: true, portalExit: properties.portalExit, portalContent: properties.portalContent});
+  findKeyInProperties(properties);
+  return new PortalEntrance(properties);
+}
+
+export class PortalEntrance extends Flow {
+  setProperties({portalContent, portalExit}) {
+    this.portalExit = portalExit; 
+    this.portalContent = portalContent;
+  }
+  
+  visibilitySet(isVisible) {
+    log("HERE!!!");
+    log("entrance:");
+    log(this);
+    log(this.portalContent);
+    if (isVisible) {
+      log("exit:");
+      log(this.portalExit);
+      if (this.portalExit.children !== this.portalContent) {
+        this.portalExit.children = this.portalContent;
+      }
+    } else {
+      if (this.portalExit.children === this.portalContent) {
+        this.portalExit.children = null;
+      }
+    }
+  }
+
+  build() {
+    return div();
+  }
 }
 
 export function portalExit(...parameters) {
   const properties = readFlowProperties(parameters);
-  findTextAndKeyInProperties(properties);
+  findKeyInProperties(properties);
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode(properties.key, {classNameOverride: "portalExit", tagName: "div", attributes, children: properties.children, isPortalExit: true,  portalContent: null});
+  return getTarget().elementNode(properties.key, 
+    { 
+      classNameOverride: "portalExit", 
+      tagName: "div", 
+      attributes, 
+    }
+  );
 }
 
 /**

@@ -47,7 +47,16 @@ export class FlowPrimitive extends Flow {
         }
 
         // Populate portals and stuff
-        this.visibilitySet(this.visibleOnTarget);
+        let scan = this.equivalentCreator; 
+        while(scan) {
+          if (scan.visibleOnTarget === this.visibleOnTarget) {
+            scan = null; 
+          } else {
+            scan.visibleOnTarget = this.visibleOnTarget;
+            scan.visibilitySet(this.visibleOnTarget);
+            scan = scan.equivalentCreator;
+          }
+        }
 
         this.childPrimitives = this.getPrimitiveChildren();
 

@@ -157,15 +157,15 @@ export function onFinishReBuildingFlow() {
   }
   
   // On will unmount
-  for (let flow of Object.values(flowChanges.globallyRemoved)) {
-    let scan = flow; 
-    while(scan) {
-      creators.push(scan);
-      scan.onWillUnmount();
-      creators.pop();
-      scan = scan.equivalentCreator;
-    } 
-  }
+  // for (let flow of Object.values(flowChanges.globallyRemoved)) {
+  //   let scan = flow; 
+  //   while(scan) {
+  //     creators.push(scan);
+  //     scan.onWillUnmount();
+  //     creators.pop();
+  //     scan = scan.equivalentCreator;
+  //   } 
+  // }
 
   if (previousFlowChanges.globallyAddedAnimated) {
     // log("CLEANUP")
@@ -210,15 +210,15 @@ export function onFinishReBuildingDOM() {
   // log(flowChanges);
 
   // On did mount
-  for (let flow of Object.values(globallyAdded)) {
-    let scan = flow; 
-    while(scan) {
-      creators.push(scan);
-      scan.onDidMount();
-      creators.pop();
-      scan = scan.equivalentCreator;
-    } 
-  }
+  // for (let flow of Object.values(globallyAdded)) {
+  //   let scan = flow; 
+  //   while(scan) {
+  //     creators.push(scan);
+  //     scan.onDidMount();
+  //     creators.pop();
+  //     scan = scan.equivalentCreator;
+  //   } 
+  // }
   
   requestAnimationFrame(() => {
 

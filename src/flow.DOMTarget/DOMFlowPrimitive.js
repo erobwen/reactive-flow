@@ -63,31 +63,6 @@ export function clearNode(node) {
     return result; 
   }
 
-  visibilitySet(isVisible) {
-    if (this.isPortalEntrance) {
-      log("HERE!!!");
-      log("entrance:");
-      log(this);
-      log(this.portalContent);
-      if (isVisible) {
-        if (this.isPortalEntrance) {
-          log("exit:");
-          log(this.portalExit);
-          if (this.portalExit.portalContent !== this.portalContent) {
-            this.portalExit.portalContent = this.portalContent;
-          }
-        }
-      } else {
-        if (this.isPortalEntrance) {
-          if (this.portalExit.portalContent === this.portalContent) {
-            this.portalExit.portalContent = null;
-          }
-        }
-      }
-    } 
-  }
-
-
   getDomNode() {
     this.ensureDomNodeBuilt();
     return this.domNode; 
@@ -191,17 +166,7 @@ export function clearNode(node) {
   }
 
   *iterateChildren() {
-    if (this.isPortalExit) {
-      if (this.portalContent) {
-        if (this.portalContent instanceof Array) {
-          for (let content of this.portalContent) {
-            if (content) yield content;
-          }
-        } else {
-          yield this.portalContent;
-        }
-      }
-    } else if (this.children instanceof Array) {
+    if (this.children instanceof Array) {
       for (let child of this.children) {
         if (child instanceof Flow && child !== null) {
           yield child;

@@ -223,10 +223,6 @@ export class Flow {
     }
   }
 
-  onWillUnmount() {}
-  
-  onDidMount() {}
-
   onDispose() {
     delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 
@@ -236,12 +232,13 @@ export class Flow {
       this.buildRepeater.dispose();
     }
     if (this.derriveRepeaters) this.derriveRepeaters.map(repeater => repeater.dispose()); // Do you want a disposed repeater to nullify all its writed values? Probably not....
-    if (this.isPortalEntrance) {
-      if (this.portalExit.portalContent === this.portalContent) {
-        this.portalExit.portalContent = null;
-      }
-    }
     this.disposeState();
+  }
+
+  visibilitySet(visibility) {
+    // Called if the visibility is changed for this component. 
+    // Since Flow allows hidden component that maintain their state but are not disposed, 
+    // this is how you know if your component is visible.  
   }
 
   className() {
