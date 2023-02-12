@@ -357,7 +357,13 @@ export class Flow {
 
           // Establish relationship between equivalent child and this (its creator).
           if (me.newBuild !== null) {
-            me.newBuild.equivalentCreator = me;
+            if (me.newBuild instanceof Array) {
+              for (let fragment of me.newBuild) {
+                fragment.equivalentCreator = me;
+              }
+            } else {
+              me.newBuild.equivalentCreator = me;
+            }
             me.equivalentChild = me.newBuild;
           }
           

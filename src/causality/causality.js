@@ -1345,6 +1345,9 @@ function createWorld(configuration) {
     if (options.onStartBuildUpdate) options.onStartBuildUpdate();
 
     function translateReference(reference) {
+      if (reference instanceof Array) {
+        return reference.map(fragment => translateReference(fragment));
+      }
       if (isObservable(reference)) {
         if (reference[objectMetaProperty].copyTo) {
           return reference[objectMetaProperty].copyTo;
