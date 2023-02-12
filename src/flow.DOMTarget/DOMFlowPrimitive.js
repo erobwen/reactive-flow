@@ -70,7 +70,6 @@ export function clearNode(node) {
   
   ensureDomNodeBuilt() {
     finalize(this);
-    if (this.isPortalEntrance) return null; // TODO: only for some portals? Or all?
     if (!this.buildDOMRepeater) {
       // this.buildDOMRepeater = repeat(mostAbstractFlow(this).toString() + ".buildDOMRepeater", (repeater) => {
       this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildDOMRepeater", (repeater) => {
@@ -78,11 +77,11 @@ export function clearNode(node) {
         
         this.ensureDomNode();
         this.ensureDomNodeAttributesSet();
-        if (!this.isPortalEntrance) this.ensureDomNodeChildrenInPlace();
+        this.ensureDomNodeChildrenInPlace();
         if (trace) console.groupEnd();  
       }, {priority: 2});
     }
-    return this.domNode; // Just return null if isPortalEntrance?
+    return this.domNode;
   }
 
   createEmptyDomNode() {

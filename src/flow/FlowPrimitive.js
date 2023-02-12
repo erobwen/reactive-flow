@@ -53,7 +53,7 @@ export class FlowPrimitive extends Flow {
             scan = null; 
           } else {
             scan.visibleOnTarget = this.visibleOnTarget;
-            scan.visibilitySet(this.visibleOnTarget);
+            scan.onVisibilityWillChange(!!this.visibleOnTarget);
             scan = scan.equivalentCreator;
           }
         }
@@ -71,7 +71,7 @@ export class FlowPrimitive extends Flow {
     return this; 
   }
   
-  visibilitySet() {}
+  onVisibilityWillChange() {}
 
   *iterateChildren() {
     if (this.children instanceof Array) {

@@ -344,14 +344,18 @@ export class PortalEntrance extends Flow {
     this.portalContent = portalContent;
   }
   
-  visibilitySet(isVisible) {
+  onVisibilityWillChange(isVisible) {
     log("HERE!!!");
-    log("entrance:");
+    log(isVisible);
+
+    // Note: This is happening inside the expander repeater of a primitive... 
+    // Could this cause a problem? Do we need to do this visibility change with a different priority? 
+
     log(this);
-    log(this.portalContent);
+    // log(this.portalContent);
     if (isVisible) {
-      log("exit:");
-      log(this.portalExit);
+    //   log("exit:");
+    //   log(this.portalExit);
       if (this.portalExit.children !== this.portalContent) {
         this.portalExit.children = this.portalContent;
       }
@@ -363,7 +367,7 @@ export class PortalEntrance extends Flow {
   }
 
   build() {
-    return div();
+    return text("[portal active]");
   }
 }
 

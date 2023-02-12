@@ -235,7 +235,7 @@ export class Flow {
     this.disposeState();
   }
 
-  visibilitySet(visibility) {
+  onVisibilityWillChange(visibility) {
     // Called if the visibility is changed for this component. 
     // Since Flow allows hidden component that maintain their state but are not disposed, 
     // this is how you know if your component is visible.  

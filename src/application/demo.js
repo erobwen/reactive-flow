@@ -20,7 +20,7 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
-    this.leftColumnPortal = portalExit({key: "portal", isPortalExit: true});
+    this.leftColumnPortal = portalExit({key: "portal"});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = [
