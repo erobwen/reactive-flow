@@ -15,8 +15,6 @@ export class DOMFlowTarget extends FlowTarget {
     if (!this.key) this.key = configuration.key ? configuration.key : null;
     this.animate = typeof(configuration.animate) === "undefined" ? true : configuration.animate; 
     if (this.animate) addDOMFlowTarget(this);
-    this.contentHolder = new DOMElementNode({targetDomNode: rootElement, tagName: rootElement.tagName});
-    this.contentHolder.visibleOnTarget = this; 
     this.creator = creator;
     this.rootElement = rootElement;
     if (fullWindow) {
@@ -55,23 +53,16 @@ export class DOMFlowTarget extends FlowTarget {
     return "[target]" + (this.content ? this.content.toString() : "null");
   }
 
-  setContent(children) {
-    this.contentHolder.children = children;
-    this.contentHolder.getChildren().forEach(
-      child => {
-        child.bounds = {width: window.innerWidth, height: window.innerHeight}
-        child.target = this;  
-        child.ensureEstablished();
-      }
-    )
-    workOnPriorityLevel(1, () => this.contentHolder.ensureBuiltRecursive());
-    workOnPriorityLevel(2, () => this.contentHolder.ensureDomNodeBuilt());
-  }
-
-  removeContent() {
-    this.contentHolder.children = null;
-    workOnPriorityLevel(1, () => this.contentHolder.ensureBuiltRecursive());
-    workOnPriorityLevel(2, () => this.contentHolder.ensureDomNodeBuilt());
+  setContent(flow) {
+    this.flow = flow; 
+    flow.bounds = {width: window.innerWidth, height: window.innerHeight}
+    flow.target = this;  
+    flow.visibleOnTarget = this; 
+    flow.ensureEstablished();
+    workOnPriorityLevel(1, () => this.flow.ensureBuiltRecursive());
+    if (flow.getPrimitive() instanceof Array) throw new Error("Cannot have fragments on the top level");
+    flow.getPrimitive().givenDomNode = this.rootElement;
+    workOnPriorityLevel(2, () => this.flow.getPrimitive().ensureDomNodeBuilt());
   }
 
   dispose() {
@@ -91,9 +82,6 @@ export class DOMFlowTarget extends FlowTarget {
 
 
 
-    // if (this.contentHolder.children) {
-    //   this.contentHolder.getChildren().forEach(child => child.onRemoveFromFlowTarget()) 
-    // }
 
   // setupModalDiv() {
   //   const div = document.createElement("div");

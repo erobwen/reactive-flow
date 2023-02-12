@@ -85,7 +85,7 @@ export function onFinishReBuildingFlow() {
   }
   
   for (let target of domFlowTargets) {
-    analyzePrimitives(idPrimitiveMap, target.contentHolder);
+    analyzePrimitives(idPrimitiveMap, target.flow.getPrimitive());
   }
 
   if (flowChanges.globallyAddedAnimated) {

@@ -102,7 +102,7 @@ export function clearNode(node) {
         if (trace) console.group(repeater.causalityString());
         
         this.ensureDomNode();
-        if (!this.targetDomNode) this.ensureDomNodeAttributesSet();
+        this.ensureDomNodeAttributesSet();
         if (!this.isPortalEntrance) this.ensureDomNodeChildrenInPlace();
         if (trace) console.groupEnd();  
       }, {priority: 2});
@@ -217,8 +217,8 @@ export function clearNode(node) {
   }
 
   ensureDomNode() { 
-    if (this.targetDomNode) {
-      this.domNode = this.targetDomNode;
+    if (this.givenDomNode) {
+      this.domNode = this.givenDomNode;
       this.domNode.id = aggregateToString(this);
       this.domNode.equivalentCreator = this; 
     } else if (!this.createElementRepeater) {

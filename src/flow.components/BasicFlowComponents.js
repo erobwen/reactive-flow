@@ -316,11 +316,9 @@ export class Modal extends Flow {
   // }
 
   setState() {
-    this.target.getModalTarget().setContent(this.content);
   }
 
   disposeState() {
-    this.target.getModalTarget().removeContent();
   }
 
   // build() {
