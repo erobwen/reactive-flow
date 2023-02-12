@@ -55,6 +55,7 @@ export class ModalAndPortalExample extends Flow {
         ), 
         portalEntrance(
           {
+            // children: text("[portal active]"), Will create infinite loop! investigate! 
             portalExit: this.portal, 
             key: "portalEntrance", 
             portalContent 

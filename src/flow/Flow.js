@@ -239,6 +239,8 @@ export class Flow {
     // Called if the visibility is changed for this component. 
     // Since Flow allows hidden component that maintain their state but are not disposed, 
     // this is how you know if your component is visible.  
+    // Tips: It might be better do do a derrive and simply reading isVisible instead of 
+    // overloading this method. 
   }
 
   className() {

@@ -356,31 +356,10 @@ export class PortalEntrance extends Flow {
         }
     });
   }
-  
-  // onVisibilityWillChange(isVisible) {
-  //   log("HERE!!!");
-  //   log(isVisible);
-
-  //   // Note: This is happening inside the expander repeater of a primitive... 
-  //   // Could this cause a problem? Do we need to do this visibility change with a different priority? 
-
-  //   log(this);
-  //   // log(this.portalContent);
-  //   if (isVisible) {
-  //   //   log("exit:");
-  //   //   log(this.portalExit);
-  //     if (this.portalExit.children !== this.portalContent) {
-  //       this.portalExit.children = this.portalContent;
-  //     }
-  //   } else {
-  //     if (this.portalExit.children === this.portalContent) {
-  //       this.portalExit.children = null;
-  //     }
-  //   }
-  // }
 
   build() {
     return text("[portal active]");
+    // return this.children;
   }
 }
 
