@@ -288,7 +288,16 @@ export class Flow {
 
   findChild(key) {
     if (this.key === key) return this;
-    return this.getPrimitive().findChild(key);
+    const primitive = this.getPrimitive();
+    if (primitive instanceof Array) {
+      for (let fragment of primitive) {
+        const result = fragment.findChild();
+        if (result) return result; 
+      }
+      return null;
+    } else {
+      return primitive.findChild(key);
+    }
   }
 
   getChild(keyOrPath) {
@@ -449,6 +458,7 @@ export class Flow {
   dimensions() {
     if (!this.key) console.warn("It is considered unsafe to use dimensions on a flow without a key. The reason is that a call to dimensions from a parent build function will finalize the flow early, and without a key, causality cannot send proper onEstablish event to your flow component before it is built");
     const primitive = this.getPrimitive();
+    if (primitive instanceof Array) throw new Error("Dimensions not supported for fragmented components.");
     return primitive ? primitive.dimensions() : null;
   }
 
