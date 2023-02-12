@@ -307,6 +307,11 @@ export function onFinishReBuildingDOM() {
       }
       for (let flow of globallyRemovedAnimated) {
         flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+        // () => {
+        //   return !(
+        //     flow.parentPrimitive && flow.parentPrimitive.childPrimitives && flow.parentPrimitive.childPrimitives.includes(flow)
+        //   );
+        // });
       } 
    }); 
   })
