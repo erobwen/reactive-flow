@@ -1359,7 +1359,17 @@ function createWorld(configuration) {
       const shapeAnalysis = repeater.options.rebuildShapeAnalysis;
       
       // console.group("reBuildShapeAnalysis");
-      matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
+      if (repeater.establishedRoot instanceof Array || shapeAnalysis.shapeRoot() instanceof Array) {
+        // If one shape root is array, compare as arrays.
+        let establishedRootArray = repeater.establishedRoot;
+        let shapeRootArray = shapeAnalysis.shapeRoot();
+        if (!(establishedRootArray instanceof Array)) establishedRootArray = [establishedRootArray];
+        if (!(shapeRootArray instanceof Array)) shapeRootArray = [shapeRootArray];
+        matchChildrenInEquivalentSlot(establishedRootArray, shapeRootArray)
+      } else {
+        // Match two ordinary shape roots
+        matchInEquivalentSlot(repeater.establishedShapeRoot, shapeAnalysis.shapeRoot());
+      }
       for(let id in  repeater.newIdObjectShapeMap) {
         const newObject = repeater.newIdObjectShapeMap[id];
         const temporaryObject = newObject[objectMetaProperty].forwardTo;

@@ -356,7 +356,21 @@ export class Flow {
           creators.pop();
          
           // Recursive call
-          me.primitive = me.newBuild !== null ? me.newBuild.getPrimitive(parentPrimitive) : null;
+          if (!me.newBuild) {
+            me.primitive = null; 
+          } else if (!(me.newBuild instanceof Array)) {
+            me.primitive = me.newBuild.getPrimitive(parentPrimitive) 
+          } else {
+            me.primitive = me.newBuild
+              .map(fragment => fragment.getPrimitive(parentPrimitive))
+              .reduce((result, childPrimitive) => {
+                if (childPrimitive instanceof Array) {
+                  childPrimitive.forEach(fragment => result.push(fragment));
+                } else {
+                  result.push(childPrimitive);
+                }
+              }, []);
+          }
 
           if (trace) console.groupEnd();
         }, 
@@ -453,7 +467,7 @@ export class Flow {
   inheritPropertyFromEquivalent(property) {
     const propertyValue = this[property];
     if (typeof(propertyValue) !== "undefined") {
-      return this[property]
+      return propertyValue;
     } else if (this.equivalentCreator) {
       return this.equivalentCreator.inheritPropertyFromEquivalent(property);
     } else {

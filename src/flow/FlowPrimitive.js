@@ -79,7 +79,13 @@ export class FlowPrimitive extends Flow {
   *iteratePrimitiveChildren() {
     for(let child of this.iterateChildren()) {
       let primitive = child.getPrimitive(this);
-      if (primitive) yield primitive;
+      if (primitive instanceof Array) {
+        for (let fragment of primitive) { 
+          yield fragment; 
+        }
+      } else {
+        if (primitive) yield primitive;
+      }
     }
   }
 
