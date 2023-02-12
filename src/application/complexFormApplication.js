@@ -6,7 +6,7 @@ import { button } from "../flow.components/StyledFlowComponents";
 const log = console.log;
 
 /**
- * Data model
+ * Data model. Plain Javascript
  */
 
 export const initialData = model({
@@ -38,7 +38,7 @@ function createTraveler(isFellowTraveller) {
 
 
 /**
- * Cost calculator
+ * Cost calculator. Plain Javascript
  */
 
 
@@ -60,7 +60,7 @@ function calculateCost(data) {
 
 
 /**
- * Travlers verifier
+ * Travlers verifier. Plain Javascript
  */
 
  function verifyData(editData) {
@@ -102,7 +102,7 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
 
 
 /**
- * Reusable components 
+ * Reusable components. Plain Javascript
  */
 
 const panel = flow("panel", ({ children }) =>
@@ -128,7 +128,7 @@ export class SimpleDrawer extends Flow {
 
 
 /**
- * Components
+ * Components. Plain Javascript
  */
 
 export class ComplexForm extends Flow {
