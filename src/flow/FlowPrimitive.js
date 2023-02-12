@@ -30,8 +30,11 @@ export class FlowPrimitive extends Flow {
     return this;
   }
 
-  ensureBuiltRecursive() {
+  ensureBuiltRecursive(flowTarget) {
     const name = this.toString(); // For chrome debugger
+    
+    if (flowTarget) this.visibleOnTarget = flowTarget;
+
     finalize(this); // Finalize might not work if no key was used, it might not call onEstablish.
     if (!this.expandRepeater) {
       this.expandRepeater = repeat(this.toString() + ".expandRepeater", repeater => {
@@ -58,6 +61,7 @@ export class FlowPrimitive extends Flow {
           }
         }
 
+        // This will trigger getPrimitive on abstract child flows. 
         this.childPrimitives = this.getPrimitiveChildren();
 
         // Expand known children (do as much as possible before integration)

@@ -56,12 +56,11 @@ export class DOMFlowTarget extends FlowTarget {
   setContent(flow) {
     this.flow = flow; 
     flow.bounds = {width: window.innerWidth, height: window.innerHeight}
-    flow.target = this;   
+    flow.target = this;
     flow.ensureEstablished();
-    workOnPriorityLevel(1, () => this.flow.ensureBuiltRecursive());
+    workOnPriorityLevel(1, () => this.flow.ensureBuiltRecursive(this));
     if (flow.getPrimitive() instanceof Array) throw new Error("Cannot have fragments on the top level");
     flow.getPrimitive().givenDomNode = this.rootElement;
-    flow.getPrimitive().visibleOnTarget = this;
     workOnPriorityLevel(2, () => this.flow.getPrimitive().ensureDomNodeBuilt());
   }
 

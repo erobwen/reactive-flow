@@ -326,8 +326,8 @@ export class Flow {
     }
   }
 
-  ensureBuiltRecursive() {
-    workOnPriorityLevel(1, () => this.getPrimitive(null).ensureBuiltRecursive());
+  ensureBuiltRecursive(flowTarget) {
+    workOnPriorityLevel(1, () => this.getPrimitive().ensureBuiltRecursive(flowTarget));
     return this.getPrimitive();
   }
 
@@ -515,8 +515,7 @@ export function findKeyInProperties(properties) {
 }
 
 export function findTextAndKeyInProperties(properties) {
-  log("findText and... ")
-  console.log(properties)
+  // console.log(properties)
   if (!properties.stringsAndNumbers) return properties;
   if (properties.stringsAndNumbers.length) {
     properties.text = properties.stringsAndNumbers.pop();
@@ -532,9 +531,7 @@ export function findTextAndKeyInProperties(properties) {
 }
 
 export function findTextKeyAndOnClickInProperties(properties) {
-  log("-------------------")
   findTextAndKeyInProperties(properties);
-  log({...properties});
   if (!properties.functions) return properties;
   if (properties.functions.length) {
     properties.onClick = properties.functions.pop();

@@ -25,7 +25,6 @@ export class RecursiveExample extends Flow {
 
   // Lifecycle function onEstablish when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
   setState() {
-    log("SET STATE==========================================================")
     this.count = 1
     this.myModel = observable({
       value: 42 
