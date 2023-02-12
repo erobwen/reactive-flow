@@ -1,6 +1,6 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal, portalEntrance } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, extractAttributes, wrapper, centerMiddle, modal, portalEntrance, filler } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
@@ -21,27 +21,46 @@ const loga = (action) => {
  */
 export class ModalAndPortalExample extends Flow {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
-  setParameters({portal}) {
+  setProperties({portal}) {
+    this.name = "Modal and Portal Example";
     this.portal = portal;
   }
   
   setState() {
-    this.name = "Modal and Portal Example";
     this.showPortal = true;
+    this.showFlyingTextInPortal = false; 
   }
 
   build() {
+    const flyingText = text("flying text in portal", {key: "flying-content", animate: true}); 
+    const staticText = text("text in portal", {key: "content", animate: true})
+
+    const portalContent = [staticText];
+    if (this.showFlyingTextInPortal) portalContent.push(flyingText)
+
+    // return flyingText; 
+
     return (
       column(
-        button("toggle-button", "Toggle", ()=> {this.showPortal = !this.showPortal}),
-        text("portal demo"), 
+        text("portal demo"),
+        row(
+          button(this.showPortal ? "Close Portal" : "Open Portal", ()=> {this.showPortal = !this.showPortal}),
+          filler()
+        ),
+        row(
+          button(this.showFlyingTextInPortal ? "Fly from portal" : "Fly to portal", ()=> {this.showFlyingTextInPortal = !this.showFlyingTextInPortal}),
+          flyingText.show(!this.showFlyingTextInPortal),
+          filler(),
+          {style: {overflow: "visible"}}
+        ), 
         portalEntrance(
           {
             portalExit: this.portal, 
             key: "portalEntrance", 
-            portalContent: text("text in portal", {key: "content", animate: true})
+            portalContent 
           })
-          .show(this.showPortal)
+          .show(this.showPortal),
+        {style: {overflow: "visible"}}
       )
     );
   }

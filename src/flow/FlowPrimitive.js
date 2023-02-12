@@ -56,7 +56,8 @@ export class FlowPrimitive extends Flow {
             scan = null; 
           } else {
             scan.visibleOnTarget = this.visibleOnTarget;
-            scan.onVisibilityWillChange(!!this.visibleOnTarget);
+            scan.isVisible = !!this.visibleOnTarget
+            scan.onVisibilityWillChange(scan.isVisible);
             scan = scan.equivalentCreator;
           }
         }

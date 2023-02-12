@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle, div, filler, portalExit } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, flexAutoStyle, div, filler, portalExit, columnStyle } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -20,7 +20,7 @@ const log = console.log;
 // A very simple view component
 export class Demo extends Flow {
   setState() {
-    this.leftColumnPortal = portalExit({key: "portal"});
+    this.leftColumnPortal = portalExit({key: "portal", style: {...columnStyle, overflow: "visible"}});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = [
@@ -75,7 +75,7 @@ export class Demo extends Flow {
     const leftColumn = column(
       buttons,
       {key: "left-column", 
-       style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray"}}
+       style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray", overflow: "visible"}}
     );
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
     // this.choosen.leftColumnPortal =  this.leftColumnPortal;  
@@ -83,7 +83,7 @@ export class Demo extends Flow {
     return row(
       leftColumn, 
       this.choosen, 
-      {style: {height: "100%"}}
+      {style: {height: "100%", overflow: "visible"}}
     )
   }
 }

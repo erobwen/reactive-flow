@@ -143,6 +143,7 @@ export function clearNode(node) {
           if (animation) {
             const newPrimitiveDomNode = newPrimitive.domNode; 
             if (!newPrimitiveDomNode.disappearingExpander) {
+              //&& newPrimitiveDomNode.parentNode
               newPrimitiveDomNode.parentNode.insertBefore(animation.getDisappearingReplacement(newPrimitiveDomNode), newPrimitiveDomNode);
               newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
             }
