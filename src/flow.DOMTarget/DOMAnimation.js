@@ -48,7 +48,12 @@ function findAndRecordOriginalBoundsOfOrigin(flow) {
       
   // Scan and mark old dom structure
   let scan = flow.domNode.parentNode; 
-  if (!scan) throw new Error("Did not expect an animated without a parent!")
+  if (!scan) {
+    console.log(flow);
+    console.log(flow.domNode);
+    console.log(scan);
+    throw new Error("Did not expect an animated without a parent!")
+  } 
   while (scan) {
     scan.originMark = originMark;
     scan = scan.parentNode;

@@ -36,7 +36,7 @@ export class ModalAndPortalExample extends Flow {
     const staticText = text("text in portal", {key: "content", animate: true})
 
     const portalContent = [staticText];
-    if (this.showFlyingTextInPortal) portalContent.push(flyingText)
+    // if (this.showFlyingTextInPortal) portalContent.push(flyingText)
 
     // return flyingText; 
 

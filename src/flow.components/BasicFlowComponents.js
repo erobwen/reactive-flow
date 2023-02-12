@@ -358,6 +358,7 @@ export class PortalEntrance extends Flow {
   }
 
   build() {
+    // return null;
     return text("[portal active]");
     // return this.children;
   }

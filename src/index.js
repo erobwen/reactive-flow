@@ -27,12 +27,12 @@ setFlowConfiguration({
 });
 installDOMAnimation();
 
-// startSuperSimple();
+startSuperSimple();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
 // startAnimationExample();
 // startComplexFormApplication();
-startDemo();
+// startDemo();
 // startPatternMatching();
 

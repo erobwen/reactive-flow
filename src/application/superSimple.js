@@ -5,54 +5,19 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 const log = console.log;
 
 /**
- * Flow definitions
+ * Minimalistic component used for experiments. 
  */
-
-// A very simple model
-const model = observable({value: ""});
-
-// A very simple view component
 export class SuperSimple extends Flow {
   setState() {
-    this.foo = "foo";
-    this.bar = "bar"
+    this.showText = true; 
   }
 
   build() {
-    log("BUILD");
-    log(this.model.value)
     return column(
-      button("foo", "Foo", ()=> {console.log("pressed Foo!")}),
-      text(this.foo), 
-
-      text(this.bar), 
-      text(this.model.value), 
+      button("foo", "Foo", ()=> { this.showText = !this.showText}),
+      text("Some text", {animate: true, key: "my-text"}).show(this.showText),
       {style: {fontSize: "40px", padding: "20px"}}
     );
-  }
-
-  reset() {
-    this.model.value = "";
-    this.foo = "foo";
-    this.bar = "bar";
-  }
-
-  timedChanges() {
-    this.reset();
-    setTimeout(() => {
-      log("----------------------------------");
-      this.foo = "FOO";
-    }, 1000);
-  
-    setTimeout(() => {
-      log("----------------------------------");
-      this.bar = "BAR";
-    }, 2000);
-  
-    setTimeout(() => {
-      log("----------------------------------");
-      this.model.value = "FUM";
-    }, 3000);  
   }
 }
 
@@ -60,8 +25,6 @@ export class SuperSimple extends Flow {
  * This is what you would typically do in index.js to start this app. 
  */
 export function startSuperSimple() {
-  const simple = new SuperSimple({model})
-  simple.timedChanges();
-  
+  const simple = new SuperSimple()  
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(simple)
 }
