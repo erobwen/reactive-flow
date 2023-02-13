@@ -188,29 +188,44 @@ export class DOMFlipAnimation {
     } 
   }
 
+  getAnimatedProperties(computedStyle) {
+    const result = {};
+    animatedProperties.forEach(property => {
+      if (typeof property === "string") {
+        result[property] = computedStyle[property]
+      } else {
+        property.partial.forEach(partialProperty => {
+          result[partialProperty] = computedStyle[partialProperty]
+        });
+      }
+    });
+    return result; 
+  }
+
   residentOriginalStyle(node) {
     // return {...node.computedOriginalStyle}; 
     // If we could animate to auto, this would be a place to freeze the current style, so that we can animate from it. 
     // If the node has moved to another context, it might otherwise instantly change to a style of that context, 
     // And we want the change to be gradual. 
     // console.log("original: " + node.computedOriginalStyle.fontSize);
-    const result = {};
     // console.log(node.computedOriginalStyle);
-    animatedProperties.forEach(property => result[property] = node.computedOriginalStyle[property]);
-    return result; 
-    // return {
-    //   transform: node.computedOriginalStyle.transform,
-    //   color: node.computedOriginalStyle.color,
-    //   fontSize: node.computedOriginalStyle.fontSize,
-    // }
+    
+    return this.getAnimatedProperties(node.computedOriginalStyle);
   }
   
   removedOriginalStyle(node) {
-    // Add pre-set offset for fly-out effect in the opposite direction
     const style = node.computedOriginalStyle; delete node.computedOriginalStyle;
+    const result = this.getAnimatedProperties(style);
+    // result.transform = "scale(1)";
+    result.maxHeight = style.height; 
+    result.maxWidth = style.width; 
+    return result; 
+    // Add pre-set offset for fly-out effect in the opposite direction
+    // const style = node.computedOriginalStyle; 
+    // return style; 
     return {
       transform: "scale(1)",
-      opacity: "1",
+      opacity: style.opacity,
       maxHeight: style.height,
       maxWidth: style.width
     }
