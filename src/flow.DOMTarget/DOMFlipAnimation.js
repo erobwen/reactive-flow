@@ -383,22 +383,13 @@ export class DOMFlipAnimation {
     const targetStyle = node.targetStyle;// delete node.targetStyle;
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
 
-    return {
-      transform: "scale(1)",
-      maxHeight: targetDimensions.height + "px",
-      maxWidth: targetDimensions.width + "px",
-      margin: targetStyle.margin, 
-      marginTop: targetStyle.marginTop, 
-      marginBottom: targetStyle.marginBottom, 
-      marginLeft: targetStyle.marginLeft, 
-      marginRight: targetStyle.marginRight, 
-      padding: targetStyle.padding,
-      paddingTop: targetStyle.paddingTop,
-      paddingBottom: targetStyle.paddingBottom,
-      paddingLeft: targetStyle.paddingLeft,
-      paddingRight: targetStyle.paddingRight,
-      opacity: "1",
-    } 
+    const result = this.getAnimatedProperties(node.computedTargetStyle);
+    // result.transform = "scale(1)";
+    result.maxHeight = targetDimensions.height + "px";
+    result.maxWidth =  targetDimensions.width + "px";
+    result.margin = targetStyle.margin;
+    result.padding = targetStyle.padding;
+    return result; 
   }
 
   residentTransitionStyle() {
@@ -409,23 +400,14 @@ export class DOMFlipAnimation {
 
   residentFinalStyle(node) {
     const targetStyle = node.targetStyle;// delete node.targetStyle;
-    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
 
-    return {
-      transform: "scale(1)",
-      margin: targetStyle.margin, 
-      marginTop: targetStyle.marginTop, 
-      marginBottom: targetStyle.marginBottom, 
-      marginLeft: targetStyle.marginLeft, 
-      marginRight: targetStyle.marginRight, 
-      padding: targetStyle.padding,
-      paddingTop: targetStyle.paddingTop,
-      paddingBottom: targetStyle.paddingBottom,
-      paddingLeft: targetStyle.paddingLeft,
-      paddingRight: targetStyle.paddingRight,
-      color: node.computedTargetStyle.color,
-      fontSize: node.computedTargetStyle.fontSize,
-    }
+    const result = this.getAnimatedProperties(node.computedTargetStyle);
+    result.transform = "scale(1)";
+    delete result.maxHeight;
+    delete result.maxWidth;
+    result.margin = targetStyle.margin;
+    result.padding = targetStyle.padding;
+    return result;
   }
   
   removedTransitionStyle() {
