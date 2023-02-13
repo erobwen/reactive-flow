@@ -62,6 +62,39 @@ const log = console.log;
       this.previouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
     }
   
+    synchronizeDomNodeStyle(properties) {
+      const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 
+      for (let property of properties) {
+        if (typeof property === "string") {
+          if (style[property] !== this.domNode.style[property]) {
+            this.domNode.style[property] = style[property] ? style[property] : "";
+          }
+        } else {
+          const propertyCompoundValue = style[property.compound];
+
+          if (propertyCompoundValue) {
+            if (propertyCompoundValue !== this.domNode.style[property]) {
+              console.log("Style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
+              this.domNode.style[property.compound] = propertyCompoundValue ? propertyCompoundValue : "";
+            }
+          } else {
+            const propertyPartialValues = {}
+            property.partial.forEach(property => {
+              if (style[property]) {
+                propertyPartialValues[property] = style[property];  
+              }
+            });
+  
+            if (Object.keys(propertyPartialValues).length > 0) {
+              Object.assign(this.domNode.style, propertyPartialValues);
+            } else {
+              this.domNode.style[property.compound] = "";
+            }
+          }
+        }
+      }
+    }
+
     updateStyle(element, newStyle) {
       const elementStyle = element.style;
       const newPreviouslySetStyles = {};
@@ -98,6 +131,12 @@ const log = console.log;
       // console.log(this.toString() + ".ensureDomNodeAttributesSet:");
       // console.log(element);
       this.domNode.nodeValue = this.text; // toString()
+    }
+
+    synchronizeDomNodeStyle(properties) {
+      // for (let property of properties) {
+      //   this.domNode.style[property] = "";
+      // }
     }
   }
   

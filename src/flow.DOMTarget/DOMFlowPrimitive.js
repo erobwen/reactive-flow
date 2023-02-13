@@ -210,6 +210,12 @@ export function clearNode(node) {
   }
 
   ensureDomNodeAttributesSet() {
+    // Ensure dom node attributes set. This method assumes that no one else has messed with the dom node. 
+    throw new Error("Not implemented yet!");
+  }
+
+  synchronizeDomNodeStyle(properties) {
+    // Enforce writing of all dom node style to the dom. This is used when the dom node is out of sync with the flow, for example after a halted animation.  
     throw new Error("Not implemented yet!");
   }
 }

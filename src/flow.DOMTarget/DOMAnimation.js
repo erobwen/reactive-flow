@@ -43,6 +43,9 @@ let idParentIdMap = {};
 
 let nextOriginMark = 0;
 
+let nextcurrentFrameNumber = 1;
+export let currentFrameNumber = null;
+
 function findAndRecordOriginalBoundsOfOrigin(flow) {
   const originMark = nextOriginMark++;
       
@@ -74,6 +77,7 @@ function findAndRecordOriginalBoundsOfOrigin(flow) {
 
 export function onFinishReBuildingFlow() {
   log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
+  currentFrameNumber = nextcurrentFrameNumber++;
 
   previousIdPrimitiveMap = idPrimitiveMap;
   idPrimitiveMap = {};
@@ -136,6 +140,21 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyResidentMovedAnimated = flowChanges.globallyResidentAnimated.filter(flow => idParentIdMap[flow.id] !== previousIdParentIdMap[flow.id]);
 
  
+  if (previousFlowChanges.globallyAddedAnimated) {
+    // log("CLEANUP")
+    // debugger;
+    // Cleanup possible animation artefacts, such as set styles (need to do a pass to avoid indirect influence over )
+    for (let flow of previousFlowChanges.globallyAddedAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+    }
+    for (let flow of previousFlowChanges.globallyResidentAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+    }
+    for (let flow of previousFlowChanges.globallyRemovedAnimated) {
+      flow.animation.cleanupPossibleAnimation(flow.domNode);
+    }
+  }
+
   // Debug info
   // flowChanges.a_globallyRemoved = Object.values(flowChanges.globallyRemoved).map(flow => flow.domNode);
   // flowChanges.a_added = flowChanges.globallyAddedAnimated.map(flow => flow.domNode);
@@ -172,30 +191,28 @@ export function onFinishReBuildingFlow() {
   //   } 
   // }
 
-  if (previousFlowChanges.globallyAddedAnimated) {
-    // log("CLEANUP")
-    // debugger;
-    // Cleanup possible animation artefacts, such as set styles (need to do a pass to avoid indirect influence over )
-    for (let flow of previousFlowChanges.globallyAddedAnimated) {
-      flow.animation.cleanupPossibleAnimation(flow.domNode);
-    }
-    for (let flow of previousFlowChanges.globallyResidentAnimated) {
-      flow.animation.cleanupPossibleAnimation(flow.domNode);
-    }
-    for (let flow of previousFlowChanges.globallyRemovedAnimated) {
-      flow.animation.cleanupPossibleAnimation(flow.domNode);
-    }
-  }
-
   // Set in animation
   for (let flow of flowChanges.globallyAddedAnimated) {
-    if (flow.domNode) flow.domNode.inAnimation = true; 
+    if (flow.domNode) flow.domNode.inAnimation = currentFrameNumber; 
   }
   for (let flow of flowChanges.globallyResidentAnimated) {
-    if (flow.domNode) flow.domNode.inAnimation = true; 
+    if (flow.domNode) flow.domNode.inAnimation = currentFrameNumber; 
   }
   for (let flow of flowChanges.globallyRemovedAnimated) {
-    if (flow.domNode) flow.domNode.inAnimation = true; 
+    if (flow.domNode) flow.domNode.inAnimation = currentFrameNumber; 
+  }
+
+  // Reset styles and remove halted styles! 
+  if (previousFlowChanges.globallyAddedAnimated) {
+    for (let flow of previousFlowChanges.globallyAddedAnimated) {
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+    }
+    for (let flow of previousFlowChanges.globallyResidentAnimated) {
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+    }
+    for (let flow of previousFlowChanges.globallyRemovedAnimated) {
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+    }
   }
 
   flowChanges.onFinishReBuildingFlowDone = true;

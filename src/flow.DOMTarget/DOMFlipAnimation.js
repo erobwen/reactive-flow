@@ -1,6 +1,8 @@
 
 // cubic-bezier(0.42,0,1,1)
 
+import { currentFrameNumber } from "./DOMAnimation";
+
 const log = console.log;
 
 var camelCased = (myString) => myString.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
@@ -15,16 +17,8 @@ const animatedProperties = [
   "transform",
   "maxHeight",
   "maxWidth",
-  "margin", 
-  "marginTop", 
-  "marginBottom", 
-  "marginLeft", 
-  "marginRight",
-  "padding",
-  "paddingTop", 
-  "paddingBottom", 
-  "paddingLeft",
-  "paddingRight",
+  {compound: "margin", partial: ["marginBottom", "marginBottom", "marginLeft", "marginRight"]},
+  {compound: "padding", partial: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]},
   "opacity",
   "color", 
   "fontSize",
@@ -32,15 +26,17 @@ const animatedProperties = [
 
 
 export class DOMFlipAnimation {
+  animatedProperties = animatedProperties;
+
   /**
    * Default transition
    */
   defaultTransition() {
-    return "all 10s ease-in-out, opacity 1s ease-in"
+    return "all .5s ease-in-out, opacity 1s ease-in"
   }
 
   removeTransition() {
-    return "all 10s ease-in-out, opacity 0.5s ease-out"
+    return "all .5s ease-in-out, opacity 0.5s ease-out"
   }
 
   /**
@@ -72,15 +68,23 @@ export class DOMFlipAnimation {
   cleanupPossibleAnimation(node) {
     if (node.inAnimation) {
       this.cleanupMidAnimation(node);
-      node.inAnimation = false; 
     }
   }
 
   cleanupMidAnimation(node) {
+    node.transition = "";
+    const computedStyle = window.getComputedStyle(node);
     for (let property of animatedProperties) {
-      node.style[property] = node.targetStyle[property];
+      if (typeof property === "string") {
+        node.style[property] = computedStyle[property]; 
+      } else {
+        for (let partialProperty of property.partial) {
+          node.style[partialProperty] = computedStyle[partialProperty];
+        }
+      }
     }
-    node.inAnimation = false; 
+    node.haltedInAnimation = true; 
+    delete node.inAnimation; 
 
 
     // const previouslySetStyles = node.equivalentCreator && node.equivalentCreator.unobservable.previouslySetStyles;
@@ -389,7 +393,6 @@ export class DOMFlipAnimation {
   }
 
   residentFinalStyle(node) {
-    // console.log("final: " + node.computedTargetStyle.fontSize);
     const targetStyle = node.targetStyle;// delete node.targetStyle;
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
 
@@ -442,33 +445,36 @@ export class DOMFlipAnimation {
    * Setup animation cleanup 
    */
   setupAddedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node)
+    this.setupAnimationCleanup(node, false, currentFrameNumber)
   }
 
   setupResidentAnimationCleanup(node) {
-    this.setupAnimationCleanup(node)
+    this.setupAnimationCleanup(node, false, currentFrameNumber)
     if (node.disappearingExpander) {
-      this.setupAnimationCleanup(node.disappearingExpander, true);
+      this.setupAnimationCleanup(node.disappearingExpander, true, currentFrameNumber);
       delete node.disappearingExpander; 
     }
   }
 
   setupRemovedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, true)
+    this.setupAnimationCleanup(node, true, currentFrameNumber)
   }
 
-  setupAnimationCleanup(node, alsoRemoveNode) {
+  setupAnimationCleanup(node, alsoRemoveNode, frameNumber) {
     const me = this; 
     function onTransitionEnd(event) {
-      delete node.inAnimation; 
-      node.removeEventListener("transitionend", onTransitionEnd);
+      // console.log(event);
+      if (frameNumber === currentFrameNumber) {
+        delete node.inAnimation;
 
-      if (alsoRemoveNode) {
-        // For dissapearing replacement
-        node.parentNode.removeChild(node);
+        node.removeEventListener("transitionend", onTransitionEnd);
+        me.cleanupAnimation(node);
+  
+        if (alsoRemoveNode) {
+          // For dissapearing replacement
+          node.parentNode.removeChild(node);
+        }  
       }
-
-      me.cleanupAnimation(node);
     }
 
     node.addEventListener("transitionend", onTransitionEnd);
@@ -478,16 +484,20 @@ export class DOMFlipAnimation {
     // All
     node.style.transition = "";
 
-    // Added cleanup
-    node.style.width = "";
-    node.style.height = "";
-    node.style.maxWidth = "";
-    node.style.maxHeight = "";
-    node.style.opacity = "";
+    if (node.equivalentCreator) {
+      node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+    }
+
+    // // Added cleanup
+    // node.style.width = "";
+    // node.style.height = "";
+    // node.style.maxWidth = "";
+    // node.style.maxHeight = "";
+    // node.style.opacity = "";
     
-    // Resident
-    node.style.color = "";
-    node.style.fontSize = "";
+    // // Resident
+    // node.style.color = "";
+    // node.style.fontSize = "";
 
     // if (node.savedIncomingMeasures) {
     //   delete node.savedIncomingMeasures;
