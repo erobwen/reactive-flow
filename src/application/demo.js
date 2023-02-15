@@ -38,8 +38,8 @@ export class Demo extends Flow {
       component.onEstablish();
     }
 
-    this.choosen = this.components.find(component => component.key === "modalAndPortalExample");
-    // this.choosen = this.components["Complex Form Example"];
+    // this.choosen = this.components.find(component => component.key === "modalAndPortalExample");
+    this.choosen = this.components.find(component => component.key === "complexForm");
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
 
