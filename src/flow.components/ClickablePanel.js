@@ -141,7 +141,7 @@ export class ClickablePanel extends Flow {
             top: 0,
             left: 0,
             position: "absolute",
-            backgroundColor: "black",
+            backgroundColor: "white",
             opacity: 0,
             pointerEvents: "none",
           })
@@ -150,7 +150,7 @@ export class ClickablePanel extends Flow {
           requestAnimationFrame(() => {
             this.shade.style.transition = "opacity .5s";
             requestAnimationFrame(() => {
-              this.shade.style.opacity = 0.5; 
+              this.shade.style.opacity = 0.4; 
             });
           });
         }

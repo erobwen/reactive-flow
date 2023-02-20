@@ -72,7 +72,7 @@ export class DOMFlipAnimation {
   }
 
   cleanupMidAnimation(node) {
-    node.transition = "";
+    // node.style.transition = "";
     const computedStyle = window.getComputedStyle(node);
     for (let property of animatedProperties) {
       if (typeof property === "string") {
@@ -168,6 +168,13 @@ export class DOMFlipAnimation {
   }
 
   addedOriginalStyle(node) {
+    if (node.addADeletedNode) {
+      delete node.addADeletedNode;
+      const result = this.residentOriginalStyle(node);
+      result.maxHeight = node.computedOriginalStyle.height;
+      result.maxWidth = node.computedOriginalStyle.width;
+      return result;
+    }
     const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
