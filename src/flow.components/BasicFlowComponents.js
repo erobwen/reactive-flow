@@ -1,4 +1,4 @@
-import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
 const log = console.log;
 
 
@@ -303,31 +303,107 @@ export function button(...parameters) {
 /**
  * Modal
  */
-// export function modal(...parameters) {
-//   const properties = readFlowProperties(parameters);
-//   findTextAndKeyInProperties(properties);
-//   return new Modal(properties);
-// }
+export function modalFrame(...parameters) {
+  // debugger; 
+  const properties = readFlowProperties(parameters);
+  const result = new ModalFrame(properties);
+  log("----------------------------------------------------------------")
+  log(result.target);
+  return result; 
+}
 
-// export class Modal extends Flow {
-//   // setProperties({children}) {
-//   //   this.child = (children instanceof Array) ? children[0] : children;
-//   //   this.children = null; // Avoid children for the initiator 
-//   // }
+class ModalFrame extends Flow {
+  setProperties({style, children}) {
+    this.style = style; 
+    this.children = children;  
+    this.modalFrame = this;
+    this.staticContent = children; 
+  }
 
-//   setState() {
-//     this.target.getModalTarget().setContent(this.content);
-//   }
+  setState() {
+    this.modalContent = null;
+    this.modalSubFrame = null;
+    this.actualChildren = this.children;
+  }
 
-//   disposeState() {
-//     this.target.getModalTarget().removeContent();
-//   }
+  updateChildren() {
+    const newChildren = [...this.staticContent]
+    if (this.modalSubFrame) newChildren.push(this.modalSubFrame);
+    this.actualChildren = newChildren;  
+  }
 
-//   // build() {
-//   //   this.target.getModalTarget().setContent(this.content);
-//   //   return null;
-//   // }
-// }
+  openModal(modalContent) {
+    this.setModalContent(modalContent)
+  }
+
+  closeModal() {
+    this.setModalContent(null);
+  }
+
+  setStaticContent(staticContent) {
+    staticContent = staticContent instanceof Array ? staticContent : [staticContent]
+    this.staticContent = staticContent;
+    this.updateChildren();
+  }
+
+  setModalContent(modalContent) {
+    log("OPEN MODAL")
+    const previousContent = this.modalContent;
+
+    transaction(() => {
+      if (previousContent !== modalContent) {
+        this.modalContent = modalContent;
+
+        if (!modalContent) {
+          // Remove modal
+          this.disposeModalSubFrame();
+          this.updateChildren();
+        } else if (previousContent) {
+          // Replace content
+          this.modalSubFrame.setStaticContent(modalContent)
+          modalContent.modalFrame = this.modalSubFrame;
+        } else {
+          // New content
+          this.ensureModalSubFrame(this.modalContent);
+          modalContent.modalFrame = this.modalSubFrame;
+          this.updateChildren();
+        }
+      }
+    });
+  }
+
+  ensureModalSubFrame(content) {
+    if (!this.modalSubFrame) {
+      creators.push(this);
+      this.modalSubFrame = new ModalFrame(
+        content, 
+        { 
+          style: {
+            position: "absolute", 
+            top: 0, 
+            left: 0, 
+            width: "100%", 
+            height: "100%", 
+            pointerEvents: "none"
+          }
+        }
+      ); 
+      creators.pop();
+    }
+  }
+
+  disposeModalSubFrame() {
+    if (!this.modalSubFrame) {
+      this.modalSubFrame.dispose();
+      this.modalSubFrame = null;
+    }
+  }
+
+  build() {
+    return new div({style: this.style, children: this.actualChildren});
+  }
+}
+
 
 /**
  * Portals
@@ -344,16 +420,14 @@ export class PortalEntrance extends Flow {
     this.portalContent = portalContent;
     this.derrive(() => {
       if (this.isVisible) {
-        //   log("exit:");
-        //   log(this.portalExit);
-          if (this.portalExit.children !== this.portalContent) {
-            this.portalExit.children = this.portalContent;
-          }
-        } else {
-          if (this.portalExit.children === this.portalContent) {
-            this.portalExit.children = null;
-          }
+        log("visible entrance..");
+        // Note: check if children already set will cause infinite loop. This is unnecessary since it is built in to causality anyway. 
+        this.portalExit.children = this.portalContent;
+      } else {
+        if (this.portalExit.children && this.portalExit.children === this.portalContent) {
+          this.portalExit.children = null;
         }
+      }
     });
   }
 

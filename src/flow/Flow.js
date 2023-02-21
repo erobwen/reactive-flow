@@ -114,6 +114,8 @@ export class Flow {
       this.providedProperties[property] = true;
     }
 
+    if (this.className() !== "Demo" && !this.target) debugger; 
+
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
@@ -473,10 +475,28 @@ export class Flow {
   }
 
   inherit(property) {
-    if (!this[property]) {
-      this[property] = this.creator.inherit(property);
+    // Note: Caching is dangerous unless we have one repeater at each level that can push the new values down.
+    // A reaction that goes up a chain and caches on the way down, will find its own caches and stop, even if the 
+    // value at the top of the chain changed. 
+    if (this[property]) {
+      return this[property];
+    } else {
+      return this.creator.inherit(property);
     }
-    return this[property];
+  }
+
+  inheritFromContainer(property) {
+    if (this[property]) {
+      return this[property];
+    } else if (this.parentPrimitive) {
+      const valueFromEquivalent = this.parentPrimitive.inheritPropertyFromEquivalent(property);
+      if (valueFromEquivalent) {
+        return valueFromEquivalent;
+      }
+      return this.parentPrimitive.inheritFromContainer(property)
+    } else {
+      return null; 
+    }
   }
 
   inheritPropertyFromEquivalent(property) {

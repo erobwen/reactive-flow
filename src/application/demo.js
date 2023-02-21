@@ -1,5 +1,5 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle, div, filler, portalExit, columnStyle } from "../flow.components/BasicFlowComponents";
+import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
+import { text, column, row, button, flexAutoStyle, div, filler, portalExit, columnStyle, modalFrame } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -8,7 +8,8 @@ import { HelloWorld } from "./helloWorldApplication";
 import { RecursiveExample } from "./recursiveDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
-import { ModalAndPortalExample } from "./modalAndPortalDemo";
+import { PortalExample } from "./portalDemo";
+import { ModalExample } from "./modalDemo";
 
 const log = console.log;
 
@@ -27,7 +28,8 @@ export class Demo extends Flow {
       new HelloWorld({key: "helloWorld"}),
       new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       new ComplexForm({key: "complexForm", initialData}),
-      new ModalAndPortalExample({key: "modalAndPortalExample", portal: this.leftColumnPortal}),
+      new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
+      new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
       new RecursiveExample({key: "recursiveDemo", name: "RecursiveExample"})
       // "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
@@ -38,8 +40,9 @@ export class Demo extends Flow {
       component.onEstablish();
     }
 
-    // this.choosen = this.components.find(component => component.key === "modalAndPortalExample");
-    this.choosen = this.components.find(component => component.key === "complexForm");
+    // this.choosen = this.components.find(component => component.key === "portalExample");
+    // this.choosen = this.components.find(component => component.key === "complexForm");
+    this.choosen = this.components.find(component => component.key === "modalExample");
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
 
@@ -63,6 +66,8 @@ export class Demo extends Flow {
   }
 
   build() {
+    log("BUILD DEMO -----------------------------------------------")
+    log(creators.length)
     const buttons = [];
     for (let component of this.components) {
       buttons.push(
@@ -80,10 +85,12 @@ export class Demo extends Flow {
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
     // this.choosen.leftColumnPortal =  this.leftColumnPortal;  
 
-    return row(
-      leftColumn, 
-      this.choosen, 
-      {style: {height: "100%", overflow: "visible"}}
+    return modalFrame(
+      row(
+        leftColumn, 
+        this.choosen, 
+        {style: {height: "100%", overflow: "visible"}}
+      )  
     )
   }
 }

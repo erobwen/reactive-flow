@@ -19,10 +19,10 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-export class ModalAndPortalExample extends Flow {
+export class PortalExample extends Flow {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   setProperties({portal}) {
-    this.name = "Modal and Portal Example";
+    this.name = "Portal Example";
     this.portal = portal;
   }
   
@@ -73,6 +73,6 @@ export class ModalAndPortalExample extends Flow {
  */
   
 export function startModalDemo() {
-  const root = new ModalAndPortalExample();
+  const root = new PortalExample();
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(root);
 }

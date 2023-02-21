@@ -470,6 +470,9 @@ export class DOMFlipAnimation {
       // console.log(event);
       if (frameNumber === currentFrameNumber) {
         delete node.inAnimation;
+        if (node.equivalentCreator) {
+          node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+        }
 
         node.removeEventListener("transitionend", onTransitionEnd);
         me.cleanupAnimation(node);
