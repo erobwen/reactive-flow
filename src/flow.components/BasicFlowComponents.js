@@ -315,17 +315,22 @@ export class Modal extends Flow {
     this.content = children[0];
   }
 
+  setState() {
+    this.visibleOnFrame = null;
+  }
+
   ensure() {
     this.modalFrame = this.inheritFromContainer("modalFrame")
     console.log("ENSURE");
-    log(this.modalFrame)
-    if (this.modalFrame) {
-      log(this.isVisible)
-      if (this.isVisible) {
+    log("frame: " + this.modalFrame);
+    log("visible:" + this.isVisible);
+    if (this.isVisible && modalFrame) {
         this.modalFrame.openModal(this.content);
-      } else {
-        this.modalFrame.closeModal(this.content);
-      }
+        this.visibleOnFrame = this.modalFrame;
+    } 
+    
+    if (!this.isVisible && this.visibleOnFrame) {
+      this.modalFrame.closeModal(this.content);
     }
   }
 

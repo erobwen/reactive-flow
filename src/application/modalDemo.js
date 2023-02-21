@@ -22,7 +22,8 @@ export class Dialog extends Flow {
   build() {
     return row(
       text(this.text),
-      button("Close", () => this.close())
+      button("Close", () => this.close()), 
+      {style: {pointerEvents: "auto"}}
     )
   }
 }
@@ -33,14 +34,13 @@ export class Dialog extends Flow {
  */
 export class ModalExample extends Flow {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
-  setProperties({portal}) {
+  setProperties({}) {
+    // Object.assign(this, properties)
     this.name = "Modal Example";
-    this.portal = portal;
-    log(this);
   }
 
   setState() {
-    this.modal = null;
+    this.showModal = false;
   }
 
   build() {
@@ -52,7 +52,7 @@ export class ModalExample extends Flow {
           button("Open Modal", ()=> {this.showModal = true;}),
         ), 
         modal(
-          dialog("Modal!", {close: () => this.showModal = false})
+          dialog("Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
         ).show(this.showModal)
       )
     );
