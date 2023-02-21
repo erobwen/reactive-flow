@@ -56,8 +56,8 @@ export class PortalExample extends Flow {
         portalEntrance(
           {
             // children: text("[portal active]"), Will create infinite loop! investigate! 
-            portalExit: this.portal, 
             key: "portalEntrance", 
+            portalExit: this.portal, 
             portalContent 
           })
           .show(this.showPortal),

@@ -303,6 +303,37 @@ export function button(...parameters) {
 /**
  * Modal
  */
+export function modal(...parameters) {
+  const properties = readFlowProperties(parameters);
+  const result = new Modal(properties);
+  return result; 
+}
+
+export class Modal extends Flow {
+  setProperties({children}) {
+    if (children.length !== 1) throw new Error("Modal only accepts a single child!");
+    this.content = children[0];
+  }
+
+  ensure() {
+    this.modalFrame = this.inheritFromContainer("modalFrame")
+    console.log("ENSURE");
+    log(this.modalFrame)
+    if (this.modalFrame) {
+      log(this.isVisible)
+      if (this.isVisible) {
+        this.modalFrame.openModal(this.content);
+      } else {
+        this.modalFrame.closeModal(this.content);
+      }
+    }
+  }
+
+  build() {
+    return div({style: {display: "none"}});
+  }
+}
+
 export function modalFrame(...parameters) {
   // debugger; 
   const properties = readFlowProperties(parameters);
@@ -336,8 +367,10 @@ class ModalFrame extends Flow {
     this.setModalContent(modalContent)
   }
 
-  closeModal() {
-    this.setModalContent(null);
+  closeModal(modalContent) {
+    if (this.modalContent === modalContent) {
+      this.setModalContent(null);
+    }
   }
 
   setStaticContent(staticContent) {

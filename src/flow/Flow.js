@@ -160,6 +160,10 @@ export class Flow {
     // Use this.derrive(action) to establish reactive relations here. 
   }
 
+  ensure() {
+    // Component worker here.
+  }
+
   disposeState() {
     // throw new Error("Not implemented yet");
   }
@@ -214,9 +218,22 @@ export class Flow {
     creators.push(this);
     this.setState();
     creators.pop();
+    this.startGeneralEnsure();
     if (trace) log("Established:" + this.toString());
     // Lifecycle, override to do expensive things. Like opening up connections etc.
     // However, this will not guarantee a mount. For that, just observe specific properties set by the integration process.
+  }
+
+  startGeneralEnsure() {
+    if (!this.generalEnsureRepeater) {
+      this.generalEnsureRepeater = repeat(
+        this.toString() + ".generalRepeater",
+        (repeater) => {
+          if (trace) console.group(repeater.causalityString());
+          this.ensure();
+          if (trace) console.groupEnd();
+        });
+    }
   }
 
   onRemoveFromFlowTarget() {

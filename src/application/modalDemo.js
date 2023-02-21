@@ -1,10 +1,30 @@
-import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget, creators } from "../flow/Flow";
+import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget, creators, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button, modal } from "../flow.components/BasicFlowComponents";
 
 const log = console.log;
 const loga = (action) => {
   log("-----------" + action + "-----------");
+}
+
+function dialog(...parameters) {
+  let properties = readFlowProperties(parameters);
+  properties = findTextAndKeyInProperties(properties);
+  return new Dialog(properties);
+}
+
+export class Dialog extends Flow {
+  setProperties({close, text}) {
+    this.close = close; 
+    this.text = text; 
+  }
+
+  build() {
+    return row(
+      text(this.text),
+      button("Close", () => this.close())
+    )
+  }
 }
 
 
@@ -22,16 +42,6 @@ export class ModalExample extends Flow {
   setState() {
     this.modal = null;
   }
-  
-  showModal() {
-    console.group("CREATE MODAL TEXT");
-    creators.push(this);
-    this.modal = text("modal!");
-    // this.modal.target = this.target; 
-    creators.pop();
-    console.groupEnd();
-    this.inheritFromContainer("modalFrame").openModal(this.modal);
-  }
 
   build() {
 
@@ -39,8 +49,11 @@ export class ModalExample extends Flow {
       column(
         text("modal demo"),
         row(
-          button("Open Modal", ()=> {this.showModal()}),
-        )
+          button("Open Modal", ()=> {this.showModal = true;}),
+        ), 
+        modal(
+          dialog("Modal!", {close: () => this.showModal = false})
+        ).show(this.showModal)
       )
     );
   }
