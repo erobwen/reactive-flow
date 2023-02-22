@@ -24,6 +24,12 @@ export function div(...parameters) {
   return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children});
 }
 
+export function div2(...parameters) {
+  let properties = findKeyInProperties(readFlowProperties(parameters)); 
+  const attributes = extractAttributes(properties);
+  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "modal-frame", attributes, children: properties.children});
+}
+
  function styledDiv(classNameOverride, style, parameters) { 
   const properties = findKeyInProperties(readFlowProperties(parameters));
   const attributes = extractAttributes(properties);
@@ -305,6 +311,7 @@ export function button(...parameters) {
  */
 export function modal(...parameters) {
   const properties = readFlowProperties(parameters);
+  findKeyInProperties(properties);
   const result = new Modal(properties);
   return result; 
 }
@@ -313,6 +320,7 @@ export class Modal extends Flow {
   setProperties({children}) {
     if (children.length !== 1) throw new Error("Modal only accepts a single child!");
     this.content = children[0];
+    children.length = 0;
   }
 
   setState() {
@@ -322,14 +330,19 @@ export class Modal extends Flow {
   ensure() {
     this.modalFrame = this.inheritFromContainer("modalFrame")
     console.log("ENSURE");
-    log("frame: " + this.modalFrame);
-    log("visible:" + this.isVisible);
-    if (this.isVisible && modalFrame) {
-        this.modalFrame.openModal(this.content);
-        this.visibleOnFrame = this.modalFrame;
+    // log("frame: ");
+    // log(this.causality.target.modalFrame)
+    // log("visible:" + this.isVisible);
+    // log(this.visibleOnFrame)
+    if (this.isVisible && this.modalFrame) {
+      // log("open")
+      this.visibleOnFrame = this.modalFrame;
+      // log(this.visibleOnFrame)
+      this.modalFrame.openModal(this.content);
     } 
     
     if (!this.isVisible && this.visibleOnFrame) {
+      log("close")
       this.modalFrame.closeModal(this.content);
     }
   }
@@ -359,7 +372,7 @@ class ModalFrame extends Flow {
   setState() {
     this.modalContent = null;
     this.modalSubFrame = null;
-    this.actualChildren = this.children;
+    this.actualChildren = [...this.children];
   }
 
   updateChildren() {
@@ -385,7 +398,7 @@ class ModalFrame extends Flow {
   }
 
   setModalContent(modalContent) {
-    log("OPEN MODAL")
+
     const previousContent = this.modalContent;
 
     transaction(() => {
@@ -431,14 +444,16 @@ class ModalFrame extends Flow {
   }
 
   disposeModalSubFrame() {
-    if (!this.modalSubFrame) {
-      this.modalSubFrame.dispose();
+    if (this.modalSubFrame) {
+      this.modalSubFrame.reallyDisposed = true; 
+      this.modalSubFrame.onDispose();
       this.modalSubFrame = null;
+      console.groupEnd();
     }
   }
 
   build() {
-    return new div({style: this.style, children: this.actualChildren});
+    if (this.reallyDisposed) throw new Error("CANNOT REBUILD A DISPOSED ONE!!!");
   }
 }
 

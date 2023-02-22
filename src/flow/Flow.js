@@ -114,8 +114,6 @@ export class Flow {
       this.providedProperties[property] = true;
     }
 
-    if (this.className() !== "Demo" && !this.target) debugger; 
-
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
@@ -249,6 +247,7 @@ export class Flow {
     if (this.buildRepeater) {
       this.buildRepeater.notifyDisposeToCreatedObjects();
       this.buildRepeater.dispose();
+      this.buildRepeater.repeaterAction = () => {};
     }
     if (this.derriveRepeaters) this.derriveRepeaters.map(repeater => repeater.dispose()); // Do you want a disposed repeater to nullify all its writed values? Probably not....
     this.disposeState();
@@ -392,10 +391,10 @@ export class Flow {
           if (!me.newBuild) {
             me.primitive = null; 
           } else if (!(me.newBuild instanceof Array)) {
-            me.primitive = me.newBuild.getPrimitive(this.parentPrimitive) 
+            me.primitive = me.newBuild.getPrimitive(this.causality.target.parentPrimitive)  // Use object if it changed from outside, but do not observe primitive as this is the role of the expanderRepeater! 
           } else {
             me.primitive = me.newBuild
-              .map(fragment => fragment.getPrimitive(this.parentPrimitive))
+              .map(fragment => fragment.getPrimitive(this.causality.target.parentPrimitive))
               .reduce((result, childPrimitive) => {
                 if (childPrimitive instanceof Array) {
                   childPrimitive.forEach(fragment => result.push(fragment));
@@ -474,7 +473,7 @@ export class Flow {
       );
     } else {
       // If parent primitive was null on first call.
-      if (me.newBuild) me.newBuild.getPrimitive(this.parentPrimitive);
+      if (me.newBuild) me.newBuild.getPrimitive(this.causality.target.parentPrimitive);
     }
     return me.primitive;
   }

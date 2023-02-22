@@ -52,7 +52,8 @@ export class ModalExample extends Flow {
           button("Open Modal", ()=> {this.showModal = true;}),
         ), 
         modal(
-          dialog("Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+          "modal",
+          dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
         ).show(this.showModal)
       )
     );
