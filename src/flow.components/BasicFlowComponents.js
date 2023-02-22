@@ -329,20 +329,12 @@ export class Modal extends Flow {
 
   ensure() {
     this.modalFrame = this.inheritFromContainer("modalFrame")
-    console.log("ENSURE");
-    // log("frame: ");
-    // log(this.causality.target.modalFrame)
-    // log("visible:" + this.isVisible);
-    // log(this.visibleOnFrame)
     if (this.isVisible && this.modalFrame) {
-      // log("open")
       this.visibleOnFrame = this.modalFrame;
-      // log(this.visibleOnFrame)
       this.modalFrame.openModal(this.content);
     } 
     
     if (!this.isVisible && this.visibleOnFrame) {
-      log("close")
       this.modalFrame.closeModal(this.content);
     }
   }
@@ -356,8 +348,6 @@ export function modalFrame(...parameters) {
   // debugger; 
   const properties = readFlowProperties(parameters);
   const result = new ModalFrame(properties);
-  log("----------------------------------------------------------------")
-  log(result.target);
   return result; 
 }
 
@@ -383,6 +373,11 @@ class ModalFrame extends Flow {
 
   openModal(modalContent) {
     this.setModalContent(modalContent)
+  }
+
+  onDispose() {
+    super.onDispose();
+    this.setModalContent(null);
   }
 
   closeModal(modalContent) {
@@ -445,16 +440,18 @@ class ModalFrame extends Flow {
 
   disposeModalSubFrame() {
     if (this.modalSubFrame) {
-      this.modalSubFrame.reallyDisposed = true; 
+      this.modalSubFrame.reallyDisposed = true;
+      // This is to avoid the old sub frame holding on the the dialog, if we create a new one. 
+      this.modalSubFrame.getPrimitive(this.modalSubFrame.causality.target.parentPrimitive).children = []; 
       this.modalSubFrame.onDispose();
       this.modalSubFrame = null;
-      console.groupEnd();
     }
   }
 
   build() {
     if (this.reallyDisposed) throw new Error("CANNOT REBUILD A DISPOSED ONE!!!");
     return new div2({style: this.style, children: this.actualChildren});
+    // return new styledDiv("modalFrame", this.style, {children: this.actualChildren});
   }
 }
 
@@ -474,7 +471,6 @@ export class PortalEntrance extends Flow {
     this.portalContent = portalContent;
     this.derrive(() => {
       if (this.isVisible) {
-        log("visible entrance..");
         // Note: check if children already set will cause infinite loop. This is unnecessary since it is built in to causality anyway. 
         this.portalExit.children = this.portalContent;
       } else {
