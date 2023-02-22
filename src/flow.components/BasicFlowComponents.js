@@ -454,6 +454,7 @@ class ModalFrame extends Flow {
 
   build() {
     if (this.reallyDisposed) throw new Error("CANNOT REBUILD A DISPOSED ONE!!!");
+    return new div2({style: this.style, children: this.actualChildren});
   }
 }
 
