@@ -392,10 +392,10 @@ export class Flow {
           if (!me.newBuild) {
             me.primitive = null; 
           } else if (!(me.newBuild instanceof Array)) {
-            me.primitive = me.newBuild.getPrimitive(parentPrimitive) 
+            me.primitive = me.newBuild.getPrimitive(this.parentPrimitive) 
           } else {
             me.primitive = me.newBuild
-              .map(fragment => fragment.getPrimitive(parentPrimitive))
+              .map(fragment => fragment.getPrimitive(this.parentPrimitive))
               .reduce((result, childPrimitive) => {
                 if (childPrimitive instanceof Array) {
                   childPrimitive.forEach(fragment => result.push(fragment));
@@ -474,7 +474,7 @@ export class Flow {
       );
     } else {
       // If parent primitive was null on first call.
-      if (me.newBuild) me.newBuild.getPrimitive(parentPrimitive);
+      if (me.newBuild) me.newBuild.getPrimitive(this.parentPrimitive);
     }
     return me.primitive;
   }
