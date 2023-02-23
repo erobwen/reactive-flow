@@ -1,5 +1,5 @@
 import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle, div, filler, columnStyle, modalFrame } from "../flow.components/BasicFlowComponents";
+import { text, column, row, button, flexAutoStyle, div, filler, columnStyle } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -10,7 +10,7 @@ import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
-import { portalExit } from "../flow.components/PortalAndModal";
+import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
 
 const log = console.log;
 
