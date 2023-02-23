@@ -1,5 +1,4 @@
 import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
-import { text, column, row, button, flexAutoStyle, div, filler, columnStyle } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { SuperSimple } from "./superSimple";
 import { AnimationExample } from "./animationExample";
@@ -11,6 +10,8 @@ import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
 import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
+import { button } from "../flow.components/BasicWidgets";
+import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
 
 const log = console.log;
 

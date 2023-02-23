@@ -1,8 +1,9 @@
 import { observable, Flow, flow, repeat, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
-import { text, column, button, row } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { ClickablePanel } from "../flow.components/ClickablePanel";
+import { ClickablePanel } from "../flow.components/ModernButton";
 import { modal, modalFrame } from "../flow.components/PortalAndModal";
+import { button, text } from "../flow.components/BasicWidgets";
+import { column, row } from "../flow.components/Layout";
 
 const log = console.log;
 

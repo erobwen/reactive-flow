@@ -3,7 +3,7 @@ import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
 import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, onFinishReBuildingDOM, onFinishReBuildingFlow, removeDOMFlowTarget } from "./DOMAnimation";
-import { div } from "../flow.components/BasicFlowComponents";
+import { div } from "../flow.components/BasicWidgets";
 
 const log = console.log;
 

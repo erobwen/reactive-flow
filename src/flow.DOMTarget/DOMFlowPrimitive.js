@@ -1,4 +1,4 @@
-import { flexAutoStyle } from "../flow.components/BasicFlowComponents";
+import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
 import { flowChanges } from "./DOMAnimation";

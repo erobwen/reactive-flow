@@ -1,5 +1,5 @@
 import { Flow } from "../flow/Flow";
-import { div } from "./BasicFlowComponents";
+import { div } from "./Basic";
 const log = console.log; 
 
 export class ClickablePanel extends Flow {

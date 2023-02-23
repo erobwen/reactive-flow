@@ -1,7 +1,9 @@
 import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
-import { text, column, textInputField, row, numberInputField, flexGrowShrinkStyle, checkboxInputField, div, filler } from "../flow.components/BasicFlowComponents";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { button } from "../flow.components/StyledFlowComponents";
+import { button } from "../flow.components/ModernWidgets";
+import { div } from "../flow.components/Basic";
+import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
+import { checkboxInputField, numberInputField, text, textInputField } from "../flow.components/BasicWidgets";
 
 const log = console.log;
 

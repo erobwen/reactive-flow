@@ -1,4 +1,5 @@
-import { button, column } from "../flow.components/BasicFlowComponents";
+import { button } from "../flow.components/BasicWidgets";
+import { column } from "../flow.components/Layout";
 import { Flow, model, observable, repeat } from "../flow/Flow";
 
 /*

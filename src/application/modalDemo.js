@@ -1,7 +1,9 @@
-import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget, creators, findTextAndKeyInProperties } from "../flow/Flow";
+import { Flow, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button } from "../flow.components/BasicFlowComponents";
 import { modal } from "../flow.components/PortalAndModal";
+import { button, text } from "../flow.components/BasicWidgets";
+import { centerMiddle, column, row } from "../flow.components/Layout";
+
 
 const log = console.log;
 const loga = (action) => {
@@ -21,10 +23,10 @@ export class Dialog extends Flow {
   }
 
   build() {
-    return row(
+    return centerMiddle(
       text(this.text),
       button("Close", () => this.close()), 
-      {style: {pointerEvents: "auto"}}
+      {style: {height: "100%", pointerEvents: "auto"}}
     )
   }
 }

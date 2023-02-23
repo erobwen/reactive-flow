@@ -1,5 +1,6 @@
 import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
-import { div, text } from "./BasicFlowComponents";
+import { div } from "./Basic";
+import { text } from "./BasicWidgets";
 
 export function button(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
