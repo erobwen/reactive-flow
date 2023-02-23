@@ -241,6 +241,7 @@ export class Flow {
   }
 
   onDispose() {
+    console.log("DISPOSING: " + this.toString());
     delete window.allFlows[this.causality.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());

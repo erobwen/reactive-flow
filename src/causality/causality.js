@@ -446,6 +446,7 @@ function createWorld(configuration) {
    ***************************************************************/
 
   function getHandlerArray(target, key) {
+
     if (key === objectMetaProperty) {
       return this.meta;
     } else if (this.meta.forwardTo !== null) {
@@ -612,6 +613,12 @@ function createWorld(configuration) {
 
   function getHandlerObject(target, key) {
     key = key.toString();
+    // if (key === "parentPrimitive") {
+    //   console.log("READING parentPrimitive");
+    //   // if (currentRepeater && currentRepeater.description === "[row:46].buildDOMRepeater") {
+    //   //   debugger;
+    //   // }
+    // }
 
     if (key === objectMetaProperty) {
       return this.meta;
@@ -1204,14 +1211,16 @@ function createWorld(configuration) {
         repeaterDirty(this);
         this.disposeChildren();
       },
+      // disposeAllCreatedWithBuildId() {
+      //   // Dispose all created objects? 
+      //   if(this.buildIdObjectMap) {
+      //     for (let key in this.buildIdObjectMap) {
+      //       const object = this.buildIdObjectMap[key]; 
+      //       if (typeof(object.onDispose) === "function") object.onDispose();
+      //     }
+      //   }
+      // },
       dispose() {
-        // Dispose all created objects? 
-        // if(this.buildIdObjectMap) {
-        //   for (let key in this.buildIdObjectMap) {
-        //     const object = this.buildIdObjectMap[key]; 
-        //     if (typeof(object.onDispose) === "function") object.onDispose();
-        //   }
-        // }
         detatchRepeater(this);
         removeAllSources(this);
         this.disposeChildren();
@@ -1222,7 +1231,9 @@ function createWorld(configuration) {
             let object = this.idObjectShapeMap[id];
   
             // Send dispose event
-            if (typeof(object[objectMetaProperty].target.onDispose) === "function") object.onDispose();
+            if (typeof(object[objectMetaProperty].target.onDispose) === "function") {
+              object.onDispose();
+            }
           }
         } else if (this.buildIdObjectMap) {
           for (let key in this.buildIdObjectMap) {
@@ -1672,6 +1683,8 @@ function createWorld(configuration) {
     return null; 
   }
 
+  let currentRepeater= null; 
+
   function refreshAllDirtyRepeaters() {
     if (state.postponeRefreshRepeaters === 0) {
       if (!state.refreshingAllDirtyRepeaters) {
@@ -1679,6 +1692,7 @@ function createWorld(configuration) {
           state.refreshingAllDirtyRepeaters = true;
           while (anyDirtyRepeater()) {
             let repeater = firstDirtyRepeater();
+            currentRepeater = repeater; 
             repeater.refresh();
             detatchRepeater(repeater);
             exitPriorityLevel(repeater.priority());

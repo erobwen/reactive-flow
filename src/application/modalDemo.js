@@ -45,7 +45,7 @@ export class Dialog extends Flow {
           text(this.text),
           button("Close", () => this.close()), 
           ...this.children,
-          {style: {...panelStyle, ...animatedContainerStyle}}
+          {style: {...panelStyle, ...animatedContainerStyle}, animateChildrenWhenThisAppears: true}
         ),
         {style: {...zStackElementStyle, ...animatedContainerStyle, height: "100%", pointerEvents: "auto"}}
       ),
@@ -72,7 +72,7 @@ export class ModalExample extends Flow {
 
   build() {
 
-    const openAnimatedModalButton = button("openAnimatedButton", "Open Animated Modal", ()=> {this.showAnimatedModal = true;}, {animate: true});
+    const openAnimatedModalButton = button("openAnimatedButton", this.showAnimatedModal ? "Close Animated Modal" : "Open Animated Modal", ()=> {this.showAnimatedModal = !this.showAnimatedModal;}, {animate: true});
 
     return (
       column(
@@ -80,6 +80,7 @@ export class ModalExample extends Flow {
         row(
           button("Open Modal", ()=> {this.showModal = true;}),
           openAnimatedModalButton.show(!this.showAnimatedModal),
+          {style: animatedContainerStyle}
         ), 
         modal(
           "modal",
@@ -87,8 +88,9 @@ export class ModalExample extends Flow {
         ).show(this.showModal),
         modal(
           "animatedModal",
-          dialog("animatedDialog", "Animated Modal!", openAnimatedModalButton, {close: () => {log("CLOSE"); this.showAnimatedModal = false}})
-        ).show(this.showAnimatedModal)
+          dialog("animatedDialog", "Animated Modal!", openAnimatedModalButton.show(this.showAnimatedModal), {close: () => {log("CLOSE"); this.showAnimatedModal = false}})
+        ).show(this.showAnimatedModal),
+        {style: animatedContainerStyle}
       )
     );
   }

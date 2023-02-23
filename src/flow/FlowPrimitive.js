@@ -113,7 +113,7 @@ export class FlowPrimitive extends Flow {
 
   isStable() {
     // return true; 
-    return (!flowChanges.globallyAdded[this.id] || !this.getAnimation()) && (!this.primitiveParent || this.primitiveParent.isStable());
+    return (!flowChanges.globallyAdded[this.id] || this.animateChildrenWhenThisAppears) && (!this.primitiveParent || this.primitiveParent.isStable());
   }
 
   getAnimation() {

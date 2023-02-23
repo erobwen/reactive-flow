@@ -73,8 +73,11 @@ class ModalFrame extends Flow {
   }
 
   onDispose() {
+    log("DISPOSE!!!!!");
+    console.group("onDispose");
     super.onDispose();
     this.setModalContent(null);
+    console.groupEnd();
   }
 
   closeModal(modalContent) {
@@ -137,11 +140,14 @@ class ModalFrame extends Flow {
 
   disposeModalSubFrame() {
     if (this.modalSubFrame) {
-      this.modalSubFrame.reallyDisposed = true;
-      // This is to avoid the old sub frame holding on the the dialog, if we create a new one. 
-      this.modalSubFrame.getPrimitive(this.modalSubFrame.causality.target.parentPrimitive).children = []; 
-      this.modalSubFrame.onDispose();
-      this.modalSubFrame = null;
+      transaction(() => {
+        this.modalSubFrame.reallyDisposed = true;
+        // This is to avoid the old sub frame holding on the the dialog, if we create a new one. 
+        this.modalSubFrame.children = [];
+        this.modalSubFrame.getPrimitive(this.modalSubFrame.causality.target.parentPrimitive).children = []; 
+        this.modalSubFrame.onDispose();
+        this.modalSubFrame = null;
+      });
     }
   }
 
