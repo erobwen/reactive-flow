@@ -65,7 +65,7 @@ function findAndRecordOriginalBoundsOfOrigin(flow) {
   // Scan new flow structure and find common ancestor for resident flow
   scan = flow.parentPrimitive;
   while (scan) {
-    if (scan.domNode.originMark === originMark) {
+    if (scan.domNode && scan.domNode.originMark === originMark) {
       flow.domNode.animationOriginNode = scan.domNode;
       break;
     }

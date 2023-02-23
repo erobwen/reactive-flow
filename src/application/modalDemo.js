@@ -17,21 +17,39 @@ function dialog(...parameters) {
   return new Dialog(properties);
 }
 
+
+const panelStyle = {
+  backgroundColor: "rgb(250, 250, 250)",
+  borderStyle: "solid", 
+  borderRadius: "5px",
+  borderWidth: "1px",
+  padding: "20px"
+}
+
+const animatedContainerStyle = {
+  overflow: "visible"
+}
+
 export class Dialog extends Flow {
-  setProperties({close, text}) {
+  setProperties({close, text, children}) {
     this.close = close; 
     this.text = text; 
+    this.children = children ? children : []; 
   }
 
   build() {
     return zStack(
+      div({style: {...zStackElementStyle, ...animatedContainerStyle, backgroundColor: "rgba(0, 0, 0, 0.1)"}}),
       centerMiddle(
-        text(this.text),
-        button("Close", () => this.close()), 
-        {style: {...zStackElementStyle, height: "100%", pointerEvents: "auto"}}
+        column(
+          text(this.text),
+          button("Close", () => this.close()), 
+          ...this.children,
+          {style: {...panelStyle, ...animatedContainerStyle}}
+        ),
+        {style: {...zStackElementStyle, ...animatedContainerStyle, height: "100%", pointerEvents: "auto"}}
       ),
-      div({style: {...zStackElementStyle, backgroundColor: "rgba(0, 0, 0, 0.1)"}}),
-      {style: fitStyle}
+      {style: fitStyle, ...animatedContainerStyle}
     )
   }
 }
@@ -49,20 +67,28 @@ export class ModalExample extends Flow {
 
   setState() {
     this.showModal = false;
+    this.showAnimatedModal = false; 
   }
 
   build() {
+
+    const openAnimatedModalButton = button("openAnimatedButton", "Open Animated Modal", ()=> {this.showAnimatedModal = true;}, {animate: true});
 
     return (
       column(
         text("modal demo"),
         row(
           button("Open Modal", ()=> {this.showModal = true;}),
+          openAnimatedModalButton.show(!this.showAnimatedModal),
         ), 
         modal(
           "modal",
           dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
-        ).show(this.showModal)
+        ).show(this.showModal),
+        modal(
+          "animatedModal",
+          dialog("animatedDialog", "Animated Modal!", openAnimatedModalButton, {close: () => {log("CLOSE"); this.showAnimatedModal = false}})
+        ).show(this.showAnimatedModal)
       )
     );
   }
