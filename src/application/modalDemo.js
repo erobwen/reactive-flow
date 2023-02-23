@@ -1,6 +1,7 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget, creators, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text, row, column, button, modal } from "../flow.components/BasicFlowComponents";
+import { text, row, column, button } from "../flow.components/BasicFlowComponents";
+import { modal } from "../flow.components/PortalAndModal";
 
 const log = console.log;
 const loga = (action) => {
