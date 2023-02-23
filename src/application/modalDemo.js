@@ -2,7 +2,8 @@ import { Flow, readFlowProperties, findTextAndKeyInProperties } from "../flow/Fl
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { modal } from "../flow.components/PortalAndModal";
 import { button, text } from "../flow.components/BasicWidgets";
-import { centerMiddle, column, row } from "../flow.components/Layout";
+import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
+import { div } from "../flow.components/Basic";
 
 
 const log = console.log;
@@ -23,10 +24,14 @@ export class Dialog extends Flow {
   }
 
   build() {
-    return centerMiddle(
-      text(this.text),
-      button("Close", () => this.close()), 
-      {style: {height: "100%", pointerEvents: "auto"}}
+    return zStack(
+      centerMiddle(
+        text(this.text),
+        button("Close", () => this.close()), 
+        {style: {...zStackElementStyle, height: "100%", pointerEvents: "auto"}}
+      ),
+      div({style: {...zStackElementStyle, backgroundColor: "rgba(0, 0, 0, 0.1)"}}),
+      {style: fitStyle}
     )
   }
 }

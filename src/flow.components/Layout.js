@@ -154,3 +154,18 @@ export const centerMiddle = (...parameters) => styledDiv("centerMiddle", centerM
  */
 export const filler = (...parameters) => styledDiv("filler", flexGrowShrinkStyle, parameters);
 
+
+/**
+ * ZStack
+ */
+
+export const zStackElementStyle = {
+  ...fitStyle,
+  position:"absolute", 
+  top:0, 
+  left:0,
+  width: "100%",
+  height: "100%",
+}
+
+export const zStack = (...parameters) => styledDiv("zStack", {...parameters.style, position: "relative"}, parameters);
