@@ -1,14 +1,24 @@
-import { Flow } from "../flow/Flow";
+import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
 import { div } from "./Basic";
+import { adjustLightness } from "./Color";
 const log = console.log; 
+
+export function xbutton(...parameters) { 
+  const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
+  return new ClickablePanel(properties);
+};
 
 export class ClickablePanel extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor}) {
+  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = 0.2}) {
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
-    this.mouseOverBackgroundColor = mouseOverBackgroundColor; 
+    if (mouseOverBackgroundColor) {
+      this.mouseOverBackgroundColor = mouseOverBackgroundColor;
+    } else if (style && style.backgroundColor) {
+      this.mouseOverBackgroundColor = adjustLightness(style.backgroundColor, hoverAjust);
+    }
     this.inAnimation = false;
     this.eventListenersSet = false; 
   }

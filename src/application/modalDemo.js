@@ -5,6 +5,7 @@ import { button, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
 import { div } from "../flow.components/Basic";
 import { adjustLightness } from "../flow.components/Color";
+import { xbutton } from "../flow.components/ModernButton";
 
 
 const log = console.log;
@@ -72,7 +73,6 @@ export class ModalExample extends Flow {
   }
 
   build() {
-
     const openAnimatedModalButton = button("openAnimatedButton", this.showAnimatedModal ? "Close Animated Modal" : "Open Animated Modal", ()=> {this.showAnimatedModal = !this.showAnimatedModal;}, {animate: true});
     const color = "rgb(143, 212, 190)";
     return (
@@ -93,6 +93,7 @@ export class ModalExample extends Flow {
           div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.6)}}),
           {style: animatedContainerStyle}
         ), 
+        xbutton({style: {width: "100px", height: "100px", backgroundColor: color}}),
         modal(
           "modal",
           dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
