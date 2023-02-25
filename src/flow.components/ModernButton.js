@@ -34,11 +34,15 @@ export class ClickablePanel extends Flow {
 
   setState() {
     this.derrive(() => {
-      if (this.domNode) {
-        this.clearEventListeners();
-        this.setEventListeners(this.onClick, this.mouseOverBackgroundColor);
-      }
     });
+  }
+
+  ensure() {
+    if (this.domNode !== this.eventListenersDomNode) {
+      this.eventListenersDomNode = this.domNode;
+      this.clearEventListeners();
+      this.setEventListeners(this.onClick, this.mouseOverBackgroundColor);
+    }
   }
 
   onDispose() {
