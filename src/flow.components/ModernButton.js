@@ -10,7 +10,7 @@ export function xbutton(...parameters) {
 
 export class ClickablePanel extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = -0.2}) {
+  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = -0.1}) {
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
@@ -142,45 +142,28 @@ export class ClickablePanel extends Flow {
 
     if (onClick && mouseOverBackgroundColor) {
       this.setMouseoverColor = () => {
-        if (!this.shade || this.shade.removing) {
-          const shade = document.createElement('div');
-          this.shade = shade; 
-          Object.assign(shade.style, {
-            width: "100%",
-            height: "100%",
-            top: 0,
-            left: 0,
-            position: "absolute",
-            backgroundColor: "white",
-            opacity: 0,
-            pointerEvents: "none",
-          })
-          panel.appendChild(shade);
-
-          requestAnimationFrame(() => {
-            this.shade.style.transition = "opacity .5s";
-            requestAnimationFrame(() => {
-              this.shade.style.opacity = 0.4; 
-            });
-          });
+        if (!panel.mouseIn) {
+          panel.mouseIn = true;         
+          // log("mouseover");
+          panel.style["transition"] = "background-color 0.25s";
+          panel._savedBackgroundColor = panel.style["background-color"];
+          panel.style["background-color"] = mouseOverBackgroundColor;
         }
       }
       panel.addEventListener("mouseover", this.setMouseoverColor);
 
+      // panel.addEventListener("mouseenter", () => {
+      //   log("mouseenter");
+      // });
+
       this.removeMouseoverColor = () => {
-        if (this.shade) {
-          ((shade) => {
-            shade.addEventListener("transitionend", () => {
-              if (shade.parentNode === panel) {
-                panel.removeChild(shade);
-                if (this.shade === shade) {
-                  this.shade = null;
-                }
-              }
-            }); 
-            shade.style.opacity = 0;
-            shade.removing = true;
-          })(this.shade);
+        if (panel.mouseIn) {
+          panel.mouseIn = false;     
+          // log("mouseout");
+          // log(panel._savedBackgroundColor);
+          panel.style["background-color"] = panel._savedBackgroundColor; //"rgba(0, 0, 0, 0)";
+          // delete panel.style["background-color"]; // Note: Does not work in IE
+          // panel.style["background-color"] = null; // Note: Does not work in IE
         }
       }
       panel.addEventListener("mouseout", this.removeMouseoverColor);
