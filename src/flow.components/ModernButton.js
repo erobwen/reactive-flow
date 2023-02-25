@@ -1,6 +1,8 @@
 import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
 import { div } from "./Basic";
 import { adjustLightness } from "./Color";
+import { button, text } from "../flow.components/BasicWidgets";
+
 const log = console.log; 
 
 export function xbutton(...parameters) { 
@@ -10,7 +12,7 @@ export function xbutton(...parameters) {
 
 export class ClickablePanel extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = -0.1}) {
+  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = -0.1, text="TESTING"}) {
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
@@ -21,11 +23,13 @@ export class ClickablePanel extends Flow {
     }
     this.inAnimation = false;
     this.eventListenersSet = false; 
+    this.text = text; 
   }
 
   setState() {
     this.derrive(() => {
       if (this.domNode) {
+        debugger; 
         this.clearEventListeners();
         this.setEventListeners(this.onClick, this.mouseOverBackgroundColor);
       }
@@ -33,6 +37,7 @@ export class ClickablePanel extends Flow {
   }
 
   onDispose() {
+    debugger; 
     this.clearEventListeners();
   }
 
@@ -172,12 +177,18 @@ export class ClickablePanel extends Flow {
   
   build() {
     let {style, children, onClick} = this;
-    style = {...style, overflow: "hidden", position: "relative", userSelect: "none"};
+    style = {...style, overflow: "hidden", position: "relative", userSelect: "none", padding: "4px"};
     if (onClick) {
       style.cursor = "pointer";
     }
     return (
-      div({style, children})
+      div(
+        text(
+          this.text,
+          {style: {top: "50%", left: "50%", transform: "translate(-50%, -50%)", position: "absolute"}}
+        ),
+        {style}
+      )
     );
   }
 }

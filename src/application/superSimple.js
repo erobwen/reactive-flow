@@ -3,6 +3,7 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, text } from "../flow.components/BasicWidgets";
 import { column } from "../flow.components/Layout";
 import { ClickablePanel } from "../flow.components/ModernButton";
+import { panelStyle } from "../flow.components/Style";
 
 
 const log = console.log;
@@ -19,7 +20,7 @@ export class SuperSimple extends Flow {
     return column(
       button("foo", "Foo", ()=> { this.showText = !this.showText}),
       text("Some text", {animate: true, key: "my-text"}).show(this.showText),
-      new ClickablePanel({style: {width: "400px", padding: "20px", height: "100px", backgroundColor: "blue"}, onClick: () => {console.log("hello")}}),
+      new ClickablePanel("Text", {style: {width: "400px", padding: "20px", height: "100px", backgroundColor: "rgb(150, 150, 255)", ...panelStyle}, onClick: () => {console.log("hello")}}),
       {style: {fontSize: "40px", padding: "20px"}}
     );
   }

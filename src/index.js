@@ -27,8 +27,8 @@ setFlowConfiguration({
 });
 installDOMAnimation();
 
-// startDemo();
-startSuperSimple();
+startDemo();
+// startSuperSimple();
 
 // startHelloWorld();
 // startRecursiveDemo();
