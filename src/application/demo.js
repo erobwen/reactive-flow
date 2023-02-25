@@ -12,6 +12,7 @@ import { ModalExample } from "./modalDemo";
 import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
 import { button } from "../flow.components/BasicWidgets";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
+import { xbutton } from "../flow.components/ModernButton";
 
 const log = console.log;
 
@@ -77,6 +78,7 @@ export class Demo extends Flow {
       )
     }
     buttons.push(this.leftColumnPortal);
+    buttons.push(xbutton("TEST", () => {}))
     buttons.push(filler());
 
     const leftColumn = column(
