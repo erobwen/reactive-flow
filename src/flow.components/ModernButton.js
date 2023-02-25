@@ -10,7 +10,7 @@ export function xbutton(...parameters) {
 
 export class ClickablePanel extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = 0.2}) {
+  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style, hoverAjust = -0.2}) {
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
