@@ -4,6 +4,7 @@ import { modal } from "../flow.components/PortalAndModal";
 import { button, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
 import { div } from "../flow.components/Basic";
+import { adjustLightness } from "../flow.components/Color";
 
 
 const log = console.log;
@@ -73,13 +74,23 @@ export class ModalExample extends Flow {
   build() {
 
     const openAnimatedModalButton = button("openAnimatedButton", this.showAnimatedModal ? "Close Animated Modal" : "Open Animated Modal", ()=> {this.showAnimatedModal = !this.showAnimatedModal;}, {animate: true});
-
+    const color = "rgb(143, 212, 190)";
     return (
       column(
         text("modal demo"),
         row(
           button("Open Modal", ()=> {this.showModal = true;}),
           openAnimatedModalButton.show(!this.showAnimatedModal),
+          text("foobar"),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, -0.2)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, -0.1)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: color}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.1)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.2)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.3)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.4)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.5)}}),
+          div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.6)}}),
           {style: animatedContainerStyle}
         ), 
         modal(
