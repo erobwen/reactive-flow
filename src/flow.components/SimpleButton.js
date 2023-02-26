@@ -1,14 +1,12 @@
 import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
 import { div } from "./Basic";
 import { text } from "./BasicWidgets";
-import { xbutton } from "./ModernButton";
+import { modernButton } from "./ModernButton";
 
-// export function button(...parameters) { 
-//   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-//   return new ModernButton(properties);
-// };
-
-export const button = xbutton; 
+export function simpleButton(...parameters) { 
+  const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
+  return new ModernButton(properties);
+};
 
 export class ModernButton extends Flow {
   build() {

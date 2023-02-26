@@ -12,7 +12,7 @@ import { ModalExample } from "./modalDemo";
 import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
 import { button } from "../flow.components/BasicWidgets";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
-import { xbutton } from "../flow.components/ModernButton";
+import { modernButton } from "../flow.components/ModernButton";
 
 const log = console.log;
 
@@ -44,8 +44,8 @@ export class Demo extends Flow {
     }
 
     // this.choosen = this.components.find(component => component.key === "portalExample");
-    // this.choosen = this.components.find(component => component.key === "complexForm");
-    this.choosen = this.components.find(component => component.key === "modalExample");
+    this.choosen = this.components.find(component => component.key === "complexForm");
+    // this.choosen = this.components.find(component => component.key === "modalExample");
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
 
@@ -78,7 +78,7 @@ export class Demo extends Flow {
       )
     }
     buttons.push(this.leftColumnPortal);
-    buttons.push(xbutton("TEST", () => {}))
+    buttons.push(modernButton("TEST", () => {}))
     buttons.push(filler());
 
     const leftColumn = column(

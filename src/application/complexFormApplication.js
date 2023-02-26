@@ -1,9 +1,10 @@
 import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { button } from "../flow.components/ModernWidgets";
+// import { simpleButton as button } from "../flow.components/SimpleButton";
 import { div } from "../flow.components/Basic";
 import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
-import { checkboxInputField, numberInputField, text, textInputField } from "../flow.components/BasicWidgets";
+import { checkboxInputField, numberInputField, text } from "../flow.components/BasicWidgets";
+import { button, textInputField } from "../flow.components/Theme";
 
 const log = console.log;
 
@@ -232,7 +233,7 @@ export class TravelerForm extends Flow {
       // Remove button
       row(
         filler(),
-        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)})
+        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)}, {ripple: false})
       ).show(traveler.isFellowTraveller),
 
       // Traveler inforation
@@ -295,7 +296,7 @@ export class LuggageForm extends Flow {
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
-        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)})
+        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)}, {ripple: false})
       )
     );
   }

@@ -1,7 +1,7 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
 import { extractAttributes } from "./Basic.js";
 import { filler, row } from "./Layout.js";
-import { xbutton } from "./ModernButton.js";
+import { modernButton } from "./ModernButton.js";
 const log = console.log;
 
 /**
@@ -89,7 +89,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
   return row({style: {padding: "4px", ...properties.style}, children, ...properties}, );
 }
 
-// export const button = xbutton;
+// export const button = modernButton;
 
 export function button(...parameters) { 
   let result; 

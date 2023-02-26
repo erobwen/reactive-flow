@@ -3,17 +3,19 @@ import { div } from "./Basic";
 import { adjustLightness } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";
+import { centerMiddle, fitStyle } from "./Layout";
 
 const log = console.log; 
 
-export function xbutton(...parameters) { 
+export function modernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  return new ClickablePanel(properties);
+  return new ModernButton(properties);
 };
 
-export class ClickablePanel extends Flow {
+export class ModernButton extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style={}, hoverAjust = -0.1, text="TESTING"}) {
+  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, fixedSize=false}) {
+    this.ripple = ripple;
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
@@ -26,15 +28,11 @@ export class ClickablePanel extends Flow {
     } else if (style && style.backgroundColor) {
       this.mouseOverBackgroundColor = adjustLightness(style.backgroundColor, hoverAjust);
     }
-    this.style = {height: "42px", position: "relative", margin: "2px", width: "300px", ...style, ...panelStyle};
+    this.style = {height: "35px", margin: "2px", ...style, ...panelStyle};
+    if (fixedSize) style.width = "250px";
     this.inAnimation = false;
     this.eventListenersSet = false; 
     this.text = text; 
-  }
-
-  setState() {
-    this.derrive(() => {
-    });
   }
 
   ensure() {
@@ -71,7 +69,7 @@ export class ClickablePanel extends Flow {
   }
 
   setEventListeners(onClick, mouseOverBackgroundColor) {
-    const {ripple = true } = this; 
+    const {ripple} = this; 
     const panel = this.domNode;
 
     this.rippleAndCallback = (event) => {
@@ -184,18 +182,20 @@ export class ClickablePanel extends Flow {
   }
   
   build() {
-    let {style, children, onClick} = this;
-    style = {...style, overflow: "hidden", position: "relative", userSelect: "none", padding: "4px"};
+    let {ripple, style, onClick} = this;
+    style = {...style, overflow: "hidden", userSelect: "none", padding: "4px"};
+    if (ripple) style.position = "relative";
     if (onClick) {
       style.cursor = "pointer";
     }
     return (
-      div(
+      centerMiddle(
         text(
-          this.text,
-          {style: {top: "50%", left: "50%", transform: "translate(-50%, -50%)", position: "absolute"}}
-        ),
-        {style}
+          this.text
+        ), 
+        {
+          style
+        }
       )
     );
   }
