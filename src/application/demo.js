@@ -10,7 +10,7 @@ import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
 import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
-import { button } from "../flow.components/BasicWidgets";
+import { button } from "../flow.components/Theme";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 
@@ -64,8 +64,8 @@ export class Demo extends Flow {
     return ["leftColumnPortal"];
   }
 
-  buildButton(component) { // Extra function to get a stack frame that provides variables to the lambda function. 
-    return button(component.name, {onClick: () => {this.choosen = component}})
+  buildButton(component) { // Extra function to get a stack frame that provides variables to the lambda function.
+    return button(component.name, {onClick: () => {this.choosen = component}, pressed: this.choosen === component})
   }
 
   build() {
@@ -78,7 +78,6 @@ export class Demo extends Flow {
       )
     }
     buttons.push(this.leftColumnPortal);
-    buttons.push(modernButton("TEST", () => {}))
     buttons.push(filler());
 
     const leftColumn = column(

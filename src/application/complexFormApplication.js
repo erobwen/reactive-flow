@@ -124,7 +124,7 @@ export class SimpleDrawer extends Flow {
  build() {
   const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
   return column(
-    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}}),
+    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}, ripple: false}),
     column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
   );
  }
@@ -181,7 +181,7 @@ export class ComplexForm extends Flow {
             // Add traveler button
             row(
               filler(),
-              button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)))
+              button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)), {ripple: false})
             ),
 
             // Submit button
@@ -195,7 +195,8 @@ export class ComplexForm extends Flow {
               }, 
               {
                 style: {marginTop: "30px"},
-                disabled: data.anyError
+                disabled: data.anyError,
+                ripple: false
               }),
             filler(),
             { style: {padding: "30px"}}

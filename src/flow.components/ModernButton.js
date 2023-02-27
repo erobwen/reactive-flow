@@ -1,6 +1,6 @@
 import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
 import { div } from "./Basic";
-import { adjustLightness } from "./Color";
+import { adjustLightness, grayColor } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, fitStyle } from "./Layout";
@@ -14,32 +14,57 @@ export function modernButton(...parameters) {
 
 export class ModernButton extends Flow {
 
-  setProperties({children, onClick, onClickKey, mouseOverBackgroundColor, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, fixedSize=false}) {
+  setProperties({pressed= false, children, onClick, onClickKey, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, fixedSize=false}) {
     this.ripple = ripple;
     this.children = children; 
     this.onClick = onClick;
-    // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change? 
+    // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
     if (!style.backgroundColor) {
-      style.backgroundColor = "rgb(150, 150, 255)";
+      style.backgroundColor = grayColor(240);
     }
-    
-    if (mouseOverBackgroundColor) {
-      this.mouseOverBackgroundColor = mouseOverBackgroundColor;
-    } else if (style && style.backgroundColor) {
-      this.mouseOverBackgroundColor = adjustLightness(style.backgroundColor, hoverAjust);
-    }
-    this.style = {height: "35px", margin: "2px", ...style, ...panelStyle};
+    this.backgroundColor = style.backgroundColor; 
+    this.mouseOverBackgroundColor = adjustLightness(this.backgroundColor, hoverAjust);
+    this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.1)
+    this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
+
+    this.style = {transition: "background 0.5s", height: "35px", margin: "5px", ...style, ...panelStyle, color: "black"};
     if (fixedSize) style.width = "250px";
+
+    this.pressed = pressed;  
     this.inAnimation = false;
     this.eventListenersSet = false; 
     this.text = text; 
   }
 
+  setState() {
+    this.hover = false;
+  }
+
   ensure() {
+    // Ensure event listeners
     if (this.domNode !== this.eventListenersDomNode) {
       this.eventListenersDomNode = this.domNode;
       this.clearEventListeners();
       this.setEventListeners(this.onClick, this.mouseOverBackgroundColor);
+    }
+
+    // Ensure right background color
+    log(this.toString())
+    log(this.pressed);
+    log(!this.nonPressedBackgroundColor);
+    log(this.style.backgroundColor);
+    if (this.pressed) {
+      if (this.hover) {
+        this.style = {...this.style, backgroundColor: this.mouseOverPressedBackgroundColor};      
+      } else {
+        this.style = {...this.style, backgroundColor: this.pressedBackgroundColor};      
+      }
+    } else {
+      if (this.hover) {
+        this.style = {...this.style, backgroundColor: this.mouseOverBackgroundColor};      
+      } else {
+        this.style = {...this.style, backgroundColor: this.backgroundColor};      
+      }
     }
   }
 
@@ -153,29 +178,12 @@ export class ModernButton extends Flow {
 
     if (onClick && mouseOverBackgroundColor) {
       this.setMouseoverColor = () => {
-        if (!panel.mouseIn) {
-          panel.mouseIn = true;         
-          // log("mouseover");
-          panel.style["transition"] = "background-color 0.25s";
-          panel._savedBackgroundColor = panel.style["background-color"];
-          panel.style["background-color"] = mouseOverBackgroundColor;
-        }
+        this.hover = true;
       }
       panel.addEventListener("mouseover", this.setMouseoverColor);
 
-      // panel.addEventListener("mouseenter", () => {
-      //   log("mouseenter");
-      // });
-
       this.removeMouseoverColor = () => {
-        if (panel.mouseIn) {
-          panel.mouseIn = false;     
-          // log("mouseout");
-          // log(panel._savedBackgroundColor);
-          panel.style["background-color"] = panel._savedBackgroundColor; //"rgba(0, 0, 0, 0)";
-          // delete panel.style["background-color"]; // Note: Does not work in IE
-          // panel.style["background-color"] = null; // Note: Does not work in IE
-        }
+        this.hover = false;
       }
       panel.addEventListener("mouseout", this.removeMouseoverColor);
     }
@@ -188,10 +196,14 @@ export class ModernButton extends Flow {
     if (onClick) {
       style.cursor = "pointer";
     }
+    log(this.nonPressedBackgroundColor)
+    log(this.style.backgroundColor)
+    log(style.backgroundColor)
     return (
       centerMiddle(
         text(
-          this.text
+          this.text,
+          {style: {cursor: "pointer"}}
         ), 
         {
           style
