@@ -343,9 +343,14 @@ export class DOMFlipAnimation {
 
   translateFromNewToOriginalPosition(node) {
     node.style.transition = "";
-    const animationOriginNode = node.animationOriginNode; //delete node.animationOriginNode;
-    const originOriginalBounds = animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
-    const originInitialBounds = animationOriginNode.initialBounds; //delete animationOriginNode.initialBounds;
+
+    // Origin bouds... really use?
+    const defaultOrigin = {top: 0, left: 0};
+    // const animationOriginNode = node.animationOriginNode; //delete node.animationOriginNode;
+    const originOriginalBounds = defaultOrigin; //animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
+    const originInitialBounds = defaultOrigin; //animationOriginNode.initialBounds; //delete animationOriginNode.initialBounds;
+    
+    
     const originalBounds = node.originalBounds; //delete node.originalBounds;
     const initialBounds = node.initialBounds; //delete node.initialBounds;
     const deltaX = (initialBounds.left - originInitialBounds.left) - (originalBounds.left - originOriginalBounds.left);

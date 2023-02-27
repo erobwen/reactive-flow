@@ -179,7 +179,7 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.globallyResidentAnimated) {
     if (flow.domNode) {
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
-      findAndRecordOriginalBoundsOfOrigin(flow); 
+      // findAndRecordOriginalBoundsOfOrigin(flow); // Dont, for now!
     }
   }
   
@@ -187,7 +187,7 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.globallyRemovedAnimated) {
     if (flow.domNode) {
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
-      findAndRecordOriginalBoundsOfOrigin(flow); 
+      // findAndRecordOriginalBoundsOfOrigin(flow); // Dont, for now!
     }
   }
 
@@ -196,7 +196,7 @@ export function onFinishReBuildingFlow() {
     if (flow.domNode && flow.domNode.addADeletedNode) {
       // debugger;
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
-      findAndRecordOriginalBoundsOfOrigin(flow); 
+      // findAndRecordOriginalBoundsOfOrigin(flow); // Dont, for now!
     }
   }
   
@@ -318,12 +318,12 @@ export function onFinishReBuildingDOM() {
     // Record initial positions
     globallyRemovedAnimated.forEach(flow => {
       flow.animation.recordBoundsInNewStructure(flow.domNode)
-      standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
+      // standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
     });
 
     globallyResidentAnimated.forEach(flow => {
       flow.animation.recordBoundsInNewStructure(flow.domNode)
-      standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
+      // standardAnimation.recordBoundsInNewStructure(flow.domNode.animationOriginNode);
     });
     
     // Setup flow.animate initial position
