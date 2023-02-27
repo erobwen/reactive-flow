@@ -64,16 +64,21 @@ const log = console.log;
   
     synchronizeDomNodeStyle(properties) {
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 
+
+      const same = (styleValueA, styleValueB) => 
+        (typeof(styleValueA) === "undefined" && typeof(styleValueB) === "undefined")
+        || styleValueA === styleValueB; 
+
       for (let property of properties) {
         if (typeof property === "string") {
-          if (style[property] !== this.domNode.style[property]) {
+          if (!same(style[property], this.domNode.style[property])) {
             this.domNode.style[property] = style[property] ? style[property] : "";
           }
         } else {
           const propertyCompoundValue = style[property.compound];
 
           if (propertyCompoundValue) {
-            if (propertyCompoundValue !== this.domNode.style[property]) {
+            if (!same(propertyCompoundValue, this.domNode.style[property])) {
               console.log("Style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
               this.domNode.style[property.compound] = propertyCompoundValue ? propertyCompoundValue : "";
             }
