@@ -277,7 +277,9 @@ export class TravelerForm extends Flow {
               this.traveler.luggages.push(model({weight: 1, type: "bag"}));
               this.showLuggage = true;
             });
-          }),
+          },
+          {ripple: false}
+        ),
         {
           animate: true
         }
