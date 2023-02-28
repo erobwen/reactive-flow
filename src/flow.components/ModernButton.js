@@ -50,9 +50,7 @@ export class ModernButton extends Flow {
 
     // Ensure right background color
     log(this.toString())
-    log(this.pressed);
-    log(!this.nonPressedBackgroundColor);
-    log(this.style.backgroundColor);
+    log("hover:" + this.hover);
     if (this.pressed) {
       if (this.hover) {
         this.style = {...this.style, backgroundColor: this.mouseOverPressedBackgroundColor};      
@@ -191,19 +189,19 @@ export class ModernButton extends Flow {
   
   build() {
     let {ripple, style, onClick} = this;
-    style = {...style, overflow: "hidden", userSelect: "none", padding: "4px"};
+    style = {...style, overflow: "hidden", userSelect: "none", padding: "20px", fontSize: "20px"};
     if (ripple) style.position = "relative";
     if (onClick) {
       style.cursor = "pointer";
     }
-    log(this.nonPressedBackgroundColor)
-    log(this.style.backgroundColor)
-    log(style.backgroundColor)
     return (
       centerMiddle(
         text(
           this.text,
-          {style: {cursor: "pointer"}}
+          {style: {
+            cursor: "pointer", 
+            pointerEvents: "none"
+          }}
         ), 
         {
           style

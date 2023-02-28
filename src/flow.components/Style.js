@@ -11,3 +11,7 @@ export const panelStyle = {
   borderStyle: "solid",
   boxShadow: paperShadow
 };
+
+export const animatedContainerStyle = {
+  overflow: "visible"
+}

@@ -76,7 +76,7 @@ function findAndRecordOriginalBoundsOfOrigin(flow) {
 }
 
 export function onFinishReBuildingFlow() {
-  log("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
+  console.group("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
   currentFrameNumber = nextcurrentFrameNumber++;
 
   previousIdPrimitiveMap = idPrimitiveMap;
@@ -150,7 +150,19 @@ export function onFinishReBuildingFlow() {
   flowChanges.globallyResidentAnimated = getAnimatedFromMap(flowChanges.globallyResident);
   flowChanges.globallyResidentMovedAnimated = flowChanges.globallyResidentAnimated.filter(flow => idParentIdMap[flow.id] !== previousIdParentIdMap[flow.id]);
 
- 
+
+  function toStrings(changes) {
+    return {
+      added: changes.globallyAddedAnimated.map(flow => flow.toString()),
+      removed: changes.globallyRemovedAnimated.map(flow => flow.toString()),
+      resident: changes.globallyResidentAnimated.map(flow => flow.toString()),
+      moved: changes.globallyResidentMovedAnimated.map(flow => flow.toString())
+    }
+  }
+  console.group("New animation frame:");
+  log(toStrings(flowChanges));
+  console.groupEnd();
+
   if (previousFlowChanges.globallyAddedAnimated) {
     // log("CLEANUP")
     // debugger;
@@ -241,6 +253,7 @@ export function onFinishReBuildingFlow() {
   }
 
   flowChanges.onFinishReBuildingFlowDone = true;
+  console.groupEnd();
 }
 
 
@@ -249,7 +262,7 @@ export function onFinishReBuildingFlow() {
 
 export function onFinishReBuildingDOM() {
   if (!flowChanges.onFinishReBuildingFlowDone) return;
-  log("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
+  console.group("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
 
   // Reset styles and remove halted styles! 
@@ -370,6 +383,7 @@ export function onFinishReBuildingDOM() {
       } 
    }); 
   })
+  console.groupEnd();
 }
 
 

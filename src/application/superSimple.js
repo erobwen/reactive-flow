@@ -1,9 +1,10 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, text } from "../flow.components/BasicWidgets";
-import { column } from "../flow.components/Layout";
+import { column, filler, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
-import { panelStyle } from "../flow.components/Style";
+import { animatedContainerStyle, panelStyle } from "../flow.components/Style";
+import { simpleButton } from "../flow.components/SimpleButton";
 
 
 const log = console.log;
@@ -13,15 +14,40 @@ const log = console.log;
  */
 export class SuperSimple extends Flow {
   setState() {
-    this.showText = true; 
+    this.left = true; 
   }
 
   build() {
-    return column(
-      button("foo", "Foo", ()=> { this.showText = !this.showText}),
-      text("Some text", {animate: true, key: "my-text"}).show(this.showText),
-      new modernButton("Text", {style: {width: "400px", padding: "20px", height: "100px", backgroundColor: "rgb(150, 150, 255)", ...panelStyle}, onClick: () => {console.log("hello")}}),
-      {style: {fontSize: "40px", padding: "20px"}}
+    const button = new modernButton(
+    // const button = new simpleButton(
+      "button", "Text", 
+      () => {
+        this.left = !this.left;
+      }, 
+      {
+        animate: true,
+        ripple: false
+      }
+    );
+
+    return row(
+      column(
+        button.show(this.left), 
+        filler(),
+        {style: animatedContainerStyle}
+      ),
+      filler(),
+      column(
+        button.show(!this.left), 
+        filler(), 
+        {style: animatedContainerStyle}
+      ), 
+      filler(), 
+      column(
+        simpleButton("Move", () => {this.left = !this.left}),
+        filler()
+      )
+      // {style: {fontSize: "40px", padding: "20px"}}
     );
   }
 }

@@ -6,6 +6,7 @@ import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from 
 import { div } from "../flow.components/Basic";
 import { adjustLightness } from "../flow.components/Color";
 import { modernButton } from "../flow.components/ModernButton";
+import { animatedContainerStyle } from "../flow.components/Style";
 
 
 const log = console.log;
@@ -28,9 +29,7 @@ const panelStyle = {
   padding: "20px"
 }
 
-const animatedContainerStyle = {
-  overflow: "visible"
-}
+
 
 export class Dialog extends Flow {
   setProperties({close, text, children}) {

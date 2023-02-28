@@ -78,8 +78,8 @@ const log = console.log;
           const propertyCompoundValue = style[property.compound];
 
           if (propertyCompoundValue) {
-            if (!same(propertyCompoundValue, this.domNode.style[property])) {
-              console.log("Style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
+            if (!same(propertyCompoundValue, this.domNode.style[property.compound])) {
+              console.log("Synchronizing: " + this.toString() + ", style " + property.compound + " mismatch, resetting: " + this.domNode.style[property.compound] + " --> " + propertyCompoundValue);
               this.domNode.style[property.compound] = propertyCompoundValue ? propertyCompoundValue : "";
             }
           } else {
