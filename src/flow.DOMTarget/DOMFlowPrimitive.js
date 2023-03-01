@@ -102,6 +102,7 @@ export function clearNode(node) {
     // Iterate and remove things that should be removed or outgoing
     let index = node.childNodes.length - 1;
     const existingPrimitives = {};
+    
     while(index >= 0) {
       const existingChildNode = node.childNodes[index];
       const existingPrimitive = existingChildNode.equivalentCreator;
@@ -109,28 +110,36 @@ export function clearNode(node) {
         // No creator, probably a disappearing replacement that we want to keep
         newChildNodes.splice(index, 0, existingChildNode);
       } else {
+        // A creator, meaning a flow primitive
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
-        if (!newChildNodes.includes(existingChildNode) && flowChanges && flowChanges.globallyRemoved && flowChanges.globallyRemoved[existingPrimitive.id]) {
-          if (animation) {
-            // Node will be removed locally, copy it back to leave it to wait for animation.
-            newChildNodes.splice(index, 0, existingChildNode);
-          } else {
-            // Not animated, remove instantly!
-            node.removeChild(existingChildNode);
-          }
-        } else if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
-          // Child will move out from this node
-          if (animation) {
-            // outgoing could already be gone at this stage!
-            if (!existingChildNode.disappearingExpander) {
-              node.insertBefore(animation.getDisappearingReplacement(existingChildNode), existingChildNode);
+
+        // Test for being removed
+        if (!newChildNodes.includes(existingChildNode)) {
+
+          // Test for global removal
+          if (flowChanges && flowChanges.globallyRemoved && flowChanges.globallyRemoved[existingPrimitive.id]) {
+            if (animation) {
+              // Node will be removed locally, copy it back to leave it to wait for animation.
+              newChildNodes.splice(index, 0, existingChildNode);
+            } else {
+              // Not animated, remove instantly!
               node.removeChild(existingChildNode);
             }
-          } else {
-            // No animation, just remove. (do not copy to new)
+            
+            // Test for moving out 
+          } else if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
+            if (animation) {
+              // outgoing could already be gone at this stage!
+              if (!existingChildNode.disappearingExpander) {
+                node.insertBefore(animation.getDisappearingReplacement(existingChildNode), existingChildNode);
+                node.removeChild(existingChildNode);
+              }
+            } else {
+              // No animation, just remove. (do not copy to new)
+            }
           }
-        }  
+        }
       }
       index--;
     }
