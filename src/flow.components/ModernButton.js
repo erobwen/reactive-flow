@@ -195,8 +195,9 @@ export class ModernButton extends Flow {
       style.cursor = "pointer";
     }
     return (
-      centerMiddle(
+      centerMiddle("centerMiddle",
         text(
+          "text",
           this.text,
           {style: {
             cursor: "pointer", 

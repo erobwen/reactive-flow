@@ -4,8 +4,8 @@ import { modernTextField } from "./ModernTextField";
 import { simpleButton } from "./SimpleButton";
 
 export function button(...parameters) {
-  return modernButton.apply(null, parameters);
-  // return simpleButton.apply(null, parameters);
+  // return modernButton.apply(null, parameters);
+  return simpleButton.apply(null, parameters);
 }
 
 

@@ -28,6 +28,22 @@ const animatedProperties = [
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
 
+  blockedPropertiesMap() {
+    const result = animatedProperties.reduce((result, property) => {
+      if(typeof (property) === "string") {
+        result[property] = true;
+      } else {
+        result[property.compound] = true; 
+        property.partial.forEach(partial => {
+          result[partial] = true; 
+        });
+      }
+      return result; 
+    }, {});
+    result.transition = true; 
+    return result; 
+  }
+
   /**
    * Default transition
    */
