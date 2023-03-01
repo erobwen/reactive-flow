@@ -30,10 +30,11 @@ export class FlowPrimitive extends Flow {
     return this;
   }
 
-  ensureBuiltRecursive(flowTarget) {
+  ensureBuiltRecursive(flowTarget, parentPrimitive) {
     const name = this.toString(); // For chrome debugger
     
     if (flowTarget) this.visibleOnTarget = flowTarget;
+    if (parentPrimitive) this.parentPrimitive = parentPrimitive;
 
     finalize(this); // Finalize might not work if no key was used, it might not call onEstablish.
     if (!this.expandRepeater) {
@@ -55,6 +56,7 @@ export class FlowPrimitive extends Flow {
           if (scan.visibleOnTarget === this.visibleOnTarget) {
             scan = null; 
           } else {
+            scan.parentPrimitive = this.parentPrimitive; 
             scan.visibleOnTarget = this.visibleOnTarget;
             scan.isVisible = !!this.visibleOnTarget
             scan.onVisibilityWillChange(scan.isVisible);
@@ -67,7 +69,7 @@ export class FlowPrimitive extends Flow {
 
         // Expand known children (do as much as possible before integration)
         for (let childPrimitive of this.childPrimitives) { 
-          childPrimitive.ensureBuiltRecursive();
+          childPrimitive.ensureBuiltRecursive(flowTarget, this);
         }
       
         if (trace) console.groupEnd();

@@ -352,12 +352,10 @@ export class Flow {
     return this.getPrimitive();
   }
 
-  getPrimitive(parentPrimitive) {
+  getPrimitive() {
     // log("getPrimitive")
     const me = this;
     const name = this.toString(); // For chrome debugger.
-    this.parentPrimitive = parentPrimitive;
-
     finalize(me);
     if (!me.buildRepeater) {
       me.buildRepeater = repeat(
@@ -392,10 +390,10 @@ export class Flow {
           if (!me.newBuild) {
             me.primitive = null; 
           } else if (!(me.newBuild instanceof Array)) {
-            me.primitive = me.newBuild.getPrimitive(this.causality.target.parentPrimitive)  // Use object if it changed from outside, but do not observe primitive as this is the role of the expanderRepeater! 
+            me.primitive = me.newBuild.getPrimitive()  // Use object if it changed from outside, but do not observe primitive as this is the role of the expanderRepeater! 
           } else {
             me.primitive = me.newBuild
-              .map(fragment => fragment.getPrimitive(this.causality.target.parentPrimitive))
+              .map(fragment => fragment.getPrimitive())
               .reduce((result, childPrimitive) => {
                 if (childPrimitive instanceof Array) {
                   childPrimitive.forEach(fragment => result.push(fragment));
@@ -472,9 +470,6 @@ export class Flow {
           }
         }
       );
-    } else {
-      // If parent primitive was null on first call.
-      if (me.newBuild) me.newBuild.getPrimitive(this.causality.target.parentPrimitive);
     }
     return me.primitive;
   }
