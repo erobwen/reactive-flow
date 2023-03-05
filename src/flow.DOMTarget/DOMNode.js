@@ -62,49 +62,20 @@ const log = console.log;
       this.previouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
     }
     
-    updateStyle(element, newStyle) {
-      const elementStyle = element.style;
-      const newPreviouslySetStyles = {};
-  
-      // Clear out styles that will no longer be modified
-      for (let property in this.unobservable.previouslySetStyles) {
-        if (typeof(newStyle[property]) === "undefined") {
-          elementStyle[property] = "";
-        }
-      }
-  
-      // Set styles if changed
-      for (let property in newStyle) {
-        if (elementStyle[property] !== newStyle[property]) {
-          elementStyle[property] = newStyle[property];
-        }
-        newPreviouslySetStyles[property] = true;
-      }
-  
-      this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
-    }
-    
     // updateStyle(element, newStyle) {
     //   const elementStyle = element.style;
-
     //   const newPreviouslySetStyles = {};
-    //   let blockedProperties = {};
-    //   if (this.currentAnimation) {
-    //     log("HERE")
-    //     blockedProperties = this.currentAnimation.blockedPropertiesMap();
-    //     log(blockedProperties);
-    //   }
-
+  
     //   // Clear out styles that will no longer be modified
     //   for (let property in this.unobservable.previouslySetStyles) {
-    //     if (!blockedProperties[property] && typeof(newStyle[property]) === "undefined") {
+    //     if (typeof(newStyle[property]) === "undefined") {
     //       elementStyle[property] = "";
     //     }
     //   }
   
     //   // Set styles if changed
     //   for (let property in newStyle) {
-    //     if (!blockedProperties[property] && elementStyle[property] !== newStyle[property]) {
+    //     if (elementStyle[property] !== newStyle[property]) {
     //       elementStyle[property] = newStyle[property];
     //     }
     //     newPreviouslySetStyles[property] = true;
@@ -112,6 +83,35 @@ const log = console.log;
   
     //   this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
     // }
+    
+    updateStyle(element, newStyle) {
+      const elementStyle = element.style;
+
+      const newPreviouslySetStyles = {};
+      let blockedProperties = {};
+      if (this.currentAnimation) {
+        log("HERE")
+        blockedProperties = this.currentAnimation.blockedPropertiesMap();
+        log(blockedProperties);
+      }
+
+      // Clear out styles that will no longer be modified
+      for (let property in this.unobservable.previouslySetStyles) {
+        if (!blockedProperties[property] && typeof(newStyle[property]) === "undefined") {
+          elementStyle[property] = "";
+        }
+      }
+  
+      // Set styles if changed
+      for (let property in newStyle) {
+        if (!blockedProperties[property] && elementStyle[property] !== newStyle[property]) {
+          elementStyle[property] = newStyle[property];
+        }
+        newPreviouslySetStyles[property] = true;
+      }
+  
+      this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
+    }
   
     synchronizeDomNodeStyle(properties) {
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 

@@ -177,7 +177,12 @@ export function onFinishReBuildingFlow() {
         flow.animation.cleanupPossibleAnimation(flow.domNode);
       }
     }
-    for (let flow of previousFlowChanges.globallyPresentAnimated) {
+    for (let flow of previousFlowChanges.globallyResidentAnimated) {
+      if (!flowChanges.globallyResidentAnimated.includes(flow)) {
+        flow.animation.cleanupPossibleAnimation(flow.domNode);
+      }
+    }
+    for (let flow of previousFlowChanges.globallyMovedAnimated) {
       if (!flowChanges.globallyResidentAnimated.includes(flow)) {
         flow.animation.cleanupPossibleAnimation(flow.domNode);
       }
@@ -286,9 +291,12 @@ export function onFinishReBuildingDOM() {
     for (let flow of previousFlowChanges.globallyAddedAnimated) {
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
     }
-    for (let flow of previousFlowChanges.globallyPresentAnimated) {
+    for (let flow of previousFlowChanges.globallyMovedAnimated) {
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
     }
+    // for (let flow of previousFlowChanges.globallyResidentAnimated) {
+    //   flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+    // }
     for (let flow of previousFlowChanges.globallyRemovedAnimated) {
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
     }
@@ -334,9 +342,9 @@ export function onFinishReBuildingDOM() {
     for (let flow of globallyAddedAnimated) {
       flow.animation.reinstateOriginalStyleForAdded(flow.domNode);
     }
-    for (let flow of globallyPresentAnimated) {
-      flow.animation.reinstateOriginalStyleForResident(flow.domNode);
-    }
+    // for (let flow of globallyResidentAnimated) {
+    //   flow.animation.reinstateOriginalStyleForResident(flow.domNode);
+    // }
     for (let flow of globallyMovedAnimated) {
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
@@ -360,7 +368,10 @@ export function onFinishReBuildingDOM() {
     for (let flow of globallyAddedAnimated) {
       flow.animation.translateAddedFromNewToOriginalPosition(flow.domNode);
     }
-    for (let flow of globallyPresentAnimated) {
+    // for (let flow of globallyResidentAnimated) {
+    //   flow.animation.translateResidentFromNewToOriginalPosition(flow.domNode);
+    // }
+    for (let flow of globallyMovedAnimated) {
       flow.animation.translateResidentFromNewToOriginalPosition(flow.domNode);
     }
     for (let flow of globallyRemovedAnimated) {
@@ -375,7 +386,10 @@ export function onFinishReBuildingDOM() {
       for (let flow of globallyAddedAnimated) {
         flow.animation.setupFinalStyleForAdded(flow.domNode);
       }
-      for (let flow of globallyPresentAnimated) {
+      // for (let flow of globallyResidentAnimated) {
+      //   flow.animation.setupFinalStyleForResident(flow.domNode);
+      // }
+      for (let flow of globallyMovedAnimated) {
         flow.animation.setupFinalStyleForResident(flow.domNode);
       }
       for (let flow of globallyRemovedAnimated) {
@@ -386,7 +400,10 @@ export function onFinishReBuildingDOM() {
       for (let flow of globallyAddedAnimated) {
         flow.animation.setupAddedAnimationCleanup(flow.domNode);
       }
-      for (let flow of globallyPresentAnimated) {
+      // for (let flow of globallyResidentAnimated) {
+      //   flow.animation.setupResidentAnimationCleanup(flow.domNode);
+      // }
+      for (let flow of globallyMovedAnimated) {
         flow.animation.setupResidentAnimationCleanup(flow.domNode);
       }
       for (let flow of globallyRemovedAnimated) {

@@ -14,21 +14,41 @@ const log = console.log;
  */
 export class SuperSimple extends Flow {
   setState() {
-    this.left = true; 
-  }
-
-  build() {
-    const button = new modernButton(
-    // const button = new simpleButton(
+    this.left = true;
+    this.button = new simpleButton(
       "button", "Text", 
-      () => {
-        this.left = !this.left;
-      }, 
+      this.move.bind(this),
       {
         animate: true,
         ripple: false
       }
     );
+  }
+
+  onDispose() {
+    this.button.onDispose();
+  }
+
+  move() {
+    this.left = !this.left;
+    setTimeout(() => {
+      log(this.button.domNode);
+      log(this.button)
+      const primitive = this.button.getPrimitive();
+      const domNode = primitive.domNode;
+      const animation = primitive.getAnimation();
+      animation.recordOriginalBoundsAndStyle(primitive.domNode);
+      const measures = animation.getOriginalMeasures(primitive.domNode);
+      log(measures);
+      log(domNode.originalBounds);
+      log(domNode.originalBounds.top);
+      log(domNode.originalBounds.left);
+    }, 2500);
+  }
+
+  build() {
+    // const button = new modernButton(
+    const button = this.button; 
 
     return row(
       column(
@@ -44,7 +64,7 @@ export class SuperSimple extends Flow {
       ), 
       filler(), 
       column(
-        simpleButton("Move", () => {this.left = !this.left}),
+        simpleButton("Move", this.move.bind(this)),
         filler()
       )
       // {style: {fontSize: "40px", padding: "20px"}}
