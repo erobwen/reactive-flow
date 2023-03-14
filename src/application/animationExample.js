@@ -3,6 +3,7 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
 import { column, filler, row } from "../flow.components/Layout";
 import { button, text } from "../flow.components/BasicWidgets";
+import { div } from "../flow.components/Basic";
 
 const log = console.log;
 
@@ -71,6 +72,17 @@ export class AnimationExample extends Flow {
   }
 
   build() {
+    // return (
+    //   column(  
+    //       column(
+    //         div({style: {width: "100px", height: "100px", borderWidth: "1px", borderStyle: "solid"}}),
+    //         // div({style: {marginTop: "-100px"}}), // Interesting, this can collapse the parent container... 
+    //         {style: {borderWidth: "1px", borderStyle: "solid"}}
+    //       ), 
+    //       filler()
+    //     )
+    // )  
+
     return column(
       row(
         button({text: "Randomize", onClick: () => transaction(() => randomize(this.listA))}),

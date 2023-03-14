@@ -96,15 +96,15 @@ const log = console.log;
       }
 
       // Clear out styles that will no longer be modified
-      for (let property in this.unobservable.previouslySetStyles) {
-        if (!blockedProperties[property] && typeof(newStyle[property]) === "undefined") {
+      for (let property in this.unobservable.previouslySetStyles) if (!blockedProperties[property]) {
+        if (typeof(newStyle[property]) === "undefined") {
           elementStyle[property] = "";
         }
       }
   
       // Set styles if changed
-      for (let property in newStyle) {
-        if (!blockedProperties[property] && elementStyle[property] !== newStyle[property]) {
+      for (let property in newStyle) if (!blockedProperties[property]) {
+        if (elementStyle[property] !== newStyle[property]) {
           elementStyle[property] = newStyle[property];
         }
         newPreviouslySetStyles[property] = true;

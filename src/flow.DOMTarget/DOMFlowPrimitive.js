@@ -1,7 +1,7 @@
 import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges } from "./DOMAnimation";
+import { flowChanges, previousFlowChanges } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -22,7 +22,10 @@ export function aggregateToString(flow) {
   }
   return id.join(" | ");
 }
-   
+
+export const movedPrimitives = [];
+window.moved = movedPrimitives;
+
 export function clearNode(node) {
   while (node.childNodes.length > 0) {
     node.removeChild(node.lastChild);
@@ -88,12 +91,13 @@ export function clearNode(node) {
     throw new Error("Not implemented yet!");
   }
 
-  ensureDomNodeChildrenInPlace() {
+  ensureDomNodeChildrenInPlace() {// But do not change style for animated children!
+
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
     console.group("ensureDomNodeChildrenInPlace " + this.toString())
-    // log(node)
+    // log(node)0
     
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
@@ -107,59 +111,85 @@ export function clearNode(node) {
       const existingChildNode = node.childNodes[index];
       const existingPrimitive = existingChildNode.equivalentCreator;
       if (!existingPrimitive) {
-        // No creator, probably a disappearing replacement that we want to keep
+        // No creator, probably a fading trailer that we want to keep
         newChildNodes.splice(index, 0, existingChildNode);
       } else {
         // A creator, meaning a flow primitive
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
+        if (animation) {
 
-        // Test for being removed
-        if (!newChildNodes.includes(existingChildNode)) {
+          // If node is removed, copy it back to leave it to wait for animation.
+          if (flowChanges.globallyRemovedAnimated[existingPrimitive.id]) {
+            newChildNodes.splice(index, 0, existingChildNode);
+          }
+            
+          // Test for moving out 
+          if (flowChanges.globallyMovedAnimated[existingPrimitive.id]) {
 
-          // Test for global removal
-          if (flowChanges && flowChanges.globallyRemoved && flowChanges.globallyRemoved[existingPrimitive.id]) {
-            if (animation) {
-              // Node will be removed locally, copy it back to leave it to wait for animation.
-              newChildNodes.splice(index, 0, existingChildNode);
-            } else {
-              // Not animated, remove instantly!
+            // Outgoing could already be gone at this stage?
+            if (existingChildNode.fadingTrailerOnChanges !== flowChanges.number) {
+              node.insertBefore(animation.getFadingTrailer(existingChildNode), existingChildNode);
               node.removeChild(existingChildNode);
             }
-            
-            // Test for moving out 
-          } else if (existingPrimitive.parentPrimitive && existingPrimitive.parentPrimitive.id !== this.id) {
-            if (animation) {
-              // outgoing could already be gone at this stage!
-              if (!existingChildNode.disappearingExpander) {
-                node.insertBefore(animation.getDisappearingReplacement(existingChildNode), existingChildNode);
-                node.removeChild(existingChildNode);
-              }
-            } else {
-              // No animation, just remove. (do not copy to new)
-            }
+          }
+        } else {
+          // Not animated, remove instantly!
+          if (flowChanges.globallyRemoved[existingPrimitive.id] || flowChanges.globallyMoved[existingPrimitive.id]) {
+            node.removeChild(existingChildNode);
           }
         }
       }
       index--;
     }
 
-    // Arrange disappearing expander for incoming
-    if (flowChanges && flowChanges.globallyAdded)  {
-      for(let newPrimitive of newChildren) {
-        if (!existingPrimitives[newPrimitive.id] && !flowChanges.globallyAdded[newPrimitive.id]) {
-          // Incoming primitive. We have to replace it with a dissapearing replacement before we add it in this container, since ith will otherwise dissapear from that container without a chance to add the replacement.
-          const animation = newPrimitive.getAnimation(); 
-          if (animation) {
-            const newPrimitiveDomNode = newPrimitive.domNode; 
-            if (!newPrimitiveDomNode.disappearingExpander) {
-              //&& newPrimitiveDomNode.parentNode
-              newPrimitiveDomNode.parentNode.insertBefore(animation.getDisappearingReplacement(newPrimitiveDomNode), newPrimitiveDomNode);
-              newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
-            }
+    for(let newPrimitive of newChildren) {
+      const animation = newPrimitive.getAnimation();
+      if (animation) {
+
+        // For all added
+        if (flowChanges.globallyAddedAnimated[newPrimitive.id]) {
+          // At this stage, remember target dimensions.
+          animation.calculateTargetDimensionsForAdded(this.domNode, newPrimitive.domNode)
+          
+          // Check if it is being removed, in that case do nothign        
+          if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
+            animation.setOriginalMinimizedStyleForAdded(newPrimitive.domNode);
           }
         }
-      }   
+
+        // For all being moved here
+        if (flowChanges.globallyMovedAnimated[newPrimitive.id]) {
+          // debugger; 
+          log("Moved: ")
+          log(newPrimitive.domNode);
+          movedPrimitives.push(newPrimitive.domNode);
+          newPrimitive.domNode.touchedByFoo = true;
+          window.touched = newPrimitive.domNode;
+          newPrimitive.domNode.style.transform = "none";
+          // newPrimitive.domNode.style = {...newPrimitive.domNode.style, transform: "none"};
+          // newPrimitive.domNode.transform = "none";
+          // log(newPrimitive.domNode.style.transform)
+          
+          // Arrange trailer for incoming that leaves another container, arrange trailer. 
+          const newPrimitiveDomNode = newPrimitive.domNode; 
+          if (newPrimitiveDomNode.fadingTrailerOnChanges !== flowChanges.number) {
+            newPrimitiveDomNode.parentNode.insertBefore(animation.getFadingTrailer(newPrimitiveDomNode), newPrimitiveDomNode);
+            newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
+          }
+
+          // Minimize footprint for incoming. 
+          animation.minimizeIncomingFootprint(newPrimitiveDomNode);
+
+          // Preserve style for incoming. For example to avoid sudden changes of animated 
+          // properties if moving from a parent div with different font size, so we want to 
+          // fixate font size on the moving element so it can be animated. 
+          // Check if not in animation?  
+          if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
+          animation.preserveStyleForMoved(newPrimitiveDomNode);
+          if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
+        }
+      }
     }
       
     // Adding pass, will also rearrange moved elements
