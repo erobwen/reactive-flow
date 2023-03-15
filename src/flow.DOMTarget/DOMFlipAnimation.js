@@ -112,8 +112,17 @@ export class DOMFlipAnimation {
     }
   }
 
-  calculateTargetDimensionsForAdded(contextNode, node) {
-    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
+  calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
+    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
+    // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
+    this.recordTargetStyleForAdded(node);
+  }
+
+  recordTargetStyleForAdded(node) {
+    // contextNode.appendChild(node);
+    node.targetStyle = {...node.style}
+    node.computedTargetStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully.
+    // contextNode.removeChild(node); 
   }
 
   setOriginalMinimizedStyleForAdded(node) {
@@ -135,17 +144,17 @@ export class DOMFlipAnimation {
   }
 
   addedOriginalMinimizedStyle(node) {
-    if (node.addADeletedNode) {
-      delete node.addADeletedNode;
-      const result = this.getAnimatedProperties(node.computedOriginalStyle);
-      result.maxHeight = node.computedOriginalStyle.height;
-      result.maxWidth = node.computedOriginalStyle.width;
-      return result;
-    }
-    const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
-    const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
+    // if (node.addADeletedNode) {
+    //   delete node.addADeletedNode;
+    //   // const result = this.getAnimatedProperties(node.computedOriginalStyle);
+    //   result.maxHeight = "0px"; node.computedOriginalStyle.height;
+    //   result.maxWidth = node.computedOriginalStyle.width;
+    //   return result;
+    // }
+    // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
+    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
-      transform: transform,
+      transform: "scale(1)",//transform, //"scale(1)", //
       maxHeight: "0px",
       maxWidth: "0px",
       margin: "0px",
@@ -158,18 +167,18 @@ export class DOMFlipAnimation {
       paddingBottom: "0px",
       paddingLeft: "0px",
       paddingRight: "0px",
-      opacity: "0"
+      opacity: "0",
+      // color, fontSize?
     } 
   }
-
 
 
   /**
    * Remember target styles 
    */
-  calculateTargetDimensionsForAdded(contextNode, node) {
-    node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
-  }
+  // calculateTargetDimensionsForAdded(contextNode, node) {
+  //   node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
+  // }
 
   
  /**
@@ -304,15 +313,30 @@ export class DOMFlipAnimation {
   addedFinalStyle(node) {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
-
-    const result = this.getAnimatedProperties(node.computedTargetStyle);
-    // result.transform = "scale(1)";
+    const result = this.getAnimatedProperties(node.targetStyle);
+    result.transform = "scale(1)";
     result.maxHeight = targetDimensions.height + "px";
     result.maxWidth =  targetDimensions.width + "px";
     // result.margin = targetStyle.margin;
     // result.padding = targetStyle.padding;
     return result; 
   }
+
+  // transform: "", //transform,
+  // maxHeight: "0px",
+  // maxWidth: "0px",
+  // margin: "0px",
+  // marginTop: "0px",
+  // marginBottom: "0px",
+  // marginLeft: "0px",
+  // marginRight: "0px",
+  // padding: "0px",
+  // paddingTop: "0px",
+  // paddingBottom: "0px",
+  // paddingLeft: "0px",
+  // paddingRight: "0px",
+  // opacity: "0",
+
 
   residentTransition() {
     return this.defaultTransition();

@@ -257,8 +257,31 @@ export function onFinishReBuildingDOM() {
     for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
       flow.animation.recordBoundsInNewStructure(flow.domNode);
     }
-    
-    // Translate to original position
+  
+    // Examine added, measure their size etc.
+    // At this stage, remember target dimensions and style.    
+    for (let flow of flowChanges.allAnimatedAddedFlows()) {
+      log("ANALYZE ADDED")
+      log(flow.domNode.style.maxWidth);
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.domNode.style.maxWidth = "";
+      flow.domNode.style.maxHeight = "";
+      log(flow.domNode.style.maxWidth);
+      flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+      log(flow.domNode.targetStyle);
+      log(flow.domNode.targetDimensions);
+      flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
+      log("top")
+      log(flow.domNode.style.transform);
+      log(flow.domNode.style.maxWidth);
+      log(flow.domNode.style.maxHeight);
+      log(flow.domNode.style.margin);
+      log(flow.domNode.style.marginTop);
+      log(flow.domNode.style.padding);
+      log(flow.domNode.style.paddingTop);
+    }
+
+    // Translate present flows to original position
     for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
       // if (!flow.originalBounds) log(flow);
       // if (!flow.newStructureBounds) log(flow);
@@ -272,10 +295,35 @@ export function onFinishReBuildingDOM() {
     // Activate animation
     requestAnimationFrame(() => {
       for (let flow of flowChanges.allAnimatedAddedFlows()) {
-        flow.animation.setupFinalStyleForAdded(flow.domNode);
+        log("SETTING FINAL")
         flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+        flow.animation.setupFinalStyleForAdded(flow.domNode);
+        log("top")
+        log(flow.domNode.style.transform);
+        log(flow.domNode.style.maxWidth);
+        log(flow.domNode.style.maxHeight);
+        log(flow.domNode.style.margin);
+        log(flow.domNode.style.marginTop);
+        log(flow.domNode.style.padding);
+        log(flow.domNode.style.paddingTop);
         flow.animation.setupAddedAnimationCleanup(flow.domNode);
       }
+
+  // transform: "", //transform,
+  // maxHeight: "0px",
+  // maxWidth: "0px",
+  // margin: "0px",
+  // marginTop: "0px",
+  // marginBottom: "0px",
+  // marginLeft: "0px",
+  // marginRight: "0px",
+  // padding: "0px",
+  // paddingTop: "0px",
+  // paddingBottom: "0px",
+  // paddingLeft: "0px",
+  // paddingRight: "0px",
+  // opacity: "0",
+
 
       for (let flow of flowChanges.allAnimatedResidentFlows()) {
         if (flow.animateInChanges === flowChanges.number) {

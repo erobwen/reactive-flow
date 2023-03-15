@@ -149,9 +149,6 @@ export function clearNode(node) {
 
         // For all added
         if (flowChanges.globallyAddedAnimated[newPrimitive.id]) {
-          // At this stage, remember target dimensions.
-          animation.calculateTargetDimensionsForAdded(this.domNode, newPrimitive.domNode)
-          
           // Check if it is being removed, in that case do nothign        
           if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
             animation.setOriginalMinimizedStyleForAdded(newPrimitive.domNode);
