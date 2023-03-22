@@ -18,6 +18,7 @@ export let inEperiment = false;
 export class SuperSimple extends Flow {
   setState() {
     this.left = false;
+    this.showButton = false;
     this.button = new simpleButton(
       "button", "Text", 
       this.move.bind(this),

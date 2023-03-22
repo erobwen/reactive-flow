@@ -267,10 +267,11 @@ export function onFinishReBuildingDOM() {
     flow.domNode.style.maxHeight = "";
     log(flow.domNode.style.maxWidth);
     flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+    log("target style and dimensions")
     log(flow.domNode.targetStyle);
     log(flow.domNode.targetDimensions);
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-    log("top")
+    log(flow.domNode.style.transition);
     log(flow.domNode.style.transform);
     log(flow.domNode.style.maxWidth);
     log(flow.domNode.style.maxHeight);
@@ -280,7 +281,6 @@ export function onFinishReBuildingDOM() {
     log(flow.domNode.style.paddingTop);
   }
 
-  
   // Translate present flows to original position
   for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
     // if (!flow.originalBounds) log(flow);
@@ -292,66 +292,61 @@ export function onFinishReBuildingDOM() {
     }
   }
       
-
+  // Activate animation
   requestAnimationFrame(() => {
+    for (let flow of flowChanges.allAnimatedAddedFlows()) {
+      log("SETTING FINAL")
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.animation.setupFinalStyleForAdded(flow.domNode);
+      log("top")
+      log(flow.domNode.style.transition);
+      log(flow.domNode.style.transform);
+      log(flow.domNode.style.maxWidth);
+      log(flow.domNode.style.maxHeight);
+      log(flow.domNode.style.margin);
+      log(flow.domNode.style.marginTop);
+      log(flow.domNode.style.padding);
+      log(flow.domNode.style.paddingTop);
+      flow.animation.setupAddedAnimationCleanup(flow.domNode);
+    }
 
-  
+// transform: "", //transform,
+// maxHeight: "0px",
+// maxWidth: "0px",
+// margin: "0px",
+// marginTop: "0px",
+// marginBottom: "0px",
+// marginLeft: "0px",
+// marginRight: "0px",
+// padding: "0px",
+// paddingTop: "0px",
+// paddingBottom: "0px",
+// paddingLeft: "0px",
+// paddingRight: "0px",
+// opacity: "0",
 
-    // Activate animation
-    requestAnimationFrame(() => {
-      for (let flow of flowChanges.allAnimatedAddedFlows()) {
-        log("SETTING FINAL")
+
+    for (let flow of flowChanges.allAnimatedResidentFlows()) {
+      if (flow.animateInChanges === flowChanges.number) {
+        flow.animation.setupFinalStyleForResident(flow.domNode);
         flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-        flow.animation.setupFinalStyleForAdded(flow.domNode);
-        log("top")
-        log(flow.domNode.style.transform);
-        log(flow.domNode.style.maxWidth);
-        log(flow.domNode.style.maxHeight);
-        log(flow.domNode.style.margin);
-        log(flow.domNode.style.marginTop);
-        log(flow.domNode.style.padding);
-        log(flow.domNode.style.paddingTop);
-        flow.animation.setupAddedAnimationCleanup(flow.domNode);
+        flow.animation.setupResidentAnimationCleanup(flow.domNode);
       }
+    }
 
-  // transform: "", //transform,
-  // maxHeight: "0px",
-  // maxWidth: "0px",
-  // margin: "0px",
-  // marginTop: "0px",
-  // marginBottom: "0px",
-  // marginLeft: "0px",
-  // marginRight: "0px",
-  // padding: "0px",
-  // paddingTop: "0px",
-  // paddingBottom: "0px",
-  // paddingLeft: "0px",
-  // paddingRight: "0px",
-  // opacity: "0",
-
-
-      for (let flow of flowChanges.allAnimatedResidentFlows()) {
-        if (flow.animateInChanges === flowChanges.number) {
-          flow.animation.setupFinalStyleForResident(flow.domNode);
-          flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-          flow.animation.setupResidentAnimationCleanup(flow.domNode);
-        }
+    for (let flow of flowChanges.allAnimatedMovedFlows()) {
+      if (flow.animateInChanges === flowChanges.number) {
+        flow.animation.setupFinalStyleForMoved(flow.domNode);
+        flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+        flow.animation.setupResidentAnimationCleanup(flow.domNode);
       }
+    }
 
-      for (let flow of flowChanges.allAnimatedMovedFlows()) {
-        if (flow.animateInChanges === flowChanges.number) {
-          flow.animation.setupFinalStyleForMoved(flow.domNode);
-          flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-          flow.animation.setupResidentAnimationCleanup(flow.domNode);
-        }
-      }
-
-      for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-        flow.animation.setupFinalStyleForRemoved(flow.domNode);
-        flow.animation.setupRemovedAnimationCleanup(flow.domNode);
-      }
-   }); 
-  })
+    for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+      flow.animation.setupFinalStyleForRemoved(flow.domNode);
+      flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+    }
+   });
   console.groupEnd();
 }
 

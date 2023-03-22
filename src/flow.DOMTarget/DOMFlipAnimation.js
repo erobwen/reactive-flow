@@ -113,6 +113,9 @@ export class DOMFlipAnimation {
   }
 
   calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
+    
+    node.style.maxWidth = "";
+    node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
     // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
     this.recordTargetStyleForAdded(node);
@@ -154,15 +157,16 @@ export class DOMFlipAnimation {
     // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
-      transform: "scale(1)",//transform, //"scale(1)", //
+      transition: this.defaultTransition(),
+      transform: "scale(0)",//transform, //"scale(1)", //
       maxHeight: "0px",
       maxWidth: "0px",
-      margin: "0px",
+      // margin: "0px",
       marginTop: "0px",
       marginBottom: "0px",
       marginLeft: "0px",
       marginRight: "0px",
-      padding: "0px",
+      // padding: "0px",
       paddingTop: "0px",
       paddingBottom: "0px",
       paddingLeft: "0px",

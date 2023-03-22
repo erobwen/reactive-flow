@@ -32,6 +32,7 @@ export function clearNode(node) {
   }
 }
 
+
 /**
  * DOM Flow Base class
  */
@@ -40,9 +41,15 @@ export function clearNode(node) {
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-    const domNode = this.ensureDomNodeBuilt(true).cloneNode(true);
+    let domNode; 
+    let alreadyInContext;
     if (contextNode) {
-      contextNode.appendChild(domNode);
+      domNode = this.ensureDomNodeBuilt(true);
+      alreadyInContext = domNode.parentNode === contextNode;
+      if (!alreadyInContext) {
+        domNode = domNode.cloneNode(true);
+        contextNode.appendChild(domNode);
+      }
     } else {
       domNode.style.position = "absolute"; 
       domNode.style.top = "0";
@@ -52,14 +59,16 @@ export function clearNode(node) {
       Object.assign(domNode.style, flexAutoStyle);
       document.body.appendChild(domNode);  
     }
-
+  
     const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
     const original = this.ensureDomNodeBuilt(true)
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
     // debugger;
     if (contextNode) {
-      contextNode.removeChild(domNode);
+      if (!alreadyInContext) {
+        contextNode.removeChild(domNode);
+      }
     } else {
       document.body.removeChild(domNode);
     }
