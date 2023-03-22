@@ -184,9 +184,6 @@ export function clearNode(node) {
             newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
           }
 
-          // Minimize footprint for incoming. 
-          animation.minimizeIncomingFootprint(newPrimitiveDomNode);
-
           // Preserve style for incoming. For example to avoid sudden changes of animated 
           // properties if moving from a parent div with different font size, so we want to 
           // fixate font size on the moving element so it can be animated. 
@@ -194,6 +191,9 @@ export function clearNode(node) {
           if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
           animation.preserveStyleForMoved(newPrimitiveDomNode);
           if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
+
+          // Minimize footprint for incoming. 
+          animation.minimizeIncomingFootprint(newPrimitiveDomNode);
         }
       }
     }

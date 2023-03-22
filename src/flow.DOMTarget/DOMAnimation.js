@@ -41,17 +41,21 @@ const typicalAnimatedProperties = [
 ]; 
 
 function logProperties(object, properties) {
+  log(extractProperties(object, properties));
+}
+
+function extractProperties(object, properties) {
   const condensed = {};
   properties.forEach(property => {
     if (typeof(property) !== "string") {
-      property.parts.forEach(part => {
+      property.partial.forEach(part => {
         condensed[part] = object[part]   
       });
     } else {
       condensed[property] = object[property];
     }
   });
-  log(condensed);
+  return condensed;
 }
 
 
@@ -310,17 +314,25 @@ export function onFinishReBuildingDOM() {
     if (true || !sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
       log("ASDFASEF")
       log(flow.domNode.style.transform)
+      
+      const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
+      
       log(currentTransform)
       log(typeof flow.domNode.style.transform)
       if (!["none", "", " "].includes(currentTransform)) {
-        log("HEREAESRASERASER")
+        // Freeze properties as we start a new animation.
+        Object.assign(flow.domNode.style, extractProperties(computedStyle, flow.animation.animatedProperties));
+
+        // Reset transform 
         flow.domNode.style.transition = "";
         flow.domNode.style.transform = "";
+        currentTransform = computedStyle.transform;
         currentTransform = getComputedStyle(flow.domNode).transform;
         log(currentTransform);
         flow.animation.recordBoundsInNewStructure(flow.domNode);
       }
+
       flow.animateInChanges = flowChanges.number; 
       flow.animation.translateFromNewToOriginalPosition(flow.domNode);
     }

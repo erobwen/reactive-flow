@@ -62,11 +62,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 5s ease-in-out, opacity 1s ease-in"
+    return "all 1s ease-in-out, opacity 1s ease-in"
   }
 
   removeTransition() {
-    return "all 5s ease-in-out, opacity 0.5s ease-out"
+    return "all 1s ease-in-out, opacity 0.5s ease-out"
   }
 
   /**
