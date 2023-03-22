@@ -307,7 +307,20 @@ export function onFinishReBuildingDOM() {
     // if (!flow.originalBounds) log(flow);
     // if (!flow.newStructureBounds) log(flow);
 
-    if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+    if (true || !sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+      log("ASDFASEF")
+      log(flow.domNode.style.transform)
+      let currentTransform = getComputedStyle(flow.domNode).transform;
+      log(currentTransform)
+      log(typeof flow.domNode.style.transform)
+      if (!["none", "", " "].includes(currentTransform)) {
+        log("HEREAESRASERASER")
+        flow.domNode.style.transition = "";
+        flow.domNode.style.transform = "";
+        currentTransform = getComputedStyle(flow.domNode).transform;
+        log(currentTransform);
+        flow.animation.recordBoundsInNewStructure(flow.domNode);
+      }
       flow.animateInChanges = flowChanges.number; 
       flow.animation.translateFromNewToOriginalPosition(flow.domNode);
     }
