@@ -27,6 +27,33 @@ export function removeDOMFlowTarget(target) {
   domFlowTargets.splice(domFlowTargets.indexOf(target), 1);
 }
 
+const typicalAnimatedProperties = [
+  "transition", 
+  "transform", 
+  "width", 
+  "height", 
+  "maxWidth", 
+  "maxHeight", 
+  "margin", 
+  "marginTop", 
+  "padding", 
+  "paddingTop"
+]; 
+
+function logProperties(object, properties) {
+  const condensed = {};
+  properties.forEach(property => {
+    if (typeof(property) !== "string") {
+      property.parts.forEach(part => {
+        condensed[part] = object[part]   
+      });
+    } else {
+      condensed[property] = object[property];
+    }
+  });
+  log(condensed);
+}
+
 
 /**
  * Global flow change tracking
@@ -271,14 +298,8 @@ export function onFinishReBuildingDOM() {
     log(flow.domNode.targetStyle);
     log(flow.domNode.targetDimensions);
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-    log(flow.domNode.style.transition);
-    log(flow.domNode.style.transform);
-    log(flow.domNode.style.maxWidth);
-    log(flow.domNode.style.maxHeight);
-    log(flow.domNode.style.margin);
-    log(flow.domNode.style.marginTop);
-    log(flow.domNode.style.padding);
-    log(flow.domNode.style.paddingTop);
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+
   }
 
   // Translate present flows to original position
@@ -298,15 +319,8 @@ export function onFinishReBuildingDOM() {
       log("SETTING FINAL")
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
       flow.animation.setupFinalStyleForAdded(flow.domNode);
-      log("top")
-      log(flow.domNode.style.transition);
-      log(flow.domNode.style.transform);
-      log(flow.domNode.style.maxWidth);
-      log(flow.domNode.style.maxHeight);
-      log(flow.domNode.style.margin);
-      log(flow.domNode.style.marginTop);
-      log(flow.domNode.style.padding);
-      log(flow.domNode.style.paddingTop);
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
+
       flow.animation.setupAddedAnimationCleanup(flow.domNode);
     }
 
