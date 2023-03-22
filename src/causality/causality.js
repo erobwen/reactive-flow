@@ -1553,7 +1553,8 @@ function createWorld(configuration) {
         let time = Date.now();
         const timeSinceLastRepeat = time - repeater.lastRepeatTime;
         if (throttle > timeSinceLastRepeat) {
-          const waiting = throttle - timeSinceLastRepeat
+          const waiting = throttle - timeSinceLastRepeat;
+          debugger; 
           setTimeout(() => { repeater.restart() }, waiting);
         } else {
           repeater.lastRepeatTime = time;

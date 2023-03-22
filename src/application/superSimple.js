@@ -10,6 +10,8 @@ import { div } from "../flow.components/Basic";
 
 const log = console.log;
 
+export let inEperiment = false; 
+
 /**
  * Minimalistic component used for experiments. 
  */
@@ -32,19 +34,14 @@ export class SuperSimple extends Flow {
 
   move() {
     this.left = !this.left;
-    // setTimeout(() => {
-    //   log(this.button.domNode);
-    //   log(this.button)
-    //   const primitive = this.button.getPrimitive();
-    //   const domNode = primitive.domNode;
-    //   const animation = primitive.getAnimation();
-    //   animation.recordOriginalBoundsAndStyle(primitive.domNode);
-    //   const measures = animation.getOriginalMeasures(primitive.domNode);
-    //   log(measures);
-    //   log(domNode.originalBounds);
-    //   log(domNode.originalBounds.top);
-    //   log(domNode.originalBounds.left);
-    // }, 2500);
+
+    setTimeout(() => {
+      inEperiment = true; 
+    }, 1000);
+
+    setTimeout(() => {
+      this.button.text = this.button.text + "!"       
+    }, 2500);
   }
 
   build() {
