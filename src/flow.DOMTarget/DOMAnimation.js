@@ -317,11 +317,11 @@ export function onFinishReBuildingDOM() {
   requestAnimationFrame(() => {
     for (let flow of flowChanges.allAnimatedAddedFlows()) {
       log("SETTING FINAL")
-      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties); // needed?
       flow.animation.setupFinalStyleForAdded(flow.domNode);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
 
-      flow.animation.setupAddedAnimationCleanup(flow.domNode);
+      // flow.animation.setupAddedAnimationCleanup(flow.domNode);
     }
 
 // transform: "", //transform,

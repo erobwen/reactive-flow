@@ -26,16 +26,16 @@ const animatedProperties = [
 ];
 
 export function draw(bounds, color="black") {
-  const outline = window.document.createElement("div");
-  outline.style.position = "absolute";
-  outline.style.top = bounds.top + "px";
-  outline.style.left = bounds.left + "px";
-  outline.style.width = bounds.width + "px";
-  outline.style.height = bounds.height + "px";
-  outline.style.borderWidth = "1px";
-  outline.style.borderStyle = "solid";
-  outline.style.borderColor = color;
-  document.children[0].appendChild(outline);
+  // const outline = window.document.createElement("div");
+  // outline.style.position = "absolute";
+  // outline.style.top = bounds.top + "px";
+  // outline.style.left = bounds.left + "px";
+  // outline.style.width = bounds.width + "px";
+  // outline.style.height = bounds.height + "px";
+  // outline.style.borderWidth = "1px";
+  // outline.style.borderStyle = "solid";
+  // outline.style.borderColor = color;
+  // document.children[0].appendChild(outline);
 }
 
 
@@ -157,7 +157,7 @@ export class DOMFlipAnimation {
     // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
-      transition: this.defaultTransition(),
+      // transition: this.defaultTransition(),
       transform: "scale(0)",//transform, //"scale(1)", //
       maxHeight: "0px",
       maxWidth: "0px",
@@ -318,7 +318,7 @@ export class DOMFlipAnimation {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
     const result = this.getAnimatedProperties(node.targetStyle);
-    result.transform = "scale(1)";
+    result.transform = "none";
     result.maxHeight = targetDimensions.height + "px";
     result.maxWidth =  targetDimensions.width + "px";
     // result.margin = targetStyle.margin;
