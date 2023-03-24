@@ -124,7 +124,7 @@ export class SimpleDrawer extends Flow {
  build() {
   const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
   return column(
-    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}, ripple: false}),
+    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}, ripple: true}),
     column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
   );
  }
@@ -181,7 +181,7 @@ export class ComplexForm extends Flow {
             // Add traveler button
             row(
               filler(),
-              button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)), {ripple: false})
+              button("+ Traveler", () => this.editData.fellowTravellers.push(createTraveler(true)), {ripple: true})
             ),
 
             // Submit button
@@ -196,7 +196,7 @@ export class ComplexForm extends Flow {
               {
                 style: {marginTop: "30px"},
                 disabled: data.anyError,
-                ripple: false
+                ripple: true
               }),
             filler(),
             { style: {padding: "30px"}}
@@ -234,7 +234,7 @@ export class TravelerForm extends Flow {
       // Remove button
       row(
         filler(),
-        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)}, {ripple: false})
+        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)}, {ripple: true})
       ).show(traveler.isFellowTraveller),
 
       // Traveler inforation
@@ -279,7 +279,7 @@ export class TravelerForm extends Flow {
               this.showLuggage = true;
             });
           },
-          {ripple: false}
+          {ripple: true}
         ),
         {
           animate: true
@@ -299,7 +299,7 @@ export class LuggageForm extends Flow {
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
-        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)}, {ripple: false})
+        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)}, {ripple: true})
       )
     );
   }

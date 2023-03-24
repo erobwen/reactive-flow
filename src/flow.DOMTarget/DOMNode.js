@@ -1,4 +1,6 @@
+import { extractAttributes } from "../flow.components/Basic";
 import { trace } from "../flow/Flow";
+import { extractProperties } from "./DOMAnimation";
 import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    
 const log = console.log;
 
@@ -115,6 +117,12 @@ const log = console.log;
       this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
     }
   
+    getAnimatedFinishStyles() {
+      const style = (this.attributes && this.attributes.style) ? this.attributes.style : {};
+      const animation = this.animation ? this.animation : this.getAnimation();
+      return extractProperties(style, animation.animatedProperties);
+    }
+
     synchronizeDomNodeStyle(properties) {
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 
 

@@ -25,6 +25,8 @@ const animatedProperties = [
   "fontSize",
 ];
 
+
+
 export function draw(bounds, color="black") {
   // const outline = window.document.createElement("div");
   // outline.style.position = "absolute";
@@ -62,11 +64,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 5s ease-in-out, opacity 5s ease-in"
+    return "all 1s ease-in-out, opacity 1s ease-in"
   }
 
   removeTransition() {
-    return "all 5s ease-in-out, opacity 5s ease-out"
+    return "all 1s ease-in-out, opacity 1s ease-out"
   }
 
   /**
@@ -96,9 +98,9 @@ export class DOMFlipAnimation {
   /**
    * Preserve style 
    */
-  preserveStyleForMoved(node) {
+  preserveStyleForMoved(node, includeTransform=false) {
     for (let property of this.animatedProperties) {
-      if (property === "transform") continue; 
+      if (property === "transform" && !includeTransform) continue; 
       if (typeof(property) === "string") {
         node.style[property] = node.computedOriginalStyle[property];
       } else {
@@ -275,9 +277,9 @@ export class DOMFlipAnimation {
   /**
    * Final styles, the styles elements have at the end of the, before cleanup. 
    */
-  setupFinalStyleForAdded(node) {
+  setupFinalStyleForAdded(node, animatedFinishStyles) {
     node.style.transition = this.addedTransition(node);
-    Object.assign(node.style, this.addedFinalStyle(node));
+    Object.assign(node.style, this.addedFinalStyle(node, animatedFinishStyles));
   }
 
   setupFinalStyleForResident(node) {
@@ -303,13 +305,15 @@ export class DOMFlipAnimation {
     return this.defaultTransition();
   }
 
-  addedFinalStyle(node) {
+  addedFinalStyle(node, finishStyles) {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
-    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
-    const result = this.getAnimatedProperties(node.targetStyle);
+    const result = {...finishStyles}//this.getAnimatedProperties(node.targetStyle);
     result.transform = "none";
+
+    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
     result.maxHeight = targetDimensions.height + "px";
     result.maxWidth =  targetDimensions.width + "px";
+    result.opacity = "1";
     // result.margin = targetStyle.margin;
     // result.padding = targetStyle.padding;
     return result; 
@@ -391,12 +395,18 @@ export class DOMFlipAnimation {
   setupAnimationCleanup(node, alsoRemoveNode, frameNumber) {
     const me = this; 
     function onTransitionEnd(event) {
-      // console.log(event);
+      log("onTransitionEnd..." + node.animationType);
+      // log(frameNumber)
+      // log(node.inAnimationNumber)
+      // log(node.animationType);
+      event.preventDefault();
+      event.stopPropagation();
+      console.log(event);
       if (frameNumber === node.inAnimationNumber) {
-         
-        delete node.inAnimationNumber;
         
+        delete node.inAnimationNumber;
         if (["move", "resident", "added"].includes(node.animationType)) {
+          // log("resetting")
           node.style.transition = "";
           if (node.equivalentCreator) {
             node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);

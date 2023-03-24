@@ -1,7 +1,7 @@
 import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges, previousFlowChanges } from "./DOMAnimation";
+import { flowChanges, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -144,7 +144,7 @@ export function clearNode(node) {
           }
         } else {
           // Not animated, remove instantly!
-          if (flowChanges.globallyRemoved[existingPrimitive.id] || flowChanges.globallyMoved[existingPrimitive.id]) {
+          if (flowChanges.beingRemovedMap[existingPrimitive.id] || flowChanges.globallyRemoved[existingPrimitive.id] || flowChanges.globallyMoved[existingPrimitive.id]) {
             node.removeChild(existingChildNode);
           }
         }
@@ -158,9 +158,13 @@ export function clearNode(node) {
 
         // For all added
         if (flowChanges.globallyAddedAnimated[newPrimitive.id]) {
-          // Check if it is being removed, in that case do nothign        
+          // Check if it is being removed, in that case just freeze style         
           if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
             animation.setOriginalMinimizedStyleForAdded(newPrimitive.domNode);
+          } else {
+            animation.preserveStyleForMoved(newPrimitive.domNode, true); // PORTAL
+            log(newPrimitive.toString() + " is added after being removed...");
+            logProperties(newPrimitive.domNode.style, typicalAnimatedProperties);
           }
         }
 

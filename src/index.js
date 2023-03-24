@@ -8,6 +8,7 @@ import { startAnimationExample } from "./application/animationExample.js";
 import { startDemo } from "./application/demo.js";
 import { installDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
 import { startPatternMatching } from "./application/patternMatching.js";
+import { startSuperDuperSimple } from "./application/superDuperSimple.js";
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -27,8 +28,9 @@ setFlowConfiguration({
 });
 installDOMAnimation();
 
-// startDemo();
-startSuperSimple();
+startDemo();
+// startSuperSimple();
+// startSuperDuperSimple();
 // startAnimationExample();
 
 // startHelloWorld();

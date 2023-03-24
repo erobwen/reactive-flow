@@ -27,7 +27,7 @@ export function removeDOMFlowTarget(target) {
   domFlowTargets.splice(domFlowTargets.indexOf(target), 1);
 }
 
-const typicalAnimatedProperties = [
+export const typicalAnimatedProperties = [
   "transition", 
   "transform", 
   "width", 
@@ -40,19 +40,26 @@ const typicalAnimatedProperties = [
   "paddingTop"
 ]; 
 
-function logProperties(object, properties) {
+export function logProperties(object, properties) {
   log(extractProperties(object, properties));
 }
 
-function extractProperties(object, properties) {
+export function extractProperties(object, properties) {
   const condensed = {};
   properties.forEach(property => {
     if (typeof(property) !== "string") {
       property.partial.forEach(part => {
-        condensed[part] = object[part]   
+        if (object[part]) {
+          condensed[part] = object[part]   
+        }
       });
+      if (object[property.compound]) {
+        condensed[property.compound] = object[property.compound];
+      }
     } else {
-      condensed[property] = object[property];
+      if (object[property]) {
+        condensed[property] = object[property];
+      }
     }
   });
   return condensed;
@@ -189,31 +196,29 @@ export function onFinishReBuildingFlow() {
       }
     } else {
       // Globally added
-      if (flowChanges.beingRemovedMap[id]) {
-        // Move or resident
-        flowChanges.beingRemovedMap[id]
-        const previousParentFlow = primitive.domNode.parentNode ? primitive.domNode.parentNode.equivalentCreator : null;
-        if (previousParentFlow && flowChanges.idParentIdMap[primitive.id] === previousParentFlow.id) {
-          // Same parent, resident
-          flowChanges.globallyResident[id] = primitive;
-        } else {
-          // Moved
-          flowChanges.globallyMoved[id] = primitive;
-        }
-      } else {
+      // if (flowChanges.beingRemovedMap[id]) {
+      //   // Move or resident
+      //   flowChanges.beingRemovedMap[id]
+      //   const previousParentFlow = primitive.domNode.parentNode ? primitive.domNode.parentNode.equivalentCreator : null;
+      //   if (previousParentFlow && flowChanges.idParentIdMap[primitive.id] === previousParentFlow.id) {
+      //     // Same parent, resident
+      //     flowChanges.globallyResident[id] = primitive;
+      //   } else {
+      //     // Moved
+      //     flowChanges.globallyMoved[id] = primitive;
+      //   }
+      // } else {
         // A true addition
         flowChanges.globallyAdded[id] = primitive;
-      }
+      // }
     }
   }
 
   // Find removed nodes
   for (let id in previousFlowChanges.idPrimitiveMap) {
-    log("ASDFASDFASDFASDFASDFASDF")
     const inPreviousMap = previousFlowChanges.idPrimitiveMap[id];
     if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive.getChildNodes().includes(inPreviousMap.domNode)) {
       flowChanges.globallyRemoved[id] = inPreviousMap; 
-      flowChanges.beingRemovedMap[id] = inPreviousMap;
     }
   }
 
@@ -259,20 +264,21 @@ export function onFinishReBuildingFlow() {
     if (flow.domNode) {
       flow.domNode.inAnimationNumber = flowChanges.number;
       flow.domNode.animationType = "moved";
-      delete flowChanges.beingRemovedMap[flow.id];
     }
   }
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.domNode) {
       flow.domNode.inAnimationNumber = flowChanges.number;
       flow.domNode.animationType = "added";
-      delete flowChanges.beingRemovedMap[flow.id];
     }
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
       flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.animationType = "removed";
+      flow.domNode.animationType = "removed";     
+      // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
+      flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
+      flowChanges.beingRemovedMap[flow.id] = flow;    
     }
   }
 
@@ -316,11 +322,24 @@ function prepareAnimationStart() {
   // Examine added, measure their size etc.
   // At this stage, remember target dimensions and style.    
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-    flow.domNode.style.maxWidth = "";
-    flow.domNode.style.maxHeight = "";
-    flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
-    flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
+    log({... flowChanges.beingRemovedMap})
+    if (!flowChanges.beingRemovedMap[flow.id]) {
+      // Measure added final style in an emulated world. PORTAL 
+      console.group("start measure added");
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.domNode.style.maxWidth = "";
+      flow.domNode.style.maxHeight = "";
+      flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+      flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
+      log(flow.toString() + " is added and minimized again...");
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
+      console.groupEnd();
+    } else {
+      // We already recorded desired height upon removal. Note, this might be wrong if the div animated while 
+      // Being removed. This can perhaps be improved in the future to do a new proper measurement.
+      log(flow.toString() + " is added after being removed...");
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
+    }    
   }
 
   // Translate present flows to original position
@@ -352,31 +371,38 @@ function prepareAnimationStart() {
       flow.animation.translateFromNewToOriginalPosition(flow.domNode);
     }
 
-    log("ORIGINAL RESIDENT");
-    logProperties(flow.domNode.style, typicalAnimatedProperties);
+    // log("ORIGINAL RESIDENT");
+    // logProperties(flow.domNode.style, typicalAnimatedProperties);
   }
 
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+
     flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
-    flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";  
+    flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px"; 
+    flow.domNode.style.transform = "scale(1)"; 
   }
 }
 
 
 function activateAnimation() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    log("SETTING FINAL")
-    flow.synchronizeDomNodeStyle(flow.animation.animatedProperties); // needed?
-    flow.animation.setupFinalStyleForAdded(flow.domNode);
+    console.group("activate for added");
+    flow.animation.setupFinalStyleForAdded(flow.domNode, flow.getAnimatedFinishStyles());
+    log(`... adding node ${flow.toString()}, final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
     flow.animation.setupAddedAnimationCleanup(flow.domNode, flow.domNode.inAnimationNumber);
+    delete flowChanges.beingRemovedMap[flow.id];  
+    console.groupEnd();
   }
 
   for (let flow of flowChanges.allAnimatedResidentFlows()) {
     if (flow.animateInChanges === flowChanges.number) {
       flow.animation.setupFinalStyleForResident(flow.domNode);
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      log(`... resident node ${flow.toString()}, final properties: `);
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
       flow.animation.setupResidentAnimationCleanup(flow.domNode);
+      delete flowChanges.beingRemovedMap[flow.id];
     }
   }
 
@@ -384,14 +410,16 @@ function activateAnimation() {
     if (flow.animateInChanges === flowChanges.number) {
       flow.animation.setupFinalStyleForMoved(flow.domNode);
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      log(`... moving node ${flow.toString()}, final properties: `);
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
       flow.animation.setupResidentAnimationCleanup(flow.domNode);
+      delete flowChanges.beingRemovedMap[flow.id];
     }
   }
   
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-    flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
-    log("FINAL REMOVE");
+    log(`... removing node ${flow.toString()}, final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
     // flow.animation.setupRemovedAnimationCleanup(flow.domNode);
   }

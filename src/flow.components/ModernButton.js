@@ -107,11 +107,11 @@ export class ModernButton extends Flow {
       }
       this.inAnimation = true; 
       
-      const oldStyle = {
-        overflow : panel.style.overflow,
-        width: panel.style.width,
-        height: panel.style.height
-      }
+      // const oldStyle = {
+      //   overflow : panel.style.overflow,
+      //   width: panel.style.width,
+      //   height: panel.style.height
+      // }
 
       // if (backgroundOnClick) {
         //   panel.style.transition = "background-color 0.6 ease-in-out";
@@ -125,8 +125,8 @@ export class ModernButton extends Flow {
         // Fixate panel (it might grow otherwise... )
         panel.style.overflow = "hidden";
         const panelComputedStyle = window.getComputedStyle(panel, null);
-        panel.style.width = panelComputedStyle.width;
-        panel.style.height = panelComputedStyle.height;
+        panel.style.maxWidth = panelComputedStyle.width;
+        panel.style.maxHeight = panelComputedStyle.height;
         
         // Button size
         const diameter = Math.max(panel.clientWidth, panel.clientHeight);
@@ -155,18 +155,16 @@ export class ModernButton extends Flow {
           })
         });
 
-        const restorePanelAfterDelay = (panel, circle, oldStyle) => {
+        const restorePanelAfterDelay = (panel, circle) => {
           setTimeout(() => {
             panel.removeChild(circle);
             setTimeout(() => {
-              panel.style.width = oldStyle.width;
-              panel.style.height = oldStyle.height;
-              panel.style.overflow = oldStyle.overflow;
+              this.findChild("centerMiddle").synchronizeDomNodeStyle(["maxWidth", "maxHeight", "overflow"]);
               this.inAnimation = false; 
             }, 0); 
           }, 300);
         }
-        restorePanelAfterDelay(panel, circle, oldStyle);
+        restorePanelAfterDelay(panel, circle);
       } else {
         this.inAnimation = false;
       }
