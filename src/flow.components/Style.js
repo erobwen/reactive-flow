@@ -15,3 +15,11 @@ export const panelStyle = {
 export const animatedContainerStyle = {
   overflow: "visible"
 }
+
+export const borderStyle = {
+  boxShadow: "border-box",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "gray",
+  borderRadius: "3px",
+}

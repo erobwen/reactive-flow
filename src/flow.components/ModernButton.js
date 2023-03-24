@@ -41,6 +41,10 @@ export class ModernButton extends Flow {
   }
 
   ensure() {
+    const foo = this.text; 
+    log("ENSURE");
+    log(foo);
+    log("--")
     // Ensure event listeners
     if (this.domNode !== this.eventListenersDomNode) {
       this.eventListenersDomNode = this.domNode;
@@ -188,6 +192,7 @@ export class ModernButton extends Flow {
   }
   
   build() {
+    log("REBUILDING BUTTON")
     let {ripple, style, onClick} = this;
     style = {...style, overflow: "hidden", userSelect: "none", padding: "20px", fontSize: "20px"};
     if (ripple) style.position = "relative";

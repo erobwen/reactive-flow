@@ -62,11 +62,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return "all 1s ease-in-out, opacity 1s ease-in"
+    return "all 5s ease-in-out, opacity 5s ease-in"
   }
 
   removeTransition() {
-    return "all 1s ease-in-out, opacity 0.5s ease-out"
+    return "all 5s ease-in-out, opacity 5s ease-out"
   }
 
   /**
@@ -74,8 +74,6 @@ export class DOMFlipAnimation {
    */
   recordOriginalBoundsAndStyle(node) {
     node.originalBounds = node.getBoundingClientRect();
-    console.log("Original bounds x");
-    console.log(node.originalBounds.x);
     draw(node.originalBounds);
     node.originalStyle = {...node.style}
     node.computedOriginalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
@@ -236,15 +234,8 @@ export class DOMFlipAnimation {
    */
 
   recordBoundsInNewStructure(node) {
-    log("recordBoundsInNewStructure");
-    log(node.style.transform)
-    // node.style.transform = "";
+    // node.style.transform = ""; // Cannot do here as some resident nodes will continue on same animation.
     node.newStructureBounds = node.getBoundingClientRect();
-    log("new structure record... node.style.transform")
-    log(node.style.transform)
-    log(node.transform)
-    log("sdf")
-    log(node);
     movedPrimitives.push(node)
     draw(node.newStructureBounds, "red");
   }
@@ -253,7 +244,6 @@ export class DOMFlipAnimation {
   /**
    * Translate to original position
    */
-
 
   translateFromNewToOriginalPosition(node) {
     node.style.transition = "";
@@ -279,7 +269,6 @@ export class DOMFlipAnimation {
     // node.style.transform = "";
 
     node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
-    log(node.style.transform)
   }
 
 
@@ -306,7 +295,7 @@ export class DOMFlipAnimation {
   }
 
   setupFinalStyleForRemoved(node) {
-    node.style.transition = this.removedTransition(node);
+    node.style.transition = this.removeTransition();
     Object.assign(node.style, this.removedFinalStyle(node));
   }
   
@@ -358,18 +347,14 @@ export class DOMFlipAnimation {
     // result.padding = targetStyle.padding;
     return result;
   }
-  
-  removedTransition() {
-    return this.removeTransition();
-  }
 
   removedFinalStyle(node) {
-    const position = [Math.round(node.offsetWidth / 2), Math.round(node.offsetHeight / 2)];
-    const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
+    // const position = [Math.round(node.offsetWidth / 2), Math.round(node.offsetHeight / 2)];
+    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
     return {
       maxHeight: "0px",
       maxWidth: "0px",
-      transform: transform,
+      transform: "scale(0)", //  transform,
       opacity: "0.001",
       margin: "0px",
       marginTop: "0px",
@@ -387,8 +372,8 @@ export class DOMFlipAnimation {
   /**
    * Setup animation cleanup 
    */
-  setupAddedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, false, flowChanges.number)
+  setupAddedAnimationCleanup(node, number) {
+    this.setupAnimationCleanup(node, false, number)
   }
 
   setupResidentAnimationCleanup(node) {
@@ -407,21 +392,25 @@ export class DOMFlipAnimation {
     const me = this; 
     function onTransitionEnd(event) {
       // console.log(event);
-      // if (frameNumber === node.lastFrameNumberAnimation) {
+      if (frameNumber === node.inAnimationNumber) {
          
-        delete node.inAnimation;
-        // if (node.equivalentCreator) {
-        //   node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
-        // }
+        delete node.inAnimationNumber;
+        
+        if (["move", "resident", "added"].includes(node.animationType)) {
+          node.style.transition = "";
+          if (node.equivalentCreator) {
+            node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+          }
+        }
 
         node.removeEventListener("transitionend", onTransitionEnd);
-        me.cleanupAnimation(node);
   
-        if (alsoRemoveNode) {
+        if (node.animationType === "remove") {
           // For trailer
+          delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
           node.parentNode.removeChild(node);
         }  
-      // }
+      }
     }
 
     node.addEventListener("transitionend", onTransitionEnd);

@@ -41,16 +41,16 @@ export function clearNode(node) {
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-    let domNode; 
+    let domNode = this.ensureDomNodeBuilt(true);; 
     let alreadyInContext;
-    if (contextNode) {
-      domNode = this.ensureDomNodeBuilt(true);
+    if (contextNode) { 
       alreadyInContext = domNode.parentNode === contextNode;
       if (!alreadyInContext) {
         domNode = domNode.cloneNode(true);
         contextNode.appendChild(domNode);
       }
     } else {
+      domNode = domNode.cloneNode(true);
       domNode.style.position = "absolute"; 
       domNode.style.top = "0";
       domNode.style.left = "0";
@@ -166,9 +166,6 @@ export function clearNode(node) {
 
         // For all being moved here
         if (flowChanges.globallyMovedAnimated[newPrimitive.id]) {
-          // debugger; 
-          log("Moved: ")
-          log(newPrimitive.domNode);
           movedPrimitives.push(newPrimitive.domNode);
           newPrimitive.domNode.touchedByFoo = true;
           window.touched = newPrimitive.domNode;
@@ -188,9 +185,7 @@ export function clearNode(node) {
           // properties if moving from a parent div with different font size, so we want to 
           // fixate font size on the moving element so it can be animated. 
           // Check if not in animation?  
-          if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
           animation.preserveStyleForMoved(newPrimitiveDomNode);
-          if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
 
           // Minimize footprint for incoming. 
           animation.minimizeIncomingFootprint(newPrimitiveDomNode);

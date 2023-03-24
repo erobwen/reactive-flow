@@ -192,8 +192,8 @@ export function onFinishReBuildingFlow() {
       if (flowChanges.beingRemovedMap[id]) {
         // Move or resident
         flowChanges.beingRemovedMap[id]
-        const previousParentFlow = primitive.domNode.parentNode.equivalentCreator;
-        if (flowChanges.idParentIdMap[primitive.id] === previousParentFlow.id) {
+        const previousParentFlow = primitive.domNode.parentNode ? primitive.domNode.parentNode.equivalentCreator : null;
+        if (previousParentFlow && flowChanges.idParentIdMap[primitive.id] === previousParentFlow.id) {
           // Same parent, resident
           flowChanges.globallyResident[id] = primitive;
         } else {
@@ -209,6 +209,7 @@ export function onFinishReBuildingFlow() {
 
   // Find removed nodes
   for (let id in previousFlowChanges.idPrimitiveMap) {
+    log("ASDFASDFASDFASDFASDFASDF")
     const inPreviousMap = previousFlowChanges.idPrimitiveMap[id];
     if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive.getChildNodes().includes(inPreviousMap.domNode)) {
       flowChanges.globallyRemoved[id] = inPreviousMap; 
@@ -252,10 +253,31 @@ export function onFinishReBuildingFlow() {
       // findAndRecordOriginalBoundsOfOrigin(flow); // Dont, for now!
     }
   }
-  if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
+
+  // Mark all animated. 
+  for (let flow of flowChanges.allAnimatedMovedFlows()) {
+    if (flow.domNode) {
+      flow.domNode.inAnimationNumber = flowChanges.number;
+      flow.domNode.animationType = "moved";
+      delete flowChanges.beingRemovedMap[flow.id];
+    }
+  }
+  for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    if (flow.domNode) {
+      flow.domNode.inAnimationNumber = flowChanges.number;
+      flow.domNode.animationType = "added";
+      delete flowChanges.beingRemovedMap[flow.id];
+    }
+  }
+  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    if (flow.domNode) {
+      flow.domNode.inAnimationNumber = flowChanges.number;
+      flow.domNode.animationType = "removed";
+    }
+  }
+
   console.groupEnd();
   flowChanges.onFinishReBuildingFlowDone = true;
-  if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
 }
 
 /**
@@ -273,120 +295,106 @@ export function onFinishReBuildingDOM() {
   counter++
   if (!flowChanges.onFinishReBuildingFlowDone) return;
   console.group("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
-  log(counter);
-  if(window.allFlows[11] && window.allFlows[11].domNode) {
-    log(window.allFlows[11].domNode)
-    log(window.allFlows[11].domNode.style.transform);
-  } 
   delete flowChanges.onFinishReBuildingFlowDone; 
-  if(window.allFlows[11] && window.allFlows[11].domNode) log(window.allFlows[11].domNode.style.transform);
-  
-  let {globallyRemovedAnimated, globallyAddedAnimated, globallyResidentAnimated, globallyMovedAnimated} = flowChanges
+    
+  prepareAnimationStart();
+  requestAnimationFrame(() => {
+    activateAnimation();  
+  });
+
+  console.groupEnd();
+}
+
+
+function prepareAnimationStart() {
   
   // Record bounds in new structure    
-    for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
+  for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
     flow.animation.recordBoundsInNewStructure(flow.domNode);
   }
 
-    // Examine added, measure their size etc.
+  // Examine added, measure their size etc.
   // At this stage, remember target dimensions and style.    
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    log("ANALYZE ADDED")
-    log(flow.domNode.style.maxWidth);
     flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
     flow.domNode.style.maxWidth = "";
     flow.domNode.style.maxHeight = "";
-    log(flow.domNode.style.maxWidth);
     flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
-    log("target style and dimensions")
-    log(flow.domNode.targetStyle);
-    log(flow.domNode.targetDimensions);
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-    logProperties(flow.domNode.style, typicalAnimatedProperties);
-
   }
 
   // Translate present flows to original position
   for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
-    // if (!flow.originalBounds) log(flow);
-    // if (!flow.newStructureBounds) log(flow);
 
-    if (true || !sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
-      log("ASDFASEF")
-      log(flow.domNode.style.transform)
-      
+    if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+      log("Not same bounds for " + flow.toString());     
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
       
-      log(currentTransform)
-      log(typeof flow.domNode.style.transform)
+      // This is for resident that have a transform already. In an animation already.
       if (!["none", "", " "].includes(currentTransform)) {
+        log("Already have transform for " + flow.toString());     
         // Freeze properties as we start a new animation.
         Object.assign(flow.domNode.style, extractProperties(computedStyle, flow.animation.animatedProperties));
 
         // Reset transform 
         flow.domNode.style.transition = "";
         flow.domNode.style.transform = "";
-        currentTransform = computedStyle.transform;
         currentTransform = getComputedStyle(flow.domNode).transform;
-        log(currentTransform);
         flow.animation.recordBoundsInNewStructure(flow.domNode);
+
+        // Mark in new animation
+        flow.domNode.inAnimationNumber = flowChanges.number; 
+        flow.domNode.animationType = "resident";
       }
 
       flow.animateInChanges = flowChanges.number; 
       flow.animation.translateFromNewToOriginalPosition(flow.domNode);
     }
+
+    log("ORIGINAL RESIDENT");
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
   }
-      
-  // Activate animation
-  requestAnimationFrame(() => {
-    for (let flow of flowChanges.allAnimatedAddedFlows()) {
-      log("SETTING FINAL")
-      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties); // needed?
-      flow.animation.setupFinalStyleForAdded(flow.domNode);
-      logProperties(flow.domNode.style, typicalAnimatedProperties);
 
-      // flow.animation.setupAddedAnimationCleanup(flow.domNode);
+  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
+    flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";  
+  }
+}
+
+
+function activateAnimation() {
+  for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    log("SETTING FINAL")
+    flow.synchronizeDomNodeStyle(flow.animation.animatedProperties); // needed?
+    flow.animation.setupFinalStyleForAdded(flow.domNode);
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+    flow.animation.setupAddedAnimationCleanup(flow.domNode, flow.domNode.inAnimationNumber);
+  }
+
+  for (let flow of flowChanges.allAnimatedResidentFlows()) {
+    if (flow.animateInChanges === flowChanges.number) {
+      flow.animation.setupFinalStyleForResident(flow.domNode);
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.animation.setupResidentAnimationCleanup(flow.domNode);
     }
+  }
 
-// transform: "", //transform,
-// maxHeight: "0px",
-// maxWidth: "0px",
-// margin: "0px",
-// marginTop: "0px",
-// marginBottom: "0px",
-// marginLeft: "0px",
-// marginRight: "0px",
-// padding: "0px",
-// paddingTop: "0px",
-// paddingBottom: "0px",
-// paddingLeft: "0px",
-// paddingRight: "0px",
-// opacity: "0",
-
-
-    for (let flow of flowChanges.allAnimatedResidentFlows()) {
-      if (flow.animateInChanges === flowChanges.number) {
-        flow.animation.setupFinalStyleForResident(flow.domNode);
-        flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-        flow.animation.setupResidentAnimationCleanup(flow.domNode);
-      }
+  for (let flow of flowChanges.allAnimatedMovedFlows()) {
+    if (flow.animateInChanges === flowChanges.number) {
+      flow.animation.setupFinalStyleForMoved(flow.domNode);
+      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+      flow.animation.setupResidentAnimationCleanup(flow.domNode);
     }
-
-    for (let flow of flowChanges.allAnimatedMovedFlows()) {
-      if (flow.animateInChanges === flowChanges.number) {
-        flow.animation.setupFinalStyleForMoved(flow.domNode);
-        flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-        flow.animation.setupResidentAnimationCleanup(flow.domNode);
-      }
-    }
-
-    for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-      flow.animation.setupFinalStyleForRemoved(flow.domNode);
-      flow.animation.setupRemovedAnimationCleanup(flow.domNode);
-    }
-   });
-  console.groupEnd();
+  }
+  
+  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+    flow.animation.setupFinalStyleForRemoved(flow.domNode);
+    log("FINAL REMOVE");
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+    // flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+  }
 }
 
 

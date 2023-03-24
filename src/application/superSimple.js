@@ -1,11 +1,12 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { button, text } from "../flow.components/BasicWidgets";
+import { text } from "../flow.components/BasicWidgets";
 import { column, filler, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
-import { animatedContainerStyle, panelStyle } from "../flow.components/Style";
+import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
 import { simpleButton } from "../flow.components/SimpleButton";
 import { div } from "../flow.components/Basic";
+import { button } from "../flow.components/Theme";
 
 
 const log = console.log;
@@ -19,12 +20,15 @@ export class SuperSimple extends Flow {
   setState() {
     this.left = false;
     this.showButton = false;
-    this.button = new simpleButton(
+    this.button = new button(
       "button", "Text", 
       this.move.bind(this),
       {
         animate: true,
-        ripple: false
+        ripple: true,
+        // style: {
+        //   width: "150px"
+        // }
       }
     );
   }
@@ -41,7 +45,10 @@ export class SuperSimple extends Flow {
     }, 1000);
 
     setTimeout(() => {
-      this.button.text = this.button.text + "!"       
+      log("SETTING TEXT");
+      log(this.button);
+      log(this.button.button);
+      this.button.button.text = this.button.button.text + "!"       
     }, 2500);
   }
 
@@ -53,13 +60,14 @@ export class SuperSimple extends Flow {
       filler(),
       row(
         column(
-          button.show(this.left), 
+          div("wrapper", button).show(this.left), 
           filler(),
           {style: {...animatedContainerStyle, width: "150px"}}
         ),
         div({style: {width: "200px"}}),
         column(
-          button.show(!this.left), 
+          // text("Some Text", {animate: true, style: borderStyle}).show(!this.left),
+          div("wrapper", button).show(!this.left), 
           filler(), 
           {style: {...animatedContainerStyle, width: "150px"}}
         ), 

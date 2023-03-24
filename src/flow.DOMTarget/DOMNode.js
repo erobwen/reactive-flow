@@ -90,15 +90,15 @@ const log = console.log;
       const newPreviouslySetStyles = {};
       let blockedProperties = {};
       if (this.currentAnimation) {
-        log("HERE")
+        // log("HERE")
         blockedProperties = this.currentAnimation.blockedPropertiesMap();
-        log(blockedProperties);
+        // log(blockedProperties);
       }
 
       // Clear out styles that will no longer be modified
       for (let property in this.unobservable.previouslySetStyles) if (!blockedProperties[property]) {
         if (typeof(newStyle[property]) === "undefined") {
-          log(this.toString() + " clear style: " + property);
+          // log(this.toString() + " clear style: " + property);
           elementStyle[property] = "";
         }
       }
@@ -106,7 +106,7 @@ const log = console.log;
       // Set styles if changed
       for (let property in newStyle) if (!blockedProperties[property]) {
         if (elementStyle[property] !== newStyle[property]) {
-          log(this.toString() + " set style: " + property + " = " + newStyle[property]);
+          // log(this.toString() + " set style: " + property + " = " + newStyle[property]);
           elementStyle[property] = newStyle[property];
         }
         newPreviouslySetStyles[property] = true;
