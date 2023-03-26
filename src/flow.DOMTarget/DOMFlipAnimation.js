@@ -40,6 +40,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
+const animationTime = 5;
 
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
@@ -60,15 +61,17 @@ export class DOMFlipAnimation {
     return result; 
   }
 
+
+
   /**
    * Default transition
    */
   defaultTransition() {
-    return "all 1s ease-in-out, opacity 1s ease-in"
+    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s ease-in`
   }
 
   removeTransition() {
-    return "all 1s ease-in-out, opacity 1s ease-out"
+    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s ease-out`
   }
 
   /**
@@ -415,7 +418,7 @@ export class DOMFlipAnimation {
 
         node.removeEventListener("transitionend", onTransitionEnd);
   
-        if (node.animationType === "remove") {
+        if (node.animationType === "removed") {
           // For trailer
           delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
           node.parentNode.removeChild(node);

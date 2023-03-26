@@ -127,14 +127,14 @@ export const flowChanges = {
     }
   },
 
-  *allAnimatedFlowsAlreadyPresent() {
-    for (let flow of Object.values(this.globallyRemovedAnimated)) {
-      yield flow; 
-    }
+  *allAnimatedMovedResidentAndRemovedFlows() {
     for (let flow of Object.values(this.globallyResidentAnimated)) {
       yield flow; 
     }
     for (let flow of Object.values(this.globallyMovedAnimated)) {
+      yield flow; 
+    }
+    for (let flow of Object.values(this.globallyRemovedAnimated)) {
       yield flow; 
     }
   }
@@ -315,7 +315,7 @@ export function onFinishReBuildingDOM() {
 function prepareAnimationStart() {
   
   // Record bounds in new structure    
-  for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
+  for (let flow of flowChanges.allAnimatedMovedResidentAndRemovedFlows()) {
     flow.animation.recordBoundsInNewStructure(flow.domNode);
   }
 
@@ -343,7 +343,7 @@ function prepareAnimationStart() {
   }
 
   // Translate present flows to original position
-  for (let flow of flowChanges.allAnimatedFlowsAlreadyPresent()) {
+  for (let flow of flowChanges.allAnimatedMovedResidentAndRemovedFlows()) {
 
     if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
       log("Not same bounds for " + flow.toString());     
@@ -421,7 +421,7 @@ function activateAnimation() {
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
     log(`... removing node ${flow.toString()}, final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
-    // flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+    flow.animation.setupRemovedAnimationCleanup(flow.domNode);
   }
 }
 
