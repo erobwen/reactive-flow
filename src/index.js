@@ -28,10 +28,10 @@ setFlowConfiguration({
 });
 installDOMAnimation();
 
-startDemo();
+// startDemo();
 // startSuperSimple();
 // startSuperDuperSimple();
-// startAnimationExample();
+startAnimationExample();
 
 // startHelloWorld();
 // startRecursiveDemo();

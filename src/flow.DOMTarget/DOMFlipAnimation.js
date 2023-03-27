@@ -200,8 +200,11 @@ export class DOMFlipAnimation {
     trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
     trailer.style.opacity = "0";
     trailer.id = "trailer"
+    trailer.inAnimationNumber = flowChanges.number; 
+
     node.fadingTrailerOnChanges = flowChanges.number;
     node.fadingTrailer = trailer;
+    node.inAnimationType = "removed";
     return trailer;
   }
 
@@ -296,6 +299,7 @@ export class DOMFlipAnimation {
     if (node.fadingTrailer && node.fadingTrailerOnChanges === flowChanges.number) {
       node.fadingTrailer.style.transition = this.residentTransition(node);
       Object.assign(node.fadingTrailer.style, this.disappearingReplacementFinalStyle());
+      this.setupAddedAnimationCleanup(node.fadingTrailer, flowChanges.number);
     }
   }
 
@@ -379,53 +383,71 @@ export class DOMFlipAnimation {
   /**
    * Setup animation cleanup 
    */
-  setupAddedAnimationCleanup(node, number) {
-    this.setupAnimationCleanup(node, false, number)
+  setupAddedAnimationCleanup(node) {
+    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
   }
 
   setupResidentAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, false, flowChanges.number)
+    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
     if (node.fadingTrailer) {
-      this.setupAnimationCleanup(node.fadingTrailer, true, flowChanges.number);
+      this.setupAnimationCleanup(node.fadingTrailer, "removed", flowChanges.number);
       delete node.fadingTrailer; 
     }
   }
 
   setupRemovedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, true, flowChanges.number)
+    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
   }
 
-  setupAnimationCleanup(node, alsoRemoveNode, frameNumber) {
+  setupAnimationCleanup(node, inAnimationType, frameNumber) {
     const me = this; 
+    // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
+    // log(node)
     function onTransitionEnd(event) {
-      log("onTransitionEnd..." + node.animationType);
-      // log(frameNumber)
-      // log(node.inAnimationNumber)
-      // log(node.animationType);
-      event.preventDefault();
-      event.stopPropagation();
-      console.log(event);
+      console.group("onTransitionEnd: " + inAnimationType + " " + frameNumber);
+      
+      node.removeEventListener("transitionend", onTransitionEnd);
+
       if (frameNumber === node.inAnimationNumber) {
         
+        console.group("cleanup...")
+        log(event.target);
+        log(event.target.id);
+        log(frameNumber)
+        log(node.inAnimationNumber);
+        console.groupEnd();
         delete node.inAnimationNumber;
-        if (["move", "resident", "added"].includes(node.animationType)) {
-          // log("resetting")
-          node.style.transition = "";
-          if (node.equivalentCreator) {
-            node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
-          }
-        }
-
-        node.removeEventListener("transitionend", onTransitionEnd);
-  
-        if (node.animationType === "removed") {
+          
+        log("onTransitionEnd..." + node.inAnimationType);
+        // log(frameNumber)
+        // log(node.inAnimationNumber)
+        // log(node.inAnimationType);
+        event.preventDefault();
+        event.stopPropagation();
+        console.log(event);
+        
+        if (node.inAnimationType === "removed") {
           // For trailer
-          delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
+          if (node.equivalentCreator) {
+            delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
+          }
           node.parentNode.removeChild(node);
         }  
+        
+        node.style.transition = "";
+        if (node.equivalentCreator) {
+          node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+        }
       }
     }
 
+    // if (typeof(node.eventListenerFrameNumber) !== "undefined") {
+    //   if (node.eventListenerFrameNumber !== frameNumber) {
+    //     node.removeEventListener("transitionend", onTransitionEnd);
+    //   }
+    // }
+
+    node.eventListenerFrameNumber = frameNumber; 
     node.addEventListener("transitionend", onTransitionEnd);
   }
 

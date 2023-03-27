@@ -137,6 +137,15 @@ export const flowChanges = {
     for (let flow of Object.values(this.globallyRemovedAnimated)) {
       yield flow; 
     }
+  },
+
+  *allAnimatedMovedResidentFlows() {
+    for (let flow of Object.values(this.globallyResidentAnimated)) {
+      yield flow; 
+    }
+    for (let flow of Object.values(this.globallyMovedAnimated)) {
+      yield flow; 
+    }
   }
 };
 
@@ -263,19 +272,19 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.animationType = "moved";
+      flow.domNode.inAnimationType = "moved";
     }
   }
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    if (flow.domNode) {
+    if (flow.getDomNode()) {
       flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.animationType = "added";
+      flow.domNode.inAnimationType = "added";
     }
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
       flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.animationType = "removed";     
+      flow.domNode.inAnimationType = "removed";     
       // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
       flowChanges.beingRemovedMap[flow.id] = flow;    
@@ -322,28 +331,33 @@ function prepareAnimationStart() {
   // Examine added, measure their size etc.
   // At this stage, remember target dimensions and style.    
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    log({... flowChanges.beingRemovedMap})
+    // log({... flowChanges.beingRemovedMap})
     if (!flowChanges.beingRemovedMap[flow.id]) {
       // Measure added final style in an emulated world. PORTAL 
-      console.group("start measure added");
+      // console.group("start measure added");
+      // log(flow.domNode)
+      // log(flow.domNode.inAnimationNumber);
+      // log(flow.domNode.inAnimationType);
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
       flow.domNode.style.maxWidth = "";
       flow.domNode.style.maxHeight = "";
       flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
       flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-      log(flow.toString() + " is added and minimized again...");
-      logProperties(flow.domNode.style, typicalAnimatedProperties);
+      // log(flow.toString() + " is added and minimized again...");
+      // logProperties(flow.domNode.style, typicalAnimatedProperties);
       console.groupEnd();
     } else {
       // We already recorded desired height upon removal. Note, this might be wrong if the div animated while 
       // Being removed. This can perhaps be improved in the future to do a new proper measurement.
-      log(flow.toString() + " is added after being removed...");
-      logProperties(flow.domNode.style, typicalAnimatedProperties);
+      // log(flow.toString() + " is added after being removed...");
+      // logProperties(flow.domNode.style, typicalAnimatedProperties);
     }    
+    // Reflow
+    flow.domNode.getBoundingClientRect();
   }
 
   // Translate present flows to original position
-  for (let flow of flowChanges.allAnimatedMovedResidentAndRemovedFlows()) {
+  for (let flow of flowChanges.allAnimatedMovedResidentFlows()) {
 
     if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
       log("Not same bounds for " + flow.toString());     
@@ -364,11 +378,14 @@ function prepareAnimationStart() {
 
         // Mark in new animation
         flow.domNode.inAnimationNumber = flowChanges.number; 
-        flow.domNode.animationType = "resident";
+        flow.domNode.inAnimationType = "resident";
       }
 
       flow.animateInChanges = flowChanges.number; 
       flow.animation.translateFromNewToOriginalPosition(flow.domNode);
+
+      // Reflow
+      flow.domNode.getBoundingClientRect();
     }
 
     // log("ORIGINAL RESIDENT");
@@ -376,21 +393,62 @@ function prepareAnimationStart() {
   }
 
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    flow.domNode.getBoundingClientRect();
+    // Re transform if moved by structure. 
+    // if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+    //   log("Not same bounds for " + flow.toString());     
+    //   const computedStyle = getComputedStyle(flow.domNode);
+    //   let currentTransform = getComputedStyle(flow.domNode).transform;
+      
+    //   // This is for resident that have a transform already. In an animation already.
+    //   if (!["none", "", " "].includes(currentTransform)) {
+    //     log("Already have transform for " + flow.toString());     
+    //     // Freeze properties as we start a new animation.
+    //     Object.assign(flow.domNode.style, extractProperties(computedStyle, flow.animation.animatedProperties));
 
-    flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
-    flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px"; 
-    flow.domNode.style.transform = "scale(1)"; 
+    //     // Reset transform  (Note: This will not work if we are being added with transfrom, and then shift position at the same time. )
+    //     // Here we should preserve some of the original transformation scale to deal with both. 
+    //     flow.domNode.style.transition = "";
+    //     flow.domNode.style.transform = "";
+    //     currentTransform = getComputedStyle(flow.domNode).transform;
+    //     flow.animation.recordBoundsInNewStructure(flow.domNode);
+    //   }
+
+    //   flow.animateInChanges = flowChanges.number; 
+    //   flow.animation.translateFromNewToOriginalPosition(flow.domNode);
+
+    //   // Reflow
+    //   flow.domNode.getBoundingClientRect();
+    // }
+
+    // Preserve before remove
+    flow.animation.preserveStyleForMoved(flow.domNode);
+
+    // Set scale and max bounds for animation. 
+    if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
+      flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
+    }
+    if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
+      flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
+    }
+    if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
+      flow.domNode.style.transform = "scale(1)"; 
+    }
+    // Reflow
+    flow.domNode.getBoundingClientRect();
   }
 }
 
 
 function activateAnimation() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    console.group("activate for added");
-    flow.animation.setupFinalStyleForAdded(flow.domNode, flow.getAnimatedFinishStyles());
-    log(`... adding node ${flow.toString()}, final properties: `);
+    console.group("activate for added " + flow.toString());
+    log(`original properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
-    flow.animation.setupAddedAnimationCleanup(flow.domNode, flow.domNode.inAnimationNumber);
+    flow.animation.setupFinalStyleForAdded(flow.domNode, flow.getAnimatedFinishStyles());
+    log(`final properties: `);
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+    flow.animation.setupAddedAnimationCleanup(flow.domNode);
     delete flowChanges.beingRemovedMap[flow.id];  
     console.groupEnd();
   }
@@ -418,8 +476,11 @@ function activateAnimation() {
   }
   
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    console.group("activate removal " + flow.toString());
+    log(`original properties: `);
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
-    log(`... removing node ${flow.toString()}, final properties: `);
+    log(`final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
     flow.animation.setupRemovedAnimationCleanup(flow.domNode);
   }

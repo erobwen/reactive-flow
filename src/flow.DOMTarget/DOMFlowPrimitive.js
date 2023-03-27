@@ -116,42 +116,50 @@ export function clearNode(node) {
     let index = node.childNodes.length - 1;
     const existingPrimitives = {};
     
-    while(index >= 0) {
-      const existingChildNode = node.childNodes[index];
+    const recoveredNodes = [];
+    for(let existingChildNode of node.childNodes) {
       const existingPrimitive = existingChildNode.equivalentCreator;
       if (!existingPrimitive) {
         // No creator, probably a fading trailer that we want to keep
-        newChildNodes.splice(index, 0, existingChildNode);
+        recoveredNodes.push(existingChildNode);
       } else {
+        log("found " + existingPrimitive.toString());
+
         // A creator, meaning a flow primitive
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
         if (animation) {
-
+          // Keep node in new children
+          if (newChildNodes.includes(existingChildNode)) {
+            recoveredNodes.push(existingChildNode);
+          } 
+          
           // If node is removed, copy it back to leave it to wait for animation.
-          if (flowChanges.globallyRemovedAnimated[existingPrimitive.id]) {
-            newChildNodes.splice(index, 0, existingChildNode);
+          if (flowChanges.beingRemovedMap[existingPrimitive.id]) {
+            recoveredNodes.push(existingChildNode);
           }
-            
+
           // Test for moving out 
           if (flowChanges.globallyMovedAnimated[existingPrimitive.id]) {
-
             // Outgoing could already be gone at this stage?
             if (existingChildNode.fadingTrailerOnChanges !== flowChanges.number) {
-              node.insertBefore(animation.getFadingTrailer(existingChildNode), existingChildNode);
-              node.removeChild(existingChildNode);
+              recoveredNodes.push(animation.getFadingTrailer(existingChildNode), existingChildNode);
             }
-          }
-        } else {
-          // Not animated, remove instantly!
-          if (flowChanges.beingRemovedMap[existingPrimitive.id] || flowChanges.globallyRemoved[existingPrimitive.id] || flowChanges.globallyMoved[existingPrimitive.id]) {
-            node.removeChild(existingChildNode);
           }
         }
       }
       index--;
     }
 
+    // Link recovered nodes:
+    let anchor = null; 
+    recoveredNodes.forEach(node => {node.anchor = anchor; anchor = node; });
+
+    function insertAfter(array, reference, element) {
+      array.splice(array.indexOf(reference) + 1, 0, element);
+    }
+
+    // Prepare new children
     for(let newPrimitive of newChildren) {
       const animation = newPrimitive.getAnimation();
       if (animation) {
@@ -181,8 +189,10 @@ export function clearNode(node) {
           // Arrange trailer for incoming that leaves another container, arrange trailer. 
           const newPrimitiveDomNode = newPrimitive.domNode; 
           if (newPrimitiveDomNode.fadingTrailerOnChanges !== flowChanges.number) {
-            newPrimitiveDomNode.parentNode.insertBefore(animation.getFadingTrailer(newPrimitiveDomNode), newPrimitiveDomNode);
-            newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
+            if (newPrimitiveDomNode.parentNode) {
+              newPrimitiveDomNode.parentNode.insertBefore(animation.getFadingTrailer(newPrimitiveDomNode), newPrimitiveDomNode);
+              newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
+            }
           }
 
           // Preserve style for incoming. For example to avoid sudden changes of animated 
@@ -197,6 +207,20 @@ export function clearNode(node) {
       }
     }
       
+
+    // Merge old with new
+    recoveredNodes.forEach(node => {
+      if (!newChildNodes.includes(node)) {
+        let anchor = node.anchor;
+        while (!newChildNodes.includes(anchor) && anchor) anchor = anchor.anchor; // Maybe not necessary. 
+        if (!anchor) {
+          newChildNodes.unshift(node);
+        } else {
+          insertAfter(newChildNodes, anchor, node);
+        }
+      }
+    })
+
     // Adding pass, will also rearrange moved elements
     index = 0;
     while(index < newChildNodes.length) {

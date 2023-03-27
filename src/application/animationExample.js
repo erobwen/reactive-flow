@@ -137,6 +137,7 @@ export function startAnimationExample() {
 
 function removeOneRandom(list) {
   const index = Math.floor(Math.random()*(list.length))
+  // const index = 0;
   return list.splice(index, 1)[0]; 
 }
 
@@ -159,5 +160,6 @@ function randomize(list) {
 
 function addRandomly(item, list) {
   const insertIndex = Math.floor(Math.random()*(list.length));
+  // const insertIndex = list.length;
   list.splice(insertIndex, 0, item);
 }
