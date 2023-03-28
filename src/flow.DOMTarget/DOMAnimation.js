@@ -271,20 +271,44 @@ export function onFinishReBuildingFlow() {
   // Mark all animated. 
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
-      flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.inAnimationType = "moved";
+      const animation = {
+        number: flowChanges.number,
+        type: "moved",
+        previous: flow.animation
+      };
+      flow.animation = animation; 
+      flow.domNode.animation = animation; 
+
+      // flow.domNode.animation.number = flowChanges.number;
+      // flow.domNode.animation.type = "moved";
     }
   }
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.getDomNode()) {
-      flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.inAnimationType = "added";
+      const animation = {
+        number: flowChanges.number,
+        type: "added",
+        previous: flow.animation
+      };
+      flow.animation = animation; 
+      flow.domNode.animation = animation; 
+      
+      // flow.domNode.animation.number = flowChanges.number;
+      // flow.domNode.animation.type = "added";
     }
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
-      flow.domNode.inAnimationNumber = flowChanges.number;
-      flow.domNode.inAnimationType = "removed";     
+      const animation = {
+        number: flowChanges.number,
+        type: "removed",
+        previous: flow.animation
+      };
+      flow.animation = animation; 
+      flow.domNode.animation = animation; 
+
+      flow.domNode.animation.number = flowChanges.number;
+      flow.domNode.animation.type = "removed";     
       // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
       flowChanges.beingRemovedMap[flow.id] = flow;    
@@ -336,8 +360,8 @@ function prepareAnimationStart() {
       // Measure added final style in an emulated world. PORTAL 
       // console.group("start measure added");
       // log(flow.domNode)
-      // log(flow.domNode.inAnimationNumber);
-      // log(flow.domNode.inAnimationType);
+      // log(flow.domNode.animation.number);
+      // log(flow.domNode.animation.type);
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
       flow.domNode.style.maxWidth = "";
       flow.domNode.style.maxHeight = "";
@@ -377,8 +401,8 @@ function prepareAnimationStart() {
         flow.animation.recordBoundsInNewStructure(flow.domNode);
 
         // Mark in new animation
-        flow.domNode.inAnimationNumber = flowChanges.number; 
-        flow.domNode.inAnimationType = "resident";
+        flow.domNode.animation.number = flowChanges.number; 
+        flow.domNode.animation.type = "resident";
       }
 
       flow.animateInChanges = flowChanges.number; 
