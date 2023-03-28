@@ -26,9 +26,9 @@ export class SuperSimple extends Flow {
       {
         animate: true,
         ripple: true,
-        // style: {
-        //   width: "150px"
-        // }
+        style: {
+          color: "red"
+        }
       }
     );
   }
@@ -48,7 +48,10 @@ export class SuperSimple extends Flow {
       log("SETTING TEXT");
       log(this.button);
       log(this.button.button);
-      this.button.button.text = this.button.button.text + "!"       
+      let color = this.button.button.style.color;  
+      color = color === "red" ? "green" : "red"; 
+      log(this.button.button.style = {...this.button.button.style, color});
+      // this.button.button.text = this.button.button.text + "!"       
     }, 2500);
   }
 
