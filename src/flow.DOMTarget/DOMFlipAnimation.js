@@ -1,7 +1,7 @@
 
 // cubic-bezier(0.42,0,1,1)
 
-import { flowChanges } from "./DOMAnimation";
+import { flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
 import { movedPrimitives } from "./DOMFlowPrimitive";
 
 const log = console.log;
@@ -67,11 +67,11 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s ease-in`
+    return `all ${animationTime}s ease-in-out`//, opacity ${animationTime}s ease-in`
   }
 
   removeTransition() {
-    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s ease-out`
+    return `all ${animationTime}s ease-in-out`//, opacity ${animationTime}s ease-out`
   }
 
   /**
@@ -413,15 +413,10 @@ export class DOMFlipAnimation {
       
       node.removeEventListener("transitionend", onTransitionEnd);
 
-      if (frameNumber === node.changes.number && !node.changes.cleanup) {
-        
+      if (frameNumber === node.changes.number && !node.changes.finished) {
         console.group("cleanup...")
         log(event.target);
-        log(event.target.id);
-        log(frameNumber)
-        log(node.changes.number);
         console.groupEnd();
-        node.changes.cleanup = true; 
           
         log("onTransitionEnd..." + node.changes.type);
         // log(frameNumber)
@@ -436,13 +431,17 @@ export class DOMFlipAnimation {
           if (node.equivalentCreator) {
             delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
           }
-          node.parentNode.removeChild(node);
+          // node.parentNode.removeChild(node);
         }  
         
         node.style.transition = "";
         if (node.equivalentCreator) {
           node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+          log(`cleanup properties: `);
+          logProperties(node.style, typicalAnimatedProperties);
         }
+
+        node.changes.finished = true; 
       }
     }
 

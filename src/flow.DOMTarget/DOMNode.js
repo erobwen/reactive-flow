@@ -133,6 +133,7 @@ const log = console.log;
       for (let property of properties) {
         if (typeof property === "string") {
           if (!same(style[property], this.domNode.style[property])) {
+            console.log("Synchronizing: " + this.toString() + ", style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
             this.domNode.style[property] = style[property] ? style[property] : "";
           }
         } else {

@@ -18,7 +18,7 @@ export class SuperSimple extends Flow {
       button("foo", "Foo", ()=> { this.showText = !this.showText}),
       column(
         text("Some text", {animate: true, key: "my-text", style: {color: "green"}}).show(this.showText),
-        {style: {overflow: "visible"}}
+        {style: {overflow: "visible", width: "400px", height: "400px"}}
       ),
       {style: {fontSize: "40px", padding: "20px"}}
     );

@@ -262,50 +262,32 @@ export function onFinishReBuildingFlow() {
 
   // Record original bounds
   for (let flow of flowChanges.allAnimatedFlows()) {
-    if (flow.domNode) {
+    if (flow.getDomNode()) {
+      const changes = {
+        number: flowChanges.number,
+        type: "resident",
+        previous: flow.changes
+      };
+      flow.changes = changes; 
+      flow.domNode.changes = changes; 
       flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
-      // findAndRecordOriginalBoundsOfOrigin(flow); // Dont, for now!
     }
   }
 
   // Mark all animated. 
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
-      const changes = {
-        number: flowChanges.number,
-        type: "moved",
-        previous: flow.animation
-      };
-      flow.changes = changes; 
-      flow.domNode.changes = changes; 
-
-      // flow.domNode.animation.number = flowChanges.number;
-      // flow.domNode.animation.type = "moved";
+      flow.domNode.changes.type = "moved";
     }
   }
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.getDomNode()) {
-      const changes = {
-        number: flowChanges.number,
-        type: "added",
-        previous: flow.animation
-      };
-      flow.changes = changes; 
-      flow.domNode.changes = changes; 
-      
-      // flow.domNode.animation.number = flowChanges.number;
-      // flow.domNode.animation.type = "added";
+      flow.domNode.changes.type = "added"; 
     }
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
-      const changes = {
-        number: flowChanges.number,
-        type: "removed",
-        previous: flow.animation
-      };
-      flow.changes = changes; 
-      flow.domNode.changes = changes; 
+      flow.domNode.changes.type = "removed"; 
 
       // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
@@ -346,7 +328,7 @@ export function onFinishReBuildingDOM() {
 function prepareAnimationStart() {
   
   // Record bounds in new structure    
-  for (let flow of flowChanges.allAnimatedMovedResidentAndRemovedFlows()) {
+  for (let flow of flowChanges.allAnimatedFlows()) {
     flow.animation.recordBoundsInNewStructure(flow.domNode);
   }
 
@@ -371,8 +353,8 @@ function prepareAnimationStart() {
     } else {
       // We already recorded desired height upon removal. Note, this might be wrong if the div animated while 
       // Being removed. This can perhaps be improved in the future to do a new proper measurement.
-      // log(flow.toString() + " is added after being removed...");
-      // logProperties(flow.domNode.style, typicalAnimatedProperties);
+      log(flow.toString() + " is added after being removed...");
+      logProperties(flow.domNode.style, typicalAnimatedProperties);
     }    
     // Reflow
     flow.domNode.getBoundingClientRect();
