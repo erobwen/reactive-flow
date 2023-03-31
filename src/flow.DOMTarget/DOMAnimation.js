@@ -500,6 +500,7 @@ function activateAnimation() {
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     console.group("activate removal " + flow.toString());
     log(`original properties: `);
+    const foo = flow.domNode.getBoundingClientRect();
     logProperties(flow.domNode.style, typicalAnimatedProperties);
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
     log(`final properties: `);

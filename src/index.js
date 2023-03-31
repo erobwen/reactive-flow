@@ -30,8 +30,8 @@ installDOMAnimation();
 
 // startDemo();
 // startSuperSimple();
-// startSuperDuperSimple();
-startAnimationExample();
+startSuperDuperSimple();
+// startAnimationExample();
 
 // startHelloWorld();
 // startRecursiveDemo();
