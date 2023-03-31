@@ -113,7 +113,6 @@ export function clearNode(node) {
     const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
     
     // Iterate and remove things that should be removed or outgoing
-    let index = node.childNodes.length - 1;
     const existingPrimitives = {};
     
     const recoveredNodes = [];
@@ -148,7 +147,6 @@ export function clearNode(node) {
           }
         }
       }
-      index--;
     }
 
     // Link recovered nodes:
@@ -222,7 +220,7 @@ export function clearNode(node) {
     })
 
     // Adding pass, will also rearrange moved elements
-    index = 0;
+    let index = 0;
     while(index < newChildNodes.length) {
       const existingChildNode = node.childNodes[index];
       if (newChildNodes[index] !== existingChildNode) {

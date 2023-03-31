@@ -200,11 +200,15 @@ export class DOMFlipAnimation {
     trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
     trailer.style.opacity = "0";
     trailer.id = "trailer"
-    trailer.inAnimationNumber = flowChanges.number; 
 
+    const changes = {
+      number: flowChanges.number,
+      type: "removed",
+      previous: null
+    };
+    trailer.changes = changes; 
     node.fadingTrailerOnChanges = flowChanges.number;
     node.fadingTrailer = trailer;
-    node.fadingTrailer.inAnimationType = "removed";
     return trailer;
   }
 
@@ -228,9 +232,9 @@ export class DOMFlipAnimation {
 
     node.animationStartTotalWidth = measures.totalWidth;
     node.animationStartMarginLeft = measures.marginLeft;
-    node.animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
+    const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
     // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
-    node.style.marginLeft = node.animationStartAjustedMarginLeft + "px";
+    node.style.marginLeft = animationStartAjustedMarginLeft + "px";
 
     // log(node.style.marginTop)
   }
@@ -383,21 +387,21 @@ export class DOMFlipAnimation {
    * Setup animation cleanup 
    */
   setupAddedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
+    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
   }
 
   setupResidentAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
+    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
     if (node.fadingTrailer) {
-      node.fadingTrailer.inAnimationNumber = flowChanges.number;
-      node.fadingTrailer.inAnimationType = "removed";
+      // node.fadingTrailer.changes.number = flowChanges.number;
+      // node.fadingTrailer.changes.type = "removed";
       this.setupRemovedAnimationCleanup(node.fadingTrailer, flowChanges.number);
       delete node.fadingTrailer; 
     }
   }
 
   setupRemovedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.inAnimationType, flowChanges.number)
+    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
   }
 
   setupAnimationCleanup(node, inAnimationType, frameNumber) {
@@ -405,29 +409,29 @@ export class DOMFlipAnimation {
     // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
     // log(node)
     function onTransitionEnd(event) {
-      console.log("onTransitionEnd: " + inAnimationType + " " + frameNumber + " cleanup: " + frameNumber === node.inAnimationNumber);
+      console.log("onTransitionEnd: " + inAnimationType + " " + frameNumber + " cleanup: " + frameNumber === node.changes.number);
       
       node.removeEventListener("transitionend", onTransitionEnd);
 
-      if (frameNumber === node.inAnimationNumber) {
+      if (frameNumber === node.changes.number && !node.changes.cleanup) {
         
         console.group("cleanup...")
         log(event.target);
         log(event.target.id);
         log(frameNumber)
-        log(node.inAnimationNumber);
+        log(node.changes.number);
         console.groupEnd();
-        delete node.inAnimationNumber;
+        node.changes.cleanup = true; 
           
-        log("onTransitionEnd..." + node.inAnimationType);
+        log("onTransitionEnd..." + node.changes.type);
         // log(frameNumber)
-        // log(node.inAnimationNumber)
-        // log(node.inAnimationType);
+        // log(node.changes.number)
+        // log(node.changes.type);
         event.preventDefault();
         event.stopPropagation();
         console.log(event);
         
-        if (node.inAnimationType === "removed") {
+        if (node.changes.type === "removed") {
           // For trailer
           if (node.equivalentCreator) {
             delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
