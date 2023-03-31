@@ -101,7 +101,6 @@ export function clearNode(node) {
   }
 
   ensureDomNodeChildrenInPlace() {// But do not change style for animated children!
-
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
@@ -128,13 +127,18 @@ export function clearNode(node) {
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
         if (animation) {
+          
           // Keep node in new children
           if (newChildNodes.includes(existingChildNode)) {
+            log("A");
+            log(existingChildNode)
             recoveredNodes.push(existingChildNode);
           } 
           
           // If node is removed, copy it back to leave it to wait for animation.
           if (flowChanges.beingRemovedMap[existingPrimitive.id]) {
+            log("B");
+            log(existingChildNode)
             recoveredNodes.push(existingChildNode);
           }
 
@@ -219,8 +223,18 @@ export function clearNode(node) {
       }
     })
 
+    // Removing pass, will also rearrange moved elements
+    let index =  node.childNodes.length - 1;
+    while(index >= 0) {
+      const existingChildNode = node.childNodes[index];
+      if ((existingChildNode instanceof Element) && !newChildNodes.includes(existingChildNode)) {
+        node.removeChild(existingChildNode);
+      }
+      index--;
+    }
+
     // Adding pass, will also rearrange moved elements
-    let index = 0;
+    index = 0;
     while(index < newChildNodes.length) {
       const existingChildNode = node.childNodes[index];
       if (newChildNodes[index] !== existingChildNode) {
