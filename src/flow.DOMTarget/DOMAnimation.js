@@ -335,6 +335,13 @@ function prepareAnimationStart() {
   // Examine added, measure their size etc.
   // At this stage, remember target dimensions and style.    
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
+
+    if (!flow.changes.previous || flow.changes.previous.finished) {
+      log("added in new animation");
+    } else {
+      log("added already in animation");
+    }
+
     // log({... flowChanges.beingRemovedMap})
     if (!flowChanges.beingRemovedMap[flow.id]) {
       // Measure added final style in an emulated world. PORTAL 
@@ -425,19 +432,24 @@ function prepareAnimationStart() {
     //   flow.domNode.getBoundingClientRect();
     // }
 
-    // Preserve before remove
-    flow.animation.preserveStyleForMoved(flow.domNode);
+    // Preserve before remove if on a fresh animation
+    if (!flow.changes.previous || flow.changes.previous.finished) {
+      log("removed already in animation");
+      // Preserve styles
+      flow.animation.preserveStyleForMoved(flow.domNode);
 
-    // Set scale and max bounds for animation. 
-    if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
-      flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
+      // Set scale and max bounds for animation. 
+      if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
+        flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
+      }
+      if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
+        flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
+      }
+      if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
+        flow.domNode.style.transform = "scale(1)"; 
+      }
     }
-    if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
-      flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
-    }
-    if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
-      flow.domNode.style.transform = "scale(1)"; 
-    }
+
     // Reflow
     flow.domNode.getBoundingClientRect();
   }
@@ -488,6 +500,7 @@ function activateAnimation() {
     log(`final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
     flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+    console.groupEnd();
   }
 }
 

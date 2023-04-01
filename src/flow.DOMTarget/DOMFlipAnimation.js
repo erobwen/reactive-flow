@@ -40,7 +40,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 5;
+const animationTime = 1;
 
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
@@ -431,7 +431,7 @@ export class DOMFlipAnimation {
           if (node.equivalentCreator) {
             delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
           }
-          // node.parentNode.removeChild(node);
+          node.parentNode.removeChild(node);
         }  
         
         node.style.transition = "";
