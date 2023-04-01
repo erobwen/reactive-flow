@@ -599,7 +599,7 @@ export function readFlowProperties(arglist, config) {
   // The long way
   let properties = {};
   while (arglist.length > 0) {
-    if (typeof arglist[0] === "function" && !arglist[0].causality) {
+    if (typeof arglist[0] === "function") {
       if (!properties.functions) {
         properties.functions = [];
       }
@@ -667,4 +667,8 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
 
 export function getTarget() {
   return creators[creators.length - 1].target;
+}
+
+export function callback(callback, key) {
+  return observable(callback, key);
 }
