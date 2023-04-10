@@ -295,18 +295,25 @@ export function onFinishReBuildingFlow() {
     }
   }
 
+  // Add all trailers 
+  // for (let flow of flowChanges.allAnimatedMovedFlows()) {
+  //   if (flow.domNode) {
+  //     const parentNode = flow.domNode.parentNode;
+  //     parentNode.insertBefore(flow.animation.getFadingTrailer(flow.domNode));
+  //   }
+  // }
+
   console.groupEnd();
+
   flowChanges.onFinishReBuildingFlowDone = true;
 }
 
 /**
  * Between these two functions the following takes place: 
  * 
- * DOM nodes are being restructured, with regards to parent/child relationships
- * For animated nodes their style is not changed. 
- * Added nodes have their final size measured, and they are then minimized. 
- * Moved nodes have their style frozen to avoid sudden and  non-animated style changes. 
- * Remove previous transformations/translations. 
+ * New dom structure and new styling. 
+ * 
+ * Block style changes for maxWidth, maxHeight, transform for nodes in an animation.
 */
 
 export function onFinishReBuildingDOM() {
@@ -316,21 +323,40 @@ export function onFinishReBuildingDOM() {
   console.group("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
     
-  prepareAnimationStart();
+  // Measure the final size of added
+  // recordTargetSizeForAdded();
+
+  // Minimize incoming & added, set size of trailers
+  // minimizeIncomingAndSetSizeOfTrailers();
+  // inflateTrailersAndMinimizeIncomingAndAdded();
+  //if (added, removed or moved)
+  
+  // Set original style of animated properties. 
+
+  recordBoundsInNewStructure();
+
+  translateToOriginalBoundsIfNeeded(); // Resident might need too.
+  //setAnimatedStylePropertiesExplicitlyToOriginalValuesForMoved(); // Should not change layout or anything, just make sure they animate
+  //setMaxWidthHeightScale for added or removed.
   requestAnimationFrame(() => {
     activateAnimation();  
   });
+
+  // On cleanup, synchronize transitioned style property
 
   console.groupEnd();
 }
 
 
-function prepareAnimationStart() {
-  
-  // Record bounds in new structure    
+function recordBoundsInNewStructure() {
+  // force Reflow().
   for (let flow of flowChanges.allAnimatedFlows()) {
     flow.animation.recordBoundsInNewStructure(flow.domNode);
   }
+}
+
+function translateToOriginalBoundsIfNeeded() {
+  
 
   // Examine added, measure their size etc.
   // At this stage, remember target dimensions and style.    
@@ -464,7 +490,7 @@ function activateAnimation() {
     flow.animation.setupFinalStyleForAdded(flow.domNode, flow.getAnimatedFinishStyles());
     log(`final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
-    flow.animation.setupAddedAnimationCleanup(flow.domNode);
+    setupAnimationCleanup(flow.domNode, flow.domNode.changes);
     delete flowChanges.beingRemovedMap[flow.id];  
     console.groupEnd();
   }
@@ -475,7 +501,7 @@ function activateAnimation() {
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
       log(`... resident node ${flow.toString()}, final properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
-      flow.animation.setupResidentAnimationCleanup(flow.domNode);
+      setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       delete flowChanges.beingRemovedMap[flow.id];
     }
   }
@@ -486,7 +512,7 @@ function activateAnimation() {
       flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
       log(`... moving node ${flow.toString()}, final properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
-      flow.animation.setupResidentAnimationCleanup(flow.domNode);
+      setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       delete flowChanges.beingRemovedMap[flow.id];
     }
   }
@@ -499,11 +525,55 @@ function activateAnimation() {
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
     log(`final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
-    flow.animation.setupRemovedAnimationCleanup(flow.domNode);
+    setupAnimationCleanup(flow.domNode, flow.domNode.changes);
     console.groupEnd();
   }
 }
 
+function setupAnimationCleanup(node, changes) {
+  const me = this; 
+  // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
+  // log(node)
+
+  function onTransitionEnd(event) {
+    
+    node.removeEventListener("transitionend", onTransitionEnd);
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (changes === node.changes) {
+      // These changes are still on the top of the stack
+      console.group("cleanup: " + changes.type + " " + changes.number);
+      log(event.target);
+      log(event.propertyName);
+      console.groupEnd();
+
+      // Remove changes.
+      const flow = node.equivalentCreator;
+      flow.changes = null;
+      node.changes = null; 
+        
+      // Synch property that was transitioned. 
+      // event.propertyName
+
+      // Finalize a remove
+      if (changes.type === "removed") {
+        node.parentNode.removeChild(node);
+      }  
+
+      node.style.transition = "";
+      if (node.equivalentCreator) {
+        node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+        log(`cleanup properties: `);
+        logProperties(node.style, typicalAnimatedProperties);
+      }
+
+      node.changes.finished = true; 
+      node.removeEventListener("transitionend", onTransitionEnd);
+    }
+  }
+  node.addEventListener("transitionend", onTransitionEnd);
+}
 
 /**
  * Diff analysis
