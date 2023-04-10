@@ -324,11 +324,12 @@ export function onFinishReBuildingDOM() {
   delete flowChanges.onFinishReBuildingFlowDone; 
     
   // Measure the final size of added
-  // recordTargetSizeForAdded();
+  measureTargetSizeForAdded();
 
   // Minimize incoming & added, set size of trailers
   // minimizeIncomingAndSetSizeOfTrailers();
   // inflateTrailersAndMinimizeIncomingAndAdded();
+  minimizeAdded();
   inflateTrailers();
   //if (added, removed or moved)
   
@@ -349,6 +350,18 @@ export function onFinishReBuildingDOM() {
 }
 
 
+function measureTargetSizeForAdded() {
+  for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+  }
+}
+
+function minimizeAdded() {
+  for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
+  }
+}
+
 function inflateTrailers() {
   // Add all trailers 
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
@@ -366,42 +379,6 @@ function recordBoundsInNewStructure() {
 }
 
 function translateToOriginalBoundsIfNeeded() {
-  
-
-  // Examine added, measure their size etc.
-  // At this stage, remember target dimensions and style.    
-  for (let flow of flowChanges.allAnimatedAddedFlows()) {
-
-    if (!flow.changes.previous || flow.changes.previous.finished) {
-      log("added in new animation");
-    } else {
-      log("added already in animation");
-    }
-
-    // log({... flowChanges.beingRemovedMap})
-    if (!flowChanges.beingRemovedMap[flow.id]) {
-      // Measure added final style in an emulated world. PORTAL 
-      // console.group("start measure added");
-      // log(flow.domNode)
-      // log(flow.domNode.changes.number);
-      // log(flow.domNode.changes.type);
-      flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
-      flow.domNode.style.maxWidth = "";
-      flow.domNode.style.maxHeight = "";
-      flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
-      flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-      // log(flow.toString() + " is added and minimized again...");
-      // logProperties(flow.domNode.style, typicalAnimatedProperties);
-      console.groupEnd();
-    } else {
-      // We already recorded desired height upon removal. Note, this might be wrong if the div animated while 
-      // Being removed. This can perhaps be improved in the future to do a new proper measurement.
-      log(flow.toString() + " is added after being removed...");
-      logProperties(flow.domNode.style, typicalAnimatedProperties);
-    }    
-    // Reflow
-    flow.domNode.getBoundingClientRect();
-  }
 
   // Translate present flows to original position
   for (let flow of flowChanges.allAnimatedMovedResidentFlows()) {
@@ -556,13 +533,9 @@ function setupAnimationCleanup(node, changes) {
       console.group("cleanup: " + changes.type + " " + changes.number);
       log(event.target);
       log(event.propertyName);
+      log(camelCase(event.propertyName));
       console.groupEnd();
 
-      // Remove changes.
-      const flow = node.equivalentCreator;
-      flow.changes = null;
-      node.changes = null; 
-        
       // Synch property that was transitioned. 
       // event.propertyName
 
@@ -579,7 +552,13 @@ function setupAnimationCleanup(node, changes) {
       }
 
       node.changes.finished = true; 
-      node.removeEventListener("transitionend", onTransitionEnd);
+
+      // Remove changes.
+      const flow = node.equivalentCreator;
+      flow.changes = null;
+      node.changes = null; 
+        
+      // node.removeEventListener("transitionend", onTransitionEnd);
     }
   }
   node.addEventListener("transitionend", onTransitionEnd);
@@ -670,7 +649,16 @@ function parseMatrix(matrix) {
 // let nextOriginMark = 0;
 
 
+var camelCase = (function () {
+  var DEFAULT_REGEX = /[-_]+(.)?/g;
 
+  function toUpper(match, group1) {
+      return group1 ? group1.toUpperCase() : '';
+  }
+  return function (str, delimiters) {
+      return str.replace(delimiters ? new RegExp('[' + delimiters + ']+(.)?', 'g') : DEFAULT_REGEX, toUpper);
+  };
+})();
 
 // function findAndRecordOriginalBoundsOfOrigin(flow) {
 //   const originMark = nextOriginMark++;
