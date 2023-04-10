@@ -11,6 +11,7 @@ const log = console.log;
     initialUnobservables() {
       let result = super.initialUnobservables();
       result.previouslySetStyles = {};
+      result.previouslySetAttributes = {};
       return result;
     }
 
@@ -39,7 +40,7 @@ const log = console.log;
       }
   
       // Clear out styles that will no longer be modified
-      for (let property in this.previouslySetAttributes) {
+      for (let property in this.unobservable.previouslySetAttributes) {
         if (typeof(newAttributes[property]) === "undefined") {
           if (property === "style") {
             this.updateStyle(element, {}); // Clear style
@@ -51,54 +52,27 @@ const log = console.log;
   
       // Set styles if changed
       for (let property in newAttributes) {
+        const newValue = newAttributes[property];
         if (property === "style") {
-          this.updateStyle(element, newAttributes[property]);
+          this.updateStyle(element, newValue);
         } else {
-          if (element[property] !== newAttributes[property]) {
-            element[property] = newAttributes[property];
+          // Note, only change if we have a new value. Alow for animation kit to set the value to something else while this code is unaware.  
+          if (this.unobservable.previouslySetAttributes[property] !== newValue) { 
+            element[property] = newValue;
           }
-          newPreviouslySetAttributes[property] = true;  
+          newPreviouslySetAttributes[property] = newValue;  
         }
       }
   
-      this.previouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
+      this.unobservable.previouslySetAttributes = newPreviouslySetAttributes; // Note: Causality will prevent this from self triggering repeater.
     }
-    
-    // updateStyle(element, newStyle) {
-    //   const elementStyle = element.style;
-    //   const newPreviouslySetStyles = {};
-  
-    //   // Clear out styles that will no longer be modified
-    //   for (let property in this.unobservable.previouslySetStyles) {
-    //     if (typeof(newStyle[property]) === "undefined") {
-    //       elementStyle[property] = "";
-    //     }
-    //   }
-  
-    //   // Set styles if changed
-    //   for (let property in newStyle) {
-    //     if (elementStyle[property] !== newStyle[property]) {
-    //       elementStyle[property] = newStyle[property];
-    //     }
-    //     newPreviouslySetStyles[property] = true;
-    //   }
-  
-    //   this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
-    // }
     
     updateStyle(element, newStyle) {
       const elementStyle = element.style;
-
       const newPreviouslySetStyles = {};
-      let blockedProperties = {};
-      if (this.currentAnimation) {
-        // log("HERE")
-        blockedProperties = this.currentAnimation.blockedPropertiesMap();
-        // log(blockedProperties);
-      }
 
       // Clear out styles that will no longer be modified
-      for (let property in this.unobservable.previouslySetStyles) if (!blockedProperties[property]) {
+      for (let property in this.unobservable.previouslySetStyles) {
         if (typeof(newStyle[property]) === "undefined") {
           // log(this.toString() + " clear style: " + property);
           elementStyle[property] = "";
@@ -106,8 +80,9 @@ const log = console.log;
       }
   
       // Set styles if changed
-      for (let property in newStyle) if (!blockedProperties[property]) {
-        if (elementStyle[property] !== newStyle[property]) {
+      for (let property in newStyle) {
+        // Note, only change if we have a new value. Alow for animation kit to set the value to something else while this code is unaware.  
+        if (this.unobservable.previouslySetStyles[property] !== newStyle[property]) {
           // log(this.toString() + " set style: " + property + " = " + newStyle[property]);
           elementStyle[property] = newStyle[property];
         }
