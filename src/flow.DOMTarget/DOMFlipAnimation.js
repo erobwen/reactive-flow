@@ -193,23 +193,29 @@ export class DOMFlipAnimation {
    * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
    */
   getFadingTrailer(node) {
-    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
-    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
     const trailer = document.createElement("div");
-    trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
-    trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
-    trailer.style.opacity = "0";
-    trailer.id = "trailer"
 
     const changes = {
       number: flowChanges.number,
       type: "removed",
       previous: null
     };
+    trailer.owner = node; 
     trailer.changes = changes; 
     node.fadingTrailerOnChanges = flowChanges.number;
     node.fadingTrailer = trailer;
+    trailer.id = "trailer"
     return trailer;
+  }
+
+
+  inflateFadingTrailer(node) {
+    const trailer = node.fadingTrailer;
+    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
+    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
+    trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
+    trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
+    trailer.style.opacity = "0";
   }
 
   disappearingReplacementFinalStyle() {

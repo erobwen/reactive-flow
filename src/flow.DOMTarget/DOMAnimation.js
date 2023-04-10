@@ -296,12 +296,12 @@ export function onFinishReBuildingFlow() {
   }
 
   // Add all trailers 
-  // for (let flow of flowChanges.allAnimatedMovedFlows()) {
-  //   if (flow.domNode) {
-  //     const parentNode = flow.domNode.parentNode;
-  //     parentNode.insertBefore(flow.animation.getFadingTrailer(flow.domNode));
-  //   }
-  // }
+  for (let flow of flowChanges.allAnimatedMovedFlows()) {
+    if (flow.domNode) {
+      const parentNode = flow.domNode.parentNode;
+      parentNode.insertBefore(flow.animation.getFadingTrailer(flow.domNode), flow.domNode);
+    }
+  }
 
   console.groupEnd();
 
@@ -329,6 +329,7 @@ export function onFinishReBuildingDOM() {
   // Minimize incoming & added, set size of trailers
   // minimizeIncomingAndSetSizeOfTrailers();
   // inflateTrailersAndMinimizeIncomingAndAdded();
+  inflateTrailers();
   //if (added, removed or moved)
   
   // Set original style of animated properties. 
@@ -347,6 +348,15 @@ export function onFinishReBuildingDOM() {
   console.groupEnd();
 }
 
+
+function inflateTrailers() {
+  // Add all trailers 
+  for (let flow of flowChanges.allAnimatedMovedFlows()) {
+    if (flow.domNode) {
+      flow.animation.inflateFadingTrailer(flow.domNode);
+    }
+  }
+}
 
 function recordBoundsInNewStructure() {
   // force Reflow().
@@ -563,7 +573,7 @@ function setupAnimationCleanup(node, changes) {
 
       node.style.transition = "";
       if (node.equivalentCreator) {
-        node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
+        node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
         log(`cleanup properties: `);
         logProperties(node.style, typicalAnimatedProperties);
       }

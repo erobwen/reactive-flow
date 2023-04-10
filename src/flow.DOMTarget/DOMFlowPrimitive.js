@@ -143,14 +143,6 @@ export function clearNode(node) {
             log(existingChildNode)
             recoveredNodes.push(existingChildNode);
           }
-
-          // Test for moving out 
-          if (flowChanges.globallyMovedAnimated[existingPrimitive.id]) {
-            // Outgoing could already be gone at this stage?
-            if (existingChildNode.fadingTrailerOnChanges !== flowChanges.number) {
-              recoveredNodes.push(animation.getFadingTrailer(existingChildNode), existingChildNode);
-            }
-          }
         }
       }
     }
@@ -193,12 +185,6 @@ export function clearNode(node) {
           
           // Arrange trailer for incoming that leaves another container, arrange trailer. 
           const newPrimitiveDomNode = newPrimitive.domNode; 
-          if (newPrimitiveDomNode.fadingTrailerOnChanges !== flowChanges.number) {
-            if (newPrimitiveDomNode.parentNode) {
-              newPrimitiveDomNode.parentNode.insertBefore(animation.getFadingTrailer(newPrimitiveDomNode), newPrimitiveDomNode);
-              newPrimitiveDomNode.parentNode.removeChild(newPrimitiveDomNode);
-            }
-          }
 
           // Preserve style for incoming. For example to avoid sudden changes of animated 
           // properties if moving from a parent div with different font size, so we want to 
