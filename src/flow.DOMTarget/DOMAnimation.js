@@ -334,6 +334,7 @@ export function onFinishReBuildingDOM() {
   //if (added, removed or moved)
   
   // Set original style of animated properties. 
+  // set original style for moved
 
   recordBoundsInNewStructure();
 

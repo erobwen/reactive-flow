@@ -164,21 +164,21 @@ export function clearNode(node) {
         // For all added
         if (flowChanges.globallyAddedAnimated[newPrimitive.id]) {
           // Check if it is being removed, in that case just freeze style         
-          if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
+          // if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
             animation.setOriginalMinimizedStyleForAdded(newPrimitive.domNode);
-          } else {
-            animation.preserveStyleForMoved(newPrimitive.domNode, true); // PORTAL
-            log(newPrimitive.toString() + " is added after being removed...");
-            logProperties(newPrimitive.domNode.style, typicalAnimatedProperties);
-          }
+          // } else {
+          //   animation.preserveStyleForMoved(newPrimitive.domNode, true); // PORTAL
+          //   log(newPrimitive.toString() + " is added after being removed...");
+          //   logProperties(newPrimitive.domNode.style, typicalAnimatedProperties);
+          // }
         }
 
         // For all being moved here
         if (flowChanges.globallyMovedAnimated[newPrimitive.id]) {
-          movedPrimitives.push(newPrimitive.domNode);
-          newPrimitive.domNode.touchedByFoo = true;
-          window.touched = newPrimitive.domNode;
-          newPrimitive.domNode.style.transform = "none";
+          // movedPrimitives.push(newPrimitive.domNode);
+          // newPrimitive.domNode.touchedByFoo = true;
+          // window.touched = newPrimitive.domNode;
+          // newPrimitive.domNode.style.transform = "none";
           // newPrimitive.domNode.style = {...newPrimitive.domNode.style, transform: "none"};
           // newPrimitive.domNode.transform = "none";
           // log(newPrimitive.domNode.style.transform)
