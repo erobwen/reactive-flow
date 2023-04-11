@@ -326,27 +326,19 @@ export function onFinishReBuildingDOM() {
     
   // Measure the final size of added
   measureTargetSizeForAdded();
-
-  // Minimize incoming & added, set size of trailers
-  // minimizeIncomingAndSetSizeOfTrailers();
-  // inflateTrailersAndMinimizeIncomingAndAdded();
   minimizeAdded();
-  inflateTrailersAndPrepareIncoming();
-  //if (added, removed or moved)
-  
-  // Set original style of animated properties. 
-  // set original style for moved
+  inflateTrailersAndPrepareMoved();
 
+  // Do the FLIP animation technique
   recordBoundsInNewStructure();
+  translateToOriginalBoundsIfNeeded(); // Note: Might move resident animated flows also because of rearrangements.
+  
+  //setMaxWidthHeightScale for removed.
 
-  translateToOriginalBoundsIfNeeded(); // Resident might need too.
-  //setAnimatedStylePropertiesExplicitlyToOriginalValuesForMoved(); // Should not change layout or anything, just make sure they animate
-  //setMaxWidthHeightScale for added or removed.
+  // Resident might need too.
   requestAnimationFrame(() => {
     activateAnimation();  
   });
-
-  // On cleanup, synchronize transitioned style property
 
   console.groupEnd();
 }
@@ -364,7 +356,7 @@ function minimizeAdded() {
   }
 }
 
-function inflateTrailersAndPrepareIncoming() {
+function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
@@ -521,6 +513,8 @@ function activateAnimation() {
 }
 
 function setupAnimationCleanup(node, changes) {
+  
+  // On cleanup, synchronize transitioned style property
   const me = this; 
   // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
   // log(node)

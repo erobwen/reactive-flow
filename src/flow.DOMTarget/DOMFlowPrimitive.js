@@ -104,8 +104,6 @@ export function clearNode(node) {
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
-    console.group("ensureDomNodeChildrenInPlace " + this.toString())
-    // log(node)0
     
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
@@ -121,16 +119,12 @@ export function clearNode(node) {
         // No creator, probably a fading trailer that we want to keep
         recoveredNodes.push(existingChildNode);
       } else {
-        log("found " + existingPrimitive.toString());
-
         // A creator, meaning a flow primitive
         existingPrimitives[existingPrimitive.id] = existingPrimitive; 
         const animation = existingPrimitive.getAnimation(); 
 
         // Keep node in new children
         if (newChildNodes.includes(existingChildNode)) {
-          log("A");
-          log(existingChildNode)
           recoveredNodes.push(existingChildNode);
         } 
 
@@ -139,8 +133,6 @@ export function clearNode(node) {
           
           // If node is removed, copy it back to leave it to wait for animation.
           if (flowChanges.beingRemovedMap[existingPrimitive.id]) {
-            log("B");
-            log(existingChildNode)
             recoveredNodes.push(existingChildNode);
           }
         }
@@ -149,7 +141,6 @@ export function clearNode(node) {
 
     // Link recovered nodes:
     let anchor = null; 
-    log(recoveredNodes);
     recoveredNodes.forEach(node => {node.anchor = anchor; anchor = node; });
 
     function insertAfter(array, reference, element) {
@@ -159,13 +150,9 @@ export function clearNode(node) {
     // Merge old with new
     recoveredNodes.forEach(node => {
       if (!newChildNodes.includes(node)) {
-        log("adding back!")
-        log(node)
         let anchor = node.anchor;
-        log(anchor);
         while (!newChildNodes.includes(anchor) && anchor) anchor = anchor.anchor; // Maybe not necessary. 
         if (!anchor) {
-          log("unshift!!!")
           newChildNodes.unshift(node);
         } else {
           insertAfter(newChildNodes, anchor, node);
@@ -192,8 +179,6 @@ export function clearNode(node) {
       }
       index++;
     }
-
-    console.groupEnd();
   }
 
   *iterateChildren() {
