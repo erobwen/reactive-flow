@@ -266,7 +266,8 @@ export function onFinishReBuildingFlow() {
       const changes = {
         number: flowChanges.number,
         type: "resident",
-        previous: flow.changes
+        previous: flow.changes,
+        transitioningProperties: (flow.changes && flow.changes.transitioningProperties) ? flow.changes.transitioningProperties : {} 
       };
       flow.changes = changes; 
       flow.domNode.changes = changes; 
@@ -330,7 +331,7 @@ export function onFinishReBuildingDOM() {
   // minimizeIncomingAndSetSizeOfTrailers();
   // inflateTrailersAndMinimizeIncomingAndAdded();
   minimizeAdded();
-  inflateTrailers();
+  inflateTrailersAndPrepareIncoming();
   //if (added, removed or moved)
   
   // Set original style of animated properties. 
@@ -363,11 +364,12 @@ function minimizeAdded() {
   }
 }
 
-function inflateTrailers() {
-  // Add all trailers 
+function inflateTrailersAndPrepareIncoming() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
+      flow.animation.setOriginalStyleForMoved(flow.domNode);
+      flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
   }
 }

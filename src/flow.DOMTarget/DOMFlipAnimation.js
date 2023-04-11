@@ -101,7 +101,7 @@ export class DOMFlipAnimation {
   /**
    * Preserve style 
    */
-  preserveStyleForMoved(node, includeTransform=false) {
+  setOriginalStyleForMoved(node, includeTransform=false) {
     for (let property of this.animatedProperties) {
       if (property === "transform" && !includeTransform) continue; 
       if (typeof(property) === "string") {

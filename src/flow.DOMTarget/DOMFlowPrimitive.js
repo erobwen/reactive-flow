@@ -156,49 +156,6 @@ export function clearNode(node) {
       array.splice(array.indexOf(reference) + 1, 0, element);
     }
 
-    // Prepare new children
-    for(let newPrimitive of newChildren) {
-      const animation = newPrimitive.getAnimation();
-      if (animation) {
-
-        // For all added
-        if (flowChanges.globallyAddedAnimated[newPrimitive.id]) {
-          // Check if it is being removed, in that case just freeze style         
-          // if (!flowChanges.beingRemovedMap[newPrimitive.id]) {
-            animation.setOriginalMinimizedStyleForAdded(newPrimitive.domNode);
-          // } else {
-          //   animation.preserveStyleForMoved(newPrimitive.domNode, true); // PORTAL
-          //   log(newPrimitive.toString() + " is added after being removed...");
-          //   logProperties(newPrimitive.domNode.style, typicalAnimatedProperties);
-          // }
-        }
-
-        // For all being moved here
-        if (flowChanges.globallyMovedAnimated[newPrimitive.id]) {
-          // movedPrimitives.push(newPrimitive.domNode);
-          // newPrimitive.domNode.touchedByFoo = true;
-          // window.touched = newPrimitive.domNode;
-          // newPrimitive.domNode.style.transform = "none";
-          // newPrimitive.domNode.style = {...newPrimitive.domNode.style, transform: "none"};
-          // newPrimitive.domNode.transform = "none";
-          // log(newPrimitive.domNode.style.transform)
-          
-          // Arrange trailer for incoming that leaves another container, arrange trailer. 
-          const newPrimitiveDomNode = newPrimitive.domNode; 
-
-          // Preserve style for incoming. For example to avoid sudden changes of animated 
-          // properties if moving from a parent div with different font size, so we want to 
-          // fixate font size on the moving element so it can be animated. 
-          // Check if not in animation?  
-          animation.preserveStyleForMoved(newPrimitiveDomNode);
-
-          // Minimize footprint for incoming. 
-          animation.minimizeIncomingFootprint(newPrimitiveDomNode);
-        }
-      }
-    }
-      
-
     // Merge old with new
     recoveredNodes.forEach(node => {
       if (!newChildNodes.includes(node)) {
