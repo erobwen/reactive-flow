@@ -329,7 +329,10 @@ export function onFinishReBuildingDOM() {
   minimizeAdded();
   inflateTrailersAndPrepareMoved();
 
+  // We now have original style/size, but new structure. 
+
   // Do the FLIP animation technique
+  // Note: This will not happen for flows being removed (in earlier flowChanges.number). Should we include those here as well?
   recordBoundsInNewStructure();
   translateToOriginalBoundsIfNeeded(); // Note: Might move resident animated flows also because of rearrangements.
   
@@ -342,7 +345,6 @@ export function onFinishReBuildingDOM() {
 
   console.groupEnd();
 }
-
 
 function measureTargetSizeForAdded() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
@@ -360,7 +362,8 @@ function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
-      flow.animation.setOriginalStyleForMoved(flow.domNode);
+      // Should we enforce size here also?
+      flow.animation.setOriginalStyleForMoved(flow.domNode); 
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
   }
@@ -374,6 +377,8 @@ function recordBoundsInNewStructure() {
 }
 
 function translateToOriginalBoundsIfNeeded() {
+
+  // TODO: Translate parents first in case of cascading moves? 
 
   // Translate present flows to original position
   for (let flow of flowChanges.allAnimatedMovedResidentFlows()) {
@@ -444,7 +449,7 @@ function translateToOriginalBoundsIfNeeded() {
     if (!flow.changes.previous || flow.changes.previous.finished) {
       log("removed already in animation");
       // Preserve styles
-      flow.animation.preserveStyleForMoved(flow.domNode);
+      flow.animation.setOriginalStyleForMoved(flow.domNode);
 
       // Set scale and max bounds for animation. 
       if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {

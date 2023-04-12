@@ -4,22 +4,51 @@ Note: This is a compound repository where I experiment with Flow together with o
 
 ![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
-* State of the art reactive technologies, with several technical advantages over frameworks such as VueX and React. 
-* Very simple, easy to use and very little boilerplate code. 
-* A very flexible component model. No arbitrary rules about what code can change what state. Components are javascript objects (ES6 Proxies really), and changing their javascript properties is the same as changing their Flow properties. 
-* Property inheritance for making it simple to pass down properties in the component hierarchy.  
-* Safe direct manipulation of state and model.
-* Integrated, transparent and fully automated state handling (equivalent to MobX / causalityjs). 
-* Consistent and minimal updates of stte and DOM
+* Very simple, easy to use and very little boilerplate code.
+
+Excellent State Handling: 
+
+* State of the art reactive technologies using ES6 Proxies. 
+* Integrated, transparent and fully automated state handling (equivalent to MobX / causalityjs) with safe direct manipulation of state. 
+* The component state works by the same principles as the as the model state, so you can direct manipulate either component state or model state. 
+* No arbitrary rules about what code can change what state. We believe in the programmers ability to use this wisley. 
+* Consistent and minimal updates of state and DOM as a consequence of state change. 
+
+Pure Javascript: 
+
 * No dependency on template litterals, jsx, Typescript or CSS, just plain Javascript with direct DOM manipulation! 
+* Support for Modular Reactive Programmatic, Responsive and Data driven Layout. MRP-RDDL. The most powerful layout concept for responsive and data driven layout that there can exist. More powerful than using CSS. 
+
+Supreme Animation Support: 
+
+* Integrated generalized global transition animations, using the FLIP animation technique. Simply activate animation with "animate: true" on your componen for a smooth lifecycle. 
+* Fully customizeable animations. 
+
+Possibly explicit component life cycle handling: 
+
+* Typically component structures are built declarativley, however, you can take control over the life cycle of sub components in two ways: 
+    ** Use keys to persist the state of a sub component. 
+    ** Explicitly build and dispose a subcomponent in the setState/disposeState lifecycle functions of a component. 0
+* Explicitly managing the lifecycle of child components has a number of possibilities. 
+* A component can move from one part of the screen to another while maintaining its state. 
+* Off-screen components is now a possibility. Allow components to live with a state off screen, for example usable for fast tab-panel switching where all dom elements of the hidden tab component are never deallocated.  
 * Bottom up rendering capabilities: Finalize and force reflow of a child before a parent is rendered to take measures for fine control layout. Can be used for WYSIWYG word-processing and advanced responsive UI-behaviors.  
-* Integrated FLIP animations for all transitions, simply activate, or customize to fit your specific needs.
+
+Future Safe: 
+
 * DOM independent component model, future potential for portability to other platforms besides Web. 
+
+Basic features: 
+
+* Property inheritance for making it simple to pass down properties in the component hierarchy. (fullfills same role as Contexts in React)  
 * Component key-paths, for convenient programmatic manipulation of components, UI test automation and debugging.
+* Component stage portals. Since portals works on the component level, the content of a portal can be in place before the portal has mounted. This is an improvement over React that needs to get hold of a node with a ref on mounting, before that node can be used as a portal, this forces React to populate the portal in a second redering pass. With Flow, the content of a portal work more in line with the contents of any other container, allowing a more smooth user experience.  
+
+Overview: 
+
 * Based on causalityjs (similar to MobX).  
 * Lightweight < 100 kb.
 * Open source 
-* Component stage portals. Since portals works on the component level, the content of a portal can be in place before the portal has mounted. This is an improvement over React that needs to get hold of a node with a ref on mounting, before that node can be used as a portal, this forces React to populate the portal in a second redering pass. This makes the content of a portal work more in line with the contents of any other container.  
 
 
 # Running the demo

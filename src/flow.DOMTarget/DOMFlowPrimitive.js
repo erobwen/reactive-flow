@@ -117,6 +117,7 @@ export function clearNode(node) {
       const existingPrimitive = existingChildNode.equivalentCreator;
       if (!existingPrimitive) {
         // No creator, probably a fading trailer that we want to keep
+        // TODO: Mark trailers somehow! 
         recoveredNodes.push(existingChildNode);
       } else {
         // A creator, meaning a flow primitive
@@ -128,10 +129,8 @@ export function clearNode(node) {
           recoveredNodes.push(existingChildNode);
         } 
 
+        // If node is removed and animated, copy it back to leave it to wait for animation.
         if (animation) {
-          
-          
-          // If node is removed, copy it back to leave it to wait for animation.
           if (flowChanges.beingRemovedMap[existingPrimitive.id]) {
             recoveredNodes.push(existingChildNode);
           }
