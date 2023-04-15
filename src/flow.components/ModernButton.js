@@ -20,17 +20,19 @@ export class ModernButton extends Flow {
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
 
-    this.style = {height: "35px", margin: "5px", ...style};
+    this.style = {overflow: "visible", height: "35px", ...style};
     if (fixedSize) style.width = "250px";
 
     if (!innerStyle.backgroundColor) {
       innerStyle.backgroundColor = grayColor(240);
     }
+    
     this.backgroundColor = innerStyle.backgroundColor; 
     this.mouseOverBackgroundColor = adjustLightness(this.backgroundColor, hoverAjust);
     this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.2)
     this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
-    this.innerStyle = {...fitStyle, ...panelStyle, ...innerStyle, color: "black", transition: "background 0.5s", overflow: "hidden", userSelect: "none", fontSize: "20px"};
+    this.innerStyle = {...fitStyle, ...panelStyle, ...innerStyle, position: "relative", overflow: "hidden", color: "black", transition: "background 0.5s", overflow: "hidden", userSelect: "none", fontSize: "20px"};
+    if (ripple) innerStyle.position = "relative";
 
     this.pressed = pressed;  
     this.inAnimation = false;
@@ -105,11 +107,8 @@ export class ModernButton extends Flow {
     log(panel)
 
     this.rippleAndCallback = (event) => {
+      log("TRY RIPPLE");
 
-      log("RIPPLE");
-      log(this)
-      log(this.findChild("text"));
-      log(this.findChild("text").domNode);
 
       event.stopPropagation();
       if (this.inAnimation) {
@@ -117,22 +116,13 @@ export class ModernButton extends Flow {
         return;
       }
       this.inAnimation = true; 
-      
-      // const oldStyle = {
-      //   overflow : panel.style.overflow,
-      //   width: panel.style.width,
-      //   height: panel.style.height
-      // }
-
-      // if (backgroundOnClick) {
-        //   panel.style.transition = "background-color 0.6 ease-in-out";
-        //   panel.style["background-color"] = "white"; 
-        //   setTimeout(() => {
-          //     panel.style["background-color"] = backgroundOnClick; 
-          //   }, 0);
-          // }
           
       if (ripple) { 
+        log("RIPPLE");
+        log(this)
+        log(this.findChild("text"));
+        log(this.findChild("text").domNode);
+
         // Fixate panel (it might grow otherwise... )
         panel.style.overflow = "hidden";
         const panelComputedStyle = window.getComputedStyle(panel, null);
@@ -204,9 +194,7 @@ export class ModernButton extends Flow {
   
   build() {
     log("REBUILDING BUTTON")
-    let {ripple, style, onClick} = this;
-    style = {...fitStyle, ...style};
-    if (ripple) style.position = "relative";
+    let {style, innerStyle, onClick} = this;
     if (onClick) {
       style.cursor = "pointer";
     }
@@ -222,7 +210,7 @@ export class ModernButton extends Flow {
             }}
           ), 
           {
-            style: this.innerStyle
+            style: innerStyle
           }
         ),
         {

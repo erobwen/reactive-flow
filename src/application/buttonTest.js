@@ -1,5 +1,5 @@
 import { text } from "../flow.components/BasicWidgets";
-import { column } from "../flow.components/Layout";
+import { centerMiddle, column, fitStyle } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";
 import { Flow } from "../flow/Flow";
@@ -15,9 +15,9 @@ class ButtonTest extends Flow {
   }
 
   build() {
-    return column(
+    return centerMiddle(
       modernButton("test", "Test", ()=> { this.pressed = !this.pressed}, {pressed: this.pressed, style: {width: "100px"}}),
-      {style: {fontSize: "40px", padding: "20px"}}
+      {style: {...fitStyle, fontSize: "40px", padding: "20px"}}
     );
   }
 }

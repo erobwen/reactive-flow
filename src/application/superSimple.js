@@ -59,7 +59,8 @@ export class SuperSimple extends Flow {
 
   build() {
     // const button = new modernButton(
-    const button = div("wrapper", this.button, {animate: true});
+    // const button = div("wrapper", this.button, {animate: true});
+    const button = this.button; 
     button.animate = true; // Force property...  
 
     return column(
