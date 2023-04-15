@@ -6,11 +6,12 @@ import { simpleButton } from "./SimpleButton";
 
 export function button(...parameters) {
   // return modernButton.apply(null, parameters);
-  const button = simpleButton.apply(null, parameters);
-  // const button = modernButton.apply(null, parameters);
-  const wrapper = div(button);
-  wrapper.button = button; 
-  return wrapper; 
+  // const button = simpleButton.apply(null, parameters);
+  const button = modernButton.apply(null, parameters);
+  return button; 
+  // const wrapper = div(button);
+  // wrapper.button = button; 
+  // return wrapper; 
 }
 
 

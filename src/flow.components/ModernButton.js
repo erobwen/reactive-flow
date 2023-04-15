@@ -14,21 +14,23 @@ export function modernButton(...parameters) {
 
 export class ModernButton extends Flow {
 
-  setProperties({pressed= false, children, onClick, onClickKey, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, fixedSize=false}) {
+  setProperties({pressed= false, children, onClick, onClickKey, style={}, innerStyle={}, hoverAjust = -0.1, text="TESTING", ripple=true, fixedSize=false}) {
     this.ripple = ripple;
     this.children = children; 
     this.onClick = onClick;
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
-    if (!style.backgroundColor) {
-      style.backgroundColor = grayColor(240);
-    }
-    this.backgroundColor = style.backgroundColor; 
-    this.mouseOverBackgroundColor = adjustLightness(this.backgroundColor, hoverAjust);
-    this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.1)
-    this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
 
-    this.style = {transition: "background 0.5s", height: "35px", margin: "5px", ...style, ...panelStyle, color: "black"};
+    this.style = {height: "35px", margin: "5px", ...style};
     if (fixedSize) style.width = "250px";
+
+    if (!innerStyle.backgroundColor) {
+      innerStyle.backgroundColor = grayColor(240);
+    }
+    this.backgroundColor = innerStyle.backgroundColor; 
+    this.mouseOverBackgroundColor = adjustLightness(this.backgroundColor, hoverAjust);
+    this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.2)
+    this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
+    this.innerStyle = {...fitStyle, ...panelStyle, ...innerStyle, color: "black", transition: "background 0.5s", overflow: "hidden", userSelect: "none", fontSize: "20px"};
 
     this.pressed = pressed;  
     this.inAnimation = false;
@@ -46,8 +48,9 @@ export class ModernButton extends Flow {
     log(foo);
     log("--")
     // Ensure event listeners
-    if (this.domNode !== this.eventListenersDomNode) {
-      this.eventListenersDomNode = this.domNode;
+    const pannel = this.findChild("centerMiddle").domNode;
+    if (pannel !== this.eventListenersDomNode) {
+      this.eventListenersDomNode = pannel;
       this.clearEventListeners();
       this.setEventListeners(this.onClick, this.mouseOverBackgroundColor);
     }
@@ -57,15 +60,15 @@ export class ModernButton extends Flow {
     log("hover:" + this.hover);
     if (this.pressed) {
       if (this.hover) {
-        this.style = {...this.style, backgroundColor: this.mouseOverPressedBackgroundColor};      
+        this.innerStyle = {...this.innerStyle, backgroundColor: this.mouseOverPressedBackgroundColor};      
       } else {
-        this.style = {...this.style, backgroundColor: this.pressedBackgroundColor};      
+        this.innerStyle = {...this.innerStyle, backgroundColor: this.pressedBackgroundColor};      
       }
     } else {
       if (this.hover) {
-        this.style = {...this.style, backgroundColor: this.mouseOverBackgroundColor};      
+        this.innerStyle = {...this.innerStyle, backgroundColor: this.mouseOverBackgroundColor};      
       } else {
-        this.style = {...this.style, backgroundColor: this.backgroundColor};      
+        this.innerStyle = {...this.innerStyle, backgroundColor: this.backgroundColor};      
       }
     }
   }
@@ -78,7 +81,7 @@ export class ModernButton extends Flow {
     if (!this.eventListenersSet) return;
 
     // Clear old listeners
-    const panel = this.domNode;
+    const panel = this.findChild("centerMiddle").domNode;
     if (this.setMouseoverColor) {
       panel.removeEventListener("mouseover", this.setMouseoverColor);  
       delete this.setMouseoverColor;
@@ -97,9 +100,17 @@ export class ModernButton extends Flow {
 
   setEventListeners(onClick, mouseOverBackgroundColor) {
     const {ripple} = this; 
-    const panel = this.domNode;
+    const panel = this.findChild("centerMiddle").domNode;
+    log("setEventListeners");
+    log(panel)
 
     this.rippleAndCallback = (event) => {
+
+      log("RIPPLE");
+      log(this)
+      log(this.findChild("text"));
+      log(this.findChild("text").domNode);
+
       event.stopPropagation();
       if (this.inAnimation) {
         onClick(); 
@@ -172,6 +183,8 @@ export class ModernButton extends Flow {
       onClick(); 
     }
 
+    log(panel)
+
     if (onClick) {    
       panel.addEventListener("click", this.rippleAndCallback);
     }
@@ -192,21 +205,26 @@ export class ModernButton extends Flow {
   build() {
     log("REBUILDING BUTTON")
     let {ripple, style, onClick} = this;
-    style = {...style, overflow: "hidden", userSelect: "none", padding: "20px", fontSize: "20px"};
+    style = {...fitStyle, ...style};
     if (ripple) style.position = "relative";
     if (onClick) {
       style.cursor = "pointer";
     }
     return (
-      centerMiddle("centerMiddle",
-        text(
-          "text",
-          this.text,
-          {style: {
-            cursor: "pointer", 
-            pointerEvents: "none"
-          }}
-        ), 
+      div(
+        centerMiddle("centerMiddle",
+          text(
+            "text",
+            this.text,
+            {style: {
+              cursor: "pointer", 
+              pointerEvents: "none"
+            }}
+          ), 
+          {
+            style: this.innerStyle
+          }
+        ),
         {
           style
         }

@@ -24,7 +24,6 @@ export class SuperSimple extends Flow {
       "button", "Text", 
       this.move.bind(this),
       {
-        animate: true,
         ripple: true,
         style: {
           color: "red"
@@ -38,39 +37,43 @@ export class SuperSimple extends Flow {
   }
 
   move() {
+    this.button.hover = true;  
     this.left = !this.left;
 
     setTimeout(() => {
       inEperiment = true; 
     }, 1000);
 
-    setTimeout(() => {
-      log("SETTING TEXT");
-      log(this.button);
-      log(this.button.button);
-      let color = this.button.button.style.color;  
-      color = color === "red" ? "green" : "red"; 
-      log(this.button.button.style = {...this.button.button.style, color});
-      // this.button.button.text = this.button.button.text + "!"       
-    }, 2500);
+    // setTimeout(() => {
+    //   log("SETTING TEXT");
+    //   log(this.button);
+    //   log(this.button);
+    //   this.button.hover = false;  
+
+    //   // let color = this.button.style.color;  
+    //   // color = color === "red" ? "green" : "red"; 
+    //   // log(this.button.style = {...this.button.style, color});
+    //   // this.button.text = this.button.text + "!"       
+    // }, 2500);
   }
 
   build() {
     // const button = new modernButton(
-    const button = this.button; 
+    const button = div("wrapper", this.button, {animate: true});
+    button.animate = true; // Force property...  
 
     return column(
       filler(),
       row(
         column(
-          div("wrapper", button).show(this.left), 
+          button.show(this.left), 
           filler(),
           {style: {...animatedContainerStyle, width: "150px"}}
         ),
         div({style: {width: "200px"}}),
         column(
           // text("Some Text", {animate: true, style: borderStyle}).show(!this.left),
-          div("wrapper", button).show(!this.left), 
+          button.show(!this.left), 
           filler(), 
           {style: {...animatedContainerStyle, width: "150px"}}
         ), 

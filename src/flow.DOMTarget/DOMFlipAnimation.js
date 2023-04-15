@@ -40,7 +40,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 1;
+const animationTime = 5;
 
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
