@@ -321,7 +321,7 @@ export function onFinishReBuildingDOM() {
 
   counter++
   if (!flowChanges.onFinishReBuildingFlowDone) return;
-  console.group("---------------------------------------- onFinishBuildingDOM ----------------------------------------");
+  console.group("------------------- onFinishBuildingDOM --------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
     
   // Measure the final size of added
@@ -354,6 +354,9 @@ function measureTargetSizeForAdded() {
 
 function minimizeAdded() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    if (flow.changes.previous && flow.changes.previous.type === "removed") {
+      continue; 
+    }
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
   }
 }

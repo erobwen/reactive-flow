@@ -1,4 +1,4 @@
-import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
 import { extractAttributes } from "./Basic.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
@@ -46,8 +46,8 @@ export function inputField(type, label, getter, setter, ...parameters) {
   if (typeof(getter) === "object" && typeof(setter) === "string") {
     const targetObject = getter;
     const targetProperty = setter; 
-    getter = () => targetObject[targetProperty]
-    setter = newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}
+    getter = callback(() => targetObject[targetProperty], "inputField.getter");
+    setter = callback(newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}, "inputField.setter")
     error = targetObject[targetProperty + "Error"];
   }
   const properties = findKeyInProperties(readFlowProperties(parameters));
@@ -59,7 +59,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     if (!inputAttributes.style.width) inputAttributes.style.width = "50px"; 
   } 
   const attributes = {
-    oninput: event => setter(type === "checkbox" ? event.target.checked : event.target.value),
+    oninput: callback(event => setter(type === "checkbox" ? event.target.checked : event.target.value), "inputField.oninput"),
     value: getter(),
     checked: getter(),
     type,
