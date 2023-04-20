@@ -327,6 +327,7 @@ export function onFinishReBuildingDOM() {
   // Measure the final size of added
   measureTargetSizeForAdded();
   minimizeAdded();
+  fixateRemoved();
   inflateTrailersAndPrepareMoved();
 
   // We now have original style/size, but new structure. 
@@ -355,9 +356,36 @@ function measureTargetSizeForAdded() {
 function minimizeAdded() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.changes.previous && flow.changes.previous.type === "removed") {
+      console.warn("Did not minimize added!");
+      log(flow.changes.previous);
+      log(flow.changes);
+      log(flow.toString());
+      log(flow.domNode);
       continue; 
     }
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
+  }
+}
+
+function fixateRemoved() {
+  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    if (flow.changes.previous && flow.changes.previous.type === "added") {
+      continue; 
+    }
+
+    // Preserve styles
+    flow.animation.setOriginalStyleForMoved(flow.domNode);
+
+    // Set scale and max bounds for animation. 
+    if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
+      flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
+    }
+    if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
+      flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
+    }
+    if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
+      flow.domNode.style.transform = "scale(1)"; 
+    }
   }
 }
 
@@ -418,57 +446,6 @@ function translateToOriginalBoundsIfNeeded() {
     // log("ORIGINAL RESIDENT");
     // logProperties(flow.domNode.style, typicalAnimatedProperties);
   }
-
-  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-    flow.domNode.getBoundingClientRect();
-    // Re transform if moved by structure. 
-    // if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
-    //   log("Not same bounds for " + flow.toString());     
-    //   const computedStyle = getComputedStyle(flow.domNode);
-    //   let currentTransform = getComputedStyle(flow.domNode).transform;
-      
-    //   // This is for resident that have a transform already. In an animation already.
-    //   if (!["none", "", " "].includes(currentTransform)) {
-    //     log("Already have transform for " + flow.toString());     
-    //     // Freeze properties as we start a new animation.
-    //     Object.assign(flow.domNode.style, extractProperties(computedStyle, flow.animation.animatedProperties));
-
-    //     // Reset transform  (Note: This will not work if we are being added with transfrom, and then shift position at the same time. )
-    //     // Here we should preserve some of the original transformation scale to deal with both. 
-    //     flow.domNode.style.transition = "";
-    //     flow.domNode.style.transform = "";
-    //     currentTransform = getComputedStyle(flow.domNode).transform;
-    //     flow.animation.recordBoundsInNewStructure(flow.domNode);
-    //   }
-
-    //   flow.animateInChanges = flowChanges.number; 
-    //   flow.animation.translateFromNewToOriginalPosition(flow.domNode);
-
-    //   // Reflow
-    //   flow.domNode.getBoundingClientRect();
-    // }
-
-    // Preserve before remove if on a fresh animation
-    if (!flow.changes.previous || flow.changes.previous.finished) {
-      log("removed already in animation");
-      // Preserve styles
-      flow.animation.setOriginalStyleForMoved(flow.domNode);
-
-      // Set scale and max bounds for animation. 
-      if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
-        flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
-      }
-      if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
-        flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
-      }
-      if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
-        flow.domNode.style.transform = "scale(1)"; 
-      }
-    }
-
-    // Reflow
-    flow.domNode.getBoundingClientRect();
-  }
 }
 
 
@@ -493,6 +470,10 @@ function activateAnimation() {
       logProperties(flow.domNode.style, typicalAnimatedProperties);
       setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       delete flowChanges.beingRemovedMap[flow.id];
+    } else {
+      // This will cancel cleanup for a removed flow becoming resident... 
+      // flow.domNode.changes = null; 
+      // flow.changes = null;
     }
   }
 
@@ -504,6 +485,9 @@ function activateAnimation() {
       logProperties(flow.domNode.style, typicalAnimatedProperties);
       setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       delete flowChanges.beingRemovedMap[flow.id];
+    } else {
+      // flow.domNode.changes = null; 
+      // flow.changes = null;
     }
   }
   
@@ -512,15 +496,19 @@ function activateAnimation() {
     log(`original properties: `);
     const foo = flow.domNode.getBoundingClientRect();
     logProperties(flow.domNode.style, typicalAnimatedProperties);
+    setupAnimationCleanup(flow.domNode, flow.domNode.changes);
+    log("Chained animation?");
+    log(flow.changes.previous);
     flow.animation.setupFinalStyleForRemoved(flow.domNode);
     log(`final properties: `);
     logProperties(flow.domNode.style, typicalAnimatedProperties);
-    setupAnimationCleanup(flow.domNode, flow.domNode.changes);
     console.groupEnd();
   }
 }
 
-function setupAnimationCleanup(node, changes) {
+function setupAnimationCleanup(node) {
+  // There can be only one
+  if (node.hasCleanupEventListener) return; 
   
   // On cleanup, synchronize transitioned style property
   const me = this; 
@@ -528,45 +516,68 @@ function setupAnimationCleanup(node, changes) {
   // log(node)
 
   function onTransitionEnd(event) {
+    if (!node.changes) return;
+
+    // event.preventDefault();
+    // event.stopPropagation();
     
-    node.removeEventListener("transitionend", onTransitionEnd);
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (changes === node.changes) {
-      // These changes are still on the top of the stack
-      console.group("cleanup: " + changes.type + " " + changes.number);
-      log(event.target);
-      log(event.propertyName);
-      log(camelCase(event.propertyName));
-      console.groupEnd();
+    // if (changes === node.changes) {
+    const propertyName = camelCase(event.propertyName); 
 
-      // Synch property that was transitioned. 
-      // event.propertyName
+    console.group("cleanup: " + node.changes.type + " " + node.changes.number);
+    log(event.target);
+    log(event.propertyName);
+    log(camelCase(event.propertyName));
+    console.groupEnd();
 
-      // Finalize a remove
-      if (changes.type === "removed") {
-        node.parentNode.removeChild(node);
-      }  
+    // Synch property that was transitioned. 
+    // event.propertyName
 
+    if (["maxWidth", "maxHeight", "transform"].includes(propertyName)) {
+      // Reset style
       node.style.transition = "";
+      node.style.maxHeight = "";
+      node.style.maxWidth = "";
+      node.style.transform = "";
       if (node.equivalentCreator) {
         node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
         log(`cleanup properties: `);
         logProperties(node.style, typicalAnimatedProperties);
       }
 
-      node.changes.finished = true; 
+      // function findRemoved(changes) {
+      //   while (changes) {
+      //     if (changes.type === "removed") {
+      //       return true; 
+      //     }
+      //     changes = changes.previous; 
+      //   }
+      //   return false; 
+      // }
 
+      // Finalize a remove
+      if (node.changes.type === "removed" && node.parentNode) {
+        node.parentNode.removeChild(node);
+      }  
+      
       // Remove changes.
-      const flow = node.equivalentCreator;
-      flow.changes = null;
-      node.changes = null; 
-        
-      // node.removeEventListener("transitionend", onTransitionEnd);
+      if (node.changes) {
+        node.changes.finished = true; 
+        const flow = node.equivalentCreator;
+        flow.changes = null;
+        node.changes = null;
+      }
+
+      // Finish animation
+      node.removeEventListener("transitionend", onTransitionEnd);
+      delete node.hasCleanupEventListener;
+      // Note: removeEventListener will remove it from multiple divs????
     }
+      
+    // }
   }
   node.addEventListener("transitionend", onTransitionEnd);
+  node.hasCleanupEventListener = true; 
 }
 
 /**
@@ -691,5 +702,5 @@ var camelCase = (function () {
 //     scan = scan.parentPrimitive;
 //   }
   
-//   standardAnimation.recordOriginalBoundsAndStyle(flow.domNode.animationOriginNode);  
+// standardAnimation.recordOriginalBoundsAndStyle(flow.domNode.animationOriginNode);  
 // }

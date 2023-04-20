@@ -10,7 +10,7 @@ const log = console.log;
  */
 export class SuperSimple extends Flow {
   setState() {
-    this.showText = false; 
+    this.showText = true; 
   }
 
   build() {

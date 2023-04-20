@@ -52,8 +52,8 @@ export function setFlowConfiguration(newConfiguration) {
 }
 
 function onFinishedPriorityLevel(level, finishedAllLevels) {
-  if (trace) log("<<<finished priority: " + level + ">>>");
-  if (finishedAllLevels) log("no more repeaters...");
+  // if (trace) log("<<<finished priority: " + level + ">>>");
+  // if (finishedAllLevels) log("no more repeaters...");
 
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
@@ -227,9 +227,9 @@ export class Flow {
       this.generalEnsureRepeater = repeat(
         this.toString() + ".generalRepeater",
         (repeater) => {
-          if (trace) console.group(repeater.causalityString());
+          // if (trace) console.group(repeater.causalityString());
           this.ensure();
-          if (trace) console.groupEnd();
+          // if (trace) console.groupEnd();
         });
     }
   }

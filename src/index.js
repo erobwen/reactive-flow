@@ -29,9 +29,10 @@ setFlowConfiguration({
 });
 installDOMAnimation();
 
-// startDemo();
-startSuperSimple();
+startDemo();
+
 // buttonTest();
+// startSuperSimple();
 // startSuperDuperSimple();
 // startAnimationExample();
 

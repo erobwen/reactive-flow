@@ -26,7 +26,8 @@ export class SuperSimple extends Flow {
       {
         ripple: true,
         style: {
-          color: "red"
+          color: "red",
+          width: "150px"
         }
       }
     );
@@ -37,7 +38,6 @@ export class SuperSimple extends Flow {
   }
 
   move() {
-    this.button.hover = true;  
     this.left = !this.left;
 
     setTimeout(() => {

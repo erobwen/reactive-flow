@@ -40,7 +40,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 5;
+const animationTime = 1;
 
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
@@ -324,7 +324,7 @@ export class DOMFlipAnimation {
   addedFinalStyle(node, finishStyles) {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
     const result = {...finishStyles}//this.getAnimatedProperties(node.targetStyle);
-    result.transform = "none";
+    result.transform = "scale(1)";
 
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
     result.maxHeight = targetDimensions.height + "px";
