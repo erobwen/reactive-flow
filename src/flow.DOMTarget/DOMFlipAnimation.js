@@ -117,7 +117,7 @@ export class DOMFlipAnimation {
 
   calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
     
-    node.style.maxWidth = "";
+    node.style.maxWidth = ""; // This causes bounce remove add to fail... we do not preserve the max sizes... 
     node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
     // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 

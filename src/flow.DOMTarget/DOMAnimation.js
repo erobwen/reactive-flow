@@ -205,21 +205,7 @@ export function onFinishReBuildingFlow() {
       }
     } else {
       // Globally added
-      // if (flowChanges.beingRemovedMap[id]) {
-      //   // Move or resident
-      //   flowChanges.beingRemovedMap[id]
-      //   const previousParentFlow = primitive.domNode.parentNode ? primitive.domNode.parentNode.equivalentCreator : null;
-      //   if (previousParentFlow && flowChanges.idParentIdMap[primitive.id] === previousParentFlow.id) {
-      //     // Same parent, resident
-      //     flowChanges.globallyResident[id] = primitive;
-      //   } else {
-      //     // Moved
-      //     flowChanges.globallyMoved[id] = primitive;
-      //   }
-      // } else {
-        // A true addition
-        flowChanges.globallyAdded[id] = primitive;
-      // }
+      flowChanges.globallyAdded[id] = primitive;
     }
   }
 
@@ -357,6 +343,10 @@ function minimizeAdded() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.changes.previous && flow.changes.previous.type === "removed") {
       console.warn("Did not minimize added!");
+
+      flow.domNode.style.maxHeight = flow.domNode.computedOriginalStyle.height + "px";
+      flow.domNode.style.maxWidth = flow.domNode.computedOriginalStyle.width + "px";
+      flow.domNode.style.transform = flow.domNode.computedOriginalStyle.transform;
       log(flow.changes.previous);
       log(flow.changes);
       log(flow.toString());
