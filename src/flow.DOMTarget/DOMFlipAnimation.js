@@ -67,11 +67,15 @@ export class DOMFlipAnimation {
    * Default transition
    */
   defaultTransition() {
-    return `all ${animationTime}s ease-in-out`//, opacity ${animationTime}s ease-in`
+    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(1, 0, 0.42, 0.93)`
+  }
+
+  addedTransition() {
+    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(1, 0, 0.42, 0.93)`
   }
 
   removeTransition() {
-    return `all ${animationTime}s ease-in-out`//, opacity ${animationTime}s ease-out`
+    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(0.33, 0.05, 0, 1)`
   }
 
   /**
