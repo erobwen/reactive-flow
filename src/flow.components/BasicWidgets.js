@@ -19,7 +19,7 @@ export function text(...parameters) {
   }
   const textCut = textProperties.text.substring(0, 20) + "...";
 
-  return getTarget().elementNode(properties.key ? properties.key + ".label" : null, 
+  return getTarget().elementNode(properties.key ? properties.key : null, // + ".label" 
     {
       classNameOverride: "text[" + textCut + "]",
       tagName:"label",
