@@ -164,3 +164,22 @@ export const globalElementAttributesCamelCase = [
 ];
 
 const globalElementAttributes = globalElementAttributesCamelCase.map(camelCase => ({camelCase, lowerCase: camelCase.toLowerCase()}));
+
+
+
+const childStyleProperties = [
+  "order",
+  "flex-grow",
+  "flex-shrink",
+  "flex-basis",
+  "flex", 
+  // {
+  //   compound: "flex", 
+  //   partial: [
+  //     "flex-grow",
+  //     "flex-shrink",
+  //     "flex-basis",
+  //   ]
+  // },
+  "align-self"
+]

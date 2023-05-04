@@ -1,5 +1,5 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
-import { styledDiv } from "./Basic.js";
+import { styledDiv } from "./BasicHtml.js";
 const log = console.log;
 
 /**

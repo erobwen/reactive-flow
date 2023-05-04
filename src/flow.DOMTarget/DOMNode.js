@@ -1,4 +1,4 @@
-import { extractAttributes } from "../flow.components/Basic";
+import { extractAttributes } from "../flow.components/BasicHtml";
 import { trace } from "../flow/Flow";
 import { extractProperties } from "./DOMAnimation";
 import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    

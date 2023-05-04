@@ -1,5 +1,5 @@
 import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
-import { div } from "./Basic";
+import { div } from "./BasicHtml";
 import { text } from "./BasicWidgets";
 import { modernButton } from "./ModernButton";
 

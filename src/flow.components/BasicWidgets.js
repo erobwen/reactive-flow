@@ -1,5 +1,5 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
-import { extractAttributes } from "./Basic.js";
+import { extractAttributes } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
 const log = console.log;

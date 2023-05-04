@@ -1,5 +1,5 @@
 import { readFlowProperties, getTarget, Flow, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
-import { div, div2, extractAttributes } from "./Basic.js";
+import { div, div2, extractAttributes } from "./BasicHtml.js";
 import { text } from "./BasicWidgets.js";
 const log = console.log;
 

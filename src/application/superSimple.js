@@ -5,7 +5,8 @@ import { column, filler, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
 import { simpleButton } from "../flow.components/SimpleButton";
-import { div } from "../flow.components/Basic";
+import { div } from "../flow.components/BasicHtml"
+;
 import { button } from "../flow.components/Theme";
 
 

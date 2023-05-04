@@ -3,7 +3,8 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
 import { column, filler, row } from "../flow.components/Layout";
 import { button, text } from "../flow.components/BasicWidgets";
-import { div } from "../flow.components/Basic";
+import { div } from "../flow.components/BasicHtml"
+;
 
 const log = console.log;
 

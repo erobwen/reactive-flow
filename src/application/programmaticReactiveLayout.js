@@ -2,7 +2,8 @@ import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text } from "../flow.components/BasicWidgets";
 import { centerMiddle, row } from "../flow.components/Layout";
-import { div } from "../flow.components/Basic";
+import { div } from "../flow.components/BasicHtml"
+;
 
 
 const log = console.log;
