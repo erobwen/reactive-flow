@@ -42,15 +42,23 @@ export function textInputField(label, getter, setter, ...parameters) {
 }
 
 export function inputField(type, label, getter, setter, ...parameters) {
+  const properties = findKeyInProperties(readFlowProperties(parameters));
+  let key;
   let error;
+  if (!properties.key) {
+    properties.key = label;
+  }
+
   if (typeof(getter) === "object" && typeof(setter) === "string") {
     const targetObject = getter;
     const targetProperty = setter; 
-    getter = callback(() => targetObject[targetProperty], "inputField.getter");
-    setter = callback(newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}, "inputField.setter")
+    console.log(targetObject.causality.id);
+    properties.key = properties.key + "." + targetObject.causality.id + "." + targetProperty;
+    key = properties.key; 
+    getter = callback(() => targetObject[targetProperty], properties.key + ".getter");
+    setter = callback(newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}, properties.key + ".setter")
     error = targetObject[targetProperty + "Error"];
   }
-  const properties = findKeyInProperties(readFlowProperties(parameters));
 
   const inputAttributes = extractAttributes(properties.inputProperties);
   delete properties.inputProperties;
@@ -59,7 +67,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     if (!inputAttributes.style.width) inputAttributes.style.width = "50px"; 
   } 
   const attributes = {
-    oninput: callback(event => setter(type === "checkbox" ? event.target.checked : event.target.value), "inputField.oninput"),
+    oninput: callback(event => setter(type === "checkbox" ? event.target.checked : event.target.value), properties.key + ".oninput"),
     value: getter(),
     checked: getter(),
     type,
@@ -73,7 +81,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
   };
   
   const children = [getTarget().elementNode({
-    key: properties.key, 
+    key: properties.key + ".input", 
     classNameOverride: type + "InputField", 
     tagName: "input", 
     attributes, 
