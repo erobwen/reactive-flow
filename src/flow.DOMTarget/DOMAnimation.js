@@ -158,6 +158,7 @@ let counter = 0;
 export function onFinishReBuildingFlow() {
   
   counter++
+  console.group("animation frame");
   console.group("---------------------------------------- onFinishBuildingFlow ----------------------------------------");
   log(counter);
   // if (counter === 5) return; 
@@ -327,9 +328,10 @@ export function onFinishReBuildingDOM() {
 
   // Resident might need too.
   requestAnimationFrame(() => {
-    activateAnimation();  
+    activateAnimation(flowChanges.number);  
   });
 
+  console.groupEnd();
   console.groupEnd();
 }
 
@@ -374,7 +376,7 @@ function fixateRemoved() {
       flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
     }
     if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
-      flow.domNode.style.transform = "scale(1)"; 
+      flow.domNode.style.transform = "matrix(1, 0, 0, 1, 0, 0)"; 
     }
   }
 }
@@ -439,7 +441,14 @@ function translateToOriginalBoundsIfNeeded() {
 }
 
 
-function activateAnimation() {
+function activateAnimation(flowChangesNumber) {
+  if (flowChangesNumber !== flowChanges.number) {
+    throw new Error("A change triggered while animation not started, consider removing event listeners using pointerEvents:none or similar");
+    // TODO: Support the possibility of animation flow changes between animation start and animation activation somehow. 
+  }
+
+  log("activate");
+  log(flowChanges);
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     console.group("activate for added " + flow.toString());
     log(`original properties: `);

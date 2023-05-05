@@ -162,10 +162,10 @@ export class DOMFlipAnimation {
     //   return result;
     // }
     // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
-    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
+    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
       // transition: this.defaultTransition(),
-      transform: "scale(0)",//transform, //"scale(1)", //
+      transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       maxHeight: "0px",
       maxWidth: "0px",
       // margin: "0px",
@@ -328,7 +328,7 @@ export class DOMFlipAnimation {
   addedFinalStyle(node, finishStyles) {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
     const result = {...finishStyles}//this.getAnimatedProperties(node.targetStyle);
-    result.transform = "scale(1)";
+    result.transform = "matrix(1, 0, 0, 1, 0, 0)";
 
     const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
     result.maxHeight = targetDimensions.height + "px";
@@ -364,7 +364,7 @@ export class DOMFlipAnimation {
 
     // const result = this.getAnimatedProperties(node.computedTargetStyle);
     const result = {};
-    result.transform = "scale(1)";
+    result.transform = "matrix(1, 0, 0, 1, 0, 0)";
     // delete result.maxHeight;
     // delete result.maxWidth;
     // result.margin = targetStyle.margin;
@@ -374,11 +374,11 @@ export class DOMFlipAnimation {
 
   removedFinalStyle(node) {
     // const position = [Math.round(node.offsetWidth / 2), Math.round(node.offsetHeight / 2)];
-    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) scale(0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
+    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
     return {
       maxHeight: "0px",
       maxWidth: "0px",
-      transform: "scale(0)", //  transform,
+      transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)", //  transform,
       opacity: "0.001",
       margin: "0px",
       marginTop: "0px",

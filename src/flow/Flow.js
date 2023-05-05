@@ -227,9 +227,9 @@ export class Flow {
       this.generalEnsureRepeater = repeat(
         this.toString() + ".generalRepeater",
         (repeater) => {
-          // if (trace) console.group(repeater.causalityString());
+          if (trace) console.group(repeater.causalityString());
           this.ensure();
-          // if (trace) console.groupEnd();
+          if (trace) console.groupEnd();
         });
     }
   }

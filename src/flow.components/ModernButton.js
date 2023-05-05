@@ -67,7 +67,7 @@ export class ModernButton extends Flow {
 
   ensure() {
     const foo = this.text; 
-    // log("ENSURE");
+    log("ENSURE");
     // log(foo);
     // log("--")
     // Ensure event listeners
@@ -125,7 +125,7 @@ export class ModernButton extends Flow {
     const {ripple} = this; 
     const panel = this.findChild("centerMiddle").domNode;
     log("setEventListeners");
-    log(panel)
+    // log(panel)
 
     this.rippleAndCallback = (event) => {
       log("TRY RIPPLE");
@@ -160,19 +160,20 @@ export class ModernButton extends Flow {
         circle.style.width = circle.style.height = diameter + "px";
         circle.style.left = (event.clientX - panel.offsetLeft) - radius + "px";
         circle.style.top = (event.clientY - panel.offsetTop) - radius + "px";
-
+        
         Object.assign(circle.style, {
+          pointerEvents: "none",
           borderRadius: "50%",
           backgroundColor: "white",
           position: "absolute",
-          transform: "scale(0)",
+          transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",
           opacity: 0.5
         });
 
         requestAnimationFrame(() => {
           Object.assign(circle.style, {
-            transition: "all 0.6s linear", 
-            transform: "scale(4)",
+            transition: "all 2s linear", 
+            transform: "scale(10)",
             opacity: 0
           })
         });
@@ -202,11 +203,13 @@ export class ModernButton extends Flow {
 
     if (onClick && mouseOverBackgroundColor) {
       this.setMouseoverColor = () => {
+        log("<<setMouseoverColor>>");
         this.hover = true;
       }
       panel.addEventListener("mouseover", this.setMouseoverColor);
 
       this.removeMouseoverColor = () => {
+        log("<<removeMouseoverColor>>");
         this.hover = false;
       }
       panel.addEventListener("mouseout", this.removeMouseoverColor);
