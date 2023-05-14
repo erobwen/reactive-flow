@@ -146,7 +146,19 @@ export const flowChanges = {
     for (let flow of Object.values(this.globallyMovedAnimated)) {
       yield flow; 
     }
-  }
+  },
+
+  *allAnimatedMovedAddedAndRemovedFlows() {
+    for (let flow of Object.values(this.globallyMovedAnimated)) {
+      yield flow; 
+    }
+    for (let flow of Object.values(this.globallyAddedAnimated)) {
+      yield flow; 
+    }
+    for (let flow of Object.values(this.globallyRemovedAnimated)) {
+      yield flow; 
+    }
+  },
 };
 
 export const previousFlowChanges = {}
@@ -243,6 +255,7 @@ export function onFinishReBuildingFlow() {
       removed: Object.values(changes.globallyRemovedAnimated).map(flow => flow.toString()),
     }
   }
+
   console.group("New animated changes:");
   log(toStrings(flowChanges));
   console.groupEnd();
@@ -287,9 +300,32 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       const parentNode = flow.domNode.parentNode;
-      parentNode.insertBefore(flow.animation.getFadingTrailer(flow.domNode), flow.domNode);
+      const trailer = flow.animation.getFadingTrailer(flow.domNode);
+      // Note: A reused wrapper is already in place, so do nothing.
+      if (trailer.parentElement !== parentNode) {
+        parentNode.insertBefore(trailer, flow.domNode);
+      } 
     }
   }
+
+  // Add all wrappers for moved
+  for (let flow of flowChanges.allAnimatedMovedAddedAndRemovedFlows()) {
+    const wrapper = document.createElement("div");
+    const wrapped = flow.getDomNode();
+    wrapped.wrapper = wrapper;
+    wrapper.wrapped = wrapped;
+    wrapper.appendChild(flow.getDomNode());
+    wrapper.style.width = "0px";
+    wrapper.style.height = "0px";
+    wrapper.id = "wrapper";
+    wrapper.style.overflow = "visible";
+    console.log(wrapper);
+    // if (flow.parentPrimitive) {
+      // const parentNode = flow.parentPrimitive.getDomNode();
+      // parentNode.insertBefore(flow.animation.getFadingTrailer(flow.domNode), flow.domNode);
+    // }
+  }
+
 
   console.groupEnd();
 
@@ -311,8 +347,11 @@ export function onFinishReBuildingDOM() {
   console.group("------------------- onFinishBuildingDOM --------------------");
   delete flowChanges.onFinishReBuildingFlowDone; 
     
-  // Measure the final size of added
+  // Measure the final size of added and moved (do this before we start to emulate original)
   measureTargetSizeForAdded();
+  measureTargetSizeForMoved();
+
+  // Emulate original and prepare for animation.
   minimizeAdded();
   fixateRemoved();
   inflateTrailersAndPrepareMoved();
@@ -339,18 +378,25 @@ function measureTargetSizeForAdded() {
   }
 }
 
+function measureTargetSizeForMoved() {
+  for (let flow of flowChanges.allAnimatedMovedFlows()) {
+    if (flow.domNode) {
+      flow.animation.measureMovedFinalSize(flow.domNode);
+    }
+  }
+}
+
 function minimizeAdded() {
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.changes.previous && flow.changes.previous.type === "removed") {
       console.warn("Did not minimize added!");
+      const domNode = flow.domNode; 
+      const wrappper = domNode.wrapper; 
+      // Do something? 
 
-      flow.domNode.style.maxHeight = flow.domNode.computedOriginalStyle.height + "px";
-      flow.domNode.style.maxWidth = flow.domNode.computedOriginalStyle.width + "px";
-      flow.domNode.style.transform = flow.domNode.computedOriginalStyle.transform;
-      log(flow.changes.previous);
-      log(flow.changes);
-      log(flow.toString());
-      log(flow.domNode);
+      // flow.domNode.style.maxHeight = flow.domNode.computedOriginalStyle.height + "px";
+      // flow.domNode.style.maxWidth = flow.domNode.computedOriginalStyle.width + "px";
+      domNode.style.transform = flow.domNode.computedOriginalStyle.transform;
       continue; 
     }
     flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
@@ -375,6 +421,7 @@ function fixateRemoved() {
     }
     if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
       flow.domNode.style.transform = "matrix(1, 0, 0, 1, 0, 0)"; 
+      flow.domNode.style.overflow = "visible";
     }
   }
 }
@@ -383,7 +430,6 @@ function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
-      // Should we enforce size here also?
       flow.animation.setOriginalStyleForMoved(flow.domNode); 
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
@@ -439,19 +485,19 @@ function translateToOriginalBoundsIfNeeded() {
 }
 
 
-function activateAnimation(flowChanges) {
+function activateAnimation(currentFlowChanges) {
   log("activateAnimation");
-  log(flowChanges.number);
+  log(currentFlowChanges.number);
   requestAnimationFrame(() => {
 
-    // if (flowChangesNumber !== flowChanges.number) {
+    // if (currentFlowChanges.number !== flowChanges.number) {
     //   throw new Error("A change triggered while animation not started, consider removing event listeners using pointerEvents:none or similar");
     //   // TODO: Support the possibility of animation flow changes between animation start and animation activation somehow. 
     // }
 
     log("activate");
-    log(flowChanges.number);
-    for (let flow of flowChanges.allAnimatedAddedFlows()) {
+    log(currentFlowChanges.number);
+    for (let flow of currentFlowChanges.allAnimatedAddedFlows()) {
       console.group("activate for added " + flow.toString());
       log(`original properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
@@ -459,18 +505,18 @@ function activateAnimation(flowChanges) {
       log(`final properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
       setupAnimationCleanup(flow.domNode, flow.domNode.changes);
-      delete flowChanges.beingRemovedMap[flow.id];  
+      delete currentFlowChanges.beingRemovedMap[flow.id];  
       console.groupEnd();
     }
 
-    for (let flow of flowChanges.allAnimatedResidentFlows()) {
-      if (flow.animateInChanges === flowChanges.number) {
+    for (let flow of currentFlowChanges.allAnimatedResidentFlows()) {
+      if (flow.animateInChanges === currentFlowChanges.number) {
         flow.animation.setupFinalStyleForResident(flow.domNode);
         flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
         log(`... resident node ${flow.toString()}, final properties: `);
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
-        delete flowChanges.beingRemovedMap[flow.id];
+        delete currentFlowChanges.beingRemovedMap[flow.id];
       } else {
         // This will cancel cleanup for a removed flow becoming resident... 
         // flow.domNode.changes = null; 
@@ -478,21 +524,21 @@ function activateAnimation(flowChanges) {
       }
     }
 
-    for (let flow of flowChanges.allAnimatedMovedFlows()) {
-      if (flow.animateInChanges === flowChanges.number) {
+    for (let flow of currentFlowChanges.allAnimatedMovedFlows()) {
+      if (flow.animateInChanges === currentFlowChanges.number) {
         flow.animation.setupFinalStyleForMoved(flow.domNode);
         flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
         log(`... moving node ${flow.toString()}, final properties: `);
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
-        delete flowChanges.beingRemovedMap[flow.id];
+        delete currentFlowChanges.beingRemovedMap[flow.id];
       } else {
         // flow.domNode.changes = null; 
         // flow.changes = null;
       }
     }
     
-    for (let flow of flowChanges.allAnimatedRemovedFlows()) {
+    for (let flow of currentFlowChanges.allAnimatedRemovedFlows()) {
       console.group("activate removal " + flow.toString());
       log(`original properties: `);
       const foo = flow.domNode.getBoundingClientRect();

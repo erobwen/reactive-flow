@@ -40,7 +40,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 1;
+const animationTime = 100;
 
 export class DOMFlipAnimation {
   animatedProperties = animatedProperties;
@@ -101,6 +101,17 @@ export class DOMFlipAnimation {
     measures.totalWidth = measures.width + measures.marginLeft + measures.marginRight;
     return measures; 
   }
+
+  /**
+   * Measure inocming size 
+   */
+  measureMovedFinalSize(node) {
+    node.movedFinalSize = {
+      width: node.offsetWidth, 
+      height: node.offsetHeight
+    }
+  }
+
 
   /**
    * Preserve style 
@@ -197,32 +208,44 @@ export class DOMFlipAnimation {
    * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
    */
   getFadingTrailer(node) {
-    const trailer = document.createElement("div");
+    let trailer; 
+
+    // Reuse wrapper if existing, as it is already in right place
+    if (node.wrapper) {
+      trailer = node.wrapper;
+      trailer.wasWrapper = true; 
+      delete trailer.wrapped;
+      delete node.wrapper;  
+    } else {
+      trailer = document.createElement("div");
+    }
 
     const changes = {
       number: flowChanges.number,
       type: "removed",
       previous: null
     };
+
     trailer.owner = node; 
     trailer.changes = changes; 
     node.fadingTrailerOnChanges = flowChanges.number;
     node.fadingTrailer = trailer;
     trailer.id = "trailer"
-    return trailer;
+    return trailer;  
   }
-
 
   inflateFadingTrailer(node) {
     const trailer = node.fadingTrailer;
-    const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
-    const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
-    trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
-    trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
-    trailer.style.opacity = "0";
+    if (!trailer.wasWrapper) {
+      const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
+      const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
+      trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
+      trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
+      trailer.style.opacity = "0";
+    }
   }
 
-  disappearingReplacementFinalStyle() {
+  fadingTrailerFinalStyle() {
     return {
       marginTop: "0px",
       marginLeft: "0px",
@@ -233,18 +256,21 @@ export class DOMFlipAnimation {
     // return; 
     // console.log("minimizeIncomingFootprint");
     const measures = this.getOriginalMeasures(node);
+    const wrapper = node.wrapper;
     
-    node.animationStartTotalHeight = measures.totalHeight;
-    node.animationStartMarginTop = measures.marginTop;
-    node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
-    // node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
-    node.style.marginTop = node.animationStartAjustedMarginTop + "px";
-
-    node.animationStartTotalWidth = measures.totalWidth;
-    node.animationStartMarginLeft = measures.marginLeft;
-    const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
-    // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
-    node.style.marginLeft = animationStartAjustedMarginLeft + "px";
+    if (!node.wrapper) {
+      node.animationStartTotalHeight = measures.totalHeight;
+      node.animationStartMarginTop = measures.marginTop;
+      node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
+      // node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
+      node.style.marginTop = node.animationStartAjustedMarginTop + "px";
+  
+      node.animationStartTotalWidth = measures.totalWidth;
+      node.animationStartMarginLeft = measures.marginLeft;
+      const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
+      // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
+      node.style.marginLeft = animationStartAjustedMarginLeft + "px";
+    }
 
     // log(node.style.marginTop)
   }
@@ -308,11 +334,21 @@ export class DOMFlipAnimation {
   }
 
   setupFinalStyleForMoved(node) {
+    const wrapper = node.wrapper;
     node.style.transition = this.residentTransition(node);
     Object.assign(node.style, this.residentFinalStyle(node));
+    if (wrapper) {
+      // debugger; 
+      wrapper.style.transition = this.residentTransition(node);
+      wrapper.style.height = node.movedFinalSize.height + "px";
+      wrapper.style.width = node.movedFinalSize.width + "px"; 
+      log(wrapper);
+      log(wrapper.style.width);
+      // debugger; 
+    }
     if (node.fadingTrailer && node.fadingTrailerOnChanges === flowChanges.number) {
       node.fadingTrailer.style.transition = this.residentTransition(node);
-      Object.assign(node.fadingTrailer.style, this.disappearingReplacementFinalStyle());
+      Object.assign(node.fadingTrailer.style, this.fadingTrailerFinalStyle());
     }
   }
 

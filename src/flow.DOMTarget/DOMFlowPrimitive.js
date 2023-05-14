@@ -112,9 +112,12 @@ export function clearNode(node) {
     // Iterate and remove things that should be removed or outgoing
     const existingPrimitives = {};
     
+    const getWrapper = (node) => !node ? node : (node.wrapper ? node.wrapper : node);  
+    const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrapped : node);  
+
     const recoveredNodes = [];
     for(let existingChildNode of node.childNodes) {
-      const existingPrimitive = existingChildNode.equivalentCreator;
+      const existingPrimitive = getWrappedNode(existingChildNode).equivalentCreator;
       if (!existingPrimitive) {
         // No creator, probably a fading trailer that we want to keep
         // TODO: Mark trailers somehow! 
@@ -162,9 +165,9 @@ export function clearNode(node) {
     // Removing pass, will also rearrange moved elements
     let index =  node.childNodes.length - 1;
     while(index >= 0) {
-      const existingChildNode = node.childNodes[index];
+      const existingChildNode = getWrappedNode(node.childNodes[index]);
       if ((existingChildNode instanceof Element) && !newChildNodes.includes(existingChildNode)) {
-        node.removeChild(existingChildNode);
+        node.removeChild(getWrapper(existingChildNode));
       }
       index--;
     }
@@ -172,9 +175,9 @@ export function clearNode(node) {
     // Adding pass, will also rearrange moved elements
     index = 0;
     while(index < newChildNodes.length) {
-      const existingChildNode = node.childNodes[index];
+      const existingChildNode = getWrappedNode(node.childNodes[index]);
       if (newChildNodes[index] !== existingChildNode) {
-        node.insertBefore(newChildNodes[index], existingChildNode);
+        node.insertBefore(getWrapper(newChildNodes[index]), getWrapper(existingChildNode));
       }
       index++;
     }
