@@ -1,5 +1,5 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
-import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation.js";
+import { standardAnimation } from "../flow.DOMTarget/DOMFlowAnimation.js";
 import { configuration, finalize, Flow, readFlowProperties, repeat, trace } from "./Flow.js";
 
 const log = console.log;

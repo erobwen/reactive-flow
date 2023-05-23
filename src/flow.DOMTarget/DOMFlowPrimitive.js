@@ -33,6 +33,10 @@ export function clearNode(node) {
 }
 
 
+export const getWrapper = (node) => !node ? node : (node.wrapper ? node.wrapper : node);  
+export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrapped : node);  
+
+
 /**
  * DOM Flow Base class
  */
@@ -112,9 +116,6 @@ export function clearNode(node) {
     // Iterate and remove things that should be removed or outgoing
     const existingPrimitives = {};
     
-    const getWrapper = (node) => !node ? node : (node.wrapper ? node.wrapper : node);  
-    const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrapped : node);  
-
     const recoveredNodes = [];
     for(let existingChildNode of node.childNodes) {
       const existingPrimitive = getWrappedNode(existingChildNode).equivalentCreator;

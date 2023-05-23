@@ -1,5 +1,6 @@
 import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from "../flow/Flow";
-import { DOMFlipAnimation, standardAnimation } from "./DOMFlipAnimation";
+import { DOMFlowAnimation, standardAnimation } from "./DOMFlowAnimation";
+import { getWrapper } from "./DOMFlowPrimitive";
 
 const log = console.log;
 
@@ -299,10 +300,10 @@ export function onFinishReBuildingFlow() {
   // Add all trailers 
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
-      const parentNode = flow.domNode.parentNode;
+      const parentNode = getWrapper(flow.domNode).parentNode;
       const trailer = flow.animation.getFadingTrailer(flow.domNode);
       // Note: A reused wrapper is already in place, so do nothing.
-      if (trailer.parentElement !== parentNode) {
+      if (trailer.parentNode !== parentNode) {
         parentNode.insertBefore(trailer, flow.domNode);
       } 
     }
@@ -531,6 +532,9 @@ function activateAnimation(currentFlowChanges) {
         log(`... moving node ${flow.toString()}, final properties: `);
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
+        if (flow.domNode.fadingTrailer) {
+          setupFadingTrailerCleanup(flow.domNode.fadingTrailer)
+        }
         delete currentFlowChanges.beingRemovedMap[flow.id];
       } else {
         // flow.domNode.changes = null; 
@@ -553,6 +557,43 @@ function activateAnimation(currentFlowChanges) {
     }
   });
 }
+
+function setupFadingTrailerCleanup(node) {
+  // There can be only one
+  if (node.hasCleanupEventListener) return; 
+  
+  // On cleanup, synchronize transitioned style property
+  const me = this; 
+  // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
+  // log(node)
+
+  function onTransitionEnd(event) {
+    if (!node.changes) return;
+
+    // event.preventDefault();
+    // event.stopPropagation();
+    
+    // if (changes === node.changes) {
+    const propertyName = camelCase(event.propertyName); 
+
+    console.group("cleanup: " + node.changes.type + " " + node.changes.number);
+    log(event.target);
+    log(event.propertyName);
+    log(camelCase(event.propertyName));
+    console.groupEnd();
+
+    if (["width", "height", "maxHeight", "maxWidth"].includes(propertyName)) {
+      node.parentNode.removeChild(node);
+
+      // Finish animation
+      node.removeEventListener("transitionend", onTransitionEnd);
+      delete node.hasCleanupEventListener;
+    }
+  }
+  node.addEventListener("transitionend", onTransitionEnd);
+  node.hasCleanupEventListener = true; 
+}
+
 
 function setupAnimationCleanup(node) {
   // There can be only one
@@ -581,17 +622,30 @@ function setupAnimationCleanup(node) {
     // Synch property that was transitioned. 
     // event.propertyName
 
-    if (["maxWidth", "maxHeight", "transform"].includes(propertyName)) {
-      // Reset style
-      node.style.transition = "";
-      node.style.maxHeight = "";
-      node.style.maxWidth = "";
-      node.style.transform = "";
-      if (node.equivalentCreator) {
-        node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
-        log(`cleanup properties: `);
-        logProperties(node.style, typicalAnimatedProperties);
+    if (["transform"].includes(propertyName)) {
+      const wrapper = node.wrapper; 
+
+      if (wrapper) {
+        wrapper.removeChild(node);
+        wrapper.parentNode.replaceChild(node, wrapper);
+        delete node.wrapper;
+        delete wrapper.wrapped; 
+        node.style.transform = "";
+        node.style.transition = "";
+      } else {
+        // Reset style
+        node.style.transition = "";
+        node.style.maxHeight = "";
+        node.style.maxWidth = "";
+        node.style.transform = "";
+
+        if (node.equivalentCreator) {
+          node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
+          log(`cleanup properties: `);
+          logProperties(node.style, typicalAnimatedProperties);
+        }
       }
+
 
       // function findRemoved(changes) {
       //   while (changes) {

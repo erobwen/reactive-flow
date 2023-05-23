@@ -1,6 +1,6 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { standardAnimation } from "../flow.DOMTarget/DOMFlipAnimation";
+import { standardAnimation } from "../flow.DOMTarget/DOMFlowAnimation";
 import { column, filler, row } from "../flow.components/Layout";
 import { button, text } from "../flow.components/BasicWidgets";
 import { div } from "../flow.components/BasicHtml"

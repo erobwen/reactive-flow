@@ -2,7 +2,7 @@
 // cubic-bezier(0.42,0,1,1)
 
 import { flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
-import { movedPrimitives } from "./DOMFlowPrimitive";
+import { getWrapper, movedPrimitives } from "./DOMFlowPrimitive";
 
 const log = console.log;
 
@@ -40,9 +40,9 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 100;
+const animationTime = 1;
 
-export class DOMFlipAnimation {
+export class DOMFlowAnimation {
   animatedProperties = animatedProperties;
 
   blockedPropertiesMap() {
@@ -83,6 +83,10 @@ export class DOMFlipAnimation {
    */
   recordOriginalBoundsAndStyle(node) {
     node.originalBounds = node.getBoundingClientRect();
+    const wrapper = getWrapper(node);
+    if (wrapper !== node) {
+      wrapper.originalBounds = wrapper.getBoundingClientRect();
+    }
     draw(node.originalBounds);
     node.originalStyle = {...node.style}
     node.computedOriginalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
@@ -236,19 +240,27 @@ export class DOMFlipAnimation {
 
   inflateFadingTrailer(node) {
     const trailer = node.fadingTrailer;
-    if (!trailer.wasWrapper) {
-      const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
-      const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
-      trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
-      trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
-      trailer.style.opacity = "0";
-    }
+    // if (!trailer.wasWrapper) {
+    //   const verticalMargins = parseInt(node.computedOriginalStyle.marginTop) + parseInt(node.computedOriginalStyle.marginBottom);
+    //   const horizontalMargins = parseInt(node.computedOriginalStyle.marginLeft) + parseInt(node.computedOriginalStyle.marginRight);
+    //   trailer.style.marginTop = (node.originalBounds.height + verticalMargins) + "px";
+    //   trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
+    //   trailer.style.opacity = "0";
+    // } else {
+      const bounds = trailer.originalBounds ? trailer.originalBounds : node.originalBounds;
+      trailer.style.width = bounds.width + "px"; 
+      trailer.style.height = bounds.height + "px"; 
+      trailer.style.maxWidth = trailer.style.width; 
+      trailer.style.maxHeight = trailer.style.height;
+    // }
   }
 
   fadingTrailerFinalStyle() {
     return {
-      marginTop: "0px",
-      marginLeft: "0px",
+      width: "0px",
+      height: "0px",
+      maxWidth: "0px",
+      maxHeight: "0px",
     }
   }
 
@@ -347,6 +359,7 @@ export class DOMFlipAnimation {
       // debugger; 
     }
     if (node.fadingTrailer && node.fadingTrailerOnChanges === flowChanges.number) {
+      // debugger;
       node.fadingTrailer.style.transition = this.residentTransition(node);
       Object.assign(node.fadingTrailer.style, this.fadingTrailerFinalStyle());
     }
@@ -529,7 +542,7 @@ export class DOMFlipAnimation {
 
 }
 
-export const standardAnimation = new DOMFlipAnimation();
+export const standardAnimation = new DOMFlowAnimation();
 
 
 
