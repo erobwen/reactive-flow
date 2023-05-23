@@ -56,8 +56,8 @@ export class AnimationExample extends Flow {
     this.listA = observable([]);
     this.listB = observable([]);
     transaction(() => {
-      // let count = 1; 
-      // while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listA);
+      let count = 1; 
+      while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listB);
     });
   }
 
@@ -95,7 +95,7 @@ export class AnimationExample extends Flow {
         column(
           filler(),
           panel({
-            children: this.listA.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+            children: this.listA.map(item => text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
             style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
             animateChildren: standardAnimation       
           }),
@@ -106,7 +106,7 @@ export class AnimationExample extends Flow {
         column(
           filler(),
           panel({
-            children: this.listB.map(item => text({key: item, text: item, style: {padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
+            children: this.listB.map(item => text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
             style: {fontSize: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
             animateChildren: standardAnimation       
           }),

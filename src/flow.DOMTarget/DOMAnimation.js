@@ -302,6 +302,9 @@ export function onFinishReBuildingFlow() {
     if (flow.domNode) {
       const parentNode = getWrapper(flow.domNode).parentNode;
       const trailer = flow.animation.getFadingTrailer(flow.domNode);
+      log(trailer);
+      log("----")
+      log(parentNode);
       // Note: A reused wrapper is already in place, so do nothing.
       if (trailer.parentNode !== parentNode) {
         parentNode.insertBefore(trailer, flow.domNode);
@@ -455,7 +458,7 @@ function translateToOriginalBoundsIfNeeded() {
       log("Not same bounds for " + flow.toString());     
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
-      
+      log(currentTransform);
       // This is for resident that have a transform already. In an animation already.
       if (!["none", "", " "].includes(currentTransform)) {
         log("Already have transform for " + flow.toString());     
@@ -527,11 +530,20 @@ function activateAnimation(currentFlowChanges) {
 
     for (let flow of currentFlowChanges.allAnimatedMovedFlows()) {
       if (flow.animateInChanges === currentFlowChanges.number) {
+        log("ACTIVATE");
+        logProperties(flow.domNode.style, typicalAnimatedProperties);
+        log(flow.domNode)
+        log(flow.domNode.style.transition);
+        log(flow.domNode.style.transform);
         flow.animation.setupFinalStyleForMoved(flow.domNode);
+        log(flow.domNode.style.transition);
+        log(flow.domNode.style.transform);
         flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+        log(flow.domNode.style.transform);
         log(`... moving node ${flow.toString()}, final properties: `);
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
+        log(flow.domNode.style.transform);
         if (flow.domNode.fadingTrailer) {
           setupFadingTrailerCleanup(flow.domNode.fadingTrailer)
         }
@@ -708,6 +720,9 @@ function setupAnimationCleanup(node) {
 // }
 
 function sameBounds(b1, b2) {
+  log("sameBounds");
+  log(b1);
+  log(b2)
   return (
       b1.top === b2.top &&
       b1.left === b2.left &&

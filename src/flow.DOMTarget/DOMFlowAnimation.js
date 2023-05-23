@@ -15,9 +15,9 @@ const firstOfCamelCase = (camelCase) =>
   camelCase.replace(/([A-Z])/g, " $1").split(" ")[0];
 
 const animatedProperties = [
-  "transform",
-  "maxHeight",
-  "maxWidth",
+  // "transform",
+  // "maxHeight",
+  // "maxWidth",
   {compound: "margin", partial: ["marginBottom", "marginBottom", "marginLeft", "marginRight"]},
   {compound: "padding", partial: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]},
   "opacity",
@@ -82,6 +82,10 @@ export class DOMFlowAnimation {
    * Record original bounds, before anything in the dome has changed
    */
   recordOriginalBoundsAndStyle(node) {
+    node.offsetBounds = {
+      height: node.offsetHeight,
+      width: node.offsetWidth
+    }
     node.originalBounds = node.getBoundingClientRect();
     const wrapper = getWrapper(node);
     if (wrapper !== node) {
@@ -247,7 +251,7 @@ export class DOMFlowAnimation {
     //   trailer.style.marginLeft = (node.originalBounds.width + horizontalMargins) + "px";
     //   trailer.style.opacity = "0";
     // } else {
-      const bounds = trailer.originalBounds ? trailer.originalBounds : node.originalBounds;
+      const bounds = trailer.originalBounds ? trailer.originalBounds : node.offsetBounds;
       trailer.style.width = bounds.width + "px"; 
       trailer.style.height = bounds.height + "px"; 
       trailer.style.maxWidth = trailer.style.width; 
@@ -327,8 +331,13 @@ export class DOMFlowAnimation {
     const deltaX = newStructureBounds.left - originalBounds.left;  //- node.animationStartTotalHeight;
     const deltaY = newStructureBounds.top - originalBounds.top; //-  node.animationStartTotalWidth;
     // node.style.transform = "";
-
-    node.style.transform = "translate(" + -deltaX + "px, " + -deltaY + "px)";
+ 
+    const transform = "matrix(1, 0, 0, 1, " + -deltaX + ", " + -deltaY + ")";
+    log(transform);
+    node.style.transform = transform;
+    log(node.style.transform)
+    // log("transform:")
+    // log(node.style.transform);
   }
 
 
@@ -354,8 +363,8 @@ export class DOMFlowAnimation {
       wrapper.style.transition = this.residentTransition(node);
       wrapper.style.height = node.movedFinalSize.height + "px";
       wrapper.style.width = node.movedFinalSize.width + "px"; 
-      log(wrapper);
-      log(wrapper.style.width);
+      // log(wrapper);
+      // log(wrapper.style.width);
       // debugger; 
     }
     if (node.fadingTrailer && node.fadingTrailerOnChanges === flowChanges.number) {

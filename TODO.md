@@ -1,6 +1,7 @@
 
 # Next
 
+TODO: Warning when trying to animate inline divs. Need to be blocks!
 TODO: div() needs to read animate property
 TODO: Move back some functionality from unobservable to state?  
 TODO: Test fragmented flows.
