@@ -20,7 +20,7 @@ export function textNode(...parameters) {
 export function div(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children});
+  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children, animate: properties.animate});
 }
 
 export function div2(...parameters) {

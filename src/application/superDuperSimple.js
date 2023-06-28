@@ -1,3 +1,4 @@
+import { div } from "../flow.components/BasicHtml";
 import { button, text } from "../flow.components/BasicWidgets";
 import { column } from "../flow.components/Layout";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";
@@ -10,14 +11,16 @@ const log = console.log;
  */
 export class SuperSimple extends Flow {
   setState() {
-    this.showText = true; 
+    this.showText = false; 
   }
+
+  // text("Some text", {div: false, animate: true, key: "my-text", style: {color: "green"}}).show(this.showText)
 
   build() {
     return column(
       button("foo", "Foo", ()=> { this.showText = !this.showText}),
       column(
-        text("Some text", {animate: true, key: "my-text", style: {color: "green"}}).show(this.showText),
+        div({key: "my-text", animate: true, style: {width: "200px", height: "40px", backgroundColor: "green"}}).show(this.showText),
         {style: {overflow: "visible", width: "400px", height: "400px"}}
       ),
       {style: {fontSize: "40px", padding: "20px"}}

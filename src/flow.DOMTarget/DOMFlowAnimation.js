@@ -71,7 +71,11 @@ export class DOMFlowAnimation {
   }
 
   addedTransition() {
-    return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(1, 0, 0.42, 0.93)`
+    return `transform ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(1, 0, 0.42, 0.93)`
+  }
+
+  wrapperTransition() {
+    return `width ${animationTime}s ease-in-out, height ${animationTime}s ease-in-out`
   }
 
   removeTransition() {
@@ -140,12 +144,49 @@ export class DOMFlowAnimation {
 
   calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
     
-    node.style.maxWidth = ""; // This causes bounce remove add to fail... we do not preserve the max sizes... 
-    node.style.maxHeight = "";    
+    // node.style.maxWidth = ""; // This causes bounce remove add to fail... we do not preserve the max sizes... 
+    // node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
     // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
+    
+    
     this.recordTargetStyleForAdded(node);
   }
+
+      // //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
+      // console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
+      // let domNode = this.ensureDomNodeBuilt(true);; 
+      // let alreadyInContext;
+      // if (contextNode) { 
+      //   alreadyInContext = domNode.parentNode === contextNode;
+      //   if (!alreadyInContext) {
+      //     domNode = domNode.cloneNode(true);
+      //     contextNode.appendChild(domNode);
+      //   }
+      // } else {
+      //   domNode = domNode.cloneNode(true);
+      //   domNode.style.position = "absolute"; 
+      //   domNode.style.top = "0";
+      //   domNode.style.left = "0";
+      //   domNode.style.width = "auto";
+      //   domNode.style.height = "auto";
+      //   Object.assign(domNode.style, flexAutoStyle);
+      //   document.body.appendChild(domNode);  
+      // }
+    
+      // const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
+      // const original = this.ensureDomNodeBuilt(true)
+      // // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
+      // // log(original);
+      // // debugger;
+      // if (contextNode) {
+      //   if (!alreadyInContext) {
+      //     contextNode.removeChild(domNode);
+      //   }
+      // } else {
+      //   document.body.removeChild(domNode);
+      // }
+      // return result; 
 
   recordTargetStyleForAdded(node) {
     // contextNode.appendChild(node);
@@ -155,7 +196,14 @@ export class DOMFlowAnimation {
   }
 
   setOriginalMinimizedStyleForAdded(node) {
+    log("setOriginalMinimizedStyleForAdded");
+    log(node);
+    if (node.wrapper) {
+      node.wrapper.style.width = "0px";
+      node.wrapper.style.height = "0px";
+    }
     Object.assign(node.style, this.addedOriginalMinimizedStyle(node));
+    console.log(node.style.transform);
   }
   
   getAnimatedProperties(computedStyle) {
@@ -185,18 +233,19 @@ export class DOMFlowAnimation {
     return {
       // transition: this.defaultTransition(),
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-      maxHeight: "0px",
-      maxWidth: "0px",
+      position: "absolute", 
+      // maxHeight: "0px",
+      // maxWidth: "0px",
       // margin: "0px",
-      marginTop: "0px",
-      marginBottom: "0px",
-      marginLeft: "0px",
-      marginRight: "0px",
+      // marginTop: "0px",
+      // marginBottom: "0px",
+      // marginLeft: "0px",
+      // marginRight: "0px",
       // padding: "0px",
-      paddingTop: "0px",
-      paddingBottom: "0px",
-      paddingLeft: "0px",
-      paddingRight: "0px",
+      // paddingTop: "0px",
+      // paddingBottom: "0px",
+      // paddingLeft: "0px",
+      // paddingRight: "0px",
       opacity: "0",
       // color, fontSize?
     } 
@@ -346,6 +395,15 @@ export class DOMFlowAnimation {
    */
   setupFinalStyleForAdded(node, animatedFinishStyles) {
     node.style.transition = this.addedTransition(node);
+    console.log("setupFinalStyleForAdded");
+    console.log(node.wrapper);
+    console.log(node.targetDimensions);
+    if (node.wrapper && node.targetDimensions) {
+      node.wrapper.style.transition = this.wrapperTransition(node);
+      const targetDimensions = node.targetDimensions;
+      node.wrapper.style.width = targetDimensions.width + "px";
+      node.wrapper.style.height = targetDimensions.height + "px";
+    }
     Object.assign(node.style, this.addedFinalStyle(node, animatedFinishStyles));
   }
 
@@ -379,18 +437,14 @@ export class DOMFlowAnimation {
     Object.assign(node.style, this.removedFinalStyle(node));
   }
   
-  addedTransition() {
-    return this.defaultTransition();
-  }
-
   addedFinalStyle(node, finishStyles) {
     // const targetStyle = node.targetStyle;// delete node.targetStyle;
     const result = {...finishStyles}//this.getAnimatedProperties(node.targetStyle);
     result.transform = "matrix(1, 0, 0, 1, 0, 0)";
 
-    const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
-    result.maxHeight = targetDimensions.height + "px";
-    result.maxWidth =  targetDimensions.width + "px";
+    // const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
+    // result.maxHeight = targetDimensions.height + "px";
+    // result.maxWidth =  targetDimensions.width + "px";
     result.opacity = "1";
     // result.margin = targetStyle.margin;
     // result.padding = targetStyle.padding;

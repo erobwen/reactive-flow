@@ -243,6 +243,7 @@ export function onFinishReBuildingFlow() {
       }, {});
   }
 
+  log(flowChanges.globallyAdded);
   flowChanges.globallyAddedAnimated = filterAnimatedInMap(flowChanges.globallyAdded);
   flowChanges.globallyResidentAnimated = filterAnimatedInMap(flowChanges.globallyResident);
   flowChanges.globallyMovedAnimated = filterAnimatedInMap(flowChanges.globallyMoved);
@@ -323,6 +324,9 @@ export function onFinishReBuildingFlow() {
     wrapper.style.height = "0px";
     wrapper.id = "wrapper";
     wrapper.style.overflow = "visible";
+    // wrapper.style.border = "1px solid"
+    wrapper.style.boxSizing = "border-box";
+    wrapper.style.position = "relative";
     console.log(wrapper);
     // if (flow.parentPrimitive) {
       // const parentNode = flow.parentPrimitive.getDomNode();
@@ -505,9 +509,11 @@ function activateAnimation(currentFlowChanges) {
       console.group("activate for added " + flow.toString());
       log(`original properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
+      // log(flow.domNode.parentNode);
       flow.animation.setupFinalStyleForAdded(flow.domNode, flow.getAnimatedFinishStyles());
       log(`final properties: `);
       logProperties(flow.domNode.style, typicalAnimatedProperties);
+      // log(flow.domNode.parentNode);
       setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       delete currentFlowChanges.beingRemovedMap[flow.id];  
       console.groupEnd();
@@ -642,6 +648,7 @@ function setupAnimationCleanup(node) {
         wrapper.parentNode.replaceChild(node, wrapper);
         delete node.wrapper;
         delete wrapper.wrapped; 
+        node.style.position = "";
         node.style.transform = "";
         node.style.transition = "";
       } else {
@@ -821,3 +828,26 @@ var camelCase = (function () {
   
 // standardAnimation.recordOriginalBoundsAndStyle(flow.domNode.animationOriginNode);  
 // }
+
+
+export function getAbsoluteHeight(el) {
+  // Get the DOM Node if you pass in a string
+  el = (typeof el === 'string') ? document.querySelector(el) : el; 
+
+  var styles = window.getComputedStyle(el);
+  var margin = parseFloat(styles['marginTop']) +
+               parseFloat(styles['marginBottom']);
+
+  return Math.ceil(el.offsetHeight + margin);
+}
+
+export function getAbsoluteWidth(el) {
+  // Get the DOM Node if you pass in a string
+  el = (typeof el === 'string') ? document.querySelector(el) : el; 
+
+  var styles = window.getComputedStyle(el);
+  var margin = parseFloat(styles['marginLeft']) +
+               parseFloat(styles['marginRight']);
+
+  return Math.ceil(el.offsetWidth + margin);
+}

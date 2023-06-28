@@ -1,7 +1,7 @@
 import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
+import { flowChanges, getAbsoluteHeight, getAbsoluteWidth, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -50,8 +50,10 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
     if (contextNode) { 
       alreadyInContext = domNode.parentNode === contextNode;
       if (!alreadyInContext) {
+        log("CLONE!!!");
         domNode = domNode.cloneNode(true);
         contextNode.appendChild(domNode);
+        // domNode.style.position = ""; 
       }
     } else {
       domNode = domNode.cloneNode(true);
@@ -64,11 +66,14 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
       document.body.appendChild(domNode);  
     }
   
-    const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
+    // domNode.offsetWidth 
+    const result = {width: getAbsoluteWidth(domNode), height: getAbsoluteHeight(domNode) }; 
     const original = this.ensureDomNodeBuilt(true)
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
     // debugger;
+    log("dimensions clone")
+    log(domNode);
     if (contextNode) {
       if (!alreadyInContext) {
         contextNode.removeChild(domNode);

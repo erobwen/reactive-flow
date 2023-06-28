@@ -1,5 +1,5 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
-import { extractAttributes } from "./BasicHtml.js";
+import { div, extractAttributes } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
 const log = console.log;
@@ -19,7 +19,7 @@ export function text(...parameters) {
   }
   const textCut = textProperties.text.substring(0, 20) + "...";
 
-  return getTarget().elementNode(properties.key ? properties.key : null, // + ".label" 
+  const label = getTarget().elementNode(properties.key ? properties.key : null, // + ".label" 
     {
       classNameOverride: "text[" + textCut + "]",
       tagName:"label",
@@ -27,6 +27,13 @@ export function text(...parameters) {
       children: [getTarget().textNode(textProperties)], 
       ...properties 
     });
+
+  if (properties.div) {
+    return div(label);
+  } else {
+    return label; 
+  }
+
 }
 
 export function checkboxInputField(label, getter, setter, ...parameters) {
