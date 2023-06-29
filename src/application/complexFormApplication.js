@@ -175,7 +175,8 @@ export class ComplexForm extends Flow {
             new TravelerForm({traveler, isFellowTraveller: false}),
             column({
               children: this.editData.fellowTravellers.map(traveler => new TravelerForm("id-" + traveler.causality.id, {traveler, isFellowTraveller: true})),
-              animateChildren: true  
+              animateChildren: true,  
+              style: { overflow: "visible" } 
             }),
 
             // Add traveler button

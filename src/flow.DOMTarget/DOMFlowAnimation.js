@@ -233,14 +233,17 @@ export class DOMFlowAnimation {
     //   result.maxWidth = node.computedOriginalStyle.width;
     //   return result;
     // }
+    log(node.targetDimensions);
+    log(node.targetDimensions.widthWithoutMargin);
     // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
       // transition: this.defaultTransition(),
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       position: "absolute", 
-      width: node.targetDimensions.width + "px",
-      height: node.targetDimensions.height + "px",
+      width: node.targetDimensions.widthWithoutMargin + "px",
+      height: node.targetDimensions.heightWithoutMargin + "px",
+      boxSizing: "border-box",
       // maxHeight: "0px",
       // maxWidth: "0px",
       // margin: "0px",

@@ -321,7 +321,7 @@ export function onFinishReBuildingFlow() {
     wrapper.wrapped = wrapped;
     wrapper.appendChild(flow.getDomNode());
     wrapper.id = "wrapper";
-    wrapper.style.border = "1px solid"
+    // wrapper.style.border = "1px solid"
     wrapper.style.boxSizing = "border-box";
     console.log(wrapper);
     // if (flow.parentPrimitive) {

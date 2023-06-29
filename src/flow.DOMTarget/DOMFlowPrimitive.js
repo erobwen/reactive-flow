@@ -69,7 +69,12 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
     }
   
     // domNode.offsetWidth 
-    const result = {width: getAbsoluteWidth(domNode), height: getAbsoluteHeight(domNode) }; 
+    const result = {
+      width: getAbsoluteWidth(domNode), 
+      height: getAbsoluteHeight(domNode),
+      widthWithoutMargin: domNode.offsetWidth,
+      heightWithoutMargin: domNode.offsetHeight
+    }; 
     const original = this.ensureDomNodeBuilt(true)
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
