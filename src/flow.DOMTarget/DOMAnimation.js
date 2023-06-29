@@ -320,13 +320,9 @@ export function onFinishReBuildingFlow() {
     wrapped.wrapper = wrapper;
     wrapper.wrapped = wrapped;
     wrapper.appendChild(flow.getDomNode());
-    wrapper.style.width = "0px";
-    wrapper.style.height = "0px";
     wrapper.id = "wrapper";
-    wrapper.style.overflow = "visible";
-    // wrapper.style.border = "1px solid"
+    wrapper.style.border = "1px solid"
     wrapper.style.boxSizing = "border-box";
-    wrapper.style.position = "relative";
     console.log(wrapper);
     // if (flow.parentPrimitive) {
       // const parentNode = flow.parentPrimitive.getDomNode();
@@ -651,6 +647,8 @@ function setupAnimationCleanup(node) {
         node.style.position = "";
         node.style.transform = "";
         node.style.transition = "";
+        node.style.height = "";
+        node.style.width = "";
       } else {
         // Reset style
         node.style.transition = "";

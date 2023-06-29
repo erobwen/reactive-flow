@@ -201,7 +201,12 @@ export class DOMFlowAnimation {
     if (node.wrapper) {
       node.wrapper.style.width = "0px";
       node.wrapper.style.height = "0px";
+      wrapper.style.height = "0px";
+      wrapper.style.width = "0px";
+      wrapper.style.overflow = "visible";
+      wrapper.style.position = "relative";
     }
+
     Object.assign(node.style, this.addedOriginalMinimizedStyle(node));
     console.log(node.style.transform);
   }
@@ -234,6 +239,8 @@ export class DOMFlowAnimation {
       // transition: this.defaultTransition(),
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       position: "absolute", 
+      width: node.targetDimensions.width + "px",
+      height: node.targetDimensions.height + "px",
       // maxHeight: "0px",
       // maxWidth: "0px",
       // margin: "0px",

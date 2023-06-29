@@ -9,8 +9,8 @@ const log = console.log;
 
 export function modernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  properties.hoverEffect = true; 
-  properties.ripple = true; 
+  properties.hoverEffect = false; 
+  properties.ripple = false; 
   return new ModernButton(properties);
 };
 
@@ -67,7 +67,7 @@ export class ModernButton extends Flow {
 
   ensure() {
     const foo = this.text; 
-    log("ENSURE");
+    // log("ENSURE");
     // log(foo);
     // log("--")
     // Ensure event listeners
@@ -203,13 +203,13 @@ export class ModernButton extends Flow {
 
     if (onClick && mouseOverBackgroundColor) {
       this.setMouseoverColor = () => {
-        log("<<setMouseoverColor>>");
+        // log("<<setMouseoverColor>>");
         this.hover = true;
       }
       panel.addEventListener("mouseover", this.setMouseoverColor);
 
       this.removeMouseoverColor = () => {
-        log("<<removeMouseoverColor>>");
+        // log("<<removeMouseoverColor>>");
         this.hover = false;
       }
       panel.addEventListener("mouseout", this.removeMouseoverColor);

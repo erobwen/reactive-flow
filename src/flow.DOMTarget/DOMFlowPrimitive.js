@@ -45,10 +45,12 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-    let domNode = this.ensureDomNodeBuilt(true);; 
+    let domNode = this.ensureDomNodeBuilt(true);
+    // domNode = getWrapper(domNode); 
     let alreadyInContext;
     if (contextNode) { 
       alreadyInContext = domNode.parentNode === contextNode;
+      // alreadyInContext = true; 
       if (!alreadyInContext) {
         log("CLONE!!!");
         domNode = domNode.cloneNode(true);
@@ -74,6 +76,10 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
     // debugger;
     log("dimensions clone")
     log(domNode);
+    log(domNode.offsetWidth);
+    log(domNode.parentNode);
+    log(domNode.parentNode.offsetWidth);
+
     if (contextNode) {
       if (!alreadyInContext) {
         contextNode.removeChild(domNode);
