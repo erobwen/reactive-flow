@@ -644,11 +644,12 @@ function setupAnimationCleanup(node) {
         wrapper.parentNode.replaceChild(node, wrapper);
         delete node.wrapper;
         delete wrapper.wrapped; 
-        node.style.position = "";
-        node.style.transform = "";
-        node.style.transition = "";
-        node.style.height = "";
-        node.style.width = "";
+        node.equivalentCreator.synchronizeDomNodeStyle(["position", "transform", "transition", "height", "width"]);
+        // node.style.position = "";
+        // node.style.transform = "";
+        // node.style.transition = "";
+        // node.style.height = "";
+        // node.style.width = "";
       } else {
         // Reset style
         node.style.transition = "";
