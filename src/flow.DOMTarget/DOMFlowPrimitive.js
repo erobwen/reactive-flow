@@ -33,8 +33,8 @@ export function clearNode(node) {
 }
 
 
-export const getWrapper = (node) => !node ? node : (node.wrapper ? node.wrapper : node);  
-export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrapped : node);  
+export const getWrapper = (node) => !node ? node : (node.wrapper && node.wrapper.wrapped === node ? node.wrapper : node);  
+export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wrapped.wrapper === node ? node.wrapped : node);  
 
 
 /**
@@ -197,6 +197,21 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped ? node.wrap
         node.insertBefore(getWrapper(newChildNodes[index]), getWrapper(existingChildNode));
       }
       index++;
+    }
+
+    // Ensure wrappers in use. 
+    for (let childNode of node.childNodes) {
+      if (childNode.id !== "wrapper" && childNode.wrapper) {
+        node.replaceChild(childNode.wrapper, childNode);
+      }
+    }
+
+    // Ensure wrappers non empty. 
+    for (let childNode of node.childNodes) {
+      if (childNode.id === "wrapper" && !childNode.isOldWrapper && childNode.wrapped.parentNode !== childNode) {
+        // debugger; 
+        childNode.appendChild(childNode.wrapped);
+      }
     }
   }
 

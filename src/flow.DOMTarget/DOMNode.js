@@ -105,6 +105,7 @@ const log = console.log;
     }
 
     synchronizeDomNodeStyle(properties) {
+      if (!(properties instanceof Array)) properties = [properties];
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 
 
       const same = (styleValueA, styleValueB) => 

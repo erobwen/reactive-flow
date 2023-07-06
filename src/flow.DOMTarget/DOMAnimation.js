@@ -306,7 +306,7 @@ export function onFinishReBuildingFlow() {
       log(trailer);
       log("----")
       log(parentNode);
-      // Note: A reused wrapper is already in place, so do nothing.
+      // Note: If a reused wrapper is already in place, so do nothing.
       if (trailer.parentNode !== parentNode) {
         parentNode.insertBefore(trailer, flow.domNode);
       } 
@@ -317,9 +317,20 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.allAnimatedMovedAddedAndRemovedFlows()) {
     const wrapper = document.createElement("div");
     const wrapped = flow.getDomNode();
+
+    // Store away old wrapper
+    if (wrapped.wrapper) {
+      wrapped.wrapper.isOldWrapper = true; 
+      if (!wrapped.oldWrappers) {
+        wrapped.oldWrappers = [];
+      }
+      wrapped.oldWrappers.push(wrapped.wrapper);
+      wrapped.wrapper = null; 
+    }
+
     wrapped.wrapper = wrapper;
     wrapper.wrapped = wrapped;
-    wrapper.appendChild(flow.getDomNode());
+    // wrapper.appendChild(flow.getDomNode());
     wrapper.id = "wrapper";
     // wrapper.style.border = "1px solid"
     wrapper.style.boxSizing = "border-box";
@@ -349,6 +360,7 @@ export function onFinishReBuildingDOM() {
   counter++
   if (!flowChanges.onFinishReBuildingFlowDone) return;
   console.group("------------------- onFinishBuildingDOM --------------------");
+  // return; 
   delete flowChanges.onFinishReBuildingFlowDone; 
     
   // Measure the final size of added and moved (do this before we start to emulate original)
@@ -546,9 +558,7 @@ function activateAnimation(currentFlowChanges) {
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
         log(flow.domNode.style.transform);
-        if (flow.domNode.fadingTrailer) {
-          setupFadingTrailerCleanup(flow.domNode.fadingTrailer)
-        }
+
         delete currentFlowChanges.beingRemovedMap[flow.id];
       } else {
         // flow.domNode.changes = null; 
@@ -580,17 +590,16 @@ function setupFadingTrailerCleanup(node) {
   const me = this; 
   // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
   // log(node)
-
+  
   function onTransitionEnd(event) {
-    if (!node.changes) return;
-
     // event.preventDefault();
     // event.stopPropagation();
+    if (event.target !== node) return; 
     
     // if (changes === node.changes) {
     const propertyName = camelCase(event.propertyName); 
 
-    console.group("cleanup: " + node.changes.type + " " + node.changes.number);
+    console.group("cleanup trailer");
     log(event.target);
     log(event.propertyName);
     log(camelCase(event.propertyName));
@@ -608,8 +617,76 @@ function setupFadingTrailerCleanup(node) {
   node.hasCleanupEventListener = true; 
 }
 
+function setupWrapperCleanup(wrapper) {
+  log("setupWrapperCleanup")
+  log(wrapper)
+  // There can be only one
+  if (wrapper.hasCleanupEventListener) return; 
+  
+  // On cleanup, synchronize transitioned style property
+  const me = this; 
+  // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
+  // log(node)
+
+  function onTransitionEnd(event) {
+    // event.preventDefault();
+    // event.stopPropagation();
+    if (event.target !== wrapper) return; 
+
+    // if (changes === node.changes) {
+    const propertyName = camelCase(event.propertyName); 
+
+    console.group("cleanup wrapper: ");
+    log(event.target);
+    log(event.propertyName);
+    log(camelCase(event.propertyName));
+    console.groupEnd();
+
+    if (["width", "height"].includes(propertyName) && wrapper.wrapped) {
+      if (wrapper.wrapped.parentNode === wrapper && wrapper.purpose !== "remove") {
+        const wrapped = wrapper.wrapped; 
+        const container = wrapper.parentNode; 
+        log(container);
+        log(wrapper);
+        log(wrapped)
+        wrapper.removeChild(wrapped);
+        container.replaceChild(wrapped, wrapper);
+                log("REMOVING WRAPPER")
+        const node = wrapper.wrapped;
+        node.equivalentCreator.synchronizeDomNodeStyle("position");
+      } else {
+        wrapper.parentNode.removeChild(wrapper);
+      }
+
+      // Remove Wrapper Relation
+      if (wrapper.wrapped) {
+
+
+        if (wrapper.wrapped.oldWrappers) {
+          wrapper.wrapped.oldWrappers.remove(wrapper);
+        }
+        delete wrapper.wrapped.wrapper;
+        delete wrapper.wrapped;
+      }
+
+      // Finish animation
+      wrapper.removeEventListener("transitionend", onTransitionEnd);
+      delete wrapper.hasCleanupEventListener;
+    }
+  }
+  wrapper.addEventListener("transitionend", onTransitionEnd);
+  wrapper.hasCleanupEventListener = true; 
+}
 
 function setupAnimationCleanup(node) {
+
+  if (node.wrapper) {
+    setupWrapperCleanup(node.wrapper)
+  }
+  if (node.fadingTrailer) {
+    setupFadingTrailerCleanup(node.fadingTrailer)
+  }
+  // return; 
   // There can be only one
   if (node.hasCleanupEventListener) return; 
   
@@ -627,7 +704,7 @@ function setupAnimationCleanup(node) {
     // if (changes === node.changes) {
     const propertyName = camelCase(event.propertyName); 
 
-    console.group("cleanup: " + node.changes.type + " " + node.changes.number);
+    console.group("cleanup_: " + node.changes.type + " " + node.changes.number);
     log(event.target);
     log(event.propertyName);
     log(camelCase(event.propertyName));
@@ -636,33 +713,30 @@ function setupAnimationCleanup(node) {
     // Synch property that was transitioned. 
     // event.propertyName
 
-    if (["transform"].includes(propertyName)) {
-      const wrapper = node.wrapper; 
+    node.equivalentCreator.synchronizeDomNodeStyle(propertyName);
 
-      if (wrapper) {
-        wrapper.removeChild(node);
-        wrapper.parentNode.replaceChild(node, wrapper);
-        delete node.wrapper;
-        delete wrapper.wrapped; 
-        node.equivalentCreator.synchronizeDomNodeStyle(["position", "transform", "transition", "height", "width"]);
-        // node.style.position = "";
-        // node.style.transform = "";
-        // node.style.transition = "";
-        // node.style.height = "";
-        // node.style.width = "";
-      } else {
-        // Reset style
-        node.style.transition = "";
-        node.style.maxHeight = "";
-        node.style.maxWidth = "";
-        node.style.transform = "";
+    // if (["transform"].includes(propertyName)) {
+    //   const wrapper = node.wrapper; 
 
-        if (node.equivalentCreator) {
-          node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
-          log(`cleanup properties: `);
-          logProperties(node.style, typicalAnimatedProperties);
-        }
-      }
+    //     // node.style.position = "";
+    //     // node.style.transform = "";
+    //     // node.style.transition = "";
+    //     // node.style.height = "";
+    //     // node.style.width = "";
+    //   } else {
+    //     debugger;
+    //     // Reset style
+    //     node.style.transition = "";
+    //     node.style.maxHeight = "";
+    //     node.style.maxWidth = "";
+    //     node.style.transform = "";
+
+    //     if (node.equivalentCreator) {
+    //       node.equivalentCreator.synchronizeDomNodeStyle(node.equivalentCreator.animation.animatedProperties);
+    //       log(`cleanup properties: `);
+    //       logProperties(node.style, typicalAnimatedProperties);
+    //     }
+    //   }
 
 
       // function findRemoved(changes) {
@@ -675,10 +749,6 @@ function setupAnimationCleanup(node) {
       //   return false; 
       // }
 
-      // Finalize a remove
-      if (node.changes.type === "removed" && node.parentNode) {
-        node.parentNode.removeChild(node);
-      }  
       
       // Remove changes.
       if (node.changes) {
@@ -689,10 +759,10 @@ function setupAnimationCleanup(node) {
       }
 
       // Finish animation
-      node.removeEventListener("transitionend", onTransitionEnd);
-      delete node.hasCleanupEventListener;
+      // node.removeEventListener("transitionend", onTransitionEnd);
+      // delete node.hasCleanupEventListener;
       // Note: removeEventListener will remove it from multiple divs????
-    }
+    // }
       
     // }
   }

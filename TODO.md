@@ -2,7 +2,6 @@
 # Next
 
 TODO: Warning when trying to animate inline divs. Need to be blocks!
-TODO: div() needs to read animate property
 TODO: Move back some functionality from unobservable to state?  
 TODO: Test fragmented flows.
 TODO: Work on children as array or flow: Styled button breaks if children are not in list 
