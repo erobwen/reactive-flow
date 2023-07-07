@@ -226,8 +226,8 @@ export function onFinishReBuildingFlow() {
   // Find removed nodes
   for (let id in previousFlowChanges.idPrimitiveMap) {
     const inPreviousMap = previousFlowChanges.idPrimitiveMap[id];
-    if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive.getChildNodes().includes(inPreviousMap.domNode)) {
-      flowChanges.globallyRemoved[id] = inPreviousMap; 
+    if (typeof(idPrimitiveMap[id]) === "undefined") { // Consider: Keep track of directly removed using inPreviousMap.parentPrimitive? 
+      flowChanges.globallyRemoved[id] = inPreviousMap;
     }
   }
 

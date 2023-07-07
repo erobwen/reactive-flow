@@ -47,6 +47,8 @@ export class FlowPrimitive extends Flow {
             this.visibleOnTarget = this.parentPrimitive.visibleOnTarget;
           } else {
             this.visibleOnTarget = null;
+            this.previousParentPrimitive = this.parentPrimitive;
+            this.parentPrimitive = null;
           }
         }
 
@@ -120,13 +122,17 @@ export class FlowPrimitive extends Flow {
 
   getAnimation() {
     let result; 
-    if (!this.parentPrimitive || !this.parentPrimitive.isStable()) {
+    if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
       result = null; 
     } else {
       result = this.inheritPropertyFromEquivalent("animate"); 
   
       if (!result && this.parentPrimitive) {
         result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
+      }      
+      
+      if (!result && this.previousParentPrimitive) {
+        result = this.previousParentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
       }
     }
     if (result === true) result = standardAnimation;
