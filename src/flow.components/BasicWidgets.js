@@ -59,7 +59,6 @@ export function inputField(type, label, getter, setter, ...parameters) {
   if (typeof(getter) === "object" && typeof(setter) === "string") {
     const targetObject = getter;
     const targetProperty = setter; 
-    console.log(targetObject.causality.id);
     properties.key = properties.key + "." + targetObject.causality.id + "." + targetProperty;
     key = properties.key; 
     getter = callback(() => targetObject[targetProperty], properties.key + ".getter");

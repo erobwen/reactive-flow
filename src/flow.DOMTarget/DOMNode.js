@@ -68,7 +68,7 @@ const log = console.log;
     }
     
     updateStyle(element, newStyle) {
-      console.group("update style...");
+      // console.group("update style...");
       const elementStyle = element.style;
       const newPreviouslySetStyles = {};
       // log({...this.unobservable.previouslySetStyles});
@@ -92,7 +92,7 @@ const log = console.log;
         }
         newPreviouslySetStyles[property] = newValue;
       }
-      console.groupEnd();
+      // console.groupEnd();
 
 
       this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
@@ -106,6 +106,7 @@ const log = console.log;
 
     synchronizeDomNodeStyle(properties) {
       if (!(properties instanceof Array)) properties = [properties];
+      // log("synchronizeDomNodeStyle");
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 
 
       const same = (styleValueA, styleValueB) => 
@@ -113,9 +114,10 @@ const log = console.log;
         || styleValueA === styleValueB; 
 
       for (let property of properties) {
+        // log(property)
         if (typeof property === "string") {
           if (!same(style[property], this.domNode.style[property])) {
-            console.log("Synchronizing: " + this.toString() + ", style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
+            // log("Synchronizing: " + this.toString() + ", style " + property + " mismatch, resetting: " + this.domNode.style[property] + " --> " + style[property]);
             this.domNode.style[property] = style[property] ? style[property] : "";
           }
         } else {
@@ -123,7 +125,7 @@ const log = console.log;
 
           if (propertyCompoundValue) {
             if (!same(propertyCompoundValue, this.domNode.style[property.compound])) {
-              console.log("Synchronizing: " + this.toString() + ", style " + property.compound + " mismatch, resetting: " + this.domNode.style[property.compound] + " --> " + propertyCompoundValue);
+              // log("Synchronizing: " + this.toString() + ", style " + property.compound + " mismatch, resetting: " + this.domNode.style[property.compound] + " --> " + propertyCompoundValue);
               this.domNode.style[property.compound] = propertyCompoundValue ? propertyCompoundValue : "";
             }
           } else {

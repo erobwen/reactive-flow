@@ -1,7 +1,7 @@
 import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, readFlowProperties, finalize } from "../flow/Flow";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges, getAbsoluteHeight, getAbsoluteWidth, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
+import { flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -52,7 +52,7 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
       alreadyInContext = domNode.parentNode === contextNode;
       // alreadyInContext = true; 
       if (!alreadyInContext) {
-        log("CLONE!!!");
+        // log("CLONE!!!");
         domNode = domNode.cloneNode(true);
         contextNode.appendChild(domNode);
         // domNode.style.position = ""; 
@@ -70,8 +70,12 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
   
     // domNode.offsetWidth 
     const result = {
-      width: getAbsoluteWidth(domNode), 
-      height: getAbsoluteHeight(domNode),
+      width: getWidthIncludingMargin(domNode), 
+      height: getHeightIncludingMargin(domNode),
+
+      widthIncludingMargin: getWidthIncludingMargin(domNode), 
+      heightIncludingMargin: getHeightIncludingMargin(domNode),
+      
       widthWithoutMargin: domNode.offsetWidth,
       heightWithoutMargin: domNode.offsetHeight
     }; 
@@ -79,11 +83,11 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
     // debugger;
-    log("dimensions clone")
-    log(domNode);
-    log(domNode.offsetWidth);
-    log(domNode.parentNode);
-    log(domNode.parentNode.offsetWidth);
+    // log("dimensions clone")
+    // log(domNode);
+    // log(domNode.offsetWidth);
+    // log(domNode.parentNode);
+    // log(domNode.parentNode.offsetWidth);
 
     if (contextNode) {
       if (!alreadyInContext) {
@@ -121,6 +125,7 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
   }
 
   ensureDomNodeChildrenInPlace() {// But do not change style for animated children!
+    // log("ensureDomNodeChildrenInPlace " + this.toString());
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
@@ -133,8 +138,12 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     const existingPrimitives = {};
     
     const recoveredNodes = [];
+    // log([...node.childNodes])
     for(let existingChildNode of node.childNodes) {
+      // log("---")
+      // log(existingChildNode);
       const existingPrimitive = getWrappedNode(existingChildNode).equivalentCreator;
+      // log(existingPrimitive);
       if (!existingPrimitive) {
         // No creator, probably a fading trailer that we want to keep
         // TODO: Mark trailers somehow! 
@@ -157,6 +166,8 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
         }
       }
     }
+
+    // log(recoveredNodes);
 
     // Link recovered nodes:
     let anchor = null; 

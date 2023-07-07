@@ -11,7 +11,7 @@ const log = console.log;
  */
 export class SuperSimple extends Flow {
   setState() {
-    this.showText = false; 
+    this.showText = true; 
   }
 
   // text("Some text", {div: false, animate: true, key: "my-text", style: {color: "green"}}).show(this.showText)

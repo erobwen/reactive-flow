@@ -148,51 +148,14 @@ export class DOMFlowAnimation {
     // node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
     // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
-    
-    
+    log("calculateTargetDimensionsAndStyleForAdded");
+    log(node.targetDimensions);
     this.recordTargetStyleForAdded(node);
   }
 
-      // //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
-      // console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-      // let domNode = this.ensureDomNodeBuilt(true);; 
-      // let alreadyInContext;
-      // if (contextNode) { 
-      //   alreadyInContext = domNode.parentNode === contextNode;
-      //   if (!alreadyInContext) {
-      //     domNode = domNode.cloneNode(true);
-      //     contextNode.appendChild(domNode);
-      //   }
-      // } else {
-      //   domNode = domNode.cloneNode(true);
-      //   domNode.style.position = "absolute"; 
-      //   domNode.style.top = "0";
-      //   domNode.style.left = "0";
-      //   domNode.style.width = "auto";
-      //   domNode.style.height = "auto";
-      //   Object.assign(domNode.style, flexAutoStyle);
-      //   document.body.appendChild(domNode);  
-      // }
-    
-      // const result = {width: domNode.offsetWidth, height: domNode.offsetHeight }; 
-      // const original = this.ensureDomNodeBuilt(true)
-      // // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
-      // // log(original);
-      // // debugger;
-      // if (contextNode) {
-      //   if (!alreadyInContext) {
-      //     contextNode.removeChild(domNode);
-      //   }
-      // } else {
-      //   document.body.removeChild(domNode);
-      // }
-      // return result; 
-
   recordTargetStyleForAdded(node) {
-    // contextNode.appendChild(node);
     node.targetStyle = {...node.style}
     node.computedTargetStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully.
-    // contextNode.removeChild(node); 
   }
 
   setOriginalMinimizedStyleForAdded(node) {
@@ -205,6 +168,7 @@ export class DOMFlowAnimation {
       wrapper.style.width = "0px";
       wrapper.style.overflow = "visible";
       wrapper.style.position = "relative";
+
     }
 
     Object.assign(node.style, this.addedOriginalMinimizedStyle(node));
@@ -233,8 +197,8 @@ export class DOMFlowAnimation {
     //   result.maxWidth = node.computedOriginalStyle.width;
     //   return result;
     // }
-    log(node.targetDimensions);
-    log(node.targetDimensions.widthWithoutMargin);
+    // log(node.targetDimensions);
+    // log(node.targetDimensions.widthWithoutMargin);
     // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
     // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
     return {
@@ -243,7 +207,7 @@ export class DOMFlowAnimation {
       position: "absolute", 
       width: node.targetDimensions.widthWithoutMargin + "px",
       height: node.targetDimensions.heightWithoutMargin + "px",
-      boxSizing: "border-box",
+      // boxSizing: "border-box",
       // maxHeight: "0px",
       // maxWidth: "0px",
       // margin: "0px",
@@ -261,14 +225,6 @@ export class DOMFlowAnimation {
     } 
   }
 
-
-  /**
-   * Remember target styles 
-   */
-  // calculateTargetDimensionsForAdded(contextNode, node) {
-  //   node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this! 
-  // }
-
   
  /**
    * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
@@ -280,6 +236,7 @@ export class DOMFlowAnimation {
     // Reuse wrapper if existing, as it is already in right place
     if (node.wrapper) {
       trailer = node.wrapper;
+      // delete trailer.purpose; 
       trailer.wasWrapper = true; 
       delete trailer.wrapped;
       delete node.wrapper;  
@@ -403,18 +360,23 @@ export class DOMFlowAnimation {
   /**
    * Final styles, the styles elements have at the end of the, before cleanup. 
    */
-  setupFinalStyleForAdded(node, animatedFinishStyles) {
+  setupFinalStyleForAdded(node) {
     node.style.transition = this.addedTransition(node);
     console.log("setupFinalStyleForAdded");
     console.log(node.wrapper);
     console.log(node.targetDimensions);
     if (node.wrapper && node.targetDimensions) {
-      node.wrapper.style.transition = this.wrapperTransition(node);
       const targetDimensions = node.targetDimensions;
-      node.wrapper.style.width = targetDimensions.width + "px";
-      node.wrapper.style.height = targetDimensions.height + "px";
+      Object.assign(node.wrapper.style, {
+        transition: this.wrapperTransition(node),
+        width: targetDimensions.widthIncludingMargin + "px",
+        height: targetDimensions.heightIncludingMargin + "px"
+      })
     }
-    Object.assign(node.style, this.addedFinalStyle(node, animatedFinishStyles));
+    Object.assign(node.style, {
+      transform: "matrix(1, 0, 0, 1, 0, 0)",
+      opacity: "1"
+    });
   }
 
   setupFinalStyleForResident(node) {
@@ -444,22 +406,14 @@ export class DOMFlowAnimation {
 
   setupFinalStyleForRemoved(node) {
     node.style.transition = this.removeTransition();
+    if (node.wrapper) {
+      node.wrapper.style.transition = this.wrapperTransition(node);
+      node.wrapper.style.width = "0px";
+      node.wrapper.style.height = "0px";
+    }
     Object.assign(node.style, this.removedFinalStyle(node));
   }
   
-  addedFinalStyle(node, finishStyles) {
-    // const targetStyle = node.targetStyle;// delete node.targetStyle;
-    const result = {...finishStyles}//this.getAnimatedProperties(node.targetStyle);
-    result.transform = "matrix(1, 0, 0, 1, 0, 0)";
-
-    // const targetDimensions = node.targetDimensions;// delete node.targetDimensions;
-    // result.maxHeight = targetDimensions.height + "px";
-    // result.maxWidth =  targetDimensions.width + "px";
-    result.opacity = "1";
-    // result.margin = targetStyle.margin;
-    // result.padding = targetStyle.padding;
-    return result; 
-  }
 
   // transform: "", //transform,
   // maxHeight: "0px",
@@ -498,20 +452,8 @@ export class DOMFlowAnimation {
     // const position = [Math.round(node.offsetWidth / 2), Math.round(node.offsetHeight / 2)];
     // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)"; // Not quite working as intended... but ok?
     return {
-      maxHeight: "0px",
-      maxWidth: "0px",
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)", //  transform,
       opacity: "0.001",
-      margin: "0px",
-      marginTop: "0px",
-      marginBottom: "0px",
-      marginLeft: "0px",
-      marginRight: "0px",
-      padding: "0px",
-      paddingTop: "0px",
-      paddingBottom: "0px",
-      paddingLeft: "0px",
-      paddingRight: "0px",
     }
   }
 

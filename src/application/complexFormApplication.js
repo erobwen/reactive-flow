@@ -110,7 +110,7 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
  */
 
 const panel = flow("panel", ({ children }) =>
-  div("panel", {children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px"}})
+  div("panel", {children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", boxSizing: "border-box"}})
 );
 
 export class SimpleDrawer extends Flow {
@@ -270,6 +270,8 @@ export class TravelerForm extends Flow {
         )
       }).show(this.traveler.luggages.length),
 
+      // div({style: {height: "48px", backgroundColor: "green"}, animate: true}).show(this.traveler.luggages.length),
+
       // Add luggages button
       row("add-luggage",
         filler(),
@@ -296,6 +298,7 @@ export class LuggageForm extends Flow {
   }
 
   build() {
+    // return div({style: {height: "48px", backgroundColor: "green"}})
     return panel(
       row(
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),

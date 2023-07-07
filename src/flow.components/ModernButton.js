@@ -217,7 +217,7 @@ export class ModernButton extends Flow {
   }
   
   build() {
-    log("REBUILDING BUTTON")
+    // log("REBUILDING BUTTON")
     let {style, innerStyle, onClick} = this;
     if (onClick) {
       style.cursor = "pointer";
