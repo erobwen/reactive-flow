@@ -148,8 +148,8 @@ export class DOMFlowAnimation {
     // node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
     // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
-    log("calculateTargetDimensionsAndStyleForAdded");
-    log(node.targetDimensions);
+    // log("calculateTargetDimensionsAndStyleForAdded");
+    // log(node.targetDimensions);
     this.recordTargetStyleForAdded(node);
   }
 
@@ -161,14 +161,13 @@ export class DOMFlowAnimation {
   setOriginalMinimizedStyleForAdded(node) {
     log("setOriginalMinimizedStyleForAdded");
     log(node);
+    log(node.wrapper);
+    const wrapper = node.wrapper;
     if (node.wrapper) {
-      node.wrapper.style.width = "0px";
-      node.wrapper.style.height = "0px";
       wrapper.style.height = "0px";
       wrapper.style.width = "0px";
       wrapper.style.overflow = "visible";
       wrapper.style.position = "relative";
-
     }
 
     Object.assign(node.style, this.addedOriginalMinimizedStyle(node));

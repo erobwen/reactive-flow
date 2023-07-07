@@ -633,6 +633,7 @@ function setupFadingTrailerCleanup(node) {
 }
 
 function setupWrapperCleanup(wrapper) {
+  const node = wrapper.wrapped; 
   // log("setupWrapperCleanup")
   // log(wrapper)
   // There can be only one
@@ -658,18 +659,22 @@ function setupWrapperCleanup(wrapper) {
     console.groupEnd();
 
     if (["width", "height"].includes(propertyName) && wrapper.wrapped) {
-      if (wrapper.wrapped.parentNode === wrapper && wrapper.purpose !== "remove") {
+      // log(node.equivalentCreator.parentPrimitive.causality.target);
+      log(wrapper.parentNode.equivalentCreator.causality.target);
+      log(node.equivalentCreator.causality.target)
+      if (node.parentNode === wrapper &&
+        node.equivalentCreator.parentPrimitive === wrapper.parentNode.equivalentCreator) {
         const wrapped = wrapper.wrapped; 
         const container = wrapper.parentNode; 
         // log(container);
         // log(wrapper);
         // log(wrapped)
+        log("REPLACE WRAPPER WITH WRAPPED")
         wrapper.removeChild(wrapped);
         container.replaceChild(wrapped, wrapper);
-                // log("REMOVING WRAPPER")
-        const node = wrapper.wrapped;
         node.equivalentCreator.synchronizeDomNodeStyle("position");
       } else {
+        log("JUST REMOVE...")
         wrapper.parentNode.removeChild(wrapper);
       }
 
