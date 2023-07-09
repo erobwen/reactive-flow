@@ -84,6 +84,8 @@ export class DOMFlowAnimation {
 
   /**
    * Record original bounds, before anything in the dome has changed
+   * Bounds do not include margin. See this:  
+   * https://stackoverflow.com/questions/50657526/does-getboundingclientrect-width-and-height-includes-paddings-and-borders-of-e
    */
   recordOriginalBoundsAndStyle(node) {
     node.offsetBounds = {

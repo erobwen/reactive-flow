@@ -1,6 +1,5 @@
 import { Flow, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { modal } from "../flow.components/PortalAndModal";
 import { button, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
 import { div } from "../flow.components/BasicHtml"
@@ -8,6 +7,7 @@ import { div } from "../flow.components/BasicHtml"
 import { adjustLightness } from "../flow.components/Color";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle } from "../flow.components/Style";
+import { modal } from "../flow.components/Modal";
 
 
 const log = console.log;

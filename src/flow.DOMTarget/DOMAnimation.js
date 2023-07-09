@@ -226,7 +226,7 @@ export function onFinishReBuildingFlow() {
   // Find removed nodes
   for (let id in previousFlowChanges.idPrimitiveMap) {
     const inPreviousMap = previousFlowChanges.idPrimitiveMap[id];
-    if (typeof(idPrimitiveMap[id]) === "undefined") { // Consider: Keep track of directly removed using inPreviousMap.parentPrimitive? 
+    if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive) { // Consider: Keep track of directly removed using inPreviousMap.parentPrimitive? 
       flowChanges.globallyRemoved[id] = inPreviousMap;
     }
   }
@@ -243,7 +243,7 @@ export function onFinishReBuildingFlow() {
       }, {});
   }
 
-  log(flowChanges.globallyAdded);
+  // log(flowChanges.globallyAdded);
   flowChanges.globallyAddedAnimated = filterAnimatedInMap(flowChanges.globallyAdded);
   flowChanges.globallyResidentAnimated = filterAnimatedInMap(flowChanges.globallyResident);
   flowChanges.globallyMovedAnimated = filterAnimatedInMap(flowChanges.globallyMoved);
@@ -424,11 +424,14 @@ function fixateRemoved() {
     if (flow.changes.previous && flow.changes.previous.type === "added") {
       continue; 
     }
+    // log("fixateRemoved");
+    const node = flow.domNode; 
+    // log(node);
+    // log(getHeightIncludingMargin(node))
 
     // Preserve styles
-    flow.animation.setOriginalStyleForMoved(flow.domNode);
+    // flow.animation.setOriginalStyleForMoved(flow.domNode);
 
-    const node = flow.domNode; 
 
     if (node.wrapper) {
       node.wrapper.style.transition = node.equivalentCreator.animation.wrapperTransition(node);
@@ -437,21 +440,16 @@ function fixateRemoved() {
       // log(getHeightIncludingMargin(node))
       node.wrapper.style.width = getWidthIncludingMargin(node) + "px";
       node.wrapper.style.height = getHeightIncludingMargin(node) + "px";
+      
+      node.wrapper.style.position = "relative";
+      node.wrapper.style.overflow = "visible";
       // log(node.wrapper);
       // debugger; 
     }
-
-    // Set scale and max bounds for animation. 
-    if (!flow.domNode.style.maxHeight || flow.domNode.style.maxHeight === "none") {
-      flow.domNode.style.maxHeight = flow.domNode.originalBounds.height + "px";  
-    }
-    if (!flow.domNode.style.maxWidth  || flow.domNode.style.maxWidth === "none") {
-      flow.domNode.style.maxWidth = flow.domNode.originalBounds.width + "px";
-    }
-    if (!flow.domNode.style.transform || flow.domNode.style.transform === "none") {
-      flow.domNode.style.transform = "matrix(1, 0, 0, 1, 0, 0)"; 
-      // flow.domNode.style.overflow = "visible";
-    }
+    node.style.position = "absolute";
+    node.style.transform = "matrix(1, 0, 0, 1, 0, 0)";
+    node.style.width = node.computedOriginalStyle.width; 
+    node.style.height = node.computedOriginalStyle.height; 
   }
 }
 
@@ -459,7 +457,7 @@ function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
-      flow.animation.setOriginalStyleForMoved(flow.domNode); 
+      // flow.animation.setOriginalStyleForMoved(flow.domNode); 
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
   }
@@ -907,3 +905,12 @@ export function getWidthIncludingMargin(node) {
                parseFloat(styles['marginRight']);
   return Math.ceil(node.offsetWidth + margin);
 }
+
+
+// function getHeightIncludingMargin(node) {
+//   var styles = window.getComputedStyle(node);
+//   var margin = parseFloat(styles['marginTop']) +
+//                parseFloat(styles['marginBottom']);
+
+//   return Math.ceil(node.offsetHeight + margin);
+// }

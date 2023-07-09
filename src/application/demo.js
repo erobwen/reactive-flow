@@ -9,10 +9,11 @@ import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
-import { modalFrame, portalExit } from "../flow.components/PortalAndModal";
+import { portalExit } from "../flow.components/Portals";
 import { button } from "../flow.components/Theme";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
+import { modalFrame } from "../flow.components/Modal";
 
 const log = console.log;
 
@@ -34,8 +35,8 @@ export class Demo extends Flow {
       new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
       new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      new RecursiveExample({key: "recursiveDemo", name: "RecursiveExample"})
-      // "Programmatic Reactive Layout": new ProgrammaticReactiveLayout(),
+      new RecursiveExample({key: "recursiveDemo", name: "RecursiveExample"}),
+      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsive Layout"}),
       // "Toggle": new ToggleView()
     ];
     

@@ -4,7 +4,7 @@ import { button, numberInputField, text } from "../flow.components/BasicWidgets"
 import { centerMiddle, column, row, wrapper } from "../flow.components/Layout";
 import { extractAttributes } from "../flow.components/BasicHtml"
 ;
-import { modal } from "../flow.components/PortalAndModal";
+import { modal } from "../flow.components/Portals";
 
 const log = console.log;
 const loga = (action) => {
