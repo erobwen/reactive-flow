@@ -23,11 +23,6 @@ export class HelloWorld extends Flow {
     });
   }
 
-  provide() {
-     // Makes all children/grandchildren inherit the helloText and emphasis properties! Define withdraw() to remove inherited properties.
-    return ["helloText", "emphasis"];
-  }
-
   build() {
     return column(
       button("Start", {onClick:() => {asyncModifications(this)}}),
@@ -41,9 +36,10 @@ export class HelloWorld extends Flow {
 }
 
 // Stateless child flow (compact definition)
-const hello = flow("hello", ({ helloText }) =>
-  text({ key: "text", text: helloText.withComma })
+const hello = flow("hello", (flow) =>
+  text({ key: "text", text: flow.inherit("helloText").withComma })
 );
+//
 
 // Statefull child flow
 class World extends Flow {
@@ -61,7 +57,7 @@ class World extends Flow {
     return myRow(
       text(this.worldText),
       exclamationMark({
-        on: this.emphasis,
+        on: this.inherit("emphasis"),
         character: this.exclamationCharacter,
       })
     );
@@ -74,9 +70,10 @@ const exclamationMark = flow("exclamationMark", ({ on, character }) =>
 );
 
 // My own dynamically/reactivley styled row
-const myRow = flow("myRow", ({ style, children, emphasis }) => {
+const myRow = flow("myRow", (flow) => {
+  let { style, children } = flow;
   if (!style) style = {};
-  if (emphasis) style.fontSize = "20px"; // Note how the emphasis property is provided/inherited from the root component.
+  if (flow.inherit("emphasis")) style.fontSize = "20px"; 
   return basicRow({ children, style });
 });
 
@@ -106,7 +103,7 @@ function asyncModifications(helloWorld) {
     log("----------------------------------");
     helloWorld.getChild("world").worldText = "world";
   }, 2000);
-
+  
   // Exclamation mark!
   setTimeout(() => {
     log("----------------------------------");

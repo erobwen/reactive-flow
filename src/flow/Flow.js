@@ -18,6 +18,7 @@ export const {
   withoutRecording,
   sameAsPreviousDeep,
   workOnPriorityLevel,
+  invalidateOnChange
 } = world;
 export const model = deeplyObservable;
 const log = console.log;
@@ -74,7 +75,7 @@ export class Flow {
     return this.causality.id;
   }
 
-  get () {
+  get get() {
     return this.causality.target;
   }
 
@@ -103,21 +104,6 @@ export class Flow {
     this.creator = creators.length > 0 ? creators[creators.length - 1] : null; // Note this can only be done in constructor!
     // this.flowDepth = this.creator ? this.creator.flowDepth + 1 : 0;
 
-    //Provided/Inherited properties
-    this.providedProperties = { target: true };
-    if (this.creator) {
-      for (let property in this.creator.providedProperties) {
-        this.providedProperties[property] = true;
-        this[property] = this.creator[property];
-      }
-    }
-    for (let property of this.withdraw()) {
-      delete this.providedProperties[property];
-    }
-    for (let property of this.provide()) {
-      this.providedProperties[property] = true;
-    }
-
     // Set properties by bypassing setProperties
     for (let property in properties) {
       let destination = property;
@@ -125,9 +111,11 @@ export class Flow {
       this[destination] = properties[property];
     }
 
+    // Inherit target from parent. TODO: Use general inheritance mechanism instead or let this be? 
+    this.target = this.creator ? this.creator.target : null;
+
     // Create observable
     let me = observable(this, this.key);
-    // log("id: " + me.causality.id)
 
     // Set properties through interface
     me.setProperties(properties); // Set default values here
@@ -175,17 +163,75 @@ export class Flow {
     // throw new Error("Not implemented yet");
   }
 
-  provide() {
-    return [];
+  inherit(property) {
+    const result = this.inheritCached(property);
+    withoutRecording(()=> {
+      log("inherit: " + property + " result: " + result);
+    })
+    return result; 
   }
 
-  inherit(property) {
-    if (typeof(this[property]) !== "undefined") {
-      return this[property]
-    } else if (this.creator) {
-      return this.creator.inherit(property);
+  inheritCached(property) {
+    const context = this.getContext();
+    if (typeof(context[property]) === "undefined") {
+      invalidateOnChange(
+        () => {
+          log("caching")
+          context[property] = this.inheritUncached(property);
+          withoutRecording(()=> {
+            log(context[property]);
+          });
+        },
+        () => {
+          log('%c Invalidate!!! ', 'background: #222; color: #bada55');
+          delete context[property];
+        }
+      )
     }
-    return null;
+    return context[property];
+  }
+
+  inheritUncached(property) {
+    const context = this.getContext();
+    if (typeof(context[property]) !== "undefined") {
+      return context[property] 
+    } else if (this.equivalentCreator) {
+      return this.equivalentCreator.inheritUncached(property); 
+    } else if (this.parentPrimitive) {
+       return this.parentPrimitive.inheritUncached(property); 
+    } else {
+      console.warn("Could not find inherited property: " + property);
+    }
+  }
+  
+  inheritFromParentContainer(property) {
+    if (this[property]) {
+      return this[property];
+    } else if (this.parentPrimitive) {
+      const valueFromEquivalent = this.parentPrimitive.inheritFromEquivalentCreator(property);
+      if (valueFromEquivalent) {
+        return valueFromEquivalent;
+      }
+      return this.parentPrimitive.inheritFromParentContainer(property)
+    } else {
+      return null; 
+    }
+  }
+
+  inheritFromEquivalentCreator(property) {
+    const propertyValue = this[property];
+    if (typeof(propertyValue) !== "undefined") {
+      return propertyValue;
+    } else if (this.equivalentCreator) {
+      return this.equivalentCreator.inheritFromEquivalentCreator(property);
+    } else {
+      return null;
+    }
+  }
+
+
+  getContext() {
+    return this; 
   }
 
   withdraw() {
@@ -194,7 +240,6 @@ export class Flow {
 
   build(repeater) {
     if (this.buildFunction) {
-      //log("-----------------")
       return this.buildFunction(this);
     }
     throw new Error("Not implemented yet");
@@ -357,12 +402,15 @@ export class Flow {
     }
   }
 
-  ensureBuiltRecursive(flowTarget) {
-    workOnPriorityLevel(1, () => this.getPrimitive().ensureBuiltRecursive(flowTarget));
-    return this.getPrimitive();
+  ensureBuiltRecursive(flowTarget, parentPrimitive) {
+    this.parentPrimitive = parentPrimitive
+    workOnPriorityLevel(1, () => this.getPrimitive().ensureBuiltRecursive(flowTarget, parentPrimitive));
+    return this.getPrimitive(parentPrimitive);
   }
 
-  getPrimitive() {
+  getPrimitive(parentPrimitive) {
+    // if (this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Parent mismatch! this could be an error but it needs investigation.");
+    this.parentPrimitive = parentPrimitive
     // log("getPrimitive")
     const me = this;
     const name = this.toString(); // For chrome debugger.
@@ -400,10 +448,10 @@ export class Flow {
           if (!me.newBuild) {
             me.primitive = null; 
           } else if (!(me.newBuild instanceof Array)) {
-            me.primitive = me.newBuild.getPrimitive()  // Use object if it changed from outside, but do not observe primitive as this is the role of the expanderRepeater! 
+            me.primitive = me.newBuild.getPrimitive(this.parentPrimitive)  // Use object if it changed from outside, but do not observe primitive as this is the role of the expanderRepeater! 
           } else {
             me.primitive = me.newBuild
-              .map(fragment => fragment.getPrimitive())
+              .map(fragment => fragment.getPrimitive(this.parentPrimitive))
               .reduce((result, childPrimitive) => {
                 if (childPrimitive instanceof Array) {
                   childPrimitive.forEach(fragment => result.push(fragment));
@@ -494,42 +542,6 @@ export class Flow {
   getEquivalentRoot() {
     if (!this.equivalentCreator) return this;
     return this.equivalentCreator.getEquivalentRoot();
-  }
-
-  inherit(property) {
-    // Note: Caching is dangerous unless we have one repeater at each level that can push the new values down.
-    // A reaction that goes up a chain and caches on the way down, will find its own caches and stop, even if the 
-    // value at the top of the chain changed. 
-    if (this[property]) {
-      return this[property];
-    } else {
-      return this.creator.inherit(property);
-    }
-  }
-
-  inheritFromContainer(property) {
-    if (this[property]) {
-      return this[property];
-    } else if (this.parentPrimitive) {
-      const valueFromEquivalent = this.parentPrimitive.inheritPropertyFromEquivalent(property);
-      if (valueFromEquivalent) {
-        return valueFromEquivalent;
-      }
-      return this.parentPrimitive.inheritFromContainer(property)
-    } else {
-      return null; 
-    }
-  }
-
-  inheritPropertyFromEquivalent(property) {
-    const propertyValue = this[property];
-    if (typeof(propertyValue) !== "undefined") {
-      return propertyValue;
-    } else if (this.equivalentCreator) {
-      return this.equivalentCreator.inheritPropertyFromEquivalent(property);
-    } else {
-      return null;
-    }
   }
 
   show(value) {

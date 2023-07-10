@@ -10,6 +10,7 @@ import { installDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
 import { startPatternMatching } from "./application/patternMatching.js";
 import { startSuperDuperSimple } from "./application/superDuperSimple.js";
 import { buttonTest } from "./application/buttonTest.js";
+import { startModalDemo } from "./application/modalDemo.js";
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -27,8 +28,9 @@ setFlowConfiguration({
   warnWhenNoKey: false,
   traceReactivity: true
 });
-installDOMAnimation();
+// installDOMAnimation();
 
+// startModalDemo();
 startDemo();
 // startSuperSimple();
 // startSuperDuperSimple();
@@ -36,7 +38,7 @@ startDemo();
 // buttonTest();
 // startAnimationExample();
 
-// startHelloWorld();
+startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
 // startComplexFormApplication();

@@ -1009,18 +1009,20 @@ function createWorld(configuration) {
     if (state.postponeInvalidation == 0) {
       state.postponeRefreshRepeaters++;
       while (state.nextObserverToInvalidate !== null) {
-        let observer = state.nextObserverToInvalidate; state.nextObserverToInvalidate = null; 
+        let observer = state.nextObserverToInvalidate; 
+        state.nextObserverToInvalidate = null; 
         const nextToNotify = observer.nextToNotify; 
         if (nextToNotify) {
           observer.nextToNotify = null;
           state.nextObserverToInvalidate = nextToNotify;
+        } else {
+          state.lastObserverToInvalidate = null; 
         }
         // blockSideEffects(function() {
         observer.invalidateAction();
         exitPriorityLevel(observer);
         // });
       }
-      state.lastObserverToInvalidate = null;
       state.postponeRefreshRepeaters--;
       refreshAllDirtyRepeaters();
     }
@@ -1108,7 +1110,10 @@ function createWorld(configuration) {
         leaveContext( activeContext );
         return value;
       },
-      returnValue: null
+      returnValue: null,
+      causalityString() {
+        return "<invalidator>" + this.invalidateAction
+      }
     }
   }
 

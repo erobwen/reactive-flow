@@ -25,7 +25,7 @@ export class Modal extends Flow {
   }
 
   ensure() {
-    this.modalFrame = this.inheritFromContainer("modalFrame")
+    this.modalFrame = this.inheritFromParentContainer("modalFrame")
     if (this.isVisible && this.modalFrame) {
       this.visibleOnFrame = this.modalFrame;
       this.modalFrame.openModal(this.content);

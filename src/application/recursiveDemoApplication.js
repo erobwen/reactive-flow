@@ -35,9 +35,11 @@ export class RecursiveExample extends Flow {
     });
   }
 
-  provide() {
+  getContext() {
     // Give all grand-children access to myModel, they will get this as a property of their own.
-    return ["myModel"];
+    return {
+      myModel: this.myModel
+    };
   }
 
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
@@ -69,7 +71,7 @@ export class ControlRow extends Flow {
       rootText,
       button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
       moreButton,
-      numberInputField("Shared state", this.myModel, "value"),
+      numberInputField("Shared state", this.inherit("myModel"), "value"),
       {style: {padding: "10px"}} // Reactive programmatic styling! 
     )
   }
@@ -115,7 +117,7 @@ export class Item extends Flow {
       text({ key: "item-text", text: me.text}),
       button({key: "toggle-button", onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
       text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      text(" Shared state: " + me.myModel.value)
+      text(" Shared state: " + me.inherit("myModel").value)
     );
   }
 }
