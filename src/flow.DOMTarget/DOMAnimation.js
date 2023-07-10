@@ -104,6 +104,12 @@ export const flowChanges = {
     }
   },
 
+  *allAddedFlows() {
+    for (let flow of Object.values(this.globallyAdded)) {
+      yield flow; 
+    }
+  },
+  
   *allAnimatedAddedFlows() {
     for (let flow of Object.values(this.globallyAddedAnimated)) {
       yield flow; 
@@ -224,9 +230,12 @@ export function onFinishReBuildingFlow() {
   }
 
   // Find removed nodes
+  // log("find nodes to remove")
   for (let id in previousFlowChanges.idPrimitiveMap) {
     const inPreviousMap = previousFlowChanges.idPrimitiveMap[id];
     if (typeof(idPrimitiveMap[id]) === "undefined" && !inPreviousMap.parentPrimitive) { // Consider: Keep track of directly removed using inPreviousMap.parentPrimitive? 
+      // log(inPreviousMap);
+      // log(inPreviousMap.parentPrimitive);
       flowChanges.globallyRemoved[id] = inPreviousMap;
     }
   }
@@ -251,6 +260,7 @@ export function onFinishReBuildingFlow() {
 
   function toStrings(changes) {
     return {
+      addedWithoutAnimation: Object.values(changes.globallyAdded).map(flow => flow.toString()),
       added: Object.values(changes.globallyAddedAnimated).map(flow => flow.toString()),
       resident: Object.values(changes.globallyResidentAnimated).map(flow => flow.toString()), 
       moved: Object.values(changes.globallyMovedAnimated).map(flow => flow.toString()),
@@ -592,6 +602,22 @@ function activateAnimation(currentFlowChanges) {
       setupAnimationCleanup(flow.domNode, flow.domNode.changes);
       console.groupEnd();
     }
+
+
+    // setTimeout(() => {
+      // log(currentFlowChanges)
+      for (let flow of currentFlowChanges.allAddedFlows()) {
+        // log(flow);
+        let scan = flow; 
+        while(scan) {
+          // log(scan);
+          scan.onDidDisplayFirstFrame();
+          scan = scan.equivalentCreator;
+        } 
+        // Consider: Can we really do this here without messing up the flow changes -> dom changes cycle? 
+        // Maybe we have to wait until after we finish the animation starting? 
+      }
+    // }, 0)
   });
 }
 

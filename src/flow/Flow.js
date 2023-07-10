@@ -68,10 +68,14 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   }
 }
 
-window.allFlows = {};
+window.flows = {};
 export class Flow {
   get id() {
     return this.causality.id;
+  }
+
+  get () {
+    return this.causality.target;
   }
 
   get unobservable() {
@@ -81,11 +85,11 @@ export class Flow {
 
   initialUnobservables() {
     return {
-      removed: {},
-      added: {},
-      resident: {},
-      incoming: {},
-      outgoing: {}
+      // removed: {},
+      // added: {},
+      // resident: {},
+      // incoming: {},
+      // outgoing: {}
     };
   }
 
@@ -162,6 +166,11 @@ export class Flow {
     // Component worker here.
   }
 
+  onDidDisplayFirstFrame() {
+    // Component was drawn for the first animation frame, 
+    // If you want to change an animated property on entry, now is the time. 
+  }
+  
   disposeState() {
     // throw new Error("Not implemented yet");
   }
@@ -212,7 +221,7 @@ export class Flow {
   onEstablish() {
     this.causality.established = true; 
     this.unobservable.established = true; 
-    window.allFlows[this.causality.id] = this;
+    window.flows[this.causality.id] = this;
     creators.push(this);
     this.setState();
     creators.pop();
@@ -242,7 +251,7 @@ export class Flow {
 
   onDispose() {
     console.log("DISPOSING: " + this.toString());
-    delete window.allFlows[this.causality.id];
+    delete window.flows[this.causality.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
@@ -255,6 +264,7 @@ export class Flow {
   }
 
   onVisibilityWillChange(visibility) {
+    log("onVisibilityWillChange: " + this.toString() + ".visibility = " + visibility);
     // Called if the visibility is changed for this component. 
     // Since Flow allows hidden component that maintain their state but are not disposed, 
     // this is how you know if your component is visible.  
