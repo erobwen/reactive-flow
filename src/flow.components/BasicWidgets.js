@@ -17,7 +17,8 @@ export let basicWidgetTheme = {
   },
   inputField: {
 
-  } 
+  },
+  fontSize: 20,
 }
 
 

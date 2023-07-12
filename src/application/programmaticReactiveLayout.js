@@ -1,7 +1,7 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { observable, Flow, flow, repeat, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { numberInputField, text } from "../flow.components/BasicWidgets";
-import { centerMiddle, column, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../flow.components/Layout";
+import { basicWidgetTheme, numberInputField, text } from "../flow.components/BasicWidgets";
+import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../flow.components/Layout";
 import { div } from "../flow.components/BasicHtml"
 ;
 import { colorLog } from "../flow/utility";
@@ -30,7 +30,8 @@ export class ProgrammaticReactiveLayout extends Flow {
 
     const controlPanel = column("control-panel",
       row(numberInputField("Rows", this, "rows")),
-      row(numberInputField("Columns", this, "columns")), 
+      row(numberInputField("Columns", this, "columns")),
+      text("Try change the size of the browser window, and add/remove columns/rows. Try do this with css :-)"),
       {style: flexAutoStyle}
     );
 
@@ -48,7 +49,7 @@ export class ProgrammaticReactiveLayout extends Flow {
     while(rowIndex < this.rows) {
       const columns = [];
       let columnIndex = 0;
-      cellType = rowIndex % 2;
+      cellType = rowIndex % 3;
       while(columnIndex < this.columns) {
         const key = rowIndex + "x" + columnIndex;
         const bounds = {width: columnWidth, height: rowHeight};
@@ -59,9 +60,12 @@ export class ProgrammaticReactiveLayout extends Flow {
           case 1: 
             columns.push(new StringDisplay({key, bounds, style: flexerStyle}));
             break; 
+          case 2: 
+            columns.push(new FixedAspectRatioDisplay({key, bounds, style: flexerStyle}));
+            break; 
         }
 
-        cellType = (cellType + 1)% 2; 
+        cellType = (cellType + 1)% 3; 
         columnIndex++;
       }
       const currentRow = row(columns, {style: flexerStyle});
@@ -90,25 +94,27 @@ export class BoundsDisplay extends Flow {
     this.bounds = bounds;
     this.style = style; 
   } 
-  
+    
   build() {
+    const text = "bounds: " + Math.round(this.bounds.width) + " x " + Math.round(this.bounds.height);
     return (
       centerMiddle(
-        text("bounds: [" + Math.round(this.bounds.width) + " x " + Math.round(this.bounds.height) + "]"), 
+        scaledTextWithMaxFontSize(
+          text, 
+          {width: this.bounds.width}
+        ),
         {style: {
           overflow: "hidden",
           border: "1px solid",
           backgroundColor: "silver", 
           boxSizing: "border-box",
-
-          // height: "100%", 
-          // width: "100%"
           ...this.style
         }}
       )
     );
   }
 }
+
 
 export class StringDisplay extends Flow {
 
@@ -118,9 +124,7 @@ export class StringDisplay extends Flow {
   } 
   
   build() {
-    // colorLog("HeRE");
-    // log(this.bounds)
-    const fittedString = "Fitted String"// + this.key; 
+    const fittedString = "Fitted Text"// + this.key; 
     return (
       centerMiddle(
         text(fittedString), 
@@ -129,13 +133,95 @@ export class StringDisplay extends Flow {
           border: "1px solid",
           boxSizing: "border-box",
           fontSize: fitTextWithinWidth(fittedString, this.bounds.width) + "px",
-          // width: "100%"
           ...this.style
         }}
       )
     );
   }
 }
+
+function scaledTextWithMaxFontSize(...parameters) {
+  const properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties)
+  // colorLog("HERE")
+  // console.log(properties);
+  const fontSize = Math.min(basicWidgetTheme.fontSize, fitTextWithinWidth(properties.text, properties.width*0.8));
+  // log(fontSize)
+  return (
+    centerMiddle(
+      text(properties.text), 
+      {
+        style: {
+          ...fitStyle,
+          overflow: "hidden",
+          fontSize: fontSize + "px",
+          ...properties.style
+        }
+      }, 
+      {    
+        key: properties.key,
+      }
+    )
+  );
+}
+
+
+export class FixedAspectRatioDisplay extends Flow {
+
+  setProperties({bounds, style}) {
+    this.bounds = bounds;
+    this.style = style; 
+  } 
+
+  setState() {
+    this.aspectRatio = (Math.random()*4 + 1) / (1 + (Math.random()*4));
+  }
+  
+  build() {
+    const fittedString = "Fitted String"// + this.key;
+    
+    const boundsAspectRatio = this.bounds.width / this.bounds.height; 
+
+    let width; 
+    let height; 
+    if (this.aspectRatio > boundsAspectRatio) {
+      // Constrained by width
+      const padding = Math.min(10, this.bounds.width*0.1);
+      width = this.bounds.width - padding*2;
+      height = width / this.aspectRatio;
+    } else {
+      // Constrained by height
+      const padding = Math.min(10, this.bounds.height*0.1);
+      height = this.bounds.height - padding*2;
+      width = height * this.aspectRatio; 
+    }
+
+    return (
+      centerMiddle(
+        div(
+          scaledTextWithMaxFontSize(
+            "width / height = " + Math.round(this.aspectRatio * 100) / 100, 
+            {width}
+          ),{
+          style: {
+            border: "1px solid",
+            boxSizing: "border-box",
+            backgroundColor: "#bbbbff",
+            width: width + "px", 
+            height: height + "px"
+          }
+        }), 
+        {style: {
+          overflow: "hidden",
+          border: "1px solid",
+          boxSizing: "border-box",
+          ...this.style
+        }}
+      )
+    );
+  }
+}
+
 
 
 

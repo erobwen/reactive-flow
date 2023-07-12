@@ -36,7 +36,7 @@ export class Demo extends Flow {
       new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
       new RecursiveExample({key: "recursiveDemo", name: "Recursive Example"}),
-      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsive Layout"}),
+      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"}),
       // "Toggle": new ToggleView()
     ];
     
