@@ -35,7 +35,7 @@ export class Demo extends Flow {
       new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
       new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
       // "Super Simple": new SuperSimple({model: observable({value: ""})}),
-      new RecursiveExample({key: "recursiveDemo", name: "RecursiveExample"}),
+      new RecursiveExample({key: "recursiveDemo", name: "Recursive Example"}),
       new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsive Layout"}),
       // "Toggle": new ToggleView()
     ];
@@ -45,11 +45,11 @@ export class Demo extends Flow {
     }
 
     // this.choosen = this.components.find(component => component.key === "portalExample");
-    this.choosen = this.components.find(component => component.key === "complexForm");
+    // this.choosen = this.components.find(component => component.key === "complexForm");
+    this.choosen = this.components.find(component => component.key === "programmaticReactiveLayout");
     // this.choosen = this.components.find(component => component.key === "modalExample");
     // this.choosen = this.components["Recursive and Modal Demo"];
     // this.choosen = this.components["Hello World"];
-
   }
   
   disposeState() {
@@ -59,10 +59,6 @@ export class Demo extends Flow {
     }
     this.leftColumnPortal.onDispose();
     this.leftColumnPortal.dispose();
-  }
-
-  provide() {
-    return ["leftColumnPortal"];
   }
 
   buildButton(component) { // Extra function to get a stack frame that provides variables to the lambda function.

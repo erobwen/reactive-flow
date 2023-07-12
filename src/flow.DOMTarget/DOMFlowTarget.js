@@ -28,8 +28,8 @@ export class DOMFlowTarget extends FlowTarget {
         if (document.body.style.height != window.innerHeight + "px")
           document.body.style.height = window.innerHeight + "px";
           transaction(() => {
-            if (this.content) {
-              this.content.bounds = {width: window.innerWidth, height: window.innerHeight}
+            if (this.flow) {
+              this.flow.bounds = {width: window.innerWidth, height: window.innerHeight}
             }
           });
       });
@@ -50,7 +50,7 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   toString() {
-    return "[target]" + (this.content ? this.content.toString() : "null");
+    return "[target]" + (this.flow ? this.flow.toString() : "null");
   }
 
   setContent(flow) {

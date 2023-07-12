@@ -42,13 +42,14 @@ export function div2(...parameters) {
  * Element Node Attributes 
  */
 export function extractAttributes(properties) {
+  // TODO: Do not destructivley change properties... can we guarantee that we do not change a const 
   const attributes = {};
   if (!properties) return attributes;
   eventHandlerContentElementAttributes.forEach(
     attribute => {
       if (typeof(properties[attribute.camelCase]) !== "undefined") {
         attributes[attribute.lowerCase] = properties[attribute.camelCase];
-        delete properties[attribute];
+        delete properties[attribute.camelCase];
       }
     }
   );
@@ -56,10 +57,11 @@ export function extractAttributes(properties) {
     attribute => {
       if (typeof(properties[attribute.camelCase]) !== "undefined") {
         attributes[attribute.lowerCase] = properties[attribute.camelCase];
-        delete properties[attribute];
+        delete properties[attribute.camelCase]; // Destructive change of properties... could this cause problems?
       }
     }
   );
+  properties.attributes = attributes;
   return attributes;
 }
 
@@ -165,13 +167,27 @@ export const globalElementAttributesCamelCase = [
 
 const globalElementAttributes = globalElementAttributesCamelCase.map(camelCase => ({camelCase, lowerCase: camelCase.toLowerCase()}));
 
+/**
+ * Child styles
+ */
 
+export function extractChildStyles(style) {
+  // style = {...style}
+  const childStyle = {}
+  childStylePropertiesCamelCase.forEach(property => {
+    if (typeof(style[property]) !== "undefined") {
+      childStyle[property] = style[property];
+      delete style[property];
+    }
+  });
+  return [childStyles, style]; 
+}
 
-const childStyleProperties = [
+const childStylePropertiesCamelCase = [
   "order",
-  "flex-grow",
-  "flex-shrink",
-  "flex-basis",
+  "flexGrow",
+  "flexShrink",
+  "flexBasis",
   "flex", 
   // {
   //   compound: "flex", 
@@ -181,5 +197,14 @@ const childStyleProperties = [
   //     "flex-basis",
   //   ]
   // },
-  "align-self"
+  "alignSelf"
 ]
+
+const childStyleProperties = childStylePropertiesCamelCase.map(camelCase => ({camelCase, lowerCase: camelCase.toLowerCase()}));
+
+
+export function extractProperty(object, property) {
+  const result = object[property];
+  delete object[property];
+  return result; 
+}

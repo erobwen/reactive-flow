@@ -1,24 +1,25 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
+import { deepFreeze } from "../flow/utility.js";
 import { styledDiv } from "./BasicHtml.js";
 const log = console.log;
 
 /**
  * Basic layout styles
+ * TODO: Deep freeze all styles. 
  */
-
-export const flexContainerStyle = {
+export const flexContainerStyle = deepFreeze({
   overflow: "hidden",
   boxSizing: "border-box",
   display:"flex",
   alignItems: "stretch", 
   justifyContent: "flexStart",
   whiteSpace: "pre"
-};
+});
 
-export const rowStyle = {
+export const rowStyle = deepFreeze({
   ...flexContainerStyle,
   flexDirection: "row"
-};
+});
 
 export const columnStyle = {
   ...flexContainerStyle,
@@ -68,6 +69,15 @@ export const flexGrowShrinkStyle = {
   flexGrow: 1,
   flexShrink: 1,
   flexBasis: 1,
+}
+
+// For components that needs to grow and shrink without regard to its contents. Scroll panels typically, or for equal distribution of space.
+export const flexerStyle = {
+  overflow: "hidden", 
+  boxSizing: "border-box",
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: 0,
 }
 
 export function flexGrowShrinkRatioStyle(ratio) {

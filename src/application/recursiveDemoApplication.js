@@ -61,7 +61,7 @@ export class ControlRow extends Flow {
       
   build() {
     const me = this;    
-    const rootText = text({ key: "root-text", text: "My Recursive List:"});
+    const rootText = text({ key: "root-text", text: "Recursive Structure"});
     const moreButton = button({key: "more-button", onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
 
     // Early finalization of sub-component, and dimension analysis of it while building 
@@ -69,14 +69,17 @@ export class ControlRow extends Flow {
 
     return row(
       rootText,
-      button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
-      moreButton,
+      row(
+        text("Depth:"),
+        moreButton, 
+        button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
+        ),
       numberInputField("Shared state", this.inherit("myModel"), "value"),
-      {style: {padding: "10px"}} // Reactive programmatic styling! 
+      {style: {padding: "10px", gap: "20px"}} // Reactive programmatic styling! 
     )
   }
 }
-  
+
 export class List extends Flow {
   // This is the function setProperties where you declare all properties that a parent can set on its child. This is optional, but is a good place to define default values, modify values given by parent, or document what properties that the component needs.   
   setProperties({maxCount, count}) {
@@ -86,7 +89,7 @@ export class List extends Flow {
 
   build() {
     const children = [];
-    children.push(new Item("first-item", {text: "Item " +  this.count}));
+    children.push(new Item("first-item", {depth: this.count}));
     if (this.count < this.maxCount) {
       children.push(new List("rest-list", {maxCount: this.maxCount, count: this.count + 1}));
     }
@@ -95,14 +98,13 @@ export class List extends Flow {
 }
 
 export class Item extends Flow {
-  setProperties({text}) {
-    this.text = text;
+  setProperties({depth}) {
+    this.depth = depth;
   }
   
   setState() {
-    // This is the place to define view model variables. In this case the "on" property is defined. 
-    this.on = true;
-    this.showModal = false;     
+    // This is the place to define view model variables. In this case the "on" property is defined.
+    this.value = 42;
   }
  
   build() {
@@ -114,33 +116,35 @@ export class Item extends Flow {
     }
 
     return row("item-row",  // row is a primitive flow that can be converted into a DOM element by the DomFlowTarget module. However, a 1:1 mapping to HTML can also be possible, by using a Div flow for example. 
-      text({ key: "item-text", text: me.text}),
-      button({key: "toggle-button", onClick: () => { loga("Toggle on"); me.on = !me.on; }, text: "toggle"}),
-      text({key: "text", style: {width: "60px"}, text: me.on ? "on" : "off"}),
-      text(" Shared state: " + me.inherit("myModel").value)
+      text({ key: "item-text", text: "Depth " +  me.depth}),
+      numberInputField("Local state", this, "value"),
+      text(" Shared state: " + me.inherit("myModel").value, {}), 
+      {
+        style: {gap: "20px"}
+      }
     );
   }
 }
 
-function shadePanel(close) {
-  const target = getTarget();
-  return target.elementNode({
-    tagName: "div", 
-    classNameOverride: "shadePanel",
-    attributes: {
-      onclick: () => {close();},
-      style:{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%", 
-        height: "100%", 
-        backgroundColor: "black", 
-        opacity: 0.2
-      }
-    }, 
-  });
-}
+// function shadePanel(close) {
+//   const target = getTarget();
+//   return target.elementNode({
+//     tagName: "div", 
+//     classNameOverride: "shadePanel",
+//     attributes: {
+//       onclick: () => {close();},
+//       style:{
+//         position: "absolute",
+//         top: 0,
+//         left: 0,
+//         width: "100%", 
+//         height: "100%", 
+//         backgroundColor: "black", 
+//         opacity: 0.2
+//       }
+//     }, 
+//   });
+// }
 
 
 /**
@@ -155,5 +159,6 @@ export function startRecursiveDemo() {
   // console.log(root.buildRepeater.buildIdObjectMap);
   root.getChild("control-row").getChild("more-button").onClick();
   root.findChild("more-button").onClick();
-  root.getChild(["root-list", "rest-list", "first-item", "toggle-button"]).onClick();
+  root.findChild("more-button").onClick();
+  root.findChild("more-button").onClick();
 }

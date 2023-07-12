@@ -1,41 +1,91 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
-import { div, extractAttributes } from "./BasicHtml.js";
+import { div, extractAttributes, extractChildStyles, extractProperty } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
 const log = console.log;
+
+const lineHeight = "20px"; 
+
+export let basicWidgetTheme = {
+  lineHeight: "20px",
+  rowGap: "10px", 
+  text: {
+    style: {
+      margin: "5px",
+      lineHeight
+    }
+  },
+  inputField: {
+
+  } 
+}
+
+
 
 /**
  * Basic widgets
  */
 
+
+/**
+ * Text macro flow
+ * 
+ * arguments: key, text, animate, + all HTML attributes 
+ */
 export function text(...parameters) {
   let properties = readFlowProperties(parameters);
-  findTextAndKeyInProperties(properties);
-  const attributes = extractAttributes(properties);
 
-  const textProperties = {
-    key: properties.key ? properties.key + ".text" : null,
-    text: properties.text,
-  }
-  const textCut = textProperties.text.substring(0, 20) + "...";
+  // Default style
+  properties.style = Object.assign({}, basicWidgetTheme.text.style, properties.style);
 
-  const label = getTarget().elementNode(properties.key ? properties.key : null, // + ".label" 
-    {
-      classNameOverride: "text[" + textCut + "]",
-      tagName:"label",
-      attributes, 
-      children: [getTarget().textNode(textProperties)], 
-      ...properties 
-    });
-
-  if (properties.div) {
-    return div(label);
-  } else {
-    return label; 
-  }
-
+  return unstyledText(properties)
 }
 
+export function unstyledText(...parameters) {
+  let properties = readFlowProperties(parameters);
+  findTextAndKeyInProperties(properties);
+  extractAttributes(properties);
+  const debugIdentifier = properties.text.substring(0, 20) + "...";
+
+  // A label surrounded by div
+  if (properties.div) return textDiv(properties);
+  
+  const key = extractProperty(properties, "key");
+  const label = getTarget().elementNode(key ? key : null, 
+    {
+      classNameOverride: "text[" + debugIdentifier + "]",
+      tagName:"label",
+      attributes: extractProperty(properties, "attributes"), 
+      children: [getTarget().textNode({
+        key: key ? key + ".text" : null,
+        text: extractProperty(properties, "text"),
+      })], 
+      animate: extractProperty(properties, "animate")
+    });
+
+  // Error on too many properties. 
+  if (Object.keys(properties).length) {
+    throw new Error("text() macro flow got unknown properties:" + Object.keys(properties).join(", "));
+  }
+
+  return label; 
+}
+
+export function textDiv(properties) {
+  delete properties.div;
+  const style = extractChildStyles(extraproperties.attributes.style); 
+  const animate = extractProperty(properties, "animate"); 
+  const key = extractProperty(properties, "key");
+  properties.key = key ? key + ".label" : null;
+  return div(unstyledText(properties), {key, style, animate});
+}
+
+
+/**
+ * Input macro flow
+ * 
+ * highlighted arguments: label, getter, setter,
+ */
 export function checkboxInputField(label, getter, setter, ...parameters) {
   return inputField("checkbox", label, getter, setter, ...parameters);
 }
@@ -70,7 +120,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
   delete properties.inputProperties;
   if (type === "number") {
     if (!inputAttributes.style) inputAttributes.style = {};
-    if (!inputAttributes.style.width) inputAttributes.style.width = "50px"; 
+    if (!inputAttributes.style.width) inputAttributes.style.width = "50px";
   } 
   const attributes = {
     oninput: callback(event => setter(type === "checkbox" ? event.target.checked : event.target.value), properties.key + ".oninput"),
@@ -92,7 +142,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     tagName: "input", 
     attributes, 
     onClick: properties.onClick})];
-  const labelChild = text(label, {style: {paddingRight: "4px"}, ...properties.labelProperties}); 
+  const labelChild = text(label, {style: {paddingRight: "4px", margin: ""}, ...properties.labelProperties}); 
   if (type === "checkbox") {
     children.push(labelChild);
   } else {
@@ -100,7 +150,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     children.unshift(labelChild);
   }
   
-  return row({style: {padding: "4px", ...properties.style}, children, ...properties}, );
+  return row({style: {alignItems: "center", padding: "4px", ...properties.style}, children, ...properties}, );
 }
 
 // export const button = modernButton;

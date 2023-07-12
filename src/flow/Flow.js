@@ -198,7 +198,13 @@ export class Flow {
     } else if (this.equivalentCreator) {
       return this.equivalentCreator.inheritUncached(property); 
     } else if (this.parentPrimitive) {
+      // This is to ensure inheritance works over component compositions, so that children can inherit properties from parent in compositions like parent({children: child() }). 
        return this.parentPrimitive.inheritUncached(property); 
+    } else if (this.creator) {
+      // This might be useful for maintaining inheritance while a child component is decoupled from the visible tree. 
+      // But it cannot be as the first option as inheritance would then skip over the parentPrimitive structure. 
+      // Note that a composed component might not have an equivalent creator, and if not visible it has no parentPrimitive.
+      return this.creator.inheritUncached(property); 
     } else {
       console.warn("Could not find inherited property: " + property);
     }
@@ -614,7 +620,7 @@ export function findBuildInProperties(properties) {
 
 export function readFlowProperties(arglist, config) {
   // Shortcut if argument is a properties object
-  if (arglist[0] !== null && typeof(arglist[0]) === "object" && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
+  if (arglist[0] !== null && typeof(arglist[0]) === "object" && !(arglist[0] instanceof Array) && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
     return arglist[0];
   }
 

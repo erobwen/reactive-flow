@@ -19,7 +19,7 @@
     let upperLimitFontSize = guessFontSize * 2;
     let upperLimitWidth;
     
-    return guessFontSize; // Somehow this seems to work pretty ok... without any font analysis...
+    // return guessFontSize; // Somehow this seems to work pretty ok... without any font analysis...
     
     let iterations = 10;
     while(iterations-- > 0) {

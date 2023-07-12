@@ -38,7 +38,7 @@ startDemo();
 // buttonTest();
 // startAnimationExample();
 
-startHelloWorld();
+// startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
 // startComplexFormApplication();
