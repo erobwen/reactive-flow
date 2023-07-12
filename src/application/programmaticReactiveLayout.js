@@ -44,21 +44,24 @@ export class ProgrammaticReactiveLayout extends Flow {
     let rowIndex = 0;
     const rowHeight = gridHeight / this.rows;
     const columnWidth = gridWidth / this.columns;
-    let toggle = false; 
+    let cellType = false; 
     while(rowIndex < this.rows) {
       const columns = [];
       let columnIndex = 0;
+      cellType = rowIndex % 2;
       while(columnIndex < this.columns) {
-        log("adding cell")
         const key = rowIndex + "x" + columnIndex;
         const bounds = {width: columnWidth, height: rowHeight};
-        if (toggle) {
-          columns.push(new BoundsDisplay({key, bounds, style: flexerStyle}));
-        } else {
-          columns.push(new StringDisplay({key, bounds, style: flexerStyle}));
+        switch(cellType) {
+          case 0: 
+            columns.push(new BoundsDisplay({key, bounds, style: flexerStyle}));
+            break; 
+          case 1: 
+            columns.push(new StringDisplay({key, bounds, style: flexerStyle}));
+            break; 
         }
 
-        toggle = !toggle; 
+        cellType = (cellType + 1)% 2; 
         columnIndex++;
       }
       const currentRow = row(columns, {style: flexerStyle});
@@ -91,7 +94,7 @@ export class BoundsDisplay extends Flow {
   build() {
     return (
       centerMiddle(
-        text("bounds: [" + Math.round(this.bounds.width) + " x " + Math.round(this.bounds.height) + "]" + this.key), 
+        text("bounds: [" + Math.round(this.bounds.width) + " x " + Math.round(this.bounds.height) + "]"), 
         {style: {
           overflow: "hidden",
           border: "1px solid",
