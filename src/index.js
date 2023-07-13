@@ -28,7 +28,7 @@ setFlowConfiguration({
   warnWhenNoKey: false,
   traceReactivity: true
 });
-// installDOMAnimation();
+installDOMAnimation();
 
 // startModalDemo();
 // startDemo();

@@ -124,8 +124,8 @@ export class FlowPrimitive extends Flow {
   getAnimation() {
     // return null;
     let result; 
-    debugger; 
-    colorLog("--------------------------")
+    // debugger; 
+    // colorLog("--------------------------")
     if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
       log("fooo")
       result = null; 

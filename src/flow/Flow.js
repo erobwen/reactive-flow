@@ -417,8 +417,8 @@ export class Flow {
   }
 
   getPrimitive(parentPrimitive) {
-    // if (this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Parent mismatch! this could be an error but it needs investigation.");
-    this.parentPrimitive = parentPrimitive
+    if (parentPrimitive && this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Parent mismatch! this could be an error but it needs investigation.");
+    if (parentPrimitive) this.parentPrimitive = parentPrimitive
     // log("getPrimitive")
     const me = this;
     const name = this.toString(); // For chrome debugger.
