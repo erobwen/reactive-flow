@@ -5,6 +5,7 @@ import { div } from "../flow.components/BasicHtml";
 import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
 import { checkboxInputField, numberInputField, text } from "../flow.components/BasicWidgets";
 import { button, textInputField } from "../flow.components/Theme";
+import { suitcaseIcon } from "../flow.components/Icons";
 
 const log = console.log;
 
@@ -167,7 +168,7 @@ export class ComplexForm extends Flow {
       row(
         div("scrollPanel",
           column(
-            // Header            
+            // Header       
             text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
             text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
 
@@ -301,6 +302,7 @@ export class LuggageForm extends Flow {
     // return div({style: {height: "48px", backgroundColor: "green"}})
     return panel(
       row(
+        suitcaseIcon({style: {padding: "14px"}}),
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
         button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)}, {ripple: true})

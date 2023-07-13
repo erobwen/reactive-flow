@@ -1,5 +1,6 @@
 import { extractAttributes } from "../flow.components/BasicHtml";
 import { trace } from "../flow/Flow";
+import { colorLog } from "../flow/utility";
 import { extractProperties } from "./DOMAnimation";
 import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    
 const log = console.log;
@@ -57,8 +58,13 @@ const log = console.log;
           this.updateStyle(element, newValue);
         } else {
           // Note, only change if we have a new value. Alow for animation kit to set the value to something else while this code is unaware.  
-          if (this.unobservable.previouslySetAttributes[property] !== newValue) { 
-            element[property] = newValue;
+          if (this.unobservable.previouslySetAttributes[property] !== newValue) {
+            if (property === "class") {
+              // TODO: Investigate why we had to use the setAttribute function for it to work with "class", is it the same with more attributes?
+              element.setAttribute('class', newValue);
+            } else {
+              element[property] = newValue;
+            }
           }
           newPreviouslySetAttributes[property] = newValue;  
         }
@@ -168,5 +174,4 @@ const log = console.log;
       // }
     }
   }
-  
   

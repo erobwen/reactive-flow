@@ -61,6 +61,7 @@ export function extractAttributes(properties) {
       }
     }
   );
+  if (properties.className) attributes["class"] = properties.className;  
   properties.attributes = attributes;
   return attributes;
 }

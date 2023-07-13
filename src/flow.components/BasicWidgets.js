@@ -22,7 +22,6 @@ export let basicWidgetTheme = {
 }
 
 
-
 /**
  * Basic widgets
  */

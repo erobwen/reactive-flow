@@ -40,7 +40,7 @@ export class ProgrammaticReactiveLayout extends Flow {
     //console.log(controlPanelHeight);
     const gridHeight = this.bounds.height - controlPanelHeight;
     const gridWidth = this.bounds.width;
-    colorLog("build");
+    // colorLog("build");
     const rows = [];
     let rowIndex = 0;
     const rowHeight = gridHeight / this.rows;
