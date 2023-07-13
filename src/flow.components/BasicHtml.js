@@ -163,7 +163,7 @@ export const globalElementAttributesCamelCase = [
   "style",
   "tabIndex",
   "title",
-  "translate"
+  "translate",
 ];
 
 const globalElementAttributes = globalElementAttributesCamelCase.map(camelCase => ({camelCase, lowerCase: camelCase.toLowerCase()}));

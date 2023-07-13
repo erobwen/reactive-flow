@@ -53,11 +53,12 @@ export function setFlowConfiguration(newConfiguration) {
 }
 
 function onFinishedPriorityLevel(level, finishedAllLevels) {
-  // if (trace) log("<<<finished priority: " + level + ">>>");
+  if (trace) log("<<<finished priority: " + level + ">>>");
   // if (finishedAllLevels) log("no more repeaters...");
 
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
+    log(configuration.onFinishReBuildingFlowCallbacks)
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
   }
 
@@ -229,6 +230,7 @@ export class Flow {
     if (typeof(propertyValue) !== "undefined") {
       return propertyValue;
     } else if (this.equivalentCreator) {
+      log(this.equivalentCreator)
       return this.equivalentCreator.inheritFromEquivalentCreator(property);
     } else {
       return null;

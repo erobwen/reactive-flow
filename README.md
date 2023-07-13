@@ -95,4 +95,3 @@ When build is run for a component, child objects are created, but in the case wh
 The following slide shows the theory and philosopy behind Flow, in particular the idea behind Programmatic Reactive Layout and the No CSS principles.
  
 https://docs.google.com/presentation/d/13E7E8TzRBoGBJ5BhVV78-s73AnYHnI4MrQ233xihZdY/edit?usp=sharing
-

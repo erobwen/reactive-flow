@@ -21,6 +21,12 @@ export class ModernButton extends Flow {
     this.hoverEffect = hoverEffect;
     this.children = children; 
     this.onClick = onClick;
+
+    // New args: 
+    this.lightenOnHoverAndPressed = true;  
+    this.mouseoverEffectOnPressed = true;  
+
+
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
 
     this.style = {
@@ -223,7 +229,7 @@ export class ModernButton extends Flow {
       style.cursor = "pointer";
     }
     return (
-      wrapper(
+      wrapper( // Wrapper used to isolate for animation? TODO: filter child attributes to wrapper. 
         centerMiddle("centerMiddle",
           text(
             "text",

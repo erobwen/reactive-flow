@@ -11,7 +11,7 @@ const log = console.log;
 /**
  * Flow definitions
  */
-const smallSpace = "10px";
+const smallSpace = "0px";
 // const largeSpace = "20px";
 // const smallSpace = "0px";
 const largeSpace = "0px";
@@ -56,7 +56,7 @@ export class AnimationExample extends Flow {
     this.listA = observable([]);
     this.listB = observable([]);
     transaction(() => {
-      let count = 1; 
+      let count = 0; 
       while (count-- > 0) addRandomly(removeOneRandom(this.store), this.listB);
     });
   }

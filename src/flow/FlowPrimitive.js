@@ -1,6 +1,7 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMFlowAnimation.js";
 import { configuration, finalize, Flow, readFlowProperties, repeat, trace } from "./Flow.js";
+import { colorLog } from "./utility.js";
 
 const log = console.log;
 
@@ -121,23 +122,30 @@ export class FlowPrimitive extends Flow {
   }
 
   getAnimation() {
+    // return null;
     let result; 
+    debugger; 
+    colorLog("--------------------------")
     if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
+      log("fooo")
       result = null; 
     } else {
-      result = this.inheritPropertyFromEquivalent("animate"); 
+      log("bar");
+      result = this.inheritFromEquivalentCreator("animate"); 
   
       if (!result && this.parentPrimitive) {
-        result = this.parentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
+        log()
+        result = this.parentPrimitive.inheritFromEquivalentCreator("animateChildren");   
       }      
       
       if (!result && this.previousParentPrimitive) {
-        result = this.previousParentPrimitive.inheritPropertyFromEquivalent("animateChildren");   
+        result = this.previousParentPrimitive.inheritFromEquivalentCreator("animateChildren");   
       }
     }
     if (result === true) result = standardAnimation;
     this.animation = result; // for quick access after call is made
-    // log(result)
+    
+    log(result)
     return result;   
   }
 }
