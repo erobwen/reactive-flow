@@ -1,5 +1,5 @@
 import getWorld from "../causality/causality.js";
-import { isUpperCase } from "./utility.js";
+import { colorLog, isUpperCase } from "./utility.js";
 
 export const world = getWorld({
   useNonObservablesAsValues: true,
@@ -607,8 +607,8 @@ export function findTextAndKeyInPropertiesUsingCase(properties) {
     } else if (properties.key && !properties.text) {
       // only text left
       properties.text = string; 
-    } else if (!(/[A-Z]|\s/.test(string[0])) && !properties.key) {
-      // Not big char or blank, assume it is a key
+    } else if (/[a-z0-9]/.test(string[0]+"") && !properties.key) { //!(/[A-Z]|\s/.test(string[0] + "")
+      // We assume this is a key
       properties.key = string;
     } else if (!properties.text){
       // Big character, assume it is a text.

@@ -1,5 +1,5 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
-import { div, extractAttributes, extractChildStyles, extractProperty } from "./BasicHtml.js";
+import { div, extractAttributes, extractChildStyles, extractProperty, textToTextNode } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
 const log = console.log;
@@ -44,8 +44,9 @@ export function text(...parameters) {
 export function unstyledText(...parameters) {
   let properties = readFlowProperties(parameters);
   findTextAndKeyInProperties(properties);
+  textToTextNode(properties);
   extractAttributes(properties);
-  const debugIdentifier = properties.text.substring(0, 20) + "...";
+  const debugIdentifier = properties.text ? properties.text.substring(0, 20) + "..." : "...";
 
   // A label surrounded by div
   if (properties.div) return textDiv(properties);
@@ -56,10 +57,7 @@ export function unstyledText(...parameters) {
       classNameOverride: "text[" + debugIdentifier + "]",
       tagName:"label",
       attributes: extractProperty(properties, "attributes"), 
-      children: [getTarget().textNode({
-        key: key ? key + ".text" : null,
-        text: extractProperty(properties, "text"),
-      })], 
+      children: extractProperty(properties, "children"), 
       animate: extractProperty(properties, "animate")
     });
 
@@ -70,6 +68,7 @@ export function unstyledText(...parameters) {
 
   return label; 
 }
+
 
 export function textDiv(properties) {
   delete properties.div;

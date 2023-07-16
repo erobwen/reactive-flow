@@ -11,6 +11,7 @@ import { startPatternMatching } from "./application/patternMatching.js";
 import { startSuperDuperSimple } from "./application/superDuperSimple.js";
 import { buttonTest } from "./application/buttonTest.js";
 import { startModalDemo } from "./application/modalDemo.js";
+import { startSingleStaticWidget } from "./application/singleStaticWidget.js";
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -34,6 +35,7 @@ installDOMAnimation();
 // startDemo();
 startSuperSimple();
 // startSuperDuperSimple();
+// startSingleStaticWidget();
 
 // buttonTest();
 // startAnimationExample();

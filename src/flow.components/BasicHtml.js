@@ -3,7 +3,7 @@
  * Basic HTML Node building 
  */
 
-import { findKeyInProperties, getTarget, readFlowProperties } from "../flow/Flow";
+import { findKeyInProperties, findTextAndKeyInPropertiesUsingCase, getTarget, readFlowProperties } from "../flow/Flow";
 
 export function elemenNode(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
@@ -15,6 +15,14 @@ export function textNode(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
   return getTarget().textNode({key: properties.key, attributes, children: properties.children});
+}
+
+export function span(...parameters) {
+  // log("Span")
+  let properties = findTextAndKeyInPropertiesUsingCase(readFlowProperties(parameters)); 
+  const attributes = extractAttributes(properties);
+  textToTextNode(properties);
+  return getTarget().elementNode({tagName: "span", key: properties.key, classNameOverride: "span", attributes, children: properties.children, animate: properties.animate});
 }
 
 export function div(...parameters) {
@@ -36,6 +44,16 @@ export function div2(...parameters) {
   return getTarget().elementNode({key: properties.key, classNameOverride, tagName: "div", attributes, ...properties }); 
 }
 
+
+export function textToTextNode(properties) {
+
+  if (properties.text) { //textToTextNode(parameters);
+    properties.children = getTarget().textNode({
+      key: properties.key ? properties.key + ".text" : null,
+      text: extractProperty(properties, "text"),
+    });
+  }
+}
 
 
 /**
