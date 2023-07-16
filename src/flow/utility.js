@@ -21,3 +21,11 @@ export function deepFreeze (o) {
 export function colorLog(text) {
   console.log('%c' + text, 'background: #222; color: #bada55');
 }
+
+
+export function isUpperCase(string) {
+  if (string.toUpperCase() === string) {
+  return true;
+} else
+  return false;
+}

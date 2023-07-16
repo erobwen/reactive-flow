@@ -1,4 +1,5 @@
 import getWorld from "../causality/causality.js";
+import { isUpperCase } from "./utility.js";
 
 export const world = getWorld({
   useNonObservablesAsValues: true,
@@ -566,6 +567,7 @@ export function when(condition, operation) {
   });
 }
 
+
 export function findKeyInProperties(properties) {
   if (!properties.stringsAndNumbers) return properties;
   if (properties.stringsAndNumbers.length) {
@@ -594,8 +596,33 @@ export function findTextAndKeyInProperties(properties) {
   return properties;
 }
 
+export function findTextAndKeyInPropertiesUsingCase(properties) {
+  // console.log(properties)
+  if (!properties.stringsAndNumbers) return properties;
+  while(properties.stringsAndNumbers.length) {
+    const string = properties.stringsAndNumbers.pop();
+    if (properties.text && !properties.key) {
+      // only key left
+      properties.key = string; 
+    } else if (properties.key && !properties.text) {
+      // only text left
+      properties.text = string; 
+    } else if (!(/[A-Z]|\s/.test(string[0])) && !properties.key) {
+      // Not big char or blank, assume it is a key
+      properties.key = string;
+    } else if (!properties.text){
+      // Big character, assume it is a text.
+      properties.text = string; 
+    } else {
+      throw new Error("Could not match loose strings in flow parameters, add them to properties.");
+    }
+  }
+  delete properties.stringsAndNumbers;
+  return properties;
+}
+
 export function findTextKeyAndOnClickInProperties(properties) {
-  findTextAndKeyInProperties(properties);
+  findTextAndKeyInPropertiesUsingCase(properties);
   if (!properties.functions) return properties;
   if (properties.functions.length) {
     properties.onClick = properties.functions.pop();

@@ -4,19 +4,20 @@ import { adjustLightness, grayColor } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, fitStyle, wrapper } from "./Layout";
+import { colorLog } from "../flow/utility";
 
 const log = console.log; 
 
 export function modernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  properties.hoverEffect = false; 
-  properties.ripple = false; 
+  properties.hoverEffect = true; 
+  properties.ripple = true; 
   return new ModernButton(properties);
 };
 
 export class ModernButton extends Flow {
 
-  setProperties({pressed= false, children, onClick, onClickKey, style={}, innerStyle={}, hoverAjust = -0.1, text="TESTING", ripple=true, hoverEffect= true, fixedSize=false}) {
+  setProperties({pressed= false, children, onClick, onClickKey, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, hoverEffect= true, fixedSize=false}) {
     this.ripple = ripple;
     this.hoverEffect = hoverEffect;
     this.children = children; 
@@ -29,25 +30,22 @@ export class ModernButton extends Flow {
 
     // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
 
-    this.style = {
-      margin: "5px",
-      overflow: "visible", 
-      height: "35px", 
-      ...style
-    };
     if (fixedSize) style.width = "250px";
 
-    if (!innerStyle.backgroundColor) {
-      innerStyle.backgroundColor = grayColor(240);
+    if (!style.backgroundColor) {
+      style.backgroundColor = grayColor(240);
     }
     
-    this.backgroundColor = innerStyle.backgroundColor; 
+    this.backgroundColor = style.backgroundColor; 
     this.mouseOverBackgroundColor = adjustLightness(this.backgroundColor, hoverAjust);
     this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.2)
     this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
-    this.innerStyle = {
-      ...fitStyle, 
+    this.style = {
+      // ...fitStyle, 
       ...panelStyle, 
+      margin: "5px",
+      overflow: "visible", 
+      height: "35px", 
       position: "relative", 
       overflow: "hidden", 
       color: "black", 
@@ -57,9 +55,9 @@ export class ModernButton extends Flow {
       fontSize: "20px",
       paddingLeft: "10px",
       paddingRight: "10px",
-      ...innerStyle
+      ...style
     };
-    if (ripple) innerStyle.position = "relative";
+    if (ripple) style.position = "relative";
 
     this.pressed = pressed;  
     this.inAnimation = false;
@@ -77,7 +75,7 @@ export class ModernButton extends Flow {
     // log(foo);
     // log("--")
     // Ensure event listeners
-    const pannel = this.findChild("centerMiddle").domNode;
+    const pannel = this.findChild("button").domNode;
     if (pannel !== this.eventListenersDomNode) {
       this.eventListenersDomNode = pannel;
       this.clearEventListeners();
@@ -89,15 +87,15 @@ export class ModernButton extends Flow {
     // log("hover:" + this.hover);
     if (this.pressed) {
       if (this.hover && this.hoverEffect) {
-        this.innerStyle = {...this.innerStyle, backgroundColor: this.mouseOverPressedBackgroundColor};      
+        this.style = {...this.style, backgroundColor: this.mouseOverPressedBackgroundColor};      
       } else {
-        this.innerStyle = {...this.innerStyle, backgroundColor: this.pressedBackgroundColor};      
+        this.style = {...this.style, backgroundColor: this.pressedBackgroundColor};      
       }
     } else {
       if (this.hover  && this.hoverEffect) {
-        this.innerStyle = {...this.innerStyle, backgroundColor: this.mouseOverBackgroundColor};      
+        this.style = {...this.style, backgroundColor: this.mouseOverBackgroundColor};      
       } else {
-        this.innerStyle = {...this.innerStyle, backgroundColor: this.backgroundColor};      
+        this.style = {...this.style, backgroundColor: this.backgroundColor};      
       }
     }
   }
@@ -110,7 +108,7 @@ export class ModernButton extends Flow {
     if (!this.eventListenersSet) return;
 
     // Clear old listeners
-    const panel = this.findChild("centerMiddle").domNode;
+    const panel = this.findChild("button").domNode;
     if (this.setMouseoverColor) {
       panel.removeEventListener("mouseover", this.setMouseoverColor);  
       delete this.setMouseoverColor;
@@ -129,7 +127,7 @@ export class ModernButton extends Flow {
 
   setEventListeners(onClick, mouseOverBackgroundColor) {
     const {ripple} = this; 
-    const panel = this.findChild("centerMiddle").domNode;
+    const panel = this.findChild("button").domNode;
     log("setEventListeners");
     // log(panel)
 
@@ -188,7 +186,7 @@ export class ModernButton extends Flow {
           setTimeout(() => {
             panel.removeChild(circle);
             setTimeout(() => {
-              this.findChild("centerMiddle").synchronizeDomNodeStyle(["maxWidth", "maxHeight", "overflow"]);
+              this.findChild("button").synchronizeDomNodeStyle(["maxWidth", "maxHeight", "overflow"]);
               this.inAnimation = false; 
             }, 0); 
           }, 300);
@@ -224,29 +222,35 @@ export class ModernButton extends Flow {
   
   build() {
     // log("REBUILDING BUTTON")
-    let {style, innerStyle, onClick} = this;
+    let {style, onClick} = this;
     if (onClick) {
       style.cursor = "pointer";
     }
+    colorLog("FOOOBAR")
+    // if (this.build)
+
+    const myButton = button("button",
+      text(
+        "text",
+        this.text,
+        {style: {
+          cursor: "pointer", 
+          pointerEvents: "none"
+        }}
+      ), 
+      {
+        style
+      }
+    );
+
     return (
-      wrapper( // Wrapper used to isolate for animation? TODO: filter child attributes to wrapper. 
-        centerMiddle("centerMiddle",
-          text(
-            "text",
-            this.text,
-            {style: {
-              cursor: "pointer", 
-              pointerEvents: "none"
-            }}
-          ), 
-          {
-            style: innerStyle
-          }
-        ),
-        {
-          style
-        }
-      )
+      // wrapper( // Wrapper used to isolate for animation? TODO: filter child attributes to wrapper. 
+        myButton
+        // ,
+        // {
+        //   style
+        // }
+      // )
     );
   }
 }
