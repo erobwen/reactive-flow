@@ -40,7 +40,6 @@ export class ProgrammaticReactiveLayout extends Flow {
     //console.log(controlPanelHeight);
     const gridHeight = this.bounds.height - controlPanelHeight;
     const gridWidth = this.bounds.width;
-    // colorLog("build");
     const rows = [];
     let rowIndex = 0;
     const rowHeight = gridHeight / this.rows;
@@ -143,7 +142,6 @@ export class StringDisplay extends Flow {
 function scaledTextWithMaxFontSize(...parameters) {
   const properties = readFlowProperties(parameters);
   findTextAndKeyInProperties(properties)
-  // colorLog("HERE")
   // console.log(properties);
   const fontSize = Math.min(basicWidgetTheme.fontSize, fitTextWithinWidth(properties.text, properties.width*0.8));
   // log(fontSize)

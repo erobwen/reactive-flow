@@ -5,7 +5,7 @@ import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from
 import { aggregateToString } from '../flow.DOMTarget/DOMFlowPrimitive';
 import { colorLog } from '../flow/utility';
 import { extractProperties } from '../flow.DOMTarget/DOMAnimation';
-import { elemenNode, extractProperty } from './BasicHtml';
+import { elemenNode, extractProperty, span } from './BasicHtml';
 library.add(faSuitcase);
 library.add(faPlus);
 
@@ -35,12 +35,20 @@ export function suitcaseIcon(...parameters) {
   return faIcon(properties);
 }
 
+
+export function plusIcon(...parameters) {
+  const properties = readFlowProperties(parameters);
+  properties.iconName = "suitcase";
+  return faIcon(properties);
+}
+
+
 export function faIcon(...parameters) {
   const properties = readFlowProperties(parameters);
   findPrefixAndIconNameInProperties(properties);
   const iconName = extractProperty(properties, "iconName");
   properties.className = "fa " + "fa-" + iconName;
-  return elemenNode(properties)
+  return span(properties)
   // return new DOMFaNode(properties);
 }
 
@@ -61,7 +69,6 @@ export function faIcon(...parameters) {
 //       this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildFaDOMRepeater", (repeater) => {
 //         this.ensureDomNode();
 //         this.domNode.className = "fa fa-plus";
-//         colorLog("ASDFASDFASDFSADF");
 //         log(icon);
 //         log(icon("plus"));
 //         log(library);

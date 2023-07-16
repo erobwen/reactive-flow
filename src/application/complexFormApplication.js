@@ -1,11 +1,11 @@
 import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 // import { simpleButton as button } from "../flow.components/SimpleButton";
-import { div } from "../flow.components/BasicHtml";
+import { div, span, textNode } from "../flow.components/BasicHtml";
 import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
 import { checkboxInputField, numberInputField, text } from "../flow.components/BasicWidgets";
 import { button, textInputField } from "../flow.components/Theme";
-import { suitcaseIcon } from "../flow.components/Icons";
+import { plusIcon, suitcaseIcon } from "../flow.components/Icons";
 
 const log = console.log;
 
@@ -276,14 +276,18 @@ export class TravelerForm extends Flow {
       // Add luggages button
       row("add-luggage",
         filler(),
-        button(" + Luggage ", 
+        button(
+          suitcaseIcon(),
+          span(" + Luggage"),
           () => {
             transaction(() => {
               this.traveler.luggages.push(model({weight: 1, type: "bag"}));
               this.showLuggage = true;
             });
           },
-          {ripple: true}
+          {
+            ripple: true
+          }
         ),
         {
           animate: true

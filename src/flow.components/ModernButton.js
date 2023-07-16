@@ -10,8 +10,8 @@ const log = console.log;
 
 export function modernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  properties.hoverEffect = true; 
-  properties.ripple = true; 
+  properties.hoverEffect = false; 
+  properties.ripple = false; 
   return new ModernButton(properties);
 };
 
@@ -144,9 +144,9 @@ export class ModernButton extends Flow {
           
       if (ripple) { 
         log("RIPPLE");
-        log(this)
-        log(this.findChild("text"));
-        log(this.findChild("text").domNode);
+        // log(this)
+        // log(this.findChild("text"));
+        // log(this.findChild("text").domNode);
 
         // Fixate panel (it might grow otherwise... )
         panel.style.overflow = "hidden";
@@ -226,18 +226,28 @@ export class ModernButton extends Flow {
     if (onClick) {
       style.cursor = "pointer";
     }
-    colorLog("FOOOBAR")
-    // if (this.build)
-
-    const myButton = button("button",
-      text(
+    let children; 
+    
+    if (this.children) {
+      // colorLog("FOOOBAR")
+      children = this.children; 
+      // log(children)
+    } else if (this.render) {
+      children = this.render(); 
+    } else if (this.text) {
+      children = text(
         "text",
         this.text,
         {style: {
           cursor: "pointer", 
           pointerEvents: "none"
         }}
-      ), 
+        ) 
+    }
+
+    
+    const myButton = button("button",
+      children, 
       {
         style
       }
