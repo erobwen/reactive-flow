@@ -40,6 +40,7 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
 /**
  * DOM Flow Base class
  */
+// TODO: Change Name to DOMNode
  export class DOMFlowPrimitive extends FlowPrimitive {
 
   dimensions(contextNode) {
@@ -223,18 +224,6 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
         // debugger; 
         childNode.appendChild(childNode.wrapped);
       }
-    }
-  }
-
-  *iterateChildren() {
-    if (this.children instanceof Array) {
-      for (let child of this.children) {
-        if (child instanceof Flow && child !== null) {
-          yield child;
-        }
-      }
-    } else if (this.children instanceof Flow  && this.children !== null) {
-      yield this.children;
     }
   }
 

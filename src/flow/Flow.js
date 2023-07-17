@@ -525,7 +525,7 @@ export class Flow {
               for (let property in flow) {
                 flow[property] = translateReference(flow[property]); 
               }
-              const children = flow.children;
+              const children = flow.children; // TODO: use iterator! 
               if (children instanceof Array) {
                 let index = 0;
                 while(index < children.length) {
@@ -541,6 +541,18 @@ export class Flow {
     return me.primitive;
   }
   
+  *iterateChildren() {
+    if (this.children instanceof Array) {
+      for (let child of this.children) {
+        if (child instanceof Flow && child !== null) {
+          yield child;
+        }
+      }
+    } else if (this.children instanceof Flow  && this.children !== null) {
+      yield this.children;
+    }
+  }
+
   dimensions(contextNode) {
     if (!this.key) console.warn("It is considered unsafe to use dimensions on a flow without a key. The reason is that a call to dimensions from a parent build function will finalize the flow early, and without a key, causality cannot send proper onEstablish event to your flow component before it is built");
     const primitive = this.getPrimitive();
@@ -685,7 +697,7 @@ export function readFlowProperties(arglist, config) {
     if (typeof arglist[0] === "object" && !arglist[0].causality) {
       if (arglist[0] instanceof Array) {
         if (!properties.children) properties.children = [];
-        for (let child of arglist.shift()) {
+        for (let child of arglist.shift()) { // TODO: Use iterator! 
           properties.children.push(child);
         }
       } else {

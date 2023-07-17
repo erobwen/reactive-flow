@@ -13,6 +13,7 @@ export class FlowPrimitive extends Flow {
   
   findChild(key) {
     if (this.key === key) return this;
+    // TODO: Use iterator!
     if (this.children) {
       for (let child of this.children) {
         if (child !== null) {
@@ -83,17 +84,6 @@ export class FlowPrimitive extends Flow {
   
   onVisibilityWillChange() {}
 
-  *iterateChildren() {
-    if (this.children instanceof Array) {
-      for (let child of this.children) {
-        if (child instanceof Flow && child !== null) {
-          yield child;
-        }
-      }
-    } else if (this.children instanceof Flow  && this.children !== null) {
-      yield this.children;
-    }
-  }
 
   *iteratePrimitiveChildren() {
     for(let child of this.iterateChildren()) {
