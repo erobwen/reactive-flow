@@ -1,6 +1,6 @@
 import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { SuperSimple } from "./superSimple";
+import { SimpleMoveAnimation } from "./SimpleMoveAnimation";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
 import { HelloWorld } from "./helloWorldApplication";
@@ -34,7 +34,7 @@ export class Demo extends Flow {
       new ComplexForm({key: "complexForm", initialData}),
       new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
       new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
-      // "Super Simple": new SuperSimple({model: observable({value: ""})}),
+      // "Super Simple": new SimpleMoveAnimation({model: observable({value: ""})}),
       new RecursiveExample({key: "recursiveDemo", name: "Recursive Example"}),
       new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"}),
       // "Toggle": new ToggleView()

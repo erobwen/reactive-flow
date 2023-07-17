@@ -1,6 +1,6 @@
 import { library, icon } from '@fortawesome/fontawesome-svg-core';
 import { faPlus, faSuitcase } from '@fortawesome/free-solid-svg-icons';
-import { DOMElementNode } from '../flow.DOMTarget/DOMNode';
+import { DOMElementNode } from '../flow.DOMTarget/DOMElementNode';
 import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from '../flow/Flow';
 import { aggregateToString } from '../flow.DOMTarget/DOMFlowPrimitive';
 import { colorLog } from '../flow/utility';

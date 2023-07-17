@@ -17,7 +17,7 @@ export let inEperiment = false;
 /**
  * Minimalistic component used for experiments. 
  */
-export class SuperSimple extends Flow {
+export class SimpleMoveAnimation extends Flow {
   setState() {
     this.left = false;
     this.showButton = false;
@@ -96,7 +96,7 @@ export class SuperSimple extends Flow {
 /**
  * This is what you would typically do in index.js to start this app. 
  */
-export function startSuperSimple() {
-  const simple = new SuperSimple()  
+export function startSimpleMoveAnimation() {
+  const simple = new SimpleMoveAnimation()  
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(simple)
 }

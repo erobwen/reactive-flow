@@ -1,6 +1,7 @@
 import { observable, repeat, readFlowProperties, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel, findKeyInProperties } from "../flow/Flow";
 import { mostAbstractFlow, clearNode } from "./DOMFlowPrimitive";
-import { DOMElementNode, DOMTextNode, DOMModalNode } from "./DOMNode";
+import { DOMElementNode, DOMModalNode } from "./DOMElementNode";
+import { DOMTextNode} from "./DOMTextNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, removeDOMFlowTarget } from "./DOMAnimation";
 import { div } from "../flow.components/BasicWidgets";

@@ -9,7 +9,7 @@ const log = console.log;
 /**
  * Minimalistic component used for experiments. 
  */
-export class SuperSimple extends Flow {
+export class SimpleAddRemoveAnimation extends Flow {
   setState() {
     this.showText = true; 
   }
@@ -31,7 +31,7 @@ export class SuperSimple extends Flow {
 /**
  * This is what you would typically do in index.js to start this app. 
  */
-export function startSuperDuperSimple() {
-  const simple = new SuperSimple()  
+export function startSimpleAddRemoveAnimation() {
+  const simple = new SimpleAddRemoveAnimation()  
   new DOMFlowTarget(document.getElementById("flow-root")).setContent(simple)
 }
