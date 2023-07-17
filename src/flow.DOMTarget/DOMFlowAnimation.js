@@ -2,7 +2,7 @@
 // cubic-bezier(0.42,0,1,1)
 
 import { flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
-import { getWrapper, movedPrimitives } from "./DOMFlowPrimitive";
+import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
 

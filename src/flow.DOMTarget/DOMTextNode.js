@@ -2,11 +2,11 @@ import { extractAttributes } from "../flow.components/BasicHtml";
 import { trace } from "../flow/Flow";
 import { colorLog } from "../flow/utility";
 import { extractProperties } from "./DOMAnimation";
-import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    
+import { DOMNode } from "./DOMNode";    
 const log = console.log;
 
 
-export class DOMTextNode extends DOMFlowPrimitive {
+export class DOMTextNode extends DOMNode {
   setProperties({text}) {
     this.text = text;
   }

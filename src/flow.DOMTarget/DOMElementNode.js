@@ -2,13 +2,13 @@ import { extractAttributes } from "../flow.components/BasicHtml";
 import { trace } from "../flow/Flow";
 import { colorLog } from "../flow/utility";
 import { extractProperties } from "./DOMAnimation";
-import { DOMFlowPrimitive } from "./DOMFlowPrimitive";    
+import { DOMNode } from "./DOMNode";    
 const log = console.log;
 
 /**
  * DOM Flow Target Primitive
  */
- export class DOMElementNode extends DOMFlowPrimitive {
+ export class DOMElementNode extends DOMNode {
     initialUnobservables() {
       let result = super.initialUnobservables();
       result.previouslySetStyles = {};

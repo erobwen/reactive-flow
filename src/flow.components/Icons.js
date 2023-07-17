@@ -2,7 +2,7 @@ import { library, icon } from '@fortawesome/fontawesome-svg-core';
 import { faPlus, faSuitcase } from '@fortawesome/free-solid-svg-icons';
 import { DOMElementNode } from '../flow.DOMTarget/DOMElementNode';
 import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from '../flow/Flow';
-import { aggregateToString } from '../flow.DOMTarget/DOMFlowPrimitive';
+import { aggregateToString } from '../flow.DOMTarget/DOMNode';
 import { colorLog } from '../flow/utility';
 import { extractProperties } from '../flow.DOMTarget/DOMAnimation';
 import { elemenNode, extractProperty, span } from './BasicHtml';

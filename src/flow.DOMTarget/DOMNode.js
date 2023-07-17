@@ -38,10 +38,9 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
 
 
 /**
- * DOM Flow Base class
+ * DOM Node
  */
-// TODO: Change Name to DOMNode
- export class DOMFlowPrimitive extends FlowPrimitive {
+ export class DOMNode extends FlowPrimitive {
 
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?

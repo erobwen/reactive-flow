@@ -115,14 +115,11 @@ export class FlowPrimitive extends Flow {
     return null;
     let result; 
     if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
-      log("fooo")
       result = null; 
     } else {
-      log("bar");
       result = this.inheritFromEquivalentCreator("animate"); 
   
       if (!result && this.parentPrimitive) {
-        log()
         result = this.parentPrimitive.inheritFromEquivalentCreator("animateChildren");   
       }      
       
@@ -132,8 +129,6 @@ export class FlowPrimitive extends Flow {
     }
     if (result === true) result = standardAnimation;
     this.animation = result; // for quick access after call is made
-    
-    log(result)
     return result;   
   }
 }
