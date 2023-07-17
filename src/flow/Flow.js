@@ -532,6 +532,8 @@ export class Flow {
                   children[index] = translateReference(children[index]);
                   index++;
                 }
+              } else if (children instanceof Flow) {
+                flow.children = translateReference(children);
               }
             }
           }
@@ -578,7 +580,6 @@ export function when(condition, operation) {
     }
   });
 }
-
 
 export function findKeyInProperties(properties) {
   if (!properties.stringsAndNumbers) return properties;
@@ -740,4 +741,17 @@ export function getTarget() {
 
 export function callback(callback, key) {
   return observable(callback, key);
+}
+
+
+function *iterateChildren(properties) {
+  if (properties.children instanceof Array) {
+    for (let child of properties.children) {
+      if (child instanceof Flow && child !== null) {
+        yield child;
+      }
+    }
+  } else if (properties.children instanceof Flow  && properties.children !== null) {
+    yield properties.children;
+  }
 }
