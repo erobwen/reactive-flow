@@ -1,10 +1,10 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text } from "../flow.components/BasicWidgets";
-import { column, filler, row, centerMiddle} from "../flow.components/Layout";
+import { panel, text } from "../flow.components/BasicWidgets";
+import { column, filler, row, centerMiddle, columnStyle} from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
-import { simpleButton } from "../flow.components/SimpleButton";
+import { simpleModernButton } from "../flow.components/SimpleModernButton";
 import { div, span } from "../flow.components/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
@@ -22,11 +22,18 @@ export class SingleStaticWidget extends Flow {
   setState() {}
 
   build() {
-    return centerMiddle(button(
-      suitcaseIcon(), 
-      span("Add luggage", {style: {marginLeft: "5px"}}),
-      () => { log("Pressed!") }
-    ));
+  
+    // const singleWidget = text("Hello");
+
+    // const singleWidget = button(
+    //   suitcaseIcon(), 
+    //   span("Add luggage", {style: {marginLeft: "5px"}}),
+    //   () => { log("Pressed!") }
+    // );
+
+    const singleWidget = panel(text("in a panel"));
+  
+    return centerMiddle(singleWidget);
   }
 }
 

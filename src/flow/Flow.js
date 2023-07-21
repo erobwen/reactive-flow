@@ -59,7 +59,7 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
   if (level === 1) {
-    log(configuration.onFinishReBuildingFlowCallbacks)
+    // log(configuration.onFinishReBuildingFlowCallbacks)
     configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
   }
 
@@ -100,6 +100,8 @@ export class Flow {
     let properties = findKeyInProperties(readFlowProperties(parameters));
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
+    this._ = null; // For debug purposes, this makes it easier to identify flows when they are proxies in the debugger. 
+
     // Key & Creator
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
@@ -116,8 +118,11 @@ export class Flow {
     // Inherit target from parent. TODO: Use general inheritance mechanism instead or let this be? 
     this.target = this.creator ? this.creator.target : null;
 
+
     // Create observable
     let me = observable(this, this.key);
+
+    me._ = me.toString(); 
 
     // Set properties through interface
     me.setProperties(properties); // Set default values here
@@ -412,14 +417,32 @@ export class Flow {
   }
 
   ensureBuiltRecursive(flowTarget, parentPrimitive) {
-    this.parentPrimitive = parentPrimitive
+    if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
+      if (this.parentPrimitive) {
+        log("Flow.ensureBuiltRecursive");
+        log(this.parentPrimitive);
+        log("-->")
+        log(parentPrimitive)
+        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+      }
+      this.parentPrimitive = parentPrimitive
+    } 
     workOnPriorityLevel(1, () => this.getPrimitive().ensureBuiltRecursive(flowTarget, parentPrimitive));
     return this.getPrimitive(parentPrimitive);
   }
 
   getPrimitive(parentPrimitive) {
-    if (parentPrimitive && this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Parent mismatch! this could be an error but it needs investigation.");
-    if (parentPrimitive) this.parentPrimitive = parentPrimitive
+    // if (parentPrimitive && this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Changed parent primitive for " + this.toString());
+    if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
+      if (this.parentPrimitive) {
+        log("getPrimitive");
+        log(this.parentPrimitive);
+        log("-->")
+        log(parentPrimitive)
+        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+      }
+      this.parentPrimitive = parentPrimitive
+    } 
     // log("getPrimitive")
     const me = this;
     const name = this.toString(); // For chrome debugger.
@@ -485,7 +508,7 @@ export class Flow {
                 && (newFlow.classNameOverride === establishedFlow.classNameOverride));
             },
             shapeRoot: () => me.newBuild,
-            slotsIterator: function*(establishedObject, newObject, hasKey) {
+            slotsIterator: function*(establishedObject, newObject, hasKey, childrenProperty=false) {
               if (establishedObject instanceof Array && newObject instanceof Array) {
                 let newIndex = 0;
                 let establishedIndex = 0;
@@ -503,12 +526,14 @@ export class Flow {
                   establishedIndex++;
                 }  
               } else if (establishedObject instanceof Flow && newObject instanceof Flow) {
+                if (childrenProperty) yield [establishedObject, newObject];
                 for (let property in newObject) {
                   if (property === "children") {
                     yield * this.slotsIterator(
                       establishedObject[property], 
                       newObject[property],
-                      hasKey
+                      hasKey,
+                      true
                     )
                   } else {
                     const establishedChild = establishedObject[property];
@@ -579,6 +604,10 @@ export function when(condition, operation) {
       operation(value);
     }
   });
+}
+
+export function addDefaultStyleToProperties(properties, defaultStyle) {
+  properties.style = Object.assign({}, defaultStyle, properties.style);
 }
 
 export function findKeyInProperties(properties) {

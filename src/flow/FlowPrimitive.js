@@ -26,9 +26,16 @@ export class FlowPrimitive extends Flow {
   }
 
   getPrimitive(parentPrimitive) {
-    if (parentPrimitive) {
-      this.parentPrimitive = parentPrimitive;
-    }
+    if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
+      if (this.parentPrimitive) {
+        log("FlowPrimitive.getPrimitive");
+        log(this.parentPrimitive);
+        log("-->")
+        log(parentPrimitive)
+        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+      }
+      this.parentPrimitive = parentPrimitive
+    } 
     return this;
   }
 
@@ -36,7 +43,17 @@ export class FlowPrimitive extends Flow {
     const name = this.toString(); // For chrome debugger
     
     if (flowTarget) this.visibleOnTarget = flowTarget;
-    if (parentPrimitive) this.parentPrimitive = parentPrimitive;
+    if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
+      if (this.parentPrimitive) {
+        log("FlowPrimitive.ensureBuiltRecursive");
+        log(this.parentPrimitive);
+        log("-->")
+        log(parentPrimitive)
+        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+        if (parentPrimitive === this) throw new Error("What the fuck just happened. ");
+      }
+      this.parentPrimitive = parentPrimitive
+    } 
 
     finalize(this); // Finalize might not work if no key was used, it might not call onEstablish.
     if (!this.expandRepeater) {
@@ -60,6 +77,16 @@ export class FlowPrimitive extends Flow {
           if (scan.visibleOnTarget === this.visibleOnTarget) {
             scan = null; 
           } else {
+            if (this.parentPrimitive && this.parentPrimitive !== scan.parentPrimitive) {
+              if (this.parentPrimitive) {
+                log("FlowPrimitive, scanning equivalent creators");
+                log(scan.parentPrimitive);
+                log("-->")
+                log(this.parentPrimitive)
+                console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+              }
+              scan.parentPrimitive = this.parentPrimitive
+            }         
             scan.parentPrimitive = this.parentPrimitive; 
             scan.visibleOnTarget = this.visibleOnTarget;
             scan.isVisible = !!this.visibleOnTarget

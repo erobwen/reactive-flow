@@ -3,12 +3,12 @@ import { div } from "./BasicHtml";
 import { text } from "./BasicWidgets";
 import { modernButton } from "./ModernButton";
 
-export function simpleButton(...parameters) { 
+export function simpleModernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  return new ModernButton(properties);
+  return new SimpleModernButton(properties);
 };
 
-export class ModernButton extends Flow {
+export class SimpleModernButton extends Flow {
   build() {
     let children; 
     if (this.children) children = this.children; 

@@ -1,13 +1,16 @@
-import { library, icon } from '@fortawesome/fontawesome-svg-core';
-import { faPlus, faSuitcase } from '@fortawesome/free-solid-svg-icons';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCross, faPlus, faSuitcase, faXmark, faXmarkCircle } from '@fortawesome/free-solid-svg-icons';
 import { DOMElementNode } from '../flow.DOMTarget/DOMElementNode';
 import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from '../flow/Flow';
 import { aggregateToString } from '../flow.DOMTarget/DOMNode';
 import { colorLog } from '../flow/utility';
 import { extractProperties } from '../flow.DOMTarget/DOMAnimation';
 import { elemenNode, extractProperty, span } from './BasicHtml';
-library.add(faSuitcase);
-library.add(faPlus);
+// library.add(faSuitcase);
+// library.add(faPlus);
+// library.add(faCross);
+// library.add(faXmark);
+// library.add(faXmarkCircle);
 
 const log = console.log; 
 
@@ -38,10 +41,23 @@ export function suitcaseIcon(...parameters) {
 
 export function plusIcon(...parameters) {
   const properties = readFlowProperties(parameters);
-  properties.iconName = "suitcase";
+  properties.iconName = "plus";
   return faIcon(properties);
 }
 
+
+export function crossIcon(...parameters) {
+  const properties = readFlowProperties(parameters);
+  properties.iconName = "cross";
+  return faIcon(properties);
+}
+
+
+export function icon(iconName, ...parameters) {
+  const properties = readFlowProperties(parameters);
+  properties.iconName = iconName;
+  return faIcon(properties); 
+}
 
 export function faIcon(...parameters) {
   const properties = readFlowProperties(parameters);
@@ -67,7 +83,7 @@ export function faIcon(...parameters) {
 //     finalize(this);
 //     if (!this.buildDOMRepeater) {
 //       this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildFaDOMRepeater", (repeater) => {
-//         this.ensureDomNode();
+//         this.ensureDomNodeExists();
 //         this.domNode.className = "fa fa-plus";
 //         log(icon);
 //         log(icon("plus"));

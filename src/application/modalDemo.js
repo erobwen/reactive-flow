@@ -1,13 +1,14 @@
 import { Flow, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { button, text } from "../flow.components/BasicWidgets";
-import { centerMiddle, column, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
+import { panel, text } from "../flow.components/BasicWidgets";
+import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
 import { div } from "../flow.components/BasicHtml"
 ;
 import { adjustLightness } from "../flow.components/Color";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle } from "../flow.components/Style";
 import { modal, modalFrame } from "../flow.components/Modal";
+import { button } from "../flow.components/Theme";
 
 
 const log = console.log;
@@ -87,10 +88,6 @@ export class ModalExample extends Flow {
     this.name = "Modal Example";
   }
 
-  setState() {
-    this.showModal = false;
-    this.showAnimatedModal = false; 
-  }
 
   build() {
     const openAnimatedModalButton = button("openAnimatedButton", this.showAnimatedModal ? "Close Animated Modal" : "Open Animated Modal", ()=> {this.showAnimatedModal = !this.showAnimatedModal;}, {animate: true});
@@ -98,31 +95,7 @@ export class ModalExample extends Flow {
     return (
       modalFrame(
         column(
-          text("modal demo"),
-          row(
-            button("Open Modal", ()=> {this.showModal = true;}),
-            // openAnimatedModalButton.show(!this.showAnimatedModal),
-            // text("foobar"),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, -0.2)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, -0.1)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: color}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.1)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.2)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.3)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.4)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.5)}}),
-            // div({style: {width: "100px", height: "100px", backgroundColor: adjustLightness(color, 0.6)}}),
-            {style: animatedContainerStyle}
-          ), 
-          // modernButton({style: {width: "100px", height: "100px", backgroundColor: color}}),
-          modal(
-            "modal",
-            dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
-          ).show(this.showModal),
-          // modal(
-          //   "animatedModal",
-          //   dialog("animatedDialog", "Animated Modal!", openAnimatedModalButton.show(this.showAnimatedModal), {close: () => {log("CLOSE"); this.showAnimatedModal = false}})
-          // ).show(this.showAnimatedModal),
+          new BasicModalExample(),
           {style: animatedContainerStyle}
         )
       )
@@ -130,6 +103,37 @@ export class ModalExample extends Flow {
   }
 }
   
+
+class BasicModalExample extends Flow {
+ 
+  setState() {
+    this.showModal = false;
+  }
+
+  build() {
+    return panel("panel",
+      column("column",
+        text("Standard responsive modal demo."),
+        // row(
+          button("Open Modal", ()=> {this.showModal = true;}),
+          {style: animatedContainerStyle}
+        // ), 
+        // modernButton({style: {width: "100px", height: "100px", backgroundColor: color}}),
+      ),
+      modal(
+        "modal",
+        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+      ).show(this.showModal),
+      { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
+    );
+  }
+}
+
+
+          // modal(
+          //   "animatedModal",
+          //   dialog("animatedDialog", "Animated Modal!", openAnimatedModalButton.show(this.showAnimatedModal), {close: () => {log("CLOSE"); this.showAnimatedModal = false}})
+          // ).show(this.showAnimatedModal),
 
 /**
  * Start the demo

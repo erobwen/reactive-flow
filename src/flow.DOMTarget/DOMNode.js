@@ -111,9 +111,10 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
       this.buildDOMRepeater = repeat("[" + aggregateToString(this) + "].buildDOMRepeater", (repeater) => {
         if (trace) console.group(repeater.causalityString());
         
-        this.ensureDomNode();
+        this.ensureDomNodeExists();
         this.ensureDomNodeAttributesSet();
         this.ensureDomNodeChildrenInPlace();
+        
         if (trace) console.groupEnd();  
       }, {priority: 2});
     }
@@ -230,7 +231,7 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     return this.getPrimitiveChildren().map(child => child.ensureDomNodeBuilt())
   }
 
-  ensureDomNode() { 
+  ensureDomNodeExists() { 
     if (this.givenDomNode) {
       this.domNode = this.givenDomNode;
       this.domNode.id = aggregateToString(this);

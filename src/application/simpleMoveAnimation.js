@@ -4,7 +4,7 @@ import { text } from "../flow.components/BasicWidgets";
 import { column, filler, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
-import { simpleButton } from "../flow.components/SimpleButton";
+import { simpleModernButton } from "../flow.components/SimpleModernButton";
 import { div } from "../flow.components/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
@@ -21,13 +21,13 @@ export class SimpleMoveAnimation extends Flow {
   setState() {
     this.left = false;
     this.showButton = false;
-    this.button = new button(
+    this.button = button(
       "button", "Text", 
       this.move.bind(this),
       {
         ripple: true,
         style: {
-          color: "red",
+          color: "green",
           width: "150px"
         }
       }
@@ -79,12 +79,12 @@ export class SimpleMoveAnimation extends Flow {
           filler(), 
           {style: {...animatedContainerStyle, width: "150px"}}
         ), 
-        filler(), 
-        column(
-          simpleButton("Move", this.move.bind(this)),
-          filler(),
-          {style: {...animatedContainerStyle, width: "150px"}}
-        ), 
+        // filler(), 
+        // column(
+        //   simpleButton("Move", this.move.bind(this)),
+        //   filler(),
+        //   {style: {...animatedContainerStyle, width: "150px"}}
+        // ), 
         {style: animatedContainerStyle}
       ),
       filler(),

@@ -1,4 +1,5 @@
-import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback } from "../flow/Flow.js";
+import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback, flow, addDefaultStyleToProperties } from "../flow/Flow.js";
+import { colorLog } from "../flow/utility.js";
 import { div, extractAttributes, extractChildStyles, extractProperty, textToTextNode } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
@@ -181,3 +182,28 @@ export function button(...parameters) {
   result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick, animate: properties.animate});
   return result; 
 };
+
+export const panel = (...parameters) => {
+  colorLog("panel");
+  const properties = readFlowProperties(parameters);
+  findKeyInProperties(properties);
+  addDefaultStyleToProperties(properties, {
+    margin: "4px", 
+    borderRadius: "5px", 
+    backgroundColor: "#eeeeee", 
+    borderColor: "#cccccc", 
+    borderStyle: "solid", 
+    borderWidth: "1px", 
+    padding: "10px", 
+    boxSizing: "border-box"
+  });
+  console.log(properties);
+  return new Flow({
+    ...properties,
+    description: "panel",
+    build: flow => {
+      return div("panel", properties);
+    }
+  });
+}
+

@@ -1,6 +1,6 @@
 import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { SimpleMoveAnimation } from "./SimpleMoveAnimation";
+import { SimpleMoveAnimation } from "./simpleMoveAnimation";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
 import { HelloWorld } from "./helloWorldApplication";
@@ -14,6 +14,7 @@ import { button } from "../flow.components/Theme";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { modalFrame } from "../flow.components/Modal";
+import { svgImage } from "./images";
 
 const log = console.log;
 
@@ -69,6 +70,7 @@ export class Demo extends Flow {
     log("BUILD DEMO -----------------------------------------------")
     log(creators.length)
     const buttons = [];
+    buttons.push(svgImage())
     for (let component of this.components) {
       buttons.push(
         this.buildButton(component), 

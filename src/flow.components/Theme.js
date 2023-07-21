@@ -2,7 +2,7 @@ import { div } from "./BasicHtml";
 import { textInputField as basicTextInputField } from "./BasicWidgets";
 import { modernButton } from "./ModernButton"
 import { modernTextField } from "./ModernTextField";
-import { simpleButton } from "./SimpleButton";
+import { simpleModernButton } from "./SimpleModernButton";
 
 export function button(...parameters) {
   // return modernButton.apply(null, parameters);

@@ -10,14 +10,34 @@ const log = console.log;
 
 export function modernButton(...parameters) { 
   const properties = findTextKeyAndOnClickInProperties(readFlowProperties(parameters));
-  properties.hoverEffect = false; 
-  properties.ripple = false; 
+  properties.hoverEffect = true; 
+  properties.ripple = true; 
   return new ModernButton(properties);
 };
 
+const boxShadowStyle = {
+  boxShadow: "rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px"
+}
+
 export class ModernButton extends Flow {
 
-  setProperties({pressed= false, children, onClick, onClickKey, style={}, hoverAjust = -0.1, text="TESTING", ripple=true, hoverEffect= true, fixedSize=false}) {
+  setProperties({
+    style={}, 
+    
+    children, 
+    text, 
+    
+    onClick,
+    
+    pressed=false, 
+    hoverAjust = -0.1, 
+    ripple=true, 
+    hoverEffect= true, 
+    edge=true,
+    square=false, 
+
+    fixedSize=false
+  }) {
     this.ripple = ripple;
     this.hoverEffect = hoverEffect;
     this.children = children; 
@@ -26,9 +46,6 @@ export class ModernButton extends Flow {
     // New args: 
     this.lightenOnHoverAndPressed = true;  
     this.mouseoverEffectOnPressed = true;  
-
-
-    // this.onClickKey = onClickKey; Do we really need this? Do not update event listeners unless this changes OR forceful change?
 
     if (fixedSize) style.width = "250px";
 
@@ -41,11 +58,18 @@ export class ModernButton extends Flow {
     this.pressedBackgroundColor = adjustLightness(this.backgroundColor, -0.2)
     this.mouseOverPressedBackgroundColor = adjustLightness(this.pressedBackgroundColor, -0.1);
     this.style = {
+      ...(edge ? boxShadowStyle : null), 
       // ...fitStyle, 
-      ...panelStyle, 
+      // ...panelStyle,
+      boxSizing: "border-box",
+      borderWidth: edge ? "1px" : "0px",
+      borderColor: "rgba(0, 0, 0, 0.4)",
+      borderRadius: "4px", // 2px
+      borderStyle: "solid", 
       margin: "5px",
       overflow: "visible", 
-      height: "35px", 
+      height: "35px",
+      width: square ? "35px" : "", 
       position: "relative", 
       overflow: "hidden", 
       color: "black", 

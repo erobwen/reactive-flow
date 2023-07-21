@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg9"
+   width="294.70892"
+   height="183.24341"
+   viewBox="0 0 294.70892 183.24341"
+   sodipodi:docname="flow_new_inkscape.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs13" />
+  <sodipodi:namedview
+     id="namedview11"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="355"
+     inkscape:cy="217"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g15" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g15"
+     transform="translate(-76.538001,-147.76948)">
+    <path
+       id="path231-9"
+       style="fill:#3c4ccc;fill-opacity:1;stroke-width:0.912936"
+       d="m 212.36363,163.95335 c -4.31093,-0.0594 -10.15302,0.29325 -17.80922,1.57177 -23.11044,3.85926 -30.57105,22.64463 -31.65721,27.26057 -6.77432,29.23277 -14.63157,61.82539 -21.06988,88.50134 -8.73531,24.63943 -32.07158,32.00198 -32.07158,32.00198 0,0 11.54511,3.17821 31.96161,-0.23119 23.11044,-3.85926 30.57107,-22.64651 31.65722,-27.26246 9.2723,-29.91015 13.63476,-57.70085 21.06662,-88.49947 8.73532,-24.63942 32.07329,-32.00197 32.07329,-32.00197 0,0 -6.96752,-1.24177 -14.1524,-1.34057 z"
+       inkscape:export-filename="flow_new.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96"
+       sodipodi:nodetypes="cscccsccccc" />
+    <text
+       xml:space="preserve"
+       style="font-size:48px;letter-spacing:15px;fill:#3c4ccc;fill-opacity:1"
+       x="150.72208"
+       y="259.85089"
+       id="text899-4"><tspan
+         sodipodi:role="line"
+         id="tspan897-8"
+         x="150.72208"
+         y="259.85089"
+         style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:#3c4ccc;fill-opacity:1"><tspan
+   style="fill:#ffffff;fill-opacity:1"
+   id="tspan2993">F</tspan>LOW</tspan></text>
+    <rect
+       style="fill:#ffffff;fill-opacity:0;stroke:none;stroke-width:0.932321;stroke-opacity:1"
+       id="rect3304"
+       width="294.70895"
+       height="183.24341"
+       x="76.537987"
+       y="147.76949"
+       inkscape:export-filename="flow.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+  </g>
+</svg>

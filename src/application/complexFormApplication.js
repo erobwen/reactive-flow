@@ -5,7 +5,7 @@ import { div, span, textNode } from "../flow.components/BasicHtml";
 import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
 import { checkboxInputField, numberInputField, text } from "../flow.components/BasicWidgets";
 import { button, textInputField } from "../flow.components/Theme";
-import { plusIcon, suitcaseIcon } from "../flow.components/Icons";
+import { crossIcon, plusIcon, suitcaseIcon, icon } from "../flow.components/Icons";
 
 const log = console.log;
 
@@ -111,7 +111,7 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
  */
 
 const panel = flow("panel", ({ children }) =>
-  div("panel", {children, style: {margin: "4px", borderRadius: "15px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", boxSizing: "border-box"}})
+  div("panel", {children, style: {margin: "4px", borderRadius: "5px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", boxSizing: "border-box"}})
 );
 
 export class SimpleDrawer extends Flow {
@@ -123,9 +123,10 @@ export class SimpleDrawer extends Flow {
     this.content = content;
  }
  build() {
+  const buttonIcon = this.isOpen ? icon("chevron-up") : icon("chevron-down");
   const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
   return column(
-    button(buttonLabel, () => this.toggleOpen(), {style: {margin: "5px"}, ripple: true}),
+    button(row(span(buttonLabel), buttonIcon, {style: {justifyContent: "space-between"}}), () => this.toggleOpen(), {style: {margin: "5px"}, ripple: true}),
     column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
   );
  }
@@ -236,7 +237,7 @@ export class TravelerForm extends Flow {
       // Remove button
       row(
         filler(),
-        button(" x ", () => {this.creator.editData.fellowTravellers.remove(this.traveler)}, {ripple: true})
+        button(icon("xmark"), () => {this.creator.editData.fellowTravellers.remove(this.traveler)}, {edge: false, square: true, ripple: true})
       ).show(traveler.isFellowTraveller),
 
       // Traveler inforation
@@ -277,8 +278,8 @@ export class TravelerForm extends Flow {
       row("add-luggage",
         filler(),
         button(
-          suitcaseIcon(),
-          span(" + Luggage"),
+          icon("suitcase-rolling", {style: {marginRight: "10px"}}),
+          span("Add luggage"),
           () => {
             transaction(() => {
               this.traveler.luggages.push(model({weight: 1, type: "bag"}));
@@ -286,7 +287,8 @@ export class TravelerForm extends Flow {
             });
           },
           {
-            ripple: true
+            ripple: true,
+            edge: false 
           }
         ),
         {
@@ -309,7 +311,7 @@ export class LuggageForm extends Flow {
         suitcaseIcon({style: {padding: "14px"}}),
         numberInputField("Weight", this.luggage, "weight", {unit: "kg"}),
         filler(),
-        button(" x ", () => {this.creator.traveler.luggages.remove(this.luggage)}, {ripple: true})
+        button(icon("xmark"), () => {this.creator.traveler.luggages.remove(this.luggage)}, {edge: false, square: true, ripple: true})
       )
     );
   }

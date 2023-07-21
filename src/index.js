@@ -10,7 +10,7 @@ import { startPatternMatching } from "./application/patternMatching.js";
 import { buttonTest } from "./application/buttonTest.js";
 import { startModalDemo } from "./application/modalDemo.js";
 import { startSingleStaticWidget } from "./application/singleStaticWidget.js";
-import { startSimpleMoveAnimation } from "./application/SimpleMoveAnimation.js";
+import { startSimpleMoveAnimation } from "./application/simpleMoveAnimation.js";
 import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnimation.js";
 
 Array.prototype.remove = function(target) {
