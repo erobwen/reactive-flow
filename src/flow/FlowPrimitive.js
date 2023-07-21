@@ -139,7 +139,7 @@ export class FlowPrimitive extends Flow {
   }
 
   getAnimation() {
-    return null;
+    // return null;
     let result; 
     if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
       result = null; 

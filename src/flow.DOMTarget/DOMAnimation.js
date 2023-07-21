@@ -814,9 +814,9 @@ function setupAnimationCleanup(node) {
 // }
 
 function sameBounds(b1, b2) {
-  log("sameBounds");
-  log(b1);
-  log(b2)
+  // log("sameBounds");
+  // log(b1);
+  // log(b2)
   return (
       b1.top === b2.top &&
       b1.left === b2.left &&

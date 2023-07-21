@@ -129,6 +129,81 @@ class BasicModalExample extends Flow {
   }
 }
 
+class FlyoutModalExample extends Flow {
+ 
+  setState() {
+    this.showModal = false;
+  }
+
+  build() {
+    return panel("panel",
+      column("column",
+        text("Standard responsive modal demo."),
+        // row(
+          button("Open Modal", ()=> {this.showModal = true;}),
+          {style: animatedContainerStyle}
+        // ), 
+        // modernButton({style: {width: "100px", height: "100px", backgroundColor: color}}),
+      ),
+      modal(
+        "modal",
+        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+      ).show(this.showModal),
+      { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
+    );
+  }
+}
+
+class PopoverModalExample extends Flow {
+ 
+  setState() {
+    this.showModal = false;
+  }
+
+  build() {
+    return panel("panel",
+      column("column",
+        text("Standard responsive modal demo."),
+        // row(
+          button("Open Modal", ()=> {this.showModal = true;}),
+          {style: animatedContainerStyle}
+        // ), 
+        // modernButton({style: {width: "100px", height: "100px", backgroundColor: color}}),
+      ),
+      modal(
+        "modal",
+        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+      ).show(this.showModal),
+      { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
+    );
+  }
+}
+
+class HybridModalExample extends Flow {
+ 
+  setState() {
+    this.showModal = false;
+  }
+
+  build() {
+    return panel("panel",
+      column("column",
+        text("Standard responsive modal demo."),
+        // row(
+          button("Open Modal", ()=> {this.showModal = true;}),
+          {style: animatedContainerStyle}
+        // ), 
+        // modernButton({style: {width: "100px", height: "100px", backgroundColor: color}}),
+      ),
+      modal(
+        "modal",
+        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+      ).show(this.showModal),
+      { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
+    );
+  }
+}
+
 
           // modal(
           //   "animatedModal",

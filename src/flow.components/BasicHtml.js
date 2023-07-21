@@ -49,12 +49,12 @@ export function textToTextNode(properties) {
   if (properties.text) { //textToTextNode(parameters);
     // TODO: Investigate why there is an infinite loop if we do not add array around children??
     properties.children = 
-      [
+      // [
         getTarget().textNode({
           key: properties.key ? properties.key + ".text" : null,
           text: extractProperty(properties, "text"),
         })
-      ]
+      // ]
       ;
   }
 }

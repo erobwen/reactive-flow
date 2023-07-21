@@ -196,17 +196,37 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     while(index >= 0) {
       const existingChildNode = getWrappedNode(node.childNodes[index]);
       if ((existingChildNode instanceof Element) && !newChildNodes.includes(existingChildNode)) {
-        node.removeChild(getWrapper(existingChildNode));
+        const wrapper = getWrapper(existingChildNode);
+        if (wrapper && wrapper.parentNode === node) {
+          node.removeChild(wrapper);
+        } else {
+          console.warn("Weird, there is a wrapper that is no longer in place?");
+        }
       }
       index--;
     }
 
     // Adding pass, will also rearrange moved elements
     index = 0;
+    // log(node)
     while(index < newChildNodes.length) {
-      const existingChildNode = getWrappedNode(node.childNodes[index]);
-      if (newChildNodes[index] !== existingChildNode) {
-        node.insertBefore(getWrapper(newChildNodes[index]), getWrapper(existingChildNode));
+      // log("index:" + index);
+      const newChildNode = newChildNodes[index];
+      const existingChildNode = node.childNodes[index]; 
+      if (existingChildNode) {
+        const existingWrappedNode = getWrappedNode(node.childNodes[index]);
+        // log("old:")
+        // log(existingWrappedNode);
+        // if (existingWrappedNode) log(existingWrappedNode.wrapper);
+        if (newChildNode !== existingWrappedNode) {
+          // log("new:")
+          // log(newChildNode);
+          // log(newChildNode.wrapper);
+          // Note: Wrapper could be for a next move that the reference is about to make. 
+          node.insertBefore(getWrapper(newChildNode), existingChildNode);
+        }
+      } else {
+        node.appendChild(getWrapper(newChildNode));
       }
       index++;
     }
