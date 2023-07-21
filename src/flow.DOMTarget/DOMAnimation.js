@@ -1,5 +1,5 @@
 import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from "../flow/Flow";
-import { DOMFlowAnimation, standardAnimation } from "./DOMFlowAnimation";
+import { DomNodeAnimation, standardAnimation } from "./DomNodeAnimation";
 import { getWrapper } from "./DOMNode";
 
 const log = console.log;

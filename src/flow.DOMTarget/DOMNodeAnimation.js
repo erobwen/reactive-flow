@@ -42,7 +42,7 @@ export function draw(bounds, color="black") {
 
 const animationTime = 1;
 
-export class DOMFlowAnimation {
+export class DomNodeAnimation {
   animatedProperties = animatedProperties;
 
   blockedPropertiesMap() {
@@ -558,7 +558,7 @@ export class DOMFlowAnimation {
 
 }
 
-export const standardAnimation = new DOMFlowAnimation();
+export const standardAnimation = new DomNodeAnimation();
 
 
 
