@@ -1,5 +1,5 @@
 import getWorld from "../causality/causality.js";
-import { colorLog, isUpperCase } from "./utility.js";
+import { logMark, isUpperCase } from "./utility.js";
 
 export const world = getWorld({
   useNonObservablesAsValues: true,
@@ -173,7 +173,7 @@ export class Flow {
   inherit(property) {
     const result = this.inheritCached(property);
     withoutRecording(()=> {
-      log("inherit: " + property + " result: " + result);
+      // log("inherit: " + property + " result: " + result);
     })
     return result; 
   }
@@ -183,14 +183,14 @@ export class Flow {
     if (typeof(context[property]) === "undefined") {
       invalidateOnChange(
         () => {
-          log("caching")
+          // log("caching")
           context[property] = this.inheritUncached(property);
           withoutRecording(()=> {
-            log(context[property]);
+            // log(context[property]);
           });
         },
         () => {
-          log('%c Invalidate!!! ', 'background: #222; color: #bada55');
+          // log('%c Invalidate!!! ', 'background: #222; color: #bada55');
           delete context[property];
         }
       )
@@ -236,7 +236,7 @@ export class Flow {
     if (typeof(propertyValue) !== "undefined") {
       return propertyValue;
     } else if (this.equivalentCreator) {
-      log(this.equivalentCreator)
+      // log(this.equivalentCreator)
       return this.equivalentCreator.inheritFromEquivalentCreator(property);
     } else {
       return null;
@@ -323,7 +323,7 @@ export class Flow {
   }
 
   onVisibilityWillChange(visibility) {
-    log("onVisibilityWillChange: " + this.toString() + ".visibility = " + visibility);
+    // log("onVisibilityWillChange: " + this.toString() + ".visibility = " + visibility);
     // Called if the visibility is changed for this component. 
     // Since Flow allows hidden component that maintain their state but are not disposed, 
     // this is how you know if your component is visible.  
@@ -420,9 +420,6 @@ export class Flow {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
         log("Flow.ensureBuiltRecursive");
-        log(this.parentPrimitive);
-        log("-->")
-        log(parentPrimitive)
         console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive
@@ -436,9 +433,6 @@ export class Flow {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
         log("getPrimitive");
-        log(this.parentPrimitive);
-        log("-->")
-        log(parentPrimitive)
         console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive

@@ -4,7 +4,7 @@ import { basicWidgetTheme, numberInputField, text } from "../flow.components/Bas
 import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../flow.components/Layout";
 import { div } from "../flow.components/BasicHtml"
 ;
-import { colorLog } from "../flow/utility";
+import { logMark } from "../flow/utility";
 import { fitTextWithinWidth } from "../flow.DOMTarget/fontMetrics";
 
 

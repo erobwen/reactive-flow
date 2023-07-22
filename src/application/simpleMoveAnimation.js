@@ -4,7 +4,6 @@ import { text } from "../flow.components/BasicWidgets";
 import { column, filler, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
-import { simpleModernButton } from "../flow.components/SimpleModernButton";
 import { div } from "../flow.components/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
@@ -61,30 +60,30 @@ export class SimpleMoveAnimation extends Flow {
   build() {
     // const button = new modernButton(
     // const button = div("wrapper", this.button, {animate: true});
-    const button = this.button; 
-    button.animate = true; // Force property...  
+    const movingButton = this.button; 
+    movingButton.animate = true; // Force property...  
 
     return column(
       filler(),
       row(
         column(
-          button.show(this.left), 
+          movingButton.show(this.left), 
           filler(),
           {style: {...animatedContainerStyle, width: "150px"}}
         ),
         div({style: {width: "200px"}}),
         column(
           // text("Some Text", {animate: true, style: borderStyle}).show(!this.left),
-          button.show(!this.left), 
+          movingButton.show(!this.left), 
           filler(), 
           {style: {...animatedContainerStyle, width: "150px"}}
         ), 
-        // filler(), 
-        // column(
-        //   simpleButton("Move", this.move.bind(this)),
-        //   filler(),
-        //   {style: {...animatedContainerStyle, width: "150px"}}
-        // ), 
+        filler(), 
+        column(
+          button("Move", this.move.bind(this)),
+          filler(),
+          {style: {...animatedContainerStyle, width: "150px"}}
+        ), 
         {style: animatedContainerStyle}
       ),
       filler(),

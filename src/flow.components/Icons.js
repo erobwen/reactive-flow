@@ -3,7 +3,7 @@ import { faCross, faPlus, faSuitcase, faXmark, faXmarkCircle } from '@fortawesom
 import { DOMElementNode } from '../flow.DOMTarget/DOMElementNode';
 import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from '../flow/Flow';
 import { aggregateToString } from '../flow.DOMTarget/DOMNode';
-import { colorLog } from '../flow/utility';
+import { logMark } from '../flow/utility';
 import { extractProperties } from '../flow.DOMTarget/DOMAnimation';
 import { elemenNode, extractProperty, span } from './BasicHtml';
 // library.add(faSuitcase);

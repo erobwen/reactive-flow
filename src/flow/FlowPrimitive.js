@@ -1,7 +1,7 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
 import { standardAnimation } from "../flow.DOMTarget/DomNodeAnimation.js";
 import { configuration, finalize, Flow, readFlowProperties, repeat, trace } from "./Flow.js";
-import { colorLog } from "./utility.js";
+import { logMark } from "./utility.js";
 
 const log = console.log;
 
@@ -29,9 +29,6 @@ export class FlowPrimitive extends Flow {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
         log("FlowPrimitive.getPrimitive");
-        log(this.parentPrimitive);
-        log("-->")
-        log(parentPrimitive)
         console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive
@@ -46,9 +43,6 @@ export class FlowPrimitive extends Flow {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
         log("FlowPrimitive.ensureBuiltRecursive");
-        log(this.parentPrimitive);
-        log("-->")
-        log(parentPrimitive)
         console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
         if (parentPrimitive === this) throw new Error("What the fuck just happened. ");
       }
@@ -80,9 +74,6 @@ export class FlowPrimitive extends Flow {
             if (this.parentPrimitive && this.parentPrimitive !== scan.parentPrimitive) {
               if (this.parentPrimitive) {
                 log("FlowPrimitive, scanning equivalent creators");
-                log(scan.parentPrimitive);
-                log("-->")
-                log(this.parentPrimitive)
                 console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
               }
               scan.parentPrimitive = this.parentPrimitive

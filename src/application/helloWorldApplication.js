@@ -94,19 +94,19 @@ export function startHelloWorld() {
 function asyncModifications(helloWorld) {
   // Set "Hello" deep inside observable data structure
   setTimeout(() => {
-    log("----------------------------------");
+    // log("----------------------------------");
     helloWorld.helloText.value = "Hello";
   }, 1000);
 
   // Set state property to "world!", using a component path to access child component.
   setTimeout(() => {
-    log("----------------------------------");
+    // log("----------------------------------");
     helloWorld.getChild("world").worldText = "world";
   }, 2000);
   
   // Exclamation mark!
   setTimeout(() => {
-    log("----------------------------------");
+    // log("----------------------------------");
     helloWorld.emphasis = true;
   }, 3000);
 }

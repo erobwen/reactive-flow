@@ -45,17 +45,16 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
     console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
-    let domNode = this.ensureDomNodeBuilt(true);
-    // domNode = getWrapper(domNode); 
+    let domNode = this.ensureDomNodeBuilt();
     let alreadyInContext;
     if (contextNode) { 
       alreadyInContext = domNode.parentNode === contextNode;
-      // alreadyInContext = true; 
       if (!alreadyInContext) {
-        // log("CLONE!!!");
+        log("Deep cloing and appending child to context... ");
         domNode = domNode.cloneNode(true);
         contextNode.appendChild(domNode);
-        // domNode.style.position = ""; 
+      } else {
+        log("No need for cloning, node already in context")
       }
     } else {
       domNode = domNode.cloneNode(true);
@@ -66,6 +65,7 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
       domNode.style.height = "auto";
       Object.assign(domNode.style, flexAutoStyle);
       document.body.appendChild(domNode);  
+      log("No context, deep cloing and appending child to document... ");
     }
   
     // domNode.offsetWidth 
@@ -79,7 +79,8 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
       widthWithoutMargin: domNode.offsetWidth,
       heightWithoutMargin: domNode.offsetHeight
     }; 
-    const original = this.ensureDomNodeBuilt(true)
+
+    // const original = this.ensureDomNodeBuilt()
     // log("dimensions " + this.toString() + " : " +  result.width + " x " +  result.height);
     // log(original);
     // debugger;

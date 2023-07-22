@@ -2,16 +2,12 @@ import { div } from "./BasicHtml";
 import { textInputField as basicTextInputField } from "./BasicWidgets";
 import { modernButton } from "./ModernButton"
 import { modernTextField } from "./ModernTextField";
-import { simpleModernButton } from "./SimpleModernButton";
+import { button as basicButton } from "./BasicWidgets";
+
 
 export function button(...parameters) {
+  return basicButton.apply(null, parameters); 
   // return modernButton.apply(null, parameters);
-  // const button = simpleButton.apply(null, parameters);
-  const button = modernButton.apply(null, parameters);
-  return button; 
-  // const wrapper = div(button);
-  // wrapper.button = button; 
-  // return wrapper; 
 }
 
 

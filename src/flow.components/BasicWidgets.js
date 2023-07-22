@@ -1,5 +1,5 @@
 import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators, callback, flow, addDefaultStyleToProperties } from "../flow/Flow.js";
-import { colorLog } from "../flow/utility.js";
+import { logMark } from "../flow/utility.js";
 import { div, extractAttributes, extractChildStyles, extractProperty, textToTextNode } from "./BasicHtml.js";
 import { filler, row } from "./Layout.js";
 import { modernButton } from "./ModernButton.js";
@@ -57,7 +57,7 @@ export function unstyledText(...parameters) {
   const label = getTarget().elementNode(key ? key : null, 
     {
       classNameOverride: "text",// + debugIdentifier + "]",
-      tagName:"label",
+      tagName:"div",
       attributes: extractProperty(properties, "attributes"), 
       children: extractProperty(properties, "children"), 
       animate: extractProperty(properties, "animate")
@@ -157,17 +157,18 @@ export function inputField(type, label, getter, setter, ...parameters) {
 // export const button = modernButton;
 
 export function button(...parameters) { 
-  let result; 
   const properties = readFlowProperties(parameters);
   findTextKeyAndOnClickInProperties(properties);
+  addDefaultStyleToProperties(properties, {lineHeight: "28px"})
   const attributes = extractAttributes(properties);
   if (properties.disabled) attributes.disabled = true; 
-
+  
   // Inject debug printout in click.
+  let result; 
   if (trace && properties.onClick) {
     const onClick = properties.onClick;
     properties.onClick = () => {
-      log("clicked at: " + JSON.stringify(result.getPath()));
+      console.log("clicked at: " + JSON.stringify(result.getPath()));
       onClick();
     }  
   }
@@ -179,12 +180,18 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  result = getTarget().elementNode(properties.key, {classNameOverride: "button", tagName: "button", attributes, children, onClick: properties.onClick, animate: properties.animate});
+  result = getTarget().elementNode(properties.key, {
+    classNameOverride: "button", 
+    tagName: "button", 
+    attributes, 
+    children, 
+    onClick: properties.onClick, 
+    animate: properties.animate
+  });
   return result; 
 };
 
 export const panel = (...parameters) => {
-  colorLog("panel");
   const properties = readFlowProperties(parameters);
   findKeyInProperties(properties);
   addDefaultStyleToProperties(properties, {

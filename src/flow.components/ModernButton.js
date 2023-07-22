@@ -4,7 +4,7 @@ import { adjustLightness, grayColor } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, fitStyle, wrapper } from "./Layout";
-import { colorLog } from "../flow/utility";
+import { logMark } from "../flow/utility";
 
 const log = console.log; 
 
@@ -152,11 +152,11 @@ export class ModernButton extends Flow {
   setEventListeners(onClick, mouseOverBackgroundColor) {
     const {ripple} = this; 
     const panel = this.findChild("button").domNode;
-    log("setEventListeners");
+    // log("setEventListeners");
     // log(panel)
 
     this.rippleAndCallback = (event) => {
-      log("TRY RIPPLE");
+      // log("TRY RIPPLE");
 
 
       event.stopPropagation();
@@ -167,7 +167,7 @@ export class ModernButton extends Flow {
       this.inAnimation = true; 
           
       if (ripple) { 
-        log("RIPPLE");
+        // log("RIPPLE");
         // log(this)
         // log(this.findChild("text"));
         // log(this.findChild("text").domNode);
@@ -223,7 +223,7 @@ export class ModernButton extends Flow {
       onClick(); 
     }
 
-    log(panel)
+    // log(panel)
 
     if (onClick) {    
       panel.addEventListener("click", this.rippleAndCallback);
@@ -253,7 +253,7 @@ export class ModernButton extends Flow {
     let children; 
     
     if (this.children) {
-      // colorLog("FOOOBAR")
+      // logMark("FOOOBAR")
       children = this.children; 
       // log(children)
     } else if (this.render) {
@@ -270,21 +270,11 @@ export class ModernButton extends Flow {
     }
 
     
-    const myButton = button("button",
+    return button("button",
       children, 
       {
         style
       }
-    );
-
-    return (
-      // wrapper( // Wrapper used to isolate for animation? TODO: filter child attributes to wrapper. 
-        myButton
-        // ,
-        // {
-        //   style
-        // }
-      // )
     );
   }
 }

@@ -67,8 +67,8 @@ export class Demo extends Flow {
   }
 
   build() {
-    log("BUILD DEMO -----------------------------------------------")
-    log(creators.length)
+    // log("BUILD DEMO -----------------------------------------------")
+    // log(creators.length)
     const buttons = [];
     buttons.push(svgImage())
     for (let component of this.components) {
@@ -85,8 +85,8 @@ export class Demo extends Flow {
        style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray", overflow: "visible"}}
     );
     const width = leftColumn.dimensions().width; 
-    log("HERE")
-    log(width);
+    // log("HERE")
+    // log(width);
     this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
     // this.choosen.leftColumnPortal =  this.leftColumnPortal;  
 

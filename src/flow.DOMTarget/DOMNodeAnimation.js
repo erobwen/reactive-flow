@@ -1,6 +1,7 @@
 
 // cubic-bezier(0.42,0,1,1)
 
+import { logMark } from "../flow/utility";
 import { flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
@@ -40,7 +41,7 @@ export function draw(bounds, color="black") {
   // document.children[0].appendChild(outline);
 }
 
-const animationTime = 1;
+const animationTime = 9;
 
 export class DomNodeAnimation {
   animatedProperties = animatedProperties;
@@ -164,18 +165,42 @@ export class DomNodeAnimation {
     log("setOriginalMinimizedStyleForAdded");
     log(node);
     log(node.wrapper);
-    const wrapper = node.wrapper;
-    if (node.wrapper) {
-      wrapper.style.height = "0px";
-      wrapper.style.width = "0px";
-      wrapper.style.overflow = "visible";
-      wrapper.style.position = "relative";
-    }
-
-    Object.assign(node.style, this.addedOriginalMinimizedStyle(node));
-    console.log(node.style.transform);
-  }
+    if (node.equivalentCreator.changes.previous && node.equivalentCreator.changes.previous.type === "removed") {
+      log("reusing removal wrapper")
+      const wrapper = node.wrapper;
+      if (node.wrapper) {
+        const wrapperOriginalStyle = {...getComputedStyle(node.wrapper)};
+        log(node.wrapper.getBoundingClientRect())
+        log("What the hell is going on here!!!");
+        log(node.computedOriginalStyle.transform);
+        node.style.transform = node.computedOriginalStyle.transform; 
+        log(wrapperOriginalStyle.width);
+        // wrapper.style.height = wrapperOriginalStyle.height;
+        // wrapper.style.width = wrapperOriginalStyle.width;
+        wrapper.style.overflow = "visible";
+        wrapper.style.position = "relative";
+      }
+    } else {
+      log("setting up a minimized wrapper")
+      const wrapper = node.wrapper;
+      if (node.wrapper) {
+        wrapper.style.height = "0px";
+        wrapper.style.width = "0px";
+        wrapper.style.overflow = "visible";
+        wrapper.style.position = "relative";
+      }
   
+      Object.assign(node.style, {
+        transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        position: "absolute", 
+        width: node.targetDimensions.widthWithoutMargin + "px",
+        height: node.targetDimensions.heightWithoutMargin + "px",
+        opacity: "0",
+      });
+      console.log(node.style.transform);
+    }
+  }
+
   getAnimatedProperties(computedStyle) {
     const result = {};
     animatedProperties.forEach(property => {
@@ -190,42 +215,6 @@ export class DomNodeAnimation {
     return result; 
   }
 
-  addedOriginalMinimizedStyle(node) {
-    // if (node.addADeletedNode) {
-    //   delete node.addADeletedNode;
-    //   // const result = this.getAnimatedProperties(node.computedOriginalStyle);
-    //   result.maxHeight = "0px"; node.computedOriginalStyle.height;
-    //   result.maxWidth = node.computedOriginalStyle.width;
-    //   return result;
-    // }
-    // log(node.targetDimensions);
-    // log(node.targetDimensions.widthWithoutMargin);
-    // const position = [Math.round(node.targetDimensions.width / 2), Math.round(node.targetDimensions.width / 2)];
-    // const transform = "translate(" + position[0] + "px, " + position[1] + "px) matrix(0.0001, 0, 0, 0.0001, 0, 0) translate(" + -position[0] + "px, " + -position[1] + "px)";// Not quite working as intended... but ok?
-    return {
-      // transition: this.defaultTransition(),
-      transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-      position: "absolute", 
-      width: node.targetDimensions.widthWithoutMargin + "px",
-      height: node.targetDimensions.heightWithoutMargin + "px",
-      // boxSizing: "border-box",
-      // maxHeight: "0px",
-      // maxWidth: "0px",
-      // margin: "0px",
-      // marginTop: "0px",
-      // marginBottom: "0px",
-      // marginLeft: "0px",
-      // marginRight: "0px",
-      // padding: "0px",
-      // paddingTop: "0px",
-      // paddingBottom: "0px",
-      // paddingLeft: "0px",
-      // paddingRight: "0px",
-      opacity: "0",
-      // color, fontSize?
-    } 
-  }
-
   
  /**
    * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
@@ -237,6 +226,8 @@ export class DomNodeAnimation {
     // Reuse wrapper if existing, as it is already in right place
     if (node.wrapper) {
       trailer = node.wrapper;
+      trailer.removeEventListener(trailer.hasCleanupEventListener);
+      delete trailer.hasCleanupEventListener;
       // delete trailer.purpose; 
       trailer.wasWrapper = true; 
       delete trailer.wrapped;
@@ -244,6 +235,12 @@ export class DomNodeAnimation {
     } else {
       trailer = document.createElement("div");
     }
+    log(trailer);
+    log(trailer.style.fontSize);
+    log(trailer.style.backgroundColor);
+    trailer.style.fontSize = "0px"; // For correctly positioning of buttons? 
+    trailer.style.backgroundColor = "#ffaaaa";
+    trailer.style.overflow = "visible; "
 
     const changes = {
       number: flowChanges.number,
@@ -286,24 +283,36 @@ export class DomNodeAnimation {
   }
 
   minimizeIncomingFootprint(node) {
+    logMark("minimizedStyleForMoved");
+    log(node);
+    log(node.wrapper);
+    const wrapper = node.wrapper;
+    log(node.wrapper.reusedWrapper)
+    if (node.wrapper && !node.wrapper.reusedWrapper) {
+      wrapper.style.height = "0px";
+      wrapper.style.width = "0px";
+      wrapper.style.overflow = "visible";
+      // wrapper.style.position = "relative";
+    }
+
     // return; 
     // console.log("minimizeIncomingFootprint");
-    const measures = this.getOriginalMeasures(node);
-    const wrapper = node.wrapper;
+    // const measures = this.getOriginalMeasures(node);
+    // const wrapper = node.wrapper;
     
-    if (!node.wrapper) {
-      node.animationStartTotalHeight = measures.totalHeight;
-      node.animationStartMarginTop = measures.marginTop;
-      node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
-      // node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
-      node.style.marginTop = node.animationStartAjustedMarginTop + "px";
+    // if (!node.wrapper) {
+    //   node.animationStartTotalHeight = measures.totalHeight;
+    //   node.animationStartMarginTop = measures.marginTop;
+    //   node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
+    //   // node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
+    //   node.style.marginTop = node.animationStartAjustedMarginTop + "px";
   
-      node.animationStartTotalWidth = measures.totalWidth;
-      node.animationStartMarginLeft = measures.marginLeft;
-      const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
-      // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
-      node.style.marginLeft = animationStartAjustedMarginLeft + "px";
-    }
+    //   node.animationStartTotalWidth = measures.totalWidth;
+    //   node.animationStartMarginLeft = measures.marginLeft;
+    //   const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
+    //   // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
+    //   node.style.marginLeft = animationStartAjustedMarginLeft + "px";
+    // }
 
     // log(node.style.marginTop)
   }
@@ -414,23 +423,6 @@ export class DomNodeAnimation {
     }
     Object.assign(node.style, this.removedFinalStyle(node));
   }
-  
-
-  // transform: "", //transform,
-  // maxHeight: "0px",
-  // maxWidth: "0px",
-  // margin: "0px",
-  // marginTop: "0px",
-  // marginBottom: "0px",
-  // marginLeft: "0px",
-  // marginRight: "0px",
-  // padding: "0px",
-  // paddingTop: "0px",
-  // paddingBottom: "0px",
-  // paddingLeft: "0px",
-  // paddingRight: "0px",
-  // opacity: "0",
-
 
   residentTransition() {
     return this.defaultTransition();
