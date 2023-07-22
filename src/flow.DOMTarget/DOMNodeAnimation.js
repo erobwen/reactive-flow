@@ -2,7 +2,7 @@
 // cubic-bezier(0.42,0,1,1)
 
 import { draw, logMark } from "../flow/utility";
-import { changeType, flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
+import { changeType, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
@@ -123,8 +123,44 @@ export class DOMNodeAnimation {
         wrapper.style.overflow = "visible";
       }
     }
-
   }
+
+  getFadingTrailer(node) {
+    let trailer; 
+
+    // Reuse wrapper if existing, as it is already in right place
+    if (node.wrapper) {
+      trailer = node.wrapper;
+      trailer.removeEventListener(trailer.hasCleanupEventListener);
+      delete trailer.hasCleanupEventListener;
+      // delete trailer.purpose; 
+      trailer.wasWrapper = true; 
+      delete trailer.wrapped;
+      delete node.wrapper;  
+    } else {
+      trailer = document.createElement("div");
+    }
+    log(trailer);
+    log(trailer.style.fontSize);
+    log(trailer.style.backgroundColor);
+    trailer.style.fontSize = "0px"; // For correctly positioning of buttons? 
+    trailer.style.backgroundColor = "#ffaaaa";
+    trailer.style.overflow = "visible; "
+
+    const changes = {
+      number: flowChanges.number,
+      type: changeType.removed,
+      previous: null
+    };
+
+    trailer.owner = node; 
+    trailer.changes = changes; 
+    node.fadingTrailerOnChanges = flowChanges.number;
+    node.fadingTrailer = trailer;
+    trailer.id = "trailer"
+    return trailer;  
+  }
+
 
   /**
    * DOM just rebuilt, it could be a good idea to measure target sizes at this stage, 
@@ -162,9 +198,16 @@ export class DOMNodeAnimation {
    * Target sizes has now been aquired, now we need to emulate the original styles, sizes and positions of all animated
    * nodes. This is for a smooth transition from their original position. 
    */
-  targetSizesAquiredEmulateOriginalStylesAndPositions() {
-
-
+  targetSizesAquiredEmulateOriginalFootprints(flow) {
+    const node = flow.domNode;
+    switch (flow.changes.type) {
+      case changeType.added: 
+        this.setOriginalMinimizedStyleForAdded(flow.domNode);
+        break; 
+      case changeType.removed: 
+        this.fixateRemoved(flow);
+        break;
+    }
   }
 
   setOriginalMinimizedStyleForAdded(node) {
@@ -196,15 +239,42 @@ export class DOMNodeAnimation {
         wrapper.style.position = "relative";
       }
   
+      // Prepare for animation, do at a later stage perhaps? 
       Object.assign(node.style, {
         transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
         position: "absolute", 
-        width: node.targetDimensions.widthWithoutMargin + "px",
+        width: node.targetDimensions.widthWithoutMargin + "px", // EH? here really? target dimensions? 
         height: node.targetDimensions.heightWithoutMargin + "px",
         opacity: "0",
       });
       console.log(node.style.transform);
     }
+  }
+    
+  fixateRemoved(flow) {
+    const node = flow.domNode; 
+    
+    if (flow.changes.previous && flow.changes.previous.type === changeType.added) {
+      return; 
+    }
+
+    if (node.wrapper) {
+      node.wrapper.style.transition = node.equivalentCreator.animation.wrapperTransition(node);
+      
+      // log(getWidthIncludingMargin(node));
+      // log(getHeightIncludingMargin(node))
+      node.wrapper.style.width = getWidthIncludingMargin(node) + "px";
+      node.wrapper.style.height = getHeightIncludingMargin(node) + "px";
+      
+      node.wrapper.style.position = "relative";
+      node.wrapper.style.overflow = "visible";
+      // log(node.wrapper);
+      // debugger; 
+    }
+    node.style.position = "absolute";
+    node.style.transform = "matrix(1, 0, 0, 1, 0, 0)";
+    node.style.width = node.computedOriginalStyle.width; 
+    node.style.height = node.computedOriginalStyle.height; 
   }
 
   getAnimatedProperties(computedStyle) {
@@ -226,41 +296,7 @@ export class DOMNodeAnimation {
    * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
    * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
    */
-  getFadingTrailer(node) {
-    let trailer; 
 
-    // Reuse wrapper if existing, as it is already in right place
-    if (node.wrapper) {
-      trailer = node.wrapper;
-      trailer.removeEventListener(trailer.hasCleanupEventListener);
-      delete trailer.hasCleanupEventListener;
-      // delete trailer.purpose; 
-      trailer.wasWrapper = true; 
-      delete trailer.wrapped;
-      delete node.wrapper;  
-    } else {
-      trailer = document.createElement("div");
-    }
-    log(trailer);
-    log(trailer.style.fontSize);
-    log(trailer.style.backgroundColor);
-    trailer.style.fontSize = "0px"; // For correctly positioning of buttons? 
-    trailer.style.backgroundColor = "#ffaaaa";
-    trailer.style.overflow = "visible; "
-
-    const changes = {
-      number: flowChanges.number,
-      type: changeType.removed,
-      previous: null
-    };
-
-    trailer.owner = node; 
-    trailer.changes = changes; 
-    node.fadingTrailerOnChanges = flowChanges.number;
-    node.fadingTrailer = trailer;
-    trailer.id = "trailer"
-    return trailer;  
-  }
 
   inflateFadingTrailer(node) {
     const trailer = node.fadingTrailer;

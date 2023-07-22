@@ -311,9 +311,7 @@ export function onFinishReBuildingFlow() {
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
-      flow.domNode.changes.type = changeType.removed; 
-
-      // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
+      flow.domNode.changes.type = changeType.removed;
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
       flowChanges.beingRemovedMap[flow.id] = flow;    
     }
@@ -358,21 +356,25 @@ export function onFinishReBuildingDOM() {
 
   console.groupEnd();
   logAnimationSeparator("---------------------------------------- DOM rebuilt, measure target sizes ... ----------------------------------------");
-  // return; 
-
   
   // Measure the final size of added and moved (do this before we start to emulate original)
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.domNode) {
       flow.animation.domJustRebuiltMeasureTargetSizes(flow);
     }
-  };
+  }
 
   logAnimationSeparator("---------------------------------------- Emulate original bounds and sizes for FLIP animations ----------------------------------------");
 
+  // Emulate original footprints. 
+  for (let flow of flowChanges.allAnimatedFlows()) {
+    if (flow.domNode) {
+      flow.animation.targetSizesAquiredEmulateOriginalFootprints(flow);
+    }
+  }
+
   // Emulate original and prepare for animation.
-  minimizeAdded();
-  fixateRemoved();
+  
   inflateTrailersAndPrepareMoved();
 
   // We now have original style/size, but new structure. 
@@ -390,57 +392,8 @@ export function onFinishReBuildingDOM() {
   // logAnimationSeparator("---------------------------------------- Waiting for first render...  ----------------------------------------");
 }
 
-function measureTargetSizeForAdded() {
-  for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    flow.animation.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
-  }
-}
 
-function measureTargetSizeForMoved() {
-  for (let flow of flowChanges.allAnimatedMovedFlows()) {
-    if (flow.domNode) {
-      flow.animation.measureMovedFinalSize(flow.domNode);
-    }
-  }
-}
 
-function minimizeAdded() {
-  for (let flow of flowChanges.allAnimatedAddedFlows()) {
-    flow.animation.setOriginalMinimizedStyleForAdded(flow.domNode);
-  }
-}
-
-function fixateRemoved() {
-  for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-    if (flow.changes.previous && flow.changes.previous.type === changeType.added) {
-      continue; 
-    }
-    // log("fixateRemoved");
-    const node = flow.domNode; 
-    // log(node);
-    // log(getHeightIncludingMargin(node))
-
- 
-
-    if (node.wrapper) {
-      node.wrapper.style.transition = node.equivalentCreator.animation.wrapperTransition(node);
-      
-      // log(getWidthIncludingMargin(node));
-      // log(getHeightIncludingMargin(node))
-      node.wrapper.style.width = getWidthIncludingMargin(node) + "px";
-      node.wrapper.style.height = getHeightIncludingMargin(node) + "px";
-      
-      node.wrapper.style.position = "relative";
-      node.wrapper.style.overflow = "visible";
-      // log(node.wrapper);
-      // debugger; 
-    }
-    node.style.position = "absolute";
-    node.style.transform = "matrix(1, 0, 0, 1, 0, 0)";
-    node.style.width = node.computedOriginalStyle.width; 
-    node.style.height = node.computedOriginalStyle.height; 
-  }
-}
 
 function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
