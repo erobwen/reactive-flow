@@ -1,8 +1,12 @@
 import getWorld from "../causality/causality.js";
 import { logMark, isUpperCase } from "./utility.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
+const log = console.log;
 
 
+/**
+ * World (from causality)
+ */
 export const world = getWorld({
   useNonObservablesAsValues: true,
   warnOnNestedRepeater: false,
@@ -11,49 +15,6 @@ export const world = getWorld({
   // onEventGlobal: event => collectEvent(event)
   onFinishedPriorityLevel: onFinishedPriorityLevel
 });
-export const {
-  transaction,
-  observable,
-  deeplyObservable,
-  isObservable, 
-  repeat,
-  finalize,
-  withoutRecording,
-  sameAsPreviousDeep,
-  workOnPriorityLevel,
-  invalidateOnChange
-} = world;
-export const model = deeplyObservable;
-const log = console.log;
-window.sameAsPreviousDeep = sameAsPreviousDeep;
-window.world = world;
-window.observable = observable;
-export let creators = [];
-
-
-export const configuration = {
-  warnWhenNoKey: false,
-  traceReactivity: false,
-  defaultTransitionAnimations: null,
-  onFinishReBuildingFlowCallbacks: [],
-  onFinishReBuildingDOMCallbacks:  [],
-
-}
-
-export let trace = false;
-export let activeTrace = false; 
-export const activeTraceModel = model({
-  on: false 
-})
-window.activeTrace = activeTraceModel;
-repeat(() => {
-  activeTrace = activeTraceModel.on;
-})
-
-export function setFlowConfiguration(newConfiguration) {
-  Object.assign(configuration, newConfiguration);
-  trace = configuration.traceReactivity;
-}
 
 function onFinishedPriorityLevel(level, finishedAllLevels) {
   if (trace) log("<<<finished priority: " + level + ">>>");
@@ -73,14 +34,80 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
   }
 }
 
+
+/**
+ * World functions
+ */
+export const {
+  transaction,
+  observable,
+  deeplyObservable,
+  isObservable, 
+  repeat,
+  finalize,
+  withoutRecording,
+  sameAsPreviousDeep,
+  workOnPriorityLevel,
+  invalidateOnChange
+} = world;
+
+
+/**
+ * Model creation
+ */
+export const model = deeplyObservable;
+
+
+/**
+ * Flow configuration
+ */
+export const configuration = {
+  warnWhenNoKey: false,
+  traceReactivity: false,
+  defaultTransitionAnimations: null,
+  onFinishReBuildingFlowCallbacks: [],
+  onFinishReBuildingDOMCallbacks:  [],
+}
+
+export function setFlowConfiguration(newConfiguration) {
+  Object.assign(configuration, newConfiguration);
+  trace = configuration.traceReactivity;
+}
+
+
+/**
+ * Debugging
+ */
+export let trace = false;
+export let activeTrace = false; 
+export const activeTraceModel = model({
+  on: false 
+})
+window.activeTrace = activeTraceModel;
+repeat(() => {
+  activeTrace = activeTraceModel.on;
+})
 window.flows = {};
 window.idToFlow = {}
+window.world = world;
+window.model = model;
+
+
+/**
+ * Flow creation stack
+ */
+export let creators = [];
+
+
+/**
+ * Flow
+ */
 export class Flow {
   get id() {
     return this.causality.id;
   }
 
-  get get() { // TODO: Move htis to causality. 
+  get get() { // TODO: Move this to causality, as some optional generic "get target" property, maybe use underscore? 
     return this.causality.target;
   }
 
