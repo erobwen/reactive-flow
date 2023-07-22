@@ -10,7 +10,7 @@ const animationTime = 9;
 
 export class DOMNodeAnimation {
   /**
-   * Default transition
+   * Default transitions
    */
   defaultTransition() {
     return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(1, 0, 0.42, 0.93)`
@@ -100,7 +100,6 @@ export class DOMNodeAnimation {
           log(node.wrapper.getBoundingClientRect());
           node.wrapper.style.width = dimensions.width + "px";
           node.wrapper.style.height = dimensions.height + "px";
-          // debugger;
           oldWrapper.reusedWrapper = true; 
         } else {
           // Dispose old wrapper
@@ -127,10 +126,25 @@ export class DOMNodeAnimation {
 
   }
 
-
   /**
-   * Measure inocming size 
+   * DOM just rebuilt, it could be a good idea to measure target sizes at this stage, 
+   * since it is the closest we will be to the actual end result. 
+   * However, removed nodes are still present at this point... maybe we should ensure added leaders for removed ones start out minimized?
+   * Trailers should also be minimized at this point.
    */
+  domJustRebuiltMeasureTargetSizes(flow) {
+    const node = flow.domNode;
+    
+    switch (flow.changes.type) {
+      case changeType.added:
+        this.calculateTargetDimensionsAndStyleForAdded(flow.parentPrimitive.domNode, flow.domNode);
+        break;
+      case changeType.moved:
+        this.measureMovedFinalSize(flow.domNode);
+        break;
+    }
+  }
+
   measureMovedFinalSize(node) {
     node.movedFinalSize = {
       width: node.offsetWidth, 
@@ -138,21 +152,19 @@ export class DOMNodeAnimation {
     }
   }
 
-
   calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
-    
-    // node.style.maxWidth = ""; // This causes bounce remove add to fail... we do not preserve the max sizes... 
-    // node.style.maxHeight = "";    
     node.targetDimensions = node.equivalentCreator.dimensions(contextNode); // Get a target size for animation, with initial styling. NOTE: This will cause a silent reflow of the DOM (without rendering). If you know your target dimensions without it, you can optimize this!
-    // It may not be possble to record style at this stage? Do after dom is rebuilt maybe? 
-    // log("calculateTargetDimensionsAndStyleForAdded");
-    // log(node.targetDimensions);
-    this.recordTargetStyleForAdded(node);
-  }
-
-  recordTargetStyleForAdded(node) {
     node.targetStyle = {...node.style}
     node.computedTargetStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully.
+  }
+
+  /**
+   * Target sizes has now been aquired, now we need to emulate the original styles, sizes and positions of all animated
+   * nodes. This is for a smooth transition from their original position. 
+   */
+  targetSizesAquiredEmulateOriginalStylesAndPositions() {
+
+
   }
 
   setOriginalMinimizedStyleForAdded(node) {

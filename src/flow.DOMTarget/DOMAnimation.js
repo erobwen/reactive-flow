@@ -345,25 +345,28 @@ export function onFinishReBuildingFlow() {
 }
 
 /**
- * Between these two functions the following takes place: 
+ * Between these two functions the DOM is rebuilt with new structure and styling. 
  * 
- * New dom structure and new styling. 
- * 
- * Block style changes for maxWidth, maxHeight, transform for nodes in an animation.
-*/
+ * Consider: Block style changes for transform for nodes in an animation?
+ */
 
 export function onFinishReBuildingDOM() {
 
   counter++
   if (!flowChanges.onFinishReBuildingFlowDone) return;
+  delete flowChanges.onFinishReBuildingFlowDone;
+
   console.groupEnd();
   logAnimationSeparator("---------------------------------------- DOM rebuilt, measure target sizes ... ----------------------------------------");
   // return; 
-  delete flowChanges.onFinishReBuildingFlowDone; 
-    
+
+  
   // Measure the final size of added and moved (do this before we start to emulate original)
-  measureTargetSizeForAdded();
-  measureTargetSizeForMoved();
+  for (let flow of flowChanges.allAnimatedFlows()) {
+    if (flow.domNode) {
+      flow.animation.domJustRebuiltMeasureTargetSizes(flow);
+    }
+  };
 
   logAnimationSeparator("---------------------------------------- Emulate original bounds and sizes for FLIP animations ----------------------------------------");
 
