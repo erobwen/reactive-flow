@@ -364,20 +364,19 @@ export function onFinishReBuildingDOM() {
     }
   }
 
-  logAnimationSeparator("---------------------------------------- Emulate original bounds and sizes for FLIP animations ----------------------------------------");
-
+  logAnimationSeparator("---------------------------------------- Emulate original footprints ----------------------------------------");
+  
   // Emulate original footprints. 
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.domNode) {
       flow.animation.targetSizesAquiredEmulateOriginalFootprints(flow);
     }
   }
-
-  // Emulate original and prepare for animation.
-  
-  inflateTrailersAndPrepareMoved();
-
   // We now have original style/size, but new structure. 
+  
+  logAnimationSeparator("---------------------------------------- Emulate original bounds and styles for FLIP animations ----------------------------------------");
+  
+
 
   // Do the FLIP animation technique
   // Note: This will not happen for flows being removed (in earlier flowChanges.number). Should we include those here as well?
@@ -394,15 +393,6 @@ export function onFinishReBuildingDOM() {
 
 
 
-
-function inflateTrailersAndPrepareMoved() {
-  for (let flow of flowChanges.allAnimatedMovedFlows()) {
-    if (flow.domNode) {
-      flow.animation.inflateFadingTrailer(flow.domNode);
-      flow.animation.minimizeIncomingFootprint(flow.domNode);
-    }
-  }
-}
 
 function recordBoundsInNewStructure() {
   // force Reflow().

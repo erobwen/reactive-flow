@@ -207,6 +207,9 @@ export class DOMNodeAnimation {
       case changeType.removed: 
         this.fixateRemoved(flow);
         break;
+      case changeType.moved: 
+        this.inflateFadingTrailer(flow.domNode);
+        this.minimizeIncomingFootprint(flow.domNode);
     }
   }
 
@@ -251,7 +254,7 @@ export class DOMNodeAnimation {
     }
   }
     
-  fixateRemoved(flow) {
+  fixateRemoved(flow) { // TODO: Should actually inflate it instead... Because we want to aquire target dimensions with removed things out of the way. 
     const node = flow.domNode; 
     
     if (flow.changes.previous && flow.changes.previous.type === changeType.added) {
@@ -277,27 +280,6 @@ export class DOMNodeAnimation {
     node.style.height = node.computedOriginalStyle.height; 
   }
 
-  getAnimatedProperties(computedStyle) {
-    const result = {};
-    animatedProperties.forEach(property => {
-      if (typeof property === "string") {
-        result[property] = computedStyle[property]
-      } else {
-        property.partial.forEach(partialProperty => {
-          result[partialProperty] = computedStyle[partialProperty]
-        });
-      }
-    });
-    return result; 
-  }
-
-  
- /**
-   * When an element moves from one container to another, we do not want the new or previous container to suddenly change in size
-   * For this reason the Flow framework adds extra elements to ajust for added or subtracted size, that gradually dissapear.  
-   */
-
-
   inflateFadingTrailer(node) {
     const trailer = node.fadingTrailer;
     // if (!trailer.wasWrapper) {
@@ -313,15 +295,6 @@ export class DOMNodeAnimation {
       trailer.style.maxWidth = trailer.style.width; 
       trailer.style.maxHeight = trailer.style.height;
     // }
-  }
-
-  fadingTrailerFinalStyle() {
-    return {
-      width: "0px",
-      height: "0px",
-      maxWidth: "0px",
-      maxHeight: "0px",
-    }
   }
 
   minimizeIncomingFootprint(node) {
@@ -431,7 +404,12 @@ export class DOMNodeAnimation {
     if (node.fadingTrailer && node.fadingTrailerOnChanges === flowChanges.number) {
       // debugger;
       node.fadingTrailer.style.transition = this.residentTransition(node);
-      Object.assign(node.fadingTrailer.style, this.fadingTrailerFinalStyle());
+      Object.assign(node.fadingTrailer.style, {
+        width: "0px",
+        height: "0px",
+        maxWidth: "0px",
+        maxHeight: "0px",
+      });
     }
   }
 
@@ -447,6 +425,21 @@ export class DOMNodeAnimation {
 
   residentTransition() {
     return this.defaultTransition();
+  }
+
+  
+  getAnimatedProperties(computedStyle) {
+    const result = {};
+    animatedProperties.forEach(property => {
+      if (typeof property === "string") {
+        result[property] = computedStyle[property]
+      } else {
+        property.partial.forEach(partialProperty => {
+          result[partialProperty] = computedStyle[partialProperty]
+        });
+      }
+    });
+    return result; 
   }
 
   residentFinalStyle(node) {
