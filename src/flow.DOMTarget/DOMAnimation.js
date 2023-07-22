@@ -342,12 +342,14 @@ export function onFinishReBuildingFlow() {
   flowChanges.onFinishReBuildingFlowDone = true;
 }
 
+
 /**
+ * On finish rebuilding DOM
+ * 
  * Between these two functions the DOM is rebuilt with new structure and styling. 
  * 
  * Consider: Block style changes for transform for nodes in an animation?
  */
-
 export function onFinishReBuildingDOM() {
 
   counter++
@@ -364,86 +366,30 @@ export function onFinishReBuildingDOM() {
     }
   }
 
-  logAnimationSeparator("---------------------------------------- Emulate original footprints ----------------------------------------");
+  logAnimationSeparator("---------------------------------------- Emulate original footprints and styles ----------------------------------------");
+  // Consider: Introduce leaders at this stage to do more accurate target size measurements without leaders? 
+  // Styles needs to be original at this point to have correct footprints. 
+
+  // Emulate original footprints. 
+  for (let flow of flowChanges.allAnimatedFlows()) {
+    if (flow.domNode) {
+      flow.animation.emulateOriginalFootprints(flow);
+    }
+  }
+  // We now have original style and footprints, but new structure. 
+  
+  logAnimationSeparator("---------------------------------------- Emulate original bounds for FLIP animations ----------------------------------------");
   
   // Emulate original footprints. 
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.domNode) {
-      flow.animation.targetSizesAquiredEmulateOriginalFootprints(flow);
+      flow.animation.emulateOriginalBounds(flow);
     }
   }
-  // We now have original style/size, but new structure. 
-  
-  logAnimationSeparator("---------------------------------------- Emulate original bounds and styles for FLIP animations ----------------------------------------");
-  
 
-
-  // Do the FLIP animation technique
-  // Note: This will not happen for flows being removed (in earlier flowChanges.number). Should we include those here as well?
-  recordBoundsInNewStructure();
-  translateToOriginalBoundsIfNeeded(); // Note: Might move resident animated flows also because of rearrangements.
-  
-  //setMaxWidthHeightScale for removed.
-
-  // Resident might need too.
+  // Activate animations using a function call to freeze flow changes in a lexical closure. 
   activateAnimationAfterFirstRender({...flowChanges});  
-
-  // logAnimationSeparator("---------------------------------------- Waiting for first render...  ----------------------------------------");
 }
-
-
-
-
-function recordBoundsInNewStructure() {
-  // force Reflow().
-  for (let flow of flowChanges.allAnimatedFlows()) {
-    flow.animation.recordBoundsInNewStructure(flow.domNode);
-  }
-}
-
-function translateToOriginalBoundsIfNeeded() {
-
-  // TODO: Translate parents first in case of cascading moves? 
-
-  // Translate present flows to original position
-  for (let flow of flowChanges.allAnimatedMovedResidentFlows()) {
-
-    if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
-      // log("Not same bounds for " + flow.toString());     
-      const computedStyle = getComputedStyle(flow.domNode);
-      let currentTransform = getComputedStyle(flow.domNode).transform;
-      // log(currentTransform);
-      // This is for resident that have a transform already. In an animation already.
-      if (!["none", "", " "].includes(currentTransform)) {
-        // log("Already have transform for " + flow.toString());     
-        // Freeze properties as we start a new animation.
-
-        
-        Object.assign(flow.domNode.style, extractProperties(computedStyle, animatedProperties));
-
-        // Reset transform 
-        flow.domNode.style.transition = "";
-        flow.domNode.style.transform = "";
-        currentTransform = getComputedStyle(flow.domNode).transform;
-        flow.animation.recordBoundsInNewStructure(flow.domNode);
-
-        // Mark in new animation
-        flow.domNode.changes.number = flowChanges.number; 
-        flow.domNode.changes.type = changeType.resident;
-      }
-
-      flow.animateInChanges = flowChanges.number; 
-      flow.animation.translateFromNewToOriginalPosition(flow.domNode);
-
-      // Reflow
-      flow.domNode.getBoundingClientRect();
-    }
-
-    // log("ORIGINAL RESIDENT");
-    // logProperties(flow.domNode.style, typicalAnimatedProperties);
-  }
-}
-
 
 function activateAnimationAfterFirstRender(currentFlowChanges) {
   // log("activateAnimation");
@@ -740,19 +686,6 @@ function setupAnimationCleanup(node) {
 //   return {removed, added, present};
 // }
 
-function sameBounds(b1, b2) {
-  // log("sameBounds");
-  // log(b1);
-  // log(b2)
-  return (
-      b1.top === b2.top &&
-      b1.left === b2.left &&
-      b1.width === b2.width &&
-      b1.height === b2.height
-  );
-}
-
-
 /**
  * Animation research
  */
@@ -868,7 +801,7 @@ export function getWidthIncludingMargin(node) {
 //   return Math.ceil(node.offsetHeight + margin);
 // }
 
-const animatedProperties = [
+export const animatedProperties = [
   // "transform",
   // "maxHeight",
   // "maxWidth",

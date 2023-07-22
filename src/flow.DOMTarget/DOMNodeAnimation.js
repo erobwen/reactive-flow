@@ -2,7 +2,7 @@
 // cubic-bezier(0.42,0,1,1)
 
 import { draw, logMark } from "../flow/utility";
-import { changeType, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
+import { animatedProperties, changeType, extractProperties, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
@@ -198,7 +198,7 @@ export class DOMNodeAnimation {
    * Target sizes has now been aquired, now we need to emulate the original styles, sizes and positions of all animated
    * nodes. This is for a smooth transition from their original position. 
    */
-  targetSizesAquiredEmulateOriginalFootprints(flow) {
+  emulateOriginalFootprints(flow) {
     const node = flow.domNode;
     switch (flow.changes.type) {
       case changeType.added: 
@@ -312,10 +312,22 @@ export class DOMNodeAnimation {
   }
 
 
-
   /**
-   * Record bounds, measures after structure change using original style  
+   * Emulate original bounds
    */
+  emulateOriginalBounds(flow) {
+    // Do the FLIP animation technique
+    // Note: This will not happen for flows being removed (in earlier flowChanges.number). Should we include those here as well?
+    this.recordBoundsInNewStructure(flow.domNode);
+    switch(flow.changes.type) {
+      case changeType.moved:
+      case changeType.resident:
+        this.translateToOriginalBoundsIfNeeded(flow);    
+        break;
+      default:
+        break;  
+    }
+  }
 
   recordBoundsInNewStructure(node) {
     // node.style.transform = ""; // Cannot do here as some resident nodes will continue on same animation.
@@ -324,10 +336,40 @@ export class DOMNodeAnimation {
     draw(node.newStructureBounds, "red");
   }
 
+  translateToOriginalBoundsIfNeeded(flow) {
+    // TODO: Translate parents first in case of cascading moves? 
+    
+    if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+      // log("Not same bounds for " + flow.toString());     
+      const computedStyle = getComputedStyle(flow.domNode);
+      let currentTransform = getComputedStyle(flow.domNode).transform;
+      // log(currentTransform);
+      // This is for resident that have a transform already. In an animation already.
+      if (!["none", "", " "].includes(currentTransform)) {
+        // log("Already have transform for " + flow.toString());     
+        // Freeze properties as we start a new animation.
 
-  /**
-   * Translate to original position
-   */
+        
+        Object.assign(flow.domNode.style, extractProperties(computedStyle, animatedProperties));
+
+        // Reset transform 
+        flow.domNode.style.transition = "";
+        flow.domNode.style.transform = "";
+        currentTransform = getComputedStyle(flow.domNode).transform;
+        this.recordBoundsInNewStructure(flow.domNode);
+
+        // Mark in new animation
+        flow.domNode.changes.number = flowChanges.number; 
+        flow.domNode.changes.type = changeType.resident;
+      }
+
+      flow.animateInChanges = flowChanges.number; 
+      this.translateFromNewToOriginalPosition(flow.domNode);
+
+      // Reflow
+      flow.domNode.getBoundingClientRect();
+    }
+  }
 
   translateFromNewToOriginalPosition(node) {
     node.style.transition = "";
@@ -338,13 +380,11 @@ export class DOMNodeAnimation {
     // const originOriginalBounds = defaultOrigin; //animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
     // const originInitialBounds = defaultOrigin; //animationOriginNode.newStructureBounds; //delete animationOriginNode.newStructureBounds;
     
-    
     // const originalBounds = node.originalBounds; //delete node.originalBounds;
     // const newStructureBounds = node.newStructureBounds; //delete node.newStructureBounds;
     // const deltaX = (newStructureBounds.left - originInitialBounds.left) - (originalBounds.left - originOriginalBounds.left) //- node.animationStartTotalHeight;
     // const deltaY = (newStructureBounds.top - originInitialBounds.top) - (originalBounds.top - originOriginalBounds.top) //-  node.animationStartTotalWidth;
     // node.style.transform = "";
-
 
     const originalBounds = node.originalBounds; //delete node.originalBounds;
     const newStructureBounds = node.newStructureBounds; //delete node.newStructureBounds;
@@ -640,3 +680,17 @@ export const standardAnimation = new DOMNodeAnimation();
     //   delete node.savedIncomingMeasures;
     // }
   // }
+
+  
+function sameBounds(b1, b2) {
+  // log("sameBounds");
+  // log(b1);
+  // log(b2)
+  return (
+      b1.top === b2.top &&
+      b1.left === b2.left &&
+      b1.width === b2.width &&
+      b1.height === b2.height
+  );
+}
+
