@@ -59,3 +59,28 @@ export function isUpperCase(string) {
 } else
   return false;
 }
+
+
+/**
+ * Drawing 
+ */
+
+export function draw(bounds, color="black") {
+  // const outline = window.document.createElement("div");
+  // outline.style.position = "absolute";
+  // outline.style.top = bounds.top + "px";
+  // outline.style.left = bounds.left + "px";
+  // outline.style.width = bounds.width + "px";
+  // outline.style.height = bounds.height + "px";
+  // outline.style.borderWidth = "1px";
+  // outline.style.borderStyle = "solid";
+  // outline.style.borderColor = color;
+  // document.children[0].appendChild(outline);
+}
+
+
+export const camelCased = (myString) => myString.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+
+// const firstOfCamelCase = (camelCase) => 
+//   camelCase.replace(/([A-Z])/g, " $1").split(" ")[0];
+

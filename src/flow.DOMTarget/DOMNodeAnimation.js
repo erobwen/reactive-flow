@@ -1,51 +1,14 @@
 
 // cubic-bezier(0.42,0,1,1)
 
-import { logMark } from "../flow/utility";
-import { flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
+import { draw, logMark } from "../flow/utility";
+import { changeType, flowChanges, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
-
-var camelCased = (myString) => myString.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
-const sizeProperties = [];
-const residentTransitionProperties = ["color", "fontSize"];
-
-
-const firstOfCamelCase = (camelCase) => 
-  camelCase.replace(/([A-Z])/g, " $1").split(" ")[0];
-
-const animatedProperties = [
-  // "transform",
-  // "maxHeight",
-  // "maxWidth",
-  {compound: "margin", partial: ["marginBottom", "marginBottom", "marginLeft", "marginRight"]},
-  {compound: "padding", partial: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]},
-  "opacity",
-  "color", 
-  "fontSize",
-];
-
-
-
-export function draw(bounds, color="black") {
-  // const outline = window.document.createElement("div");
-  // outline.style.position = "absolute";
-  // outline.style.top = bounds.top + "px";
-  // outline.style.left = bounds.left + "px";
-  // outline.style.width = bounds.width + "px";
-  // outline.style.height = bounds.height + "px";
-  // outline.style.borderWidth = "1px";
-  // outline.style.borderStyle = "solid";
-  // outline.style.borderColor = color;
-  // document.children[0].appendChild(outline);
-}
-
 const animationTime = 9;
 
 export class DOMNodeAnimation {
-  animatedProperties = animatedProperties;
-
   /**
    * Default transition
    */
@@ -65,12 +28,15 @@ export class DOMNodeAnimation {
     return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(0.33, 0.05, 0, 1)`
   }
 
+
   /**
    * Record original bounds, before anything in the dome has changed
    * Bounds do not include margin. See this:  
    * https://stackoverflow.com/questions/50657526/does-getboundingclientrect-width-and-height-includes-paddings-and-borders-of-e
    */
-  recordOriginalBoundsAndStyle(node) {
+  recordOriginalBoundsAndStyle(flow) {
+    const node = flow.domNode; 
+
     node.offsetBounds = {
       height: node.offsetHeight,
       width: node.offsetWidth
@@ -82,10 +48,10 @@ export class DOMNodeAnimation {
     }
     draw(node.originalBounds);
     node.originalStyle = {...node.style}
-    node.computedOriginalStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully. 
+    node.computedOriginalStyle = {...getComputedStyle(node)}; // TODO: Remove or optimize if not needed fully. 
   }
   
-  getOriginalMeasures(node) {
+  getOriginalMeasuresIncludingMargin(node) {
     const measures = {
       marginTop: parseInt(node.computedOriginalStyle.marginTop, 10),
       marginBottom: parseInt(node.computedOriginalStyle.marginBottom, 10),
@@ -100,6 +66,69 @@ export class DOMNodeAnimation {
   }
 
   /**
+   * Prepare for DOM building. At this stage, your node should have trailers and leaders, so the dom building process can place these right.
+   */
+  prepareForDOMBuilding(flow) {
+    const node = flow.domNode;
+
+    // Add all trailers. 
+    if (node.changes.type === changeType.moved) {
+      const parentNode = getWrapper(node).parentNode;
+      const trailer = this.getFadingTrailer(node);
+      // Note: If a reused wrapper is already in place, so do nothing.
+      if (trailer.parentNode !== parentNode) {
+        // Note insert trailers here, before the DOM building moves the node and makes it impossible to know its original location. 
+        parentNode.insertBefore(trailer, node);
+      } 
+    }
+
+    // Add all leaders 
+    if ([
+        changeType.moved, 
+        changeType.added, 
+        changeType.removed
+      ].includes(node.changes.type)) {
+      
+      // Store away old wrapper
+      if (node.wrapper) {
+        const oldWrapper = node.wrapper;
+        if (flow.changes && flow.changes.previous && flow.changes.previous.type === changeType.removed) {
+          //  oldWrapper.parentNode === flow.parentPrimitive.domNode
+          // Reuse old wrapper
+          logMark("reuse old wrapper")
+          const dimensions = node.wrapper.getBoundingClientRect() 
+          log(node.wrapper.getBoundingClientRect());
+          node.wrapper.style.width = dimensions.width + "px";
+          node.wrapper.style.height = dimensions.height + "px";
+          // debugger;
+          oldWrapper.reusedWrapper = true; 
+        } else {
+          // Dispose old wrapper
+          node.wrapper.isOldWrapper = true; 
+          if (!node.oldWrappers) {
+            node.oldWrappers = [];
+          }
+          node.oldWrappers.push(node.wrapper);
+          node.wrapper = null; 
+        }
+      }
+        
+      if (!node.wrapper) {
+        const wrapper = document.createElement("div");
+        node.wrapper = wrapper;
+        wrapper.wrapped = node;
+        // wrapper.appendChild(flow.getDomNode());
+        wrapper.id = "wrapper";
+        wrapper.style.fontSize = "0px"; // For correctly positioning of buttons? 
+        wrapper.style.backgroundColor = "#bbbbff";
+        wrapper.style.overflow = "visible";
+      }
+    }
+
+  }
+
+
+  /**
    * Measure inocming size 
    */
   measureMovedFinalSize(node) {
@@ -109,23 +138,6 @@ export class DOMNodeAnimation {
     }
   }
 
-
-  /**
-   * Preserve style 
-   */
-  setOriginalStyleForMoved(node, includeTransform=false) {
-    for (let property of this.animatedProperties) {
-      if (property === "transform" && !includeTransform) continue; 
-      if (typeof(property) === "string") {
-        node.style[property] = node.computedOriginalStyle[property];
-      } else {
-        const compoundProperty = property; 
-        for (let partial of compoundProperty.partial) {
-          node.style[partial] = node.computedOriginalStyle[partial];
-        }
-      }
-    }
-  }
 
   calculateTargetDimensionsAndStyleForAdded(contextNode, node) {
     
@@ -147,7 +159,7 @@ export class DOMNodeAnimation {
     log("setOriginalMinimizedStyleForAdded");
     log(node);
     log(node.wrapper);
-    if (node.equivalentCreator.changes.previous && node.equivalentCreator.changes.previous.type === "removed") {
+    if (node.equivalentCreator.changes.previous && node.equivalentCreator.changes.previous.type === changeType.removed) {
       log("reusing removal wrapper")
       const wrapper = node.wrapper;
       if (node.wrapper) {
@@ -226,7 +238,7 @@ export class DOMNodeAnimation {
 
     const changes = {
       number: flowChanges.number,
-      type: "removed",
+      type: changeType.removed,
       previous: null
     };
 
@@ -276,27 +288,6 @@ export class DOMNodeAnimation {
       wrapper.style.overflow = "visible";
       // wrapper.style.position = "relative";
     }
-
-    // return; 
-    // console.log("minimizeIncomingFootprint");
-    // const measures = this.getOriginalMeasures(node);
-    // const wrapper = node.wrapper;
-    
-    // if (!node.wrapper) {
-    //   node.animationStartTotalHeight = measures.totalHeight;
-    //   node.animationStartMarginTop = measures.marginTop;
-    //   node.animationStartAjustedMarginTop = measures.marginTop - measures.totalHeight;
-    //   // node.animationEndMarginTop = parseInt(node.computedTargetStyle.marginTop, 10);
-    //   node.style.marginTop = node.animationStartAjustedMarginTop + "px";
-  
-    //   node.animationStartTotalWidth = measures.totalWidth;
-    //   node.animationStartMarginLeft = measures.marginLeft;
-    //   const animationStartAjustedMarginLeft = measures.marginLeft - measures.totalWidth;
-    //   // node.animationEndMarginLeft = parseInt(node.computedTargetStyle.marginLeft, 10);
-    //   node.style.marginLeft = animationStartAjustedMarginLeft + "px";
-    // }
-
-    // log(node.style.marginTop)
   }
 
 
@@ -443,7 +434,7 @@ export class DOMNodeAnimation {
     this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
     if (node.fadingTrailer) {
       // node.fadingTrailer.changes.number = flowChanges.number;
-      // node.fadingTrailer.changes.type = "removed";
+      // node.fadingTrailer.changes.type = changeType.removed;
       this.setupRemovedAnimationCleanup(node.fadingTrailer, flowChanges.number);
       delete node.fadingTrailer; 
     }
@@ -475,7 +466,7 @@ export class DOMNodeAnimation {
         event.stopPropagation();
         console.log(event);
         
-        if (node.changes.type === "removed") {
+        if (node.changes.type === changeType.removed) {
           // For trailer
           if (node.equivalentCreator) {
             delete flowChanges.beingRemovedMap[node.equivalentCreator.id];

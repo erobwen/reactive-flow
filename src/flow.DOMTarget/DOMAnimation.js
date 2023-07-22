@@ -174,17 +174,31 @@ export const flowChanges = {
   },
 };
 
+
+/**
+ * Flow changes, to keep track of animation frames. 
+ */
 export const previousFlowChanges = {}
-
 window.flowChanges = flowChanges;
-
 let counter = 0;
 
+export const changeType = {
+  resident: 0, 
+  added: 1, 
+  removed: 2,
+  moved: 3
+}
+
+
+/**
+ * On finish building flow
+ */
 export function onFinishReBuildingFlow() {
   
   counter++
   logAnimationFrame()
   logAnimationSeparator("---------------------------------------- Flow rebuilt, DOM untouched, calculate changes... ----------------------------------------")
+  console.groupCollapsed("...");
   // log(counter);
   // if (counter === 5) return; 
 
@@ -270,114 +284,61 @@ export function onFinishReBuildingFlow() {
     }
   }
 
-  console.log("New animated changes:");
-  log(toStrings(flowChanges));
-
-  logAnimationSeparator("---------------------------------------- Measure original bounds and prepare for DOM building... ----------------------------------------");
-  console.groupCollapsed("...");
-
-  // Record original bounds
+  // Mark each flow / node with changes and chained changes sequences for analysis. 
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.getDomNode()) {
       const changes = {
         number: flowChanges.number,
-        type: "resident",
+        type: changeType.resident,
         previous: flow.changes,
         transitioningProperties: (flow.changes && flow.changes.transitioningProperties) ? flow.changes.transitioningProperties : {} 
       };
       flow.changes = changes; 
       flow.domNode.changes = changes; 
-      flow.animation.recordOriginalBoundsAndStyle(flow.domNode);
     }
   }
 
   // Mark all animated. 
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
-      flow.domNode.changes.type = "moved";
+      flow.domNode.changes.type = changeType.moved;
     }
   }
   for (let flow of flowChanges.allAnimatedAddedFlows()) {
     if (flow.getDomNode()) {
-      flow.domNode.changes.type = "added"; 
+      flow.domNode.changes.type = changeType.added; 
     }
   }
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
-      flow.domNode.changes.type = "removed"; 
+      flow.domNode.changes.type = changeType.removed; 
 
       // flow.animation.recordTargetStyleForAdded(flow.domNode); // PORTAL  
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
       flowChanges.beingRemovedMap[flow.id] = flow;    
     }
   }
-
-  // Add all trailers 
-  for (let flow of flowChanges.allAnimatedMovedFlows()) {
-    // log("add trailers");
-    if (flow.domNode) {
-      // log("asdf")
-      const parentNode = getWrapper(flow.domNode).parentNode;
-      // log("!")
-      // log(flow.animation)
-      // log(flow.animation.getFadingTrailer)
-      const trailer = flow.animation.getFadingTrailer(flow.domNode);
-      // log(trailer);
-      // log("----")
-      // log(parentNode);
-      // Note: If a reused wrapper is already in place, so do nothing.
-      if (trailer.parentNode !== parentNode) {
-        parentNode.insertBefore(trailer, flow.domNode);
-      } 
-    }
-  }
-  // log("---")
-
-  // Add all wrappers for moved
-  for (let flow of flowChanges.allAnimatedMovedAddedAndRemovedFlows()) {
-    // preceddingDiv
-    // ensuingDiv
-    // logMark("getWrapper");
-    
-    const wrapped = flow.getDomNode();
-    
-    // Store away old wrapper
-    if (wrapped.wrapper) {
-      const oldWrapper = wrapped.wrapper;
-      if (flow.changes && flow.changes.previous && flow.changes.previous.type === "removed") {
-        //  oldWrapper.parentNode === flow.parentPrimitive.domNode
-        // Reuse old wrapper
-        logMark("reuse old wrapper")
-        const dimensions = wrapped.wrapper.getBoundingClientRect() 
-        log(wrapped.wrapper.getBoundingClientRect());
-        wrapped.wrapper.style.width = dimensions.width + "px";
-        wrapped.wrapper.style.height = dimensions.height + "px";
-        // debugger;
-        oldWrapper.reusedWrapper = true; 
-      } else {
-        // Dispose old wrapper
-        wrapped.wrapper.isOldWrapper = true; 
-        if (!wrapped.oldWrappers) {
-          wrapped.oldWrappers = [];
-        }
-        wrapped.oldWrappers.push(wrapped.wrapper);
-        wrapped.wrapper = null; 
-      }
-    }
-
-    if (!wrapped.wrapper) {
-      const wrapper = document.createElement("div");
-      wrapped.wrapper = wrapper;
-      wrapper.wrapped = wrapped;
-      // wrapper.appendChild(flow.getDomNode());
-      wrapper.id = "wrapper";
-      wrapper.style.fontSize = "0px"; // For correctly positioning of buttons? 
-      wrapper.style.backgroundColor = "#bbbbff";
-      wrapper.style.overflow = "visible";
-    }
-  }
-
   console.groupEnd();
+  console.log("New animated changes:");
+  log(toStrings(flowChanges));
+
+  logAnimationSeparator("---------------------------------------- Measure original bounds... ----------------------------------------");
+  
+
+  for (let flow of flowChanges.allAnimatedFlows()) {
+    if (flow.getDomNode()) {
+      flow.animation.recordOriginalBoundsAndStyle(flow);
+    }
+  }
+  
+  logAnimationSeparator("---------------------------------------- Prepare for DOM building... ----------------------------------------");
+
+  for (let flow of flowChanges.allAnimatedFlows()) {
+    if (flow.domNode) {
+      flow.animation.prepareForDOMBuilding(flow)
+    }
+  }
+  
   logAnimationSeparator("---------------------------------------- Rebuilding DOM... ----------------------------------------")
   console.groupCollapsed("...");
   flowChanges.onFinishReBuildingFlowDone = true;
@@ -448,7 +409,7 @@ function minimizeAdded() {
 
 function fixateRemoved() {
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
-    if (flow.changes.previous && flow.changes.previous.type === "added") {
+    if (flow.changes.previous && flow.changes.previous.type === changeType.added) {
       continue; 
     }
     // log("fixateRemoved");
@@ -456,9 +417,7 @@ function fixateRemoved() {
     // log(node);
     // log(getHeightIncludingMargin(node))
 
-    // Preserve styles
-    // flow.animation.setOriginalStyleForMoved(flow.domNode);
-
+ 
 
     if (node.wrapper) {
       node.wrapper.style.transition = node.equivalentCreator.animation.wrapperTransition(node);
@@ -484,7 +443,6 @@ function inflateTrailersAndPrepareMoved() {
   for (let flow of flowChanges.allAnimatedMovedFlows()) {
     if (flow.domNode) {
       flow.animation.inflateFadingTrailer(flow.domNode);
-      // flow.animation.setOriginalStyleForMoved(flow.domNode); 
       flow.animation.minimizeIncomingFootprint(flow.domNode);
     }
   }
@@ -513,7 +471,9 @@ function translateToOriginalBoundsIfNeeded() {
       if (!["none", "", " "].includes(currentTransform)) {
         // log("Already have transform for " + flow.toString());     
         // Freeze properties as we start a new animation.
-        Object.assign(flow.domNode.style, extractProperties(computedStyle, flow.animation.animatedProperties));
+
+        
+        Object.assign(flow.domNode.style, extractProperties(computedStyle, animatedProperties));
 
         // Reset transform 
         flow.domNode.style.transition = "";
@@ -523,7 +483,7 @@ function translateToOriginalBoundsIfNeeded() {
 
         // Mark in new animation
         flow.domNode.changes.number = flowChanges.number; 
-        flow.domNode.changes.type = "resident";
+        flow.domNode.changes.type = changeType.resident;
       }
 
       flow.animateInChanges = flowChanges.number; 
@@ -571,7 +531,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
     for (let flow of currentFlowChanges.allAnimatedResidentFlows()) {
       if (flow.animateInChanges === currentFlowChanges.number) {
         flow.animation.setupFinalStyleForResident(flow.domNode);
-        flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+        flow.synchronizeDomNodeStyle(animatedProperties);
         log(`... resident node ${flow.toString()}, final properties: `);
         logProperties(flow.domNode.style, typicalAnimatedProperties);
         setupAnimationCleanup(flow.domNode, flow.domNode.changes);
@@ -593,7 +553,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
         flow.animation.setupFinalStyleForMoved(flow.domNode);
         // log(flow.domNode.style.transition);
         // log(flow.domNode.style.transform);
-        flow.synchronizeDomNodeStyle(flow.animation.animatedProperties);
+        flow.synchronizeDomNodeStyle(animatedProperties);
         // log(flow.domNode.style.transform);
         // log(`... moving node ${flow.toString()}, final properties: `);
         // logProperties(flow.domNode.style, typicalAnimatedProperties);
@@ -780,7 +740,7 @@ function setupAnimationCleanup(node) {
 
       // function findRemoved(changes) {
       //   while (changes) {
-      //     if (changes.type === "removed") {
+      //     if (changes.type === changeType.removed) {
       //       return true; 
       //     }
       //     changes = changes.previous; 
@@ -961,3 +921,14 @@ export function getWidthIncludingMargin(node) {
 
 //   return Math.ceil(node.offsetHeight + margin);
 // }
+
+const animatedProperties = [
+  // "transform",
+  // "maxHeight",
+  // "maxWidth",
+  {compound: "margin", partial: ["marginBottom", "marginBottom", "marginLeft", "marginRight"]},
+  {compound: "padding", partial: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]},
+  "opacity",
+  "color", 
+  "fontSize",
+];
