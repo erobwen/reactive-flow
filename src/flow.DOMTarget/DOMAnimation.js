@@ -1,5 +1,5 @@
 import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from "../flow/Flow";
-import { DomNodeAnimation, standardAnimation } from "./DomNodeAnimation";
+import { DOMNodeAnimation, standardAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
 

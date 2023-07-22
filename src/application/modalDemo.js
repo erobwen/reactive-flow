@@ -1,4 +1,5 @@
-import { Flow, readFlowProperties, findTextAndKeyInProperties } from "../flow/Flow";
+import { Flow } from "../flow/Flow";
+import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";

@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Flow, finalize, readFlowProperties, getTarget } from "../flow/Flow";
+import { observable, world, repeat, when, Flow, finalize, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, numberInputField, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../flow.components/Layout";

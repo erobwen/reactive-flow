@@ -1,4 +1,5 @@
-import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
+import { findTextKeyAndOnClickInProperties, Flow } from "../flow/Flow";
+import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { div } from "./BasicHtml";
 import { adjustLightness } from "./Color";
 import { button, inputField, text, textInputField } from "../flow.components/BasicWidgets";

@@ -43,26 +43,8 @@ export function draw(bounds, color="black") {
 
 const animationTime = 9;
 
-export class DomNodeAnimation {
+export class DOMNodeAnimation {
   animatedProperties = animatedProperties;
-
-  blockedPropertiesMap() {
-    const result = animatedProperties.reduce((result, property) => {
-      if(typeof (property) === "string") {
-        result[property] = true;
-      } else {
-        result[property.compound] = true; 
-        property.partial.forEach(partial => {
-          result[partial] = true; 
-        });
-      }
-      return result; 
-    }, {});
-    result.transition = true; 
-    return result; 
-  }
-
-
 
   /**
    * Default transition
@@ -550,7 +532,7 @@ export class DomNodeAnimation {
 
 }
 
-export const standardAnimation = new DomNodeAnimation();
+export const standardAnimation = new DOMNodeAnimation();
 
 
 

@@ -1,4 +1,5 @@
-import { observable, repeat, readFlowProperties, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel, findKeyInProperties } from "../flow/Flow";
+import { observable, repeat, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel } from "../flow/Flow";
+import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { mostAbstractFlow, clearNode } from "./DOMNode";
 import { DOMElementNode, DOMModalNode } from "./DOMElementNode";
 import { DOMTextNode} from "./DOMTextNode";

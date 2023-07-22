@@ -1,6 +1,7 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
-import { standardAnimation } from "../flow.DOMTarget/DomNodeAnimation.js";
-import { configuration, finalize, Flow, readFlowProperties, repeat, trace } from "./Flow.js";
+import { standardAnimation } from "../flow.DOMTarget/DOMNodeAnimation.js";
+import { configuration, finalize, Flow, repeat, trace } from "./Flow.js";
+import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { logMark } from "./utility.js";
 
 const log = console.log;

@@ -1,7 +1,9 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCross, faPlus, faSuitcase, faXmark, faXmarkCircle } from '@fortawesome/free-solid-svg-icons';
 import { DOMElementNode } from '../flow.DOMTarget/DOMElementNode';
-import { finalize, findKeyInProperties, readFlowProperties, repeat, trace } from '../flow/Flow';
+import { finalize, repeat, trace } from '../flow/Flow';
+import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
+
 import { aggregateToString } from '../flow.DOMTarget/DOMNode';
 import { logMark } from '../flow/utility';
 import { extractProperties } from '../flow.DOMTarget/DOMAnimation';

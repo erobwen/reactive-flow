@@ -3,7 +3,8 @@
  * Basic HTML Node building 
  */
 
-import { findKeyInProperties, findTextAndKeyInPropertiesUsingCase, getTarget, readFlowProperties } from "../flow/Flow";
+import { getTarget } from "../flow/Flow";
+import { readFlowProperties, findTextAndKeyInPropertiesUsingCase, findTextAndKeyInProperties, findKeyInProperties } from "../flow/flowParameters";
 
 export function elemenNode(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 

@@ -1,5 +1,7 @@
 import getWorld from "../causality/causality.js";
 import { logMark, isUpperCase } from "./utility.js";
+import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
+
 
 export const world = getWorld({
   useNonObservablesAsValues: true,
@@ -72,12 +74,13 @@ function onFinishedPriorityLevel(level, finishedAllLevels) {
 }
 
 window.flows = {};
+window.idToFlow = {}
 export class Flow {
   get id() {
     return this.causality.id;
   }
 
-  get get() {
+  get get() { // TODO: Move htis to causality. 
     return this.causality.target;
   }
 
@@ -87,20 +90,15 @@ export class Flow {
   }
 
   initialUnobservables() {
-    return {
-      // removed: {},
-      // added: {},
-      // resident: {},
-      // incoming: {},
-      // outgoing: {}
-    };
+    return {};
   }
 
   constructor(...parameters) {
     let properties = findKeyInProperties(readFlowProperties(parameters));
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
-    this._ = null; // For debug purposes, this makes it easier to identify flows when they are proxies in the debugger. 
+    // For debug purposes, this place this property first in the list and makes it easier to identify flows when they are proxies in the debugger. 
+    this._ = null; 
 
     // Key & Creator
     if (!this.key) this.key = properties.key ? properties.key : null;
@@ -108,7 +106,7 @@ export class Flow {
     this.creator = creators.length > 0 ? creators[creators.length - 1] : null; // Note this can only be done in constructor!
     // this.flowDepth = this.creator ? this.creator.flowDepth + 1 : 0;
 
-    // Set properties by bypassing setProperties
+    // Set properties by bypassing setProperties. TODO: Remove this!?
     for (let property in properties) {
       let destination = property;
       if (property === "build") destination = "buildFunction";
@@ -118,22 +116,14 @@ export class Flow {
     // Inherit target from parent. TODO: Use general inheritance mechanism instead or let this be? 
     this.target = this.creator ? this.creator.target : null;
 
-
     // Create observable
     let me = observable(this, this.key);
 
-    me._ = me.toString(); 
-
-    // Set properties through interface
-    me.setProperties(properties); // Set default values here
-
-    // Emulate onEstablish for top element. This will be done anyway with the integrationRepeater...
-    // however, what happens with flows without keys? Will they never get an establishing call? They should get one every time...
-    // if (!me.creator) {
-    //   me.onEstablish();
-    // }
-
+    // Set properties through interface, set default values here.
+    me.setProperties(properties); 
+    
     // Debug & warning
+    me._ = me.toString(); 
     if (configuration.warnWhenNoKey && me.key === null && me.creator)
       console.warn(
         "Component " +
@@ -243,13 +233,8 @@ export class Flow {
     }
   }
 
-
   getContext() {
     return this; 
-  }
-
-  withdraw() {
-    return [];
   }
 
   build(repeater) {
@@ -280,7 +265,8 @@ export class Flow {
   onEstablish() {
     this.causality.established = true; 
     this.unobservable.established = true; 
-    window.flows[this.causality.id] = this;
+    window.flows[this.toString()] = this;
+    window.idToFlow[this.id] = this;
     creators.push(this);
     this.setState();
     creators.pop();
@@ -310,7 +296,8 @@ export class Flow {
 
   onDispose() {
     console.log("DISPOSING: " + this.toString());
-    delete window.flows[this.causality.id];
+    delete window.flows[this.toString()];
+    delete window.idToFlow[this.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
@@ -600,146 +587,17 @@ export function when(condition, operation) {
   });
 }
 
-export function addDefaultStyleToProperties(properties, defaultStyle) {
-  properties.style = Object.assign({}, defaultStyle, properties.style);
+export function getTarget() {
+  return creators[creators.length - 1].target;
 }
 
-export function findKeyInProperties(properties) {
-  if (!properties.stringsAndNumbers) return properties;
-  if (properties.stringsAndNumbers.length) {
-    properties.key = properties.stringsAndNumbers.pop();
-  }
-  if (properties.stringsAndNumbers.length) {
-    throw new Error("Found too many loose strings in flow parameters");
-  }
-  delete properties.stringsAndNumbers;
-  return properties; 
+export function callback(callback, key) {
+  return observable(callback, key);
 }
 
-export function findTextAndKeyInProperties(properties) {
-  // console.log(properties)
-  if (!properties.stringsAndNumbers) return properties;
-  if (properties.stringsAndNumbers.length) {
-    properties.text = properties.stringsAndNumbers.pop();
-  }
-  if (properties.stringsAndNumbers.length) {
-    properties.key = properties.stringsAndNumbers.pop();
-  }
-  if (properties.stringsAndNumbers.length) {
-    throw new Error("Found too many loose strings in flow parameters");
-  }
-  delete properties.stringsAndNumbers;
-  return properties;
-}
-
-export function findTextAndKeyInPropertiesUsingCase(properties) {
-  // console.log(properties)
-  if (!properties.stringsAndNumbers) return properties;
-  while(properties.stringsAndNumbers.length) {
-    const string = properties.stringsAndNumbers.pop();
-    if (properties.text && !properties.key) {
-      // only key left
-      properties.key = string; 
-    } else if (properties.key && !properties.text) {
-      // only text left
-      properties.text = string; 
-    } else if (/[a-z0-9]/.test(string[0]+"") && !properties.key) { //!(/[A-Z]|\s/.test(string[0] + "")
-      // We assume this is a key
-      properties.key = string;
-    } else if (!properties.text){
-      // Big character, assume it is a text.
-      properties.text = string; 
-    } else {
-      throw new Error("Could not match loose strings in flow parameters, add them to properties.");
-    }
-  }
-  delete properties.stringsAndNumbers;
-  return properties;
-}
-
-export function findTextKeyAndOnClickInProperties(properties) {
-  findTextAndKeyInPropertiesUsingCase(properties);
-  if (!properties.functions) return properties;
-  if (properties.functions.length) {
-    properties.onClick = properties.functions.pop();
-  }
-  if (properties.functions.length) {
-    throw new Error("Found too many loose functions in flow parameters");
-  }
-  delete properties.functions;
-  return properties;
-}
-
-export function findBuildInProperties(properties) {
-  findKeyInProperties(properties);
-  if (!properties.functions) return properties;
-  if (properties.functions.length) {
-    properties.buildFunction = properties.functions.pop();
-  }
-  if (properties.functions.length) {
-    throw new Error("Found too many loose functions in flow parameters");
-  }
-  delete properties.functions;
-  return properties;
-}
-
-export function readFlowProperties(arglist, config) {
-  // Shortcut if argument is a properties object
-  if (arglist[0] !== null && typeof(arglist[0]) === "object" && !(arglist[0] instanceof Array) && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
-    return arglist[0];
-  }
-
-  // The long way
-  let properties = {};
-  while (arglist.length > 0) {
-    if (typeof arglist[0] === "function") {
-      if (!properties.functions) {
-        properties.functions = [];
-      }
-      properties.functions.push(arglist.shift());
-    }
-
-    // String or numbers
-    if ((typeof arglist[0] === "string" || typeof arglist[0] === "number") && !arglist[0].causality) {
-      if (!properties.stringsAndNumbers) {
-        properties.stringsAndNumbers = [];
-      }
-      properties.stringsAndNumbers.push(arglist.shift());
-    }
-
-    // No argument, skip!
-    if (!arglist[0]) {
-      arglist.shift();
-      continue;
-    }
-
-    if (arglist[0] === true) {
-      throw new Error("Could not make sense of flow parameter 'true'");
-    }
-
-    // Not a flow object
-    if (typeof arglist[0] === "object" && !arglist[0].causality) {
-      if (arglist[0] instanceof Array) {
-        if (!properties.children) properties.children = [];
-        for (let child of arglist.shift()) { // TODO: Use iterator! 
-          properties.children.push(child);
-        }
-      } else {
-        Object.assign(properties, arglist.shift());
-      }
-    }
-
-    // A flow object
-    if (typeof arglist[0] === "object" && arglist[0].causality) {
-      if (!properties.children) properties.children = [];
-      properties.children.push(arglist.shift());
-    }
-    //if (properties.children && !(typeof(properties.children) instanceof Array)) properties.children = [properties.children];
-  }
-  return properties;
-}
 
 export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
+  console.warn("Deprecated: dont use this function, build a macro component instead using flow parameter helper functions.")
   let description;
   let buildFunction;
   if (typeof descriptionOrBuildFunction === "string") {
@@ -756,25 +614,4 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
     return flow;
   }
   return flowBuilder;
-}
-
-export function getTarget() {
-  return creators[creators.length - 1].target;
-}
-
-export function callback(callback, key) {
-  return observable(callback, key);
-}
-
-
-function *iterateChildren(properties) {
-  if (properties.children instanceof Array) {
-    for (let child of properties.children) {
-      if (child instanceof Flow && child !== null) {
-        yield child;
-      }
-    }
-  } else if (properties.children instanceof Flow  && properties.children !== null) {
-    yield properties.children;
-  }
 }

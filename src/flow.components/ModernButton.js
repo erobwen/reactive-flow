@@ -1,10 +1,11 @@
-import { findTextKeyAndOnClickInProperties, Flow, readFlowProperties } from "../flow/Flow";
+import { Flow } from "../flow/Flow";
 import { div } from "./BasicHtml";
 import { adjustLightness, grayColor } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, fitStyle, wrapper } from "./Layout";
 import { logMark } from "../flow/utility";
+import { findTextKeyAndOnClickInProperties, readFlowProperties } from "../flow/flowParameters";
 
 const log = console.log; 
 

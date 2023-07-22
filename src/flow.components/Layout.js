@@ -1,4 +1,5 @@
-import { readFlowProperties, trace, getTarget, Flow, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, findKeyInProperties, transaction, creators } from "../flow/Flow.js";
+import { trace, getTarget, Flow, transaction, creators } from "../flow/Flow.js";
+import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { deepFreeze } from "../flow/utility.js";
 import { styledDiv } from "./BasicHtml.js";
 const log = console.log;
