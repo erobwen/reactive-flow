@@ -336,11 +336,15 @@ export function onFinishReBuildingFlow() {
       flow.animation.prepareForDOMBuilding(flow)
     }
   }
+
+  // Insert deflated trailers for moved. 
   
   logAnimationSeparator("---------------------------------------- Rebuilding DOM... ----------------------------------------------------")
   console.groupCollapsed("...");
   flowChanges.onFinishReBuildingFlowDone = true;
 }
+
+// Insert deflated leaders for removed but insert added nodes directly to be as close as possible to target for measuring
 
 
 /**
