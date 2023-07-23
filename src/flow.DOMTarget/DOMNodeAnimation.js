@@ -146,7 +146,7 @@ export class DOMNodeAnimation {
     // Reuse wrapper if existing, as it is already in right place
     if (node.wrapper) {
       trailer = node.wrapper;
-      trailer.removeEventListener(trailer.hasCleanupEventListener);
+      trailer.removeEventListener("transitionend", trailer.hasCleanupEventListener);
       delete trailer.hasCleanupEventListener;
       // delete trailer.purpose; 
       trailer.wasWrapper = true; 

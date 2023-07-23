@@ -32,12 +32,12 @@ setFlowConfiguration({
 installDOMAnimation();
 
 // buttonTest();
-// startSimpleMoveAnimation();
+startSimpleMoveAnimation();
 // startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-startDemo();
+// startDemo();
 
 // startModalDemo();
 // startAnimationExample();
