@@ -2,7 +2,7 @@
 // cubic-bezier(0.42,0,1,1)
 
 import { draw, logMark } from "../flow/utility";
-import { animatedProperties, changeType, extractProperties, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, typicalAnimatedProperties } from "./DOMAnimation";
+import { camelCase, changeType, extractProperties, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, sameBounds, typicalAnimatedProperties } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
@@ -28,6 +28,13 @@ export class DOMNodeAnimation {
     return `all ${animationTime}s ease-in-out, opacity ${animationTime}s cubic-bezier(0.33, 0.05, 0, 1)`
   }
 
+  /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                               Record original bounds
+   * 
+   * -------------------------------------------------------------------------------------
+   */
 
   /**
    * Record original bounds, before anything in the dome has changed
@@ -64,6 +71,14 @@ export class DOMNodeAnimation {
     measures.totalWidth = measures.width + measures.marginLeft + measures.marginRight;
     return measures; 
   }
+
+  /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                               Prepare for DOM building
+   * 
+   * -------------------------------------------------------------------------------------
+   */
 
   /**
    * Prepare for DOM building. At this stage, your node should have trailers and leaders, so the dom building process can place these right.
@@ -163,6 +178,14 @@ export class DOMNodeAnimation {
 
 
   /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                               Measure target sizes
+   * 
+   * -------------------------------------------------------------------------------------
+   */
+
+  /**
    * DOM just rebuilt, it could be a good idea to measure target sizes at this stage, 
    * since it is the closest we will be to the actual end result. 
    * However, removed nodes are still present at this point... maybe we should ensure added leaders for removed ones start out minimized?
@@ -194,8 +217,17 @@ export class DOMNodeAnimation {
     node.computedTargetStyle = {...getComputedStyle(node)}; // Remove or optimize if not needed fully.
   }
 
+
   /**
-   * Target sizes has now been aquired, now we need to emulate the original styles, sizes and positions of all animated
+   * -------------------------------------------------------------------------------------
+   * 
+   *                            Emulate original styles and footprints
+   * 
+   * -------------------------------------------------------------------------------------
+   */
+
+  /**
+   * Emulate the original styles and footprints of all animated
    * nodes. This is for a smooth transition from their original position. 
    */
   emulateOriginalFootprints(flow) {
@@ -311,6 +343,14 @@ export class DOMNodeAnimation {
     }
   }
 
+  
+  /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                            Emulate original bounds using transformations
+   * 
+   * -------------------------------------------------------------------------------------
+   */
 
   /**
    * Emulate original bounds
@@ -349,7 +389,6 @@ export class DOMNodeAnimation {
         // log("Already have transform for " + flow.toString());     
         // Freeze properties as we start a new animation.
 
-        
         Object.assign(flow.domNode.style, extractProperties(computedStyle, animatedProperties));
 
         // Reset transform 
@@ -400,6 +439,58 @@ export class DOMNodeAnimation {
     // log(node.style.transform);
   }
 
+ 
+  /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                           Activate animations
+   * 
+   * -------------------------------------------------------------------------------------
+   */
+
+  /**
+   * Activate animation 
+   */
+  activateAnimation(flow, currentFlowChanges) {
+    const node = flow.domNode;
+    const changes = flow.changes; 
+    
+    console.group("Activate for " + flow.changes.type + ": " + flow.toString());
+    log(`original properties: `);
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+
+    if (changes.type !== changeType.removed) {
+      delete currentFlowChanges.beingRemovedMap[flow.id];
+    }
+
+    switch(flow.changes.type) {
+      case changeType.added:
+        this.setupFinalStyleForAdded(node);
+        break;
+
+      case changeType.resident: 
+        if (flow.animateInChanges === currentFlowChanges.number) {
+          this.setupFinalStyleForResident(node);
+          flow.synchronizeDomNodeStyle(animatedProperties); // Really?
+        }
+        break;
+
+      case changeType.moved:
+        this.setupFinalStyleForMoved(node);
+        flow.synchronizeDomNodeStyle(animatedProperties);
+        break; 
+        
+      case changeType.removed: 
+        flow.animation.setupFinalStyleForRemoved(flow.domNode);
+        break; 
+    }
+
+    this.setupAnimationCleanup(flow.domNode, flow.domNode.changes);
+
+    log("final properties: ");
+    logProperties(flow.domNode.style, typicalAnimatedProperties);
+    console.groupEnd();
+  }
 
   /**
    * Final styles, the styles elements have at the end of the, before cleanup. 
@@ -505,192 +596,164 @@ export class DOMNodeAnimation {
   }
 
   /**
-   * Setup animation cleanup 
+   * -------------------------------------------------------------------------------------
+   * 
+   *                           Animation cleanup
+   * 
+   * -------------------------------------------------------------------------------------
    */
-  setupAddedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
-  }
 
-  setupResidentAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
-    if (node.fadingTrailer) {
-      // node.fadingTrailer.changes.number = flowChanges.number;
-      // node.fadingTrailer.changes.type = changeType.removed;
-      this.setupRemovedAnimationCleanup(node.fadingTrailer, flowChanges.number);
-      delete node.fadingTrailer; 
+  setupAnimationCleanup(node) {
+    log("setupAnimationCleanup");
+    log(node);
+    if (node.wrapper) {
+      log("wrapper")
+      this.setupWrapperCleanup(node.wrapper)
     }
+    if (node.fadingTrailer) {
+      log("trailer")
+      this.setupFadingTrailerCleanup(node.fadingTrailer)
+    }
+
+    // There can be only one
+    if (node.hasCleanupEventListener) return; 
+    
+    function onTransitionEnd(event) {
+      if (!node.changes) return;
+      const propertyName = camelCase(event.propertyName); 
+
+      console.group("cleanup: " + node.changes.type + " from changes number " + node.changes.number);
+      log(node);
+      log(event.propertyName);
+      console.groupEnd();
+
+      // Synch properties that was transitioned. 
+      node.equivalentCreator.synchronizeDomNodeStyle([propertyName, "transition", "transform", "width", "height"]);
+      
+      // Remove changes.
+      if (node.changes) {
+        node.changes.finished = true; 
+        const flow = node.equivalentCreator;
+        flow.changes = null;
+        node.changes = null;
+      }
+
+      // Finish animation
+      node.removeEventListener("transitionend", onTransitionEnd);
+      delete node.hasCleanupEventListener;
+    }
+    node.addEventListener("transitionend", onTransitionEnd);
+    node.hasCleanupEventListener = onTransitionEnd; 
+  }
+    
+  setupFadingTrailerCleanup(node) {
+    // There can be only one
+    if (node.hasCleanupEventListener) return; 
+    
+    // On cleanup, synchronize transitioned style property
+    const me = this; 
+    log("setupAnimationCleanup: ");
+    log(node)
+    // log(node)
+    
+    function onTransitionEnd2(event) {
+      // event.preventDefault();
+      // event.stopPropagation();
+      if (event.target !== node) return; 
+      
+      // if (changes === node.changes) {
+      const propertyName = camelCase(event.propertyName); 
+
+      console.group("cleanup trailer");
+      log(node);
+      log(event.propertyName);
+      log(camelCase(event.propertyName));
+      console.groupEnd();
+
+      if (["width", "height", "maxHeight", "maxWidth"].includes(propertyName)) {
+        node.parentNode.removeChild(node);
+
+        // Finish animation
+        node.removeEventListener("transitionend", onTransitionEnd2);
+        delete node.hasCleanupEventListener;
+      }
+    }
+    node.addEventListener("transitionend", onTransitionEnd2);
+    node.hasCleanupEventListener = onTransitionEnd2; 
   }
 
-  setupRemovedAnimationCleanup(node) {
-    this.setupAnimationCleanup(node, node.changes.type, flowChanges.number)
-  }
-
-  setupAnimationCleanup(node, inAnimationType, frameNumber) {
+  setupWrapperCleanup(wrapper) {
+    const node = wrapper.wrapped; 
+    // log("setupWrapperCleanup")
+    // log(wrapper)
+    // There can be only one
+    if (wrapper.hasCleanupEventListener) return; 
+    
+    // On cleanup, synchronize transitioned style property
     const me = this; 
     // log("setupAnimationCleanup: " + inAnimationType + " " + frameNumber);
     // log(node)
-    function onTransitionEnd(event) {
-      console.log("onTransitionEnd: " + inAnimationType + " " + frameNumber + " cleanup: " + frameNumber === node.changes.number);
-      
-      node.removeEventListener("transitionend", onTransitionEnd);
 
-      if (frameNumber === node.changes.number && !node.changes.finished) {
-        console.group("cleanup...")
-        log(event.target);
-        console.groupEnd();
-          
-        log("onTransitionEnd..." + node.changes.type);
-        // log(frameNumber)
-        // log(node.changes.number)
-        // log(node.changes.type);
-        event.preventDefault();
-        event.stopPropagation();
-        console.log(event);
-        
-        if (node.changes.type === changeType.removed) {
-          // For trailer
-          if (node.equivalentCreator) {
-            delete flowChanges.beingRemovedMap[node.equivalentCreator.id];
-          }
-          node.parentNode.removeChild(node);
-        }  
-        
-        node.style.transition = "";
-        if (node.equivalentCreator) {
-          node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
-          log(`cleanup properties: `);
-          logProperties(node.style, typicalAnimatedProperties);
+    function onTransitionEnd(event) {
+      // event.preventDefault();
+      // event.stopPropagation();
+      if (event.target !== wrapper) return; 
+
+      // if (changes === node.changes) {
+      const propertyName = camelCase(event.propertyName); 
+
+      console.group("cleanup wrapper");
+      log(node);
+      log(event.propertyName);
+      log(camelCase(event.propertyName));
+      console.groupEnd();
+
+      if (["width", "height"].includes(propertyName) && wrapper.wrapped) {
+        // log(node.equivalentCreator.parentPrimitive.causality.target);
+        log(wrapper.parentNode.equivalentCreator.causality.target);
+        log(node.equivalentCreator.causality.target)
+        if (node.parentNode === wrapper &&
+          node.equivalentCreator.parentPrimitive === wrapper.parentNode.equivalentCreator) {
+          const wrapped = wrapper.wrapped; 
+          const container = wrapper.parentNode; 
+          wrapper.removeChild(wrapped);
+          container.replaceChild(wrapped, wrapper);
+          node.equivalentCreator.synchronizeDomNodeStyle("position");
+        } else {
+          wrapper.parentNode.removeChild(wrapper);
         }
 
-        node.changes.finished = true; 
+        // Remove Wrapper Relation
+        if (wrapper.wrapped) {
+
+
+          if (wrapper.wrapped.oldWrappers) {
+            wrapper.wrapped.oldWrappers.remove(wrapper);
+          }
+          delete wrapper.wrapped.wrapper;
+          delete wrapper.wrapped;
+        }
+
+        // Finish animation
+        wrapper.removeEventListener("transitionend", onTransitionEnd);
+        delete wrapper.hasCleanupEventListener;
       }
     }
-
-    // if (typeof(node.eventListenerFrameNumber) !== "undefined") {
-    //   if (node.eventListenerFrameNumber !== frameNumber) {
-    //     node.removeEventListener("transitionend", onTransitionEnd);
-    //   }
-    // }
-
-    node.eventListenerFrameNumber = frameNumber; 
-    node.addEventListener("transitionend", onTransitionEnd);
+    wrapper.addEventListener("transitionend", onTransitionEnd);
+    wrapper.hasCleanupEventListener = onTransitionEnd; 
   }
-
-  cleanupAnimation(node) {
-    // All
-    node.style.transition = "";
-
-    // if (node.equivalentCreator) {
-    //   node.equivalentCreator.synchronizeDomNodeStyle(animatedProperties);
-    // }
-
-    // // Added cleanup
-    // node.style.width = "";
-    // node.style.height = "";
-    // node.style.maxWidth = "";
-    // node.style.maxHeight = "";
-    // node.style.opacity = "";
-    
-    // // Resident
-    // node.style.color = "";
-    // node.style.fontSize = "";
-
-    // if (node.savedIncomingMeasures) {
-    //   delete node.savedIncomingMeasures;
-    // }
-  }
-
-
-
 }
 
 export const standardAnimation = new DOMNodeAnimation();
-
-
-
-
-  /**
-   * Cleanup mid animation. 
-  //  */
-  // cleanupPossibleAnimation(node) {
-  //   if (node.inAnimation) {
-  //     this.cleanupMidAnimation(node);
-  //   }
-  // }
-
-  // cleanupMidAnimation(node) {
-  //   // node.style.transition = "";
-  //   const computedStyle = window.getComputedStyle(node);
-  //   for (let property of animatedProperties) {
-  //     if (typeof property === "string") {
-  //       node.style[property] = computedStyle[property]; 
-  //     } else {
-  //       for (let partialProperty of property.partial) {
-  //         node.style[partialProperty] = computedStyle[partialProperty];
-  //       }
-  //     }
-  //   }
-  //   node.haltedInAnimation = true; 
-  //   delete node.inAnimation; 
-
-
-    // const previouslySetStyles = node.equivalentCreator && node.equivalentCreator.unobservable.previouslySetStyles;
-    // if (previouslySetStyles) {
-    //   log("this.cleanupAnimation");
-    //   // log(node);
-    //   // log({...node.style})
-    //   let index = 0; 
-    //   while (index < node.style.length) {
-    //     const property = camelCased(node.style.item(index));
-    //     const shorthandProperty = firstOfCamelCase(property);
-    //     log("found " +  property);
-    //     if (!previouslySetStyles[property] && !previouslySetStyles[shorthandProperty]) {
-    //       log("REMOVE ALIEN STYLE:" + property);
-    //       node.style[property] = node.targetStyle[property];
-    //     }
-    //     index++;
-    //   }
-    // } else {
-    //   log("No previous set styles: ")
-    //   console.log(node);
-    // }
-    // log({...node.style})
-    // // All
-    // node.style.transition = node.targetStyle.transition;
-    // node.style.transform = node.targetStyle.transform;
-
-    // // Added cleanup
-    // node.style.width = node.targetStyle.width;
-    // node.style.height = node.targetStyle.height;
-    // node.style.maxWidth = node.targetStyle.maxWidth;
-    // node.style.maxHeight = node.targetStyle.maxHeight;
-    // node.style.opacity = node.targetStyle.opacity;
-    
-    // node.style.margin = node.targetStyle.margin;
-    // node.style.marginTop = node.targetStyle.marginTop;
-    // node.style.marginBottom = node.targetStyle.marginBottom;
-    // node.style.marginLeft = node.targetStyle.marginLeft;
-    // node.style.marginRight = node.targetStyle.marginRight;
-
-    // Resident
-    // node.style.color = "";
-    // node.style.fontSize = "";
-
-    // if (node.savedIncomingMeasures) {
-    //   delete node.savedIncomingMeasures;
-    // }
-  // }
-
   
-function sameBounds(b1, b2) {
-  // log("sameBounds");
-  // log(b1);
-  // log(b2)
-  return (
-      b1.top === b2.top &&
-      b1.left === b2.left &&
-      b1.width === b2.width &&
-      b1.height === b2.height
-  );
-}
 
+export const animatedProperties = [
+  // "transform",
+  // "maxHeight",
+  // "maxWidth",
+  {compound: "margin", partial: ["marginBottom", "marginBottom", "marginLeft", "marginRight"]},
+  {compound: "padding", partial: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"]},
+  "opacity",
+  "color", 
+  "fontSize",
+];
