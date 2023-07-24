@@ -34,10 +34,6 @@ export function clearNode(node) {
 }
 
 
-export const getWrapper = (node) => !node ? node : (node.wrapper && node.wrapper.wrapped === node ? node.wrapper : node);  
-export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wrapped.wrapper === node ? node.wrapped : node);  
-
-
 /**
  * DOM Node
  */
@@ -136,51 +132,29 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
     const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
-    
-    // Iterate and remove things that should be removed or outgoing
-    const existingPrimitives = {};
-    
+        
+    // Recover other nodes
     const recoveredNodes = [];
-    // log([...node.childNodes])
     for(let existingChildNode of node.childNodes) {
-      // log("---")
-      // log(existingChildNode);
-      const existingPrimitive = getWrappedNode(existingChildNode).equivalentCreator;
-      // log(existingPrimitive);
-      if (!existingPrimitive) {
-        // No creator, probably a fading trailer that we want to keep
-        // TODO: Mark trailers somehow! 
+      if (existingChildNode.isControlledByAnimation) {
+        // Animation nodes are controlled by animations, leave them in.
         recoveredNodes.push(existingChildNode);
       } else {
-        // A creator, meaning a flow primitive
-        existingPrimitives[existingPrimitive.id] = existingPrimitive; 
-        const animation = existingPrimitive.getAnimation(); 
-
-        // Keep node in new children
+        // Keep nodes that are in new children list
         if (newChildNodes.includes(existingChildNode)) {
           recoveredNodes.push(existingChildNode);
         } 
-
-        // If node is removed and animated, copy it back to leave it to wait for animation.
-        if (animation) {
-          if (flowChanges.beingRemovedMap[existingPrimitive.id]) {
-            recoveredNodes.push(existingChildNode);
-          }
-        }
       }
     }
 
-    // log(recoveredNodes);
-
-    // Link recovered nodes:
+    // Link recovered nodes to get their relative positions:
     let anchor = null; 
     recoveredNodes.forEach(node => {node.anchor = anchor; anchor = node; });
 
+    // Merge old with new
     function insertAfter(array, reference, element) {
       array.splice(array.indexOf(reference) + 1, 0, element);
     }
-
-    // Merge old with new
     recoveredNodes.forEach(node => {
       if (!newChildNodes.includes(node)) {
         let anchor = node.anchor;
@@ -196,56 +170,27 @@ export const getWrappedNode = (node) => !node ? node : (node.wrapped && node.wra
     // Removing pass, will also rearrange moved elements
     let index =  node.childNodes.length - 1;
     while(index >= 0) {
-      const existingChildNode = getWrappedNode(node.childNodes[index]);
+      const existingChildNode = node.childNodes[index];
       if ((existingChildNode instanceof Element) && !newChildNodes.includes(existingChildNode)) {
-        const wrapper = getWrapper(existingChildNode);
-        if (wrapper && wrapper.parentNode === node) {
-          node.removeChild(wrapper);
-        } else {
-          console.warn("Weird, there is a wrapper that is no longer in place?");
-        }
+        node.removeChild(existingChildNode);
       }
       index--;
     }
 
     // Adding pass, will also rearrange moved elements
     index = 0;
-    // log(node)
     while(index < newChildNodes.length) {
-      // log("index:" + index);
       const newChildNode = newChildNodes[index];
       const existingChildNode = node.childNodes[index]; 
       if (existingChildNode) {
-        const existingWrappedNode = getWrappedNode(node.childNodes[index]);
-        // log("old:")
-        // log(existingWrappedNode);
-        // if (existingWrappedNode) log(existingWrappedNode.wrapper);
+        const existingWrappedNode = node.childNodes[index];
         if (newChildNode !== existingWrappedNode) {
-          // log("new:")
-          // log(newChildNode);
-          // log(newChildNode.wrapper);
-          // Note: Wrapper could be for a next move that the reference is about to make. 
-          node.insertBefore(getWrapper(newChildNode), existingChildNode);
+          node.insertBefore(newChildNode, existingChildNode);
         }
       } else {
-        node.appendChild(getWrapper(newChildNode));
+        node.appendChild(newChildNode);
       }
       index++;
-    }
-
-    // Ensure wrappers in use. 
-    for (let childNode of node.childNodes) {
-      if (childNode.id !== "wrapper" && childNode.wrapper) {
-        node.replaceChild(childNode.wrapper, childNode);
-      }
-    }
-
-    // Ensure wrappers non empty. 
-    for (let childNode of node.childNodes) {
-      if (childNode.id === "wrapper" && !childNode.isOldWrapper && childNode.wrapped.parentNode !== childNode) {
-        // debugger; 
-        childNode.appendChild(childNode.wrapped);
-      }
     }
   }
 

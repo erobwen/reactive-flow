@@ -93,8 +93,6 @@ export const flowChanges = {
   globallyResidentAnimated: {},
   globallyMovedAnimated: {},
 
-  beingRemovedMap: {},
-
   *allAnimatedFlows() {
     for (let flow of Object.values(this.globallyAddedAnimated)) {
       yield flow; 
@@ -313,7 +311,6 @@ export function onFinishReBuildingFlow() {
     if (flow.domNode) {
       flow.domNode.changes.type = changeType.removed;
       flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
-      flowChanges.beingRemovedMap[flow.id] = flow;    
     }
   }
   console.groupEnd();

@@ -26,6 +26,7 @@ export class SimpleMoveAnimation extends Flow {
       {
         ripple: true,
         style: {
+          margin: "10px",
           color: "green",
           width: "150px"
         }
