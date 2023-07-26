@@ -2,7 +2,7 @@ import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, finalize } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges, typicalAnimatedProperties } from "./DOMAnimation";
+import { flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges } from "./DOMAnimation";
 
 const log = console.log;
 

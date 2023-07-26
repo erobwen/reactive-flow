@@ -1,7 +1,6 @@
 import { extractAttributes } from "../flow.components/BasicHtml";
 import { trace } from "../flow/Flow";
 import { logMark } from "../flow/utility";
-import { extractProperties } from "./DOMAnimation";
 import { DOMNode } from "./DOMNode";    
 const log = console.log;
 

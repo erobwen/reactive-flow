@@ -34,19 +34,6 @@ export function removeDOMFlowTarget(target) {
  * Debug printouts
  */
 
-export const typicalAnimatedProperties = [
-  "transition", 
-  "transform", 
-  "width", 
-  "height", 
-  "maxWidth", 
-  "maxHeight", 
-  "margin", 
-  "marginTop", 
-  "padding", 
-  "paddingTop"
-]; 
-
 export function logProperties(object, properties) {
   log(extractProperties(object, properties));
 }
@@ -378,6 +365,7 @@ export function onFinishReBuildingDOM() {
     }
   }
   // We now have original style and footprints, but new structure. 
+
   
   logAnimationSeparator("---------------------------------------- Emulate original bounds for FLIP animations -------------------------");
   
@@ -403,6 +391,9 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
 
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {
+        log("here")
+        flow.animation.setupAnimationCleanup(flow);
+        log("...")
         flow.animation.activateAnimation(flow, currentFlowChanges);
       }
     }

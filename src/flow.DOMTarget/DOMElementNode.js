@@ -104,11 +104,11 @@ const log = console.log;
       this.unobservable.previouslySetStyles = newPreviouslySetStyles; // Note: Causality will prevent this from self triggering repeater.     
     }
   
-    getAnimatedFinishStyles() {
-      const style = (this.attributes && this.attributes.style) ? this.attributes.style : {};
-      const animation = this.animation ? this.animation : this.getAnimation();
-      return extractProperties(style, animation.animatedProperties);
-    }
+    // getAnimatedFinishStyles() {
+    //   const style = (this.attributes && this.attributes.style) ? this.attributes.style : {};
+    //   const animation = this.animation ? this.animation : this.getAnimation();
+    //   return extractProperties(style, animation.animatedProperties);
+    // }
 
     synchronizeDomNodeStyle(properties) {
       if (!(properties instanceof Array)) properties = [properties];

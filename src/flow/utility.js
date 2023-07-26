@@ -21,6 +21,9 @@ export function deepFreeze (o) {
 };
 
 
+export function insertAfter(newNode, referenceNode) {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
 
 /**
  * Pretty logging 

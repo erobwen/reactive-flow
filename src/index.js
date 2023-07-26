@@ -32,8 +32,8 @@ setFlowConfiguration({
 installDOMAnimation();
 
 // buttonTest();
-startSimpleMoveAnimation();
-// startSimpleAddRemoveAnimation();
+// startSimpleMoveAnimation();
+startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
