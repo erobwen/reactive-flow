@@ -235,23 +235,51 @@ export class DOMNodeAnimation {
    */
   emulateOriginalFootprints(flow) {
     const node = flow.domNode;
+    const trailer = node.trailer;
+    
+    // Setup leaders and trailers to emulate original inflation of containers.
     switch (flow.changes.type) {
       case changeType.added: 
-        this.setOriginalStyleAndFootprintForAdded(node);
-        break; 
-      case changeType.removed: 
-        this.setOriginalStyleAndFootprintForRemoved(node);
-        break;
       case changeType.moved: 
-        this.setOriginalStyleAndFootprintForMoved(node);
+        this.setupALeaderForIncomingWithOriginalFootprint(node);
         break; 
+      case changeType.removed:
+        // Add node back to trailer and make it visible.
+        if (node.parentNode !== trailer) {
+          trailer.appendChild(node);
+        }
+        this.show(trailer);
+        break; 
+      case changeType.moved: 
+        // Make trailer visible (should already have the right measurements)
+        this.show(trailer);
+        break;
       case changeType.resident: // Do nothing! 
         break;  
     }
+
+    // Setup original style, size and transformation.
+    if (node.changes.previous) {
+      this.setOriginalStyleAndFootprintForChainAnimated(node);
+    } else {
+      switch (flow.changes.type) {
+        case changeType.added: 
+          this.setOriginalStyleAndFootprintForAdded(node);
+          break; 
+        case changeType.removed: 
+          this.setOriginalStyleAndFootprintForRemoved(node);
+          break;
+        case changeType.moved: 
+          this.setOriginalStyleAndFootprintForMoved(node);
+          break; 
+        case changeType.resident: // Do nothing! 
+          break;  
+      }
+    }
   }
 
-  setOriginalStyleAndFootprintForAdded(node) {
-    log("setOriginalStyleAndFootprintForAdded")
+  setupALeaderForIncomingWithOriginalFootprint(node) {
+    log("setupALeaderForIncomingWithOriginalFootprint")
     // Get a leader for the added, this is either a new one, or a reused one from a remove. 
     let leader;
 
@@ -276,119 +304,55 @@ export class DOMNodeAnimation {
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
       leader.style.width = "0px"; 
       leader.style.height = "0px";
-      leader.style.opacity = "1";  
       insertAfter(leader, node);
       leader.appendChild(node);
     }
+    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
     node.leader = leader;
     log("leader;")
     log(leader);
-        
-    // Debugging
-    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
-
-    // Only if we are starting a chained animation, minimize the node
-    if (!node.changes.previous) {
-      log("A new animation, zoom from zero!");
-
-      // Prepare for animation, do at a later stage perhaps? 
-      Object.assign(node.style, {
-        position: "absolute", 
-        transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-        // This is to make the absolute positioned added node to have the right size.
-        width: node.targetDimensions.widthWithoutMargin + "px", 
-        height: node.targetDimensions.heightWithoutMargin + "px",
-        opacity: "0",
-      });
-    } else {
-      log("Chained animation, keep existing transform and opacity");
-      // Note, transition animations will allways start from the previously set style, even if the actual style is something different. Therefore we need to hard-reset the style here for a correct starting point.  
-      Object.assign(node.style, {
-        position: "absolute", 
-        transform: node.computedOriginalStyle.transform,//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-        opacity: node.computedOriginalStyle.opacity,
-      });
-
-      log(node.style.transform);
-    }
-  }
-    
-  setOriginalStyleAndFootprintForRemoved(node) { // TODO: Should actually inflate it instead... Because we want to aquire target dimensions with removed things out of the way. 
-    const trailer = node.trailer; // Should have one at this point. 
-    
-    // Add back to trailer.
-    if (node.parentNode !== trailer) {
-      trailer.appendChild(node);
-    }
-    
-    // Make trailer visible (should already have the right measurements)
-    this.show(trailer);
-
-    // Prepare for animation, do at a later stage perhaps? 
-    if (!node.changes.previous) {
-      Object.assign(node.style, {
-        transform: "matrix(1, 0, 0, 1, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-        position: "absolute", 
-        // This is to make the absolute positioned added node to have the right size.
-        width: node.originalDimensions.widthWithoutMargin + "px", 
-        height: node.originalDimensions.heightWithoutMargin + "px",
-        opacity: "1",
-      });
-    } else {
-      Object.assign(node.style, {
-        position: "absolute", 
-        transform: "matrix(1, 0, 0, 1, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-        // This is to make the absolute positioned added node to have the right size.
-        transform: node.computedOriginalStyle.transform,//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-        opacity: node.computedOriginalStyle.opacity,
-      });
-    }
   }
 
-  
-  setOriginalStyleAndFootprintForMoved(node) { // TODO: Should actually inflate it instead... Because we want to aquire target dimensions with removed things out of the way. 
-    const trailer = node.trailer; // Should have one at this point. 
-
-    // Make trailer visible (should already have the right measurements)
-    this.show(trailer);
-
-    // Find a leader for moved, either borrow one, or create a new one.  
-    let leader; 
-    let previous = node.previousSibling; 
-    while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
-      leader = previous; 
-      previous = previous.previousSibling;
-    }
-    if (leader) {
-      // Found an existing leader. 
-      this.repurposeLeaderOrTrailer(leader);
-      leader.appendChild(node);
-    } else {
-      // Create new leader.
-      leader = this.createNewTrailerOrLeader("leader");
-      // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
-      leader.style.width = "0px"; 
-      leader.style.height = "0px";
-      leader.style.opacity = "1";  
-      insertAfter(leader, node);
-      leader.appendChild(node);
-    }
-    node.leader = leader;
-    
-    // Debugging
-    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
-
-    // TODO: This code needs changes.
-
-    // Prepare for animation
+  setOriginalStyleAndFootprintForChainAnimated(node) {
     Object.assign(node.style, {
+      position: "absolute",
+      transform: node.computedOriginalStyle.transform,
+      opacity: node.computedOriginalStyle.opacity,
+    });
+  }
+
+  setOriginalStyleAndFootprintForAdded(node) {
+    Object.assign(node.style, {
+      position: "absolute", 
+      transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+      // This is to make the absolute positioned added node to have the right size.
+      width: node.targetDimensions.widthWithoutMargin + "px", 
+      height: node.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
+      opacity: "0.001",
+    });
+  }
+    
+  setOriginalStyleAndFootprintForRemoved(node) {
+    Object.assign(node.style, {
+      transform: "matrix(1, 0, 0, 1, 0, 0)",
       position: "absolute", 
       // This is to make the absolute positioned added node to have the right size.
       width: node.originalDimensions.widthWithoutMargin + "px", 
       height: node.originalDimensions.heightWithoutMargin + "px",
+      opacity: "1",
     });
   }
-  
+
+  setOriginalStyleAndFootprintForMoved(node) {
+    Object.assign(node.style, {
+      transform: "matrix(1, 0, 0, 1, 0, 0)",
+      position: "absolute", 
+      // This is to make the absolute positioned added node to have the right size.
+      width: node.originalDimensions.widthWithoutMargin + "px", 
+      height: node.originalDimensions.heightWithoutMargin + "px"
+    });
+  }
+
   
   /**
    * -------------------------------------------------------------------------------------

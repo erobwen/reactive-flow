@@ -11,7 +11,7 @@ const log = console.log;
  */
 export class SimpleAddRemoveAnimation extends Flow {
   setState() {
-    this.showText = true; 
+    this.showText = false; 
   }
 
   // text("Some text", {div: false, animate: true, key: "my-text", style: {color: "green"}}).show(this.showText)
