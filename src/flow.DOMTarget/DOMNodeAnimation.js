@@ -113,7 +113,8 @@ export class DOMNodeAnimation {
     
     if (node.parentNode.isControlledByAnimation) {
       // Repurpose existing leader as trailer.
-      trailer = this.repurposeLeader(node.parentNode);
+      const leader = node.parentNode;
+      trailer = this.repurposeLeaderOrTrailer(leader);
     } else {
       // Create new trailer.
       trailer = this.createNewTrailerOrLeader("trailer");
@@ -124,16 +125,20 @@ export class DOMNodeAnimation {
     }
 
     // Debugging
-    trailer.style.backgroundColor = "#aaaaff";
-    // trailer.style.backgroundColor = "rgba(0, 0, 0, 0)";
+    trailer.style.backgroundColor = "rgba(170, 170, 255, 0.5)";
     
     node.trailer = trailer; 
   }
   
-  repurposeLeader(leader) {
-    leader.removeEventListener("transitionend", leader.hasCleanupEventListener);
-    delete leader.hasCleanupEventListener;
-    return this.resetLeader(leader);
+  repurposeLeaderOrTrailer(node) {
+    const bounds = node.getBoundingClientRect();
+    // Fixate size, it might get reset after setting display none! 
+    node.style.width = bounds.width + "px";
+    node.style.height = bounds.height + "px";
+
+    node.removeEventListener("transitionend", node.hasCleanupEventListener);
+    delete node.hasCleanupEventListener;
+    return this.resetLeader(node);
   }
   
   createNewTrailerOrLeader(id) {
@@ -230,10 +235,11 @@ export class DOMNodeAnimation {
     let previous = node.previousSibling; 
     while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
       leader = previous; 
-      previous = node.previousSibling;
+      previous = previous.previousSibling;
     }
     if (leader) {
       // Found an existing leader. 
+      this.repurposeLeaderOrTrailer(leader);
       leader.appendChild(node);
     } else {
       // Create new leader.
@@ -248,7 +254,7 @@ export class DOMNodeAnimation {
     node.leader = leader;
         
     // Debugging
-    leader.style.backgroundColor = "#ffaaaa";
+    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
     // Add node to leader and make it visible (it should already have correct size). 
     Object.assign(leader.style, {
@@ -303,14 +309,16 @@ export class DOMNodeAnimation {
       transition: this.leaderTransition(),
     });
     
-    // Find a leader for moved, either borrow one, or create a new one.   
+    // Find a leader for moved, either borrow one, or create a new one.  
+    let leader; 
     let previous = node.previousSibling; 
-    while (previous.isControlledByAnimation && !previous.hasChildNodes()) {
+    while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
       leader = previous; 
-      previous = node.previousSibling;
+      previous = previous.previousSibling;
     }
     if (leader) {
       // Found an existing leader. 
+      this.repurposeLeaderOrTrailer(leader);
       leader.appendChild(node);
     } else {
       // Create new leader.
@@ -325,7 +333,13 @@ export class DOMNodeAnimation {
     node.leader = leader;
     
     // Debugging
-    leader.style.backgroundColor = "#ffaaaa";
+    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
+
+    // Add node to leader and make it visible (it should already have correct size). 
+    Object.assign(leader.style, {
+      // Note: width and height should be set at this point.
+      display: ""
+    })
 
     // Prepare for animation
     Object.assign(node.style, {
@@ -395,7 +409,7 @@ export class DOMNodeAnimation {
         // log("Already have transform for " + flow.toString());     
         // Freeze properties as we start a new animation.
 
-        Object.assign(flow.domNode.style, extractProperties(computedStyle, animatedProperties));
+        Object.assign(flow.domNode.style, extractProperties(computedStyle, this.animatedProperties));
 
         // Reset transform 
         flow.domNode.style.transition = "";
@@ -597,6 +611,7 @@ export class DOMNodeAnimation {
               break;
             case changeType.added:
             case changeType.moved:
+              node.style.position = "";
               leader.removeChild(node);
               leader.parentNode.replaceChild(node, leader);
               break; 

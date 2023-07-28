@@ -22,7 +22,11 @@ export function deepFreeze (o) {
 
 
 export function insertAfter(newNode, referenceNode) {
-  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+  if (referenceNode.nextSibling) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+  } else {
+    referenceNode.parentNode.appendChild(newNode);
+  }
 }
 
 /**
