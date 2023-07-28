@@ -237,25 +237,26 @@ export class DOMNodeAnimation {
     const node = flow.domNode;
     const trailer = node.trailer;
     
-    // Setup leaders and trailers to emulate original inflation of containers.
+    // Setup leaders, typically deflated unless an existing leader/trailer can be reused.
     switch (flow.changes.type) {
       case changeType.added: 
       case changeType.moved: 
         this.setupALeaderForIncomingWithOriginalFootprint(node);
         break; 
+    }
+
+    // Make trailers visible, they should already have original sizes.
+    switch (flow.changes.type) {
       case changeType.removed:
-        // Add node back to trailer and make it visible.
+        // Add back to trailer if not already here
         if (node.parentNode !== trailer) {
-          trailer.appendChild(node);
+          trailer.appendChild(node); 
         }
         this.show(trailer);
         break; 
       case changeType.moved: 
-        // Make trailer visible (should already have the right measurements)
         this.show(trailer);
         break;
-      case changeType.resident: // Do nothing! 
-        break;  
     }
 
     // Setup original style, size and transformation.
