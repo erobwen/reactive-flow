@@ -134,9 +134,7 @@ export class DOMNodeAnimation {
   prepareForDOMBuilding(flow) {
     const node = flow.domNode;
 
-    // Add leaders and trailers to keep a reference of their position, since dom building will remove them. 
-
-    // Add trailers for removed 
+    // Add trailers for removed to keep a reference of their position, since dom building will remove them. 
     switch (flow.changes.type) {
       case changeType.moved:
       case changeType.removed:
@@ -327,14 +325,24 @@ export class DOMNodeAnimation {
     this.show(trailer);
 
     // Prepare for animation, do at a later stage perhaps? 
-    Object.assign(node.style, {
-      transform: "matrix(1, 0, 0, 1, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-      position: "absolute", 
-      // This is to make the absolute positioned added node to have the right size.
-      width: node.originalDimensions.widthWithoutMargin + "px", 
-      height: node.originalDimensions.heightWithoutMargin + "px",
-      opacity: "1",
-    });
+    if (!node.changes.previous) {
+      Object.assign(node.style, {
+        transform: "matrix(1, 0, 0, 1, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        position: "absolute", 
+        // This is to make the absolute positioned added node to have the right size.
+        width: node.originalDimensions.widthWithoutMargin + "px", 
+        height: node.originalDimensions.heightWithoutMargin + "px",
+        opacity: "1",
+      });
+    } else {
+      Object.assign(node.style, {
+        position: "absolute", 
+        transform: "matrix(1, 0, 0, 1, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        // This is to make the absolute positioned added node to have the right size.
+        transform: node.computedOriginalStyle.transform,//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        opacity: node.computedOriginalStyle.opacity,
+      });
+    }
   }
 
   
