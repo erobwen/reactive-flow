@@ -6,7 +6,7 @@ import { camelCase, changeType, extractProperties, flowChanges, getHeightIncludi
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
-const animationTime = 9;
+const animationTime = 5;
 
 export class DOMNodeAnimation {
   /**
@@ -55,6 +55,42 @@ export class DOMNodeAnimation {
     return dimensions; 
   }
 
+  
+  /**
+   * General helpers
+   */
+
+  repurposeLeaderOrTrailer(node) {
+    const bounds = node.getBoundingClientRect();
+    // Fixate size, it might get reset after setting display none! 
+    node.style.width = bounds.width + "px";
+    node.style.height = bounds.height + "px";
+
+    node.removeEventListener("transitionend", node.hasCleanupEventListener);
+    delete node.hasCleanupEventListener;
+    return node;
+  }
+  
+  createNewTrailerOrLeader(id) {
+    // Create a new leader
+    const node = document.createElement("div");
+    node.id = id; 
+    node.isControlledByAnimation = true; 
+    node.style.position = "relative";
+    node.style.overflow = "visible"    
+    
+    node.style.fontSize = "0px"; // For correctly positioning of buttons? 
+    return node; 
+  }
+
+  hide(node) {
+    node.style.display = "none"; // For now! this will be removed after measuring target bounds.  
+  }
+
+  show(node) {
+    node.style.display = ""; // For now! this will be removed after measuring target bounds.  
+  }
+
   /**
    * -------------------------------------------------------------------------------------
    * 
@@ -100,15 +136,24 @@ export class DOMNodeAnimation {
 
     // Add leaders and trailers to keep a reference of their position, since dom building will remove them. 
 
+    // Add trailers for removed 
     switch (flow.changes.type) {
       case changeType.moved:
       case changeType.removed:
-        this.prepareMovedAndRemovedForDOMBuilding(node);
-        break; 
+        this.addTrailersForMovedAndRemovedBeforeDomBuilding(node);
+        break;
     }
+
+    // Prepare added and moved for correct target size measurement (in case they are in a chained animation) 
+    switch (flow.changes.type) {
+      case changeType.added:
+      case changeType.moved:
+        this.neutralizeTransformationsAndPosition(node);
+        break;
+    }    
   }
 
-  prepareMovedAndRemovedForDOMBuilding(node) {
+  addTrailersForMovedAndRemovedBeforeDomBuilding(node) {
     let trailer; 
     
     if (node.parentNode.isControlledByAnimation) {
@@ -124,38 +169,18 @@ export class DOMNodeAnimation {
       insertAfter(trailer, node);
     }
 
+    // We hide it for now, to get more accurate target measures, as if removed and moved nodes has already moved out of their place
+    this.hide(trailer);
+
     // Debugging
     trailer.style.backgroundColor = "rgba(170, 170, 255, 0.5)";
     
     node.trailer = trailer; 
   }
   
-  repurposeLeaderOrTrailer(node) {
-    const bounds = node.getBoundingClientRect();
-    // Fixate size, it might get reset after setting display none! 
-    node.style.width = bounds.width + "px";
-    node.style.height = bounds.height + "px";
-
-    node.removeEventListener("transitionend", node.hasCleanupEventListener);
-    delete node.hasCleanupEventListener;
-    return this.resetLeader(node);
-  }
-  
-  createNewTrailerOrLeader(id) {
-    // Create a new leader
-    const trailer = document.createElement("div");
-    trailer.id = id; 
-    trailer.isControlledByAnimation = true; 
-    trailer.style.position = "relative";
-    trailer.style.overflow = "visible"    
-    
-    trailer.style.fontSize = "0px"; // For correctly positioning of buttons? 
-    return this.resetLeader(trailer);
-  }
-
-  resetLeader(leader) {
-    leader.style.display = "none"; // For now! this will be removed after measuring target bounds.  
-    return leader;
+  neutralizeTransformationsAndPosition(node) {
+    node.style.position = "";
+    node.style.transform = "";
   }
 
 
@@ -228,21 +253,27 @@ export class DOMNodeAnimation {
   }
 
   setOriginalStyleAndFootprintForAdded(node) {
+    log("setOriginalStyleAndFootprintForAdded")
     // Get a leader for the added, this is either a new one, or a reused one from a remove. 
     let leader;
 
     // Find a leader for added, either borrow one, or create a new one.   
-    let previous = node.previousSibling; 
+    let previous = node.previousSibling;
+    log(previous) 
+    log(previous && previous.isControlledByAnimation) 
     while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
+      log("found leader...")
       leader = previous; 
       previous = previous.previousSibling;
     }
     if (leader) {
       // Found an existing leader. 
+      log("repurpose existing leader")
       this.repurposeLeaderOrTrailer(leader);
       leader.appendChild(node);
     } else {
       // Create new leader.
+      log("create a new leader")
       leader = this.createNewTrailerOrLeader("leader");
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
       leader.style.width = "0px"; 
@@ -252,25 +283,36 @@ export class DOMNodeAnimation {
       leader.appendChild(node);
     }
     node.leader = leader;
+    log("leader;")
+    log(leader);
         
     // Debugging
     leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
-    // Add node to leader and make it visible (it should already have correct size). 
-    Object.assign(leader.style, {
-      // Note: width and height should be set at this point.
-      display: ""
-    })
+    // Only if we are starting a chained animation, minimize the node
+    if (!node.changes.previous) {
+      log("A new animation, zoom from zero!");
 
-    // Prepare for animation, do at a later stage perhaps? 
-    Object.assign(node.style, {
-      transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
-      position: "absolute", 
-      // This is to make the absolute positioned added node to have the right size.
-      width: node.targetDimensions.widthWithoutMargin + "px", 
-      height: node.targetDimensions.heightWithoutMargin + "px",
-      opacity: "0",
-    });
+      // Prepare for animation, do at a later stage perhaps? 
+      Object.assign(node.style, {
+        position: "absolute", 
+        transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        // This is to make the absolute positioned added node to have the right size.
+        width: node.targetDimensions.widthWithoutMargin + "px", 
+        height: node.targetDimensions.heightWithoutMargin + "px",
+        opacity: "0",
+      });
+    } else {
+      log("Chained animation, keep existing transform and opacity");
+      // Note, transition animations will allways start from the previously set style, even if the actual style is something different. Therefore we need to hard-reset the style here for a correct starting point.  
+      Object.assign(node.style, {
+        position: "absolute", 
+        transform: node.computedOriginalStyle.transform,//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+        opacity: node.computedOriginalStyle.opacity,
+      });
+
+      log(node.style.transform);
+    }
   }
     
   setOriginalStyleAndFootprintForRemoved(node) { // TODO: Should actually inflate it instead... Because we want to aquire target dimensions with removed things out of the way. 
@@ -281,11 +323,8 @@ export class DOMNodeAnimation {
       trailer.appendChild(node);
     }
     
-    // Make trailer visible
-    Object.assign(trailer.style, {
-      // Note: width and height should be set at this point. 
-      display: ""
-    })
+    // Make trailer visible (should already have the right measurements)
+    this.show(trailer);
 
     // Prepare for animation, do at a later stage perhaps? 
     Object.assign(node.style, {
@@ -301,14 +340,10 @@ export class DOMNodeAnimation {
   
   setOriginalStyleAndFootprintForMoved(node) { // TODO: Should actually inflate it instead... Because we want to aquire target dimensions with removed things out of the way. 
     const trailer = node.trailer; // Should have one at this point. 
-    
-    // Make trailer visible.
-    Object.assign(trailer.style, {
-      // Note: width and height should be set at this point. 
-      display: "",
-      transition: this.leaderTransition(),
-    });
-    
+
+    // Make trailer visible (should already have the right measurements)
+    this.show(trailer);
+
     // Find a leader for moved, either borrow one, or create a new one.  
     let leader; 
     let previous = node.previousSibling; 
@@ -335,11 +370,7 @@ export class DOMNodeAnimation {
     // Debugging
     leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
-    // Add node to leader and make it visible (it should already have correct size). 
-    Object.assign(leader.style, {
-      // Note: width and height should be set at this point.
-      display: ""
-    })
+    // TODO: This code needs changes.
 
     // Prepare for animation
     Object.assign(node.style, {
@@ -523,9 +554,9 @@ export class DOMNodeAnimation {
     console.group("Activate for " + flow.changes.type + ": " + flow.toString());
     log(`original properties: `);
     logProperties(node.style, this.typicalAnimatedProperties);
-    if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+    if (node.leader) {
+      log(`leader: `);
+      logProperties(node.leader.style, this.typicalAnimatedProperties);
     }
 
     // Animate node
@@ -551,7 +582,9 @@ export class DOMNodeAnimation {
 
     // Animate leader
     const leader = node.leader;
+    delete node.leader; 
     if (leader) {
+      log("animate leader")
       leader.style.transition = this.leaderTransition();
       Object.assign(leader.style, {
         width: node.targetDimensions.widthIncludingMargin + "px",
@@ -561,7 +594,9 @@ export class DOMNodeAnimation {
 
     // Animate trailer 
     const trailer = node.trailer; 
+    delete node.trailer; // Only keep a trailer linked until it has been animated. 
     if (trailer) {
+      log("animate trailer")
       trailer.style.transition = this.leaderTransition();
       Object.assign(trailer.style, {
         width: "0px",
@@ -571,9 +606,9 @@ export class DOMNodeAnimation {
 
     log("final properties: ");
     logProperties(flow.domNode.style, this.typicalAnimatedProperties);
-    if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+    if (leader) {
+      log(`leader: `);
+      logProperties(leader.style, this.typicalAnimatedProperties);
     }
     console.groupEnd();
   }
@@ -606,17 +641,26 @@ export class DOMNodeAnimation {
           // the oneventchange event on the trailer wont fire! TODO: Do more research and find out why! 
           switch(node.changes.type) {
             case changeType.removed:
-              trailer.removeChild(node);
-              trailer.parentNode.removeChild(trailer);
+              if (node.parentNode === trailer) {
+                trailer.removeChild(node);
+                trailer.parentNode.removeChild(trailer);
+              }
               break;
             case changeType.added:
             case changeType.moved:
-              node.style.position = "";
-              leader.removeChild(node);
-              leader.parentNode.replaceChild(node, leader);
+              if (node.parentNode === leader) {
+                node.style.position = "";
+                leader.removeChild(node);
+                leader.parentNode.replaceChild(node, leader);
+              }
               break; 
           }
         }
+
+        // Just in case cleanup
+        // if(node.trailer ) {
+        // }
+
         delete node.trailer; 
       }
     });
