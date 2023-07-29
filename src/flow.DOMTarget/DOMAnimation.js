@@ -391,9 +391,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
 
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {
-        log("here")
         flow.animation.setupAnimationCleanup(flow);
-        log("...")
         flow.animation.activateAnimation(flow, currentFlowChanges);
       }
     }

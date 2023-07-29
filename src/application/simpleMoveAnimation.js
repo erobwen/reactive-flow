@@ -82,6 +82,7 @@ export class SimpleMoveAnimation extends Flow {
         filler(), 
         column(
           button("Move", this.move.bind(this)),
+          button(!inEperiment ? "Activate" : "Deactivate", () => inEperiment = !inEperiment),
           filler(),
           {style: {...animatedContainerStyle, width: "150px"}}
         ), 

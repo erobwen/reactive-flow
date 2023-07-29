@@ -201,6 +201,7 @@ export class DOMNodeAnimation {
     const node = flow.domNode;
     
     switch (flow.changes.type) {
+      case changeType.resident:
       case changeType.added:
       case changeType.moved:
         // Bounds (excludes margins)
@@ -286,10 +287,10 @@ export class DOMNodeAnimation {
 
     // Find a leader for added, either borrow one, or create a new one.   
     let previous = node.previousSibling;
-    log(previous) 
-    log(previous && previous.isControlledByAnimation) 
+    // log(previous) 
+    // log(previous && previous.isControlledByAnimation) 
     while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
-      log("found leader...")
+      // log("found leader...")
       leader = previous; 
       previous = previous.previousSibling;
     }
@@ -310,8 +311,8 @@ export class DOMNodeAnimation {
     }
     leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
     node.leader = leader;
-    log("leader;")
-    log(leader);
+    // log("leader;")
+    // log(leader);
   }
 
   setOriginalStyleAndFootprintForChainAnimated(node) {
@@ -404,7 +405,7 @@ export class DOMNodeAnimation {
     // TODO: Translate parents first in case of cascading moves? 
     
     if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
-      // log("Not same bounds for " + flow.toString());     
+      log("Not same bounds for " + flow.toString());     
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
       // log(currentTransform);
@@ -456,9 +457,9 @@ export class DOMNodeAnimation {
     // node.style.transform = "";
  
     const transform = "matrix(1, 0, 0, 1, " + -deltaX + ", " + -deltaY + ")";
-    log(transform);
+    // log(transform);
     node.style.transform = transform;
-    log(node.style.transform)
+    // log(node.style.transform)
     // log("transform:")
     // log(node.style.transform);
   }
@@ -473,6 +474,9 @@ export class DOMNodeAnimation {
    */
 
   typicalAnimatedProperties = [
+    "opacity",
+    "display",
+    "position",
     "transition", 
     "transform", 
     "width", 
@@ -486,11 +490,20 @@ export class DOMNodeAnimation {
   ]; 
 
   setupFinalStyleForAdded(node) {
+    // log("before")
+    // log(node.style.transform);
+    // log(node.style.opacity);
+    // log(node.style.position);
     node.style.transition = this.addedTransition();
+    // log("setupFinalStyle")
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       opacity: "1"
     });
+    // log("after")
+    // log(node.style.transform);
+    // log(node.style.opacity);
+    // log(node.style.position);
   }
 
   setupFinalStyleForResident(node) {
@@ -531,6 +544,9 @@ export class DOMNodeAnimation {
       log(`leader: `);
       logProperties(node.leader.style, this.typicalAnimatedProperties);
     }
+
+    // Setup cleanup
+    this.setupAnimationCleanup(flow);
 
     // Animate node
     switch(flow.changes.type) {
@@ -615,6 +631,7 @@ export class DOMNodeAnimation {
           switch(node.changes.type) {
             case changeType.removed:
               if (node.parentNode === trailer) {
+                node.style.position = "";
                 trailer.removeChild(node);
                 trailer.parentNode.removeChild(trailer);
               }
@@ -638,19 +655,19 @@ export class DOMNodeAnimation {
       }
     });
   
-    if (leader) {
-      this.setupNodeAnimationCleanup(node.leader, {
-        endingProperties: ["width", "height"],
-        endingAction: () => {
-          // TODO: handle if things have already chagned...
-          log("Ending leader animation"); 
-          leader.removeChild(node);
-          leader.parentNode.replaceChild(node, leader);
-          node.equivalentCreator.synchronizeDomNodeStyle("position");
-          delete node.leader;
-        }
-      })
-    }
+    // if (leader) {
+    //   this.setupNodeAnimationCleanup(node.leader, {
+    //     endingProperties: ["width", "height"],
+    //     endingAction: () => {
+    //       // TODO: handle if things have already chagned...
+    //       log("Ending leader animation"); 
+    //       leader.removeChild(node);
+    //       leader.parentNode.replaceChild(node, leader);
+    //       node.equivalentCreator.synchronizeDomNodeStyle("position");
+    //       delete node.leader;
+    //     }
+    //   })
+    // }
     
     if (trailer) {
       this.setupNodeAnimationCleanup(node.trailer, {
@@ -675,12 +692,11 @@ export class DOMNodeAnimation {
     log("...")
     
     function onTransitionEnd(event) {
-      if (!node.changes) return;
+      // if (!node.changes) return;
       const propertyName = camelCase(event.propertyName); 
 
-      console.group("cleanup: " + node.changes.type + " from changes number " + node.changes.number);
+      console.group("cleanup " + node.id + " in " +  node.changes.type + " animation, triggered by:  " + event.propertyName);
       log(node);
-      log(event.propertyName);
       console.groupEnd();
 
       if (!endingProperties || endingProperties.includes(propertyName)) {
