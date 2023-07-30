@@ -2,7 +2,7 @@ import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from 
 import { DOMNodeAnimation, standardAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
-import { inExperimentOnCount } from "..";
+import { inExperiment, inExperimentOnCount } from "..";
 
 const log = console.log;
 
@@ -354,6 +354,7 @@ export function onFinishReBuildingDOM() {
       flow.animation.domJustRebuiltMeasureTargetSizes(flow);
     }
   }
+  // if (inExperiment()) return;
 
   // if (inExperimentOnCount(3)) return;
 
@@ -364,7 +365,7 @@ export function onFinishReBuildingDOM() {
   // Emulate original footprints. 
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.domNode) {
-      flow.animation.emulateOriginalFootprints(flow);
+      flow.animation.emulateOriginalFootprintsAndFixateAnimatedStyle(flow);
     }
   }
   // We now have original style and footprints, but new structure. 

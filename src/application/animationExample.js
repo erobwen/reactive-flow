@@ -44,6 +44,16 @@ const panel = flow("panel", ({ children, style }) =>
   })
 );
 
+// Items
+function itemDisplay(item) {
+  return div(
+    text(item, {style: {margins: ""}}),
+    {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green"}}
+  );
+  // return text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})
+}
+
+
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
@@ -98,8 +108,7 @@ export class AnimationExample extends Flow {
         column(
           filler(),
           panel({
-            // children: this.listA.map(item => text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-            children: this.listA.map(item => div({key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green"}})),
+            children: this.listA.map(item => itemDisplay(item)),
             style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
             animateChildren: standardAnimation       
           }),
@@ -110,8 +119,7 @@ export class AnimationExample extends Flow {
         column(
           filler(),
           panel({
-            // children: this.listB.map(item => text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})),
-            children: this.listB.map(item => div({key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green"}})),
+            children: this.listB.map(item => itemDisplay(item)),
             style: {fontSize: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
             animateChildren: standardAnimation       
           }),

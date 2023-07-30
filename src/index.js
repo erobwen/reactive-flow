@@ -61,14 +61,14 @@ installDOMAnimation();
 
 // buttonTest();
 // startSimpleMoveAnimation();
-startSimpleAddRemoveAnimation();
+// startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
 // startDemo();
 
 // startModalDemo();
-// startAnimationExample();
+startAnimationExample();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
