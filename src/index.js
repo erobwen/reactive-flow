@@ -13,6 +13,7 @@ import { startSingleStaticWidget } from "./application/singleStaticWidget.js";
 import { startSimpleMoveAnimation } from "./application/simpleMoveAnimation.js";
 import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnimation.js";
 import { setAnimationTime } from "./flow.DOMTarget/DOMNodeAnimation.js";
+import { logMark } from "./flow/utility.js";
 
 
 const debuggingState = model({
@@ -23,7 +24,19 @@ export function inExperiment() {
   return debuggingState.inExperiment;
 }
 
+let counter = 1;
+
+export function inExperimentOnCount(countTo) {
+  if (counter >= countTo) {
+    startExperiment();
+    return true; 
+  }
+  counter++;
+  return false; 
+}
+
 export function startExperiment() {
+  logMark("STARTING EXPERIMENT")
   setAnimationTime(50);
   debuggingState.inExperiment = true;
 }
@@ -47,8 +60,8 @@ setFlowConfiguration({
 installDOMAnimation();
 
 // buttonTest();
-startSimpleMoveAnimation();
-// startSimpleAddRemoveAnimation();
+// startSimpleMoveAnimation();
+startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 

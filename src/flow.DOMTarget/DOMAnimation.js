@@ -2,6 +2,7 @@ import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from 
 import { DOMNodeAnimation, standardAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
+import { inExperimentOnCount } from "..";
 
 const log = console.log;
 
@@ -181,7 +182,7 @@ export const changeType = {
 export function onFinishReBuildingFlow() {
   
   counter++
-  logAnimationFrame()
+  logAnimationFrame(counter)
   logAnimationSeparator("---------------------------------------- Flow rebuilt, DOM untouched, calculate changes... -------------------");
   console.groupCollapsed("Potentially start DOM building for new flows here ...");
   // log(counter);
@@ -340,7 +341,7 @@ export function onFinishReBuildingFlow() {
  */
 export function onFinishReBuildingDOM() {
 
-  counter++
+  // counter++
   if (!flowChanges.onFinishReBuildingFlowDone) return;
   delete flowChanges.onFinishReBuildingFlowDone;
 
@@ -353,6 +354,8 @@ export function onFinishReBuildingDOM() {
       flow.animation.domJustRebuiltMeasureTargetSizes(flow);
     }
   }
+
+  // if (inExperimentOnCount(3)) return;
 
   logAnimationSeparator("---------------------------------------- Emulate original footprints and styles ------------------------------");
   // Consider: Introduce leaders at this stage to do more accurate target size measurements without leaders? 

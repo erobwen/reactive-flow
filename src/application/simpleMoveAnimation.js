@@ -63,26 +63,23 @@ export class SimpleMoveAnimation extends Flow {
     const movingButton = this.button; 
     movingButton.animate = true; // Force property...  
 
-    log(!inExperiment());
     return column(
       row(
         button("Move", this.move.bind(this)),
-        button("Experiment", () => startExperiment()).show(!inExperiment()),
+        button("Experiment", () => startExperiment()),
         filler(),
         {style: {...animatedContainerStyle, width: "150px"}}
       ),
       div({style: {height: "200px"}}),
       row(
         column(
-          movingButton.show(this.left), 
-          filler(),
+          movingButton.show(this.left),
           {style: {...animatedContainerStyle, width: "150px"}}
         ),
         div({style: {width: "200px"}}),
         column(
           // text("Some Text", {animate: true, style: borderStyle}).show(!this.left),
-          movingButton.show(!this.left), 
-          filler(), 
+          movingButton.show(!this.left),
           {style: {...animatedContainerStyle, width: "150px"}}
         ),
         {style: animatedContainerStyle}

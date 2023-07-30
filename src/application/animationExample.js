@@ -4,7 +4,7 @@ import { animationTime, standardAnimation } from "../flow.DOMTarget/DOMNodeAnima
 import { column, filler, row } from "../flow.components/Layout";
 import { button, text } from "../flow.components/BasicWidgets";
 import { div } from "../flow.components/BasicHtml";
-import { inExperiment, startExperiment } from "..";
+import { startExperiment } from "..";
 
 const log = console.log;
 
@@ -92,7 +92,7 @@ export class AnimationExample extends Flow {
         button({text: "Juggle", onClick: () => this.juggle()}),
         button({text: "Experiment", onClick: () => {
           startExperiment();
-        }}).show(!inExperiment())
+        }})
       ),
       row(
         column(

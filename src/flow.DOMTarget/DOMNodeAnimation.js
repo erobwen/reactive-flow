@@ -174,7 +174,7 @@ export class DOMNodeAnimation {
     if (node.parentNode.isControlledByAnimation) {
       // Repurpose existing leader as trailer.
       const leader = node.parentNode;
-      trailer = this.repurposeLeaderOrTrailer(leader);
+      trailer = this.repurposeLeaderOrTrailer(leader, node);
     } else {
       // Create new trailer.
       trailer = this.createNewTrailerOrLeader("trailer", node);
@@ -319,7 +319,7 @@ export class DOMNodeAnimation {
     if (leader) {
       // Found an existing leader. 
       log("repurpose existing leader")
-      this.repurposeLeaderOrTrailer(leader);
+      this.repurposeLeaderOrTrailer(leader, node);
       leader.appendChild(node);
     } else {
       // Create new leader.
@@ -514,7 +514,6 @@ export class DOMNodeAnimation {
    * Activate animation 
    */
   activateAnimation(flow, currentFlowChanges) {
-    log("activateAnimation... ")
     const node = flow.domNode;
     const changes = flow.changes; 
     
@@ -568,7 +567,7 @@ export class DOMNodeAnimation {
     const trailer = node.trailer; 
     delete node.trailer; // Only keep a trailer linked until it has been animated. 
     if (trailer && trailer.owner === node) {
-      delete leader.owner;
+      delete trailer.owner;
       log("animate trailer")
       trailer.style.transition = this.leaderTransition();
       Object.assign(trailer.style, {
