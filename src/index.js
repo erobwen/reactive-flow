@@ -1,6 +1,6 @@
 import { startRecursiveDemo } from "./application/recursiveDemoApplication.js";
 import { startHelloWorld } from "./application/helloWorldApplication.js";
-import { setFlowConfiguration } from "./flow/Flow.js";
+import { model, setFlowConfiguration } from "./flow/Flow.js";
 import { startProgrammaticReactiveLayout } from "./application/programmaticReactiveLayout.js";
 import { startComplexFormApplication } from "./application/complexFormApplication.js";
 import { startAnimationExample } from "./application/animationExample.js";
@@ -12,6 +12,21 @@ import { startModalDemo } from "./application/modalDemo.js";
 import { startSingleStaticWidget } from "./application/singleStaticWidget.js";
 import { startSimpleMoveAnimation } from "./application/simpleMoveAnimation.js";
 import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnimation.js";
+import { setAnimationTime } from "./flow.DOMTarget/DOMNodeAnimation.js";
+
+
+const debuggingState = model({
+  inExperiment: false
+})
+
+export function inExperiment() {
+  return debuggingState.inExperiment;
+}
+
+export function startExperiment() {
+  setAnimationTime(50);
+  debuggingState.inExperiment = true;
+}
 
 Array.prototype.remove = function(target) {
   const index = this.findIndex((element) => {
@@ -32,7 +47,7 @@ setFlowConfiguration({
 installDOMAnimation();
 
 // buttonTest();
-// startSimpleMoveAnimation();
+startSimpleMoveAnimation();
 // startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
@@ -40,7 +55,7 @@ installDOMAnimation();
 // startDemo();
 
 // startModalDemo();
-startAnimationExample();
+// startAnimationExample();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();

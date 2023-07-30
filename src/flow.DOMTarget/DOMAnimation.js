@@ -261,7 +261,7 @@ export function onFinishReBuildingFlow() {
 
   function toStrings(changes) {
     return {
-      addedWithoutAnimation: Object.values(changes.globallyAdded).map(flow => flow.toString()),
+      addedIncludingNonAnimated: Object.values(changes.globallyAdded).map(flow => flow.toString()),
       added: Object.values(changes.globallyAddedAnimated).map(flow => flow.toString()),
       resident: Object.values(changes.globallyResidentAnimated).map(flow => flow.toString()), 
       moved: Object.values(changes.globallyMovedAnimated).map(flow => flow.toString()),
@@ -391,7 +391,6 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
 
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {
-        flow.animation.setupAnimationCleanup(flow);
         flow.animation.activateAnimation(flow, currentFlowChanges);
       }
     }

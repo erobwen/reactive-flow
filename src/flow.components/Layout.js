@@ -71,6 +71,7 @@ export const flexGrowShrinkStyle = {
   flexShrink: 1,
   flexBasis: 1,
 }
+export const fillerStyle = flexGrowShrinkStyle; 
 
 // For components that needs to grow and shrink without regard to its contents. Scroll panels typically, or for equal distribution of space.
 export const flexerStyle = {

@@ -12,8 +12,6 @@ import { suitcaseIcon } from "../flow.components/Icons";
 
 const log = console.log;
 
-export let inEperiment = false; 
-
 /**
  * Minimalistic component used for experiments. 
  */

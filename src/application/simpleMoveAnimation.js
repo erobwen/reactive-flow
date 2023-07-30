@@ -1,17 +1,16 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text } from "../flow.components/BasicWidgets";
-import { column, filler, row } from "../flow.components/Layout";
+import { column, filler, fillerStyle, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
 import { div } from "../flow.components/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
+import { startExperiment, inExperiment } from "..";
 
 
 const log = console.log;
-
-export let inEperiment = false; 
 
 /**
  * Minimalistic component used for experiments. 
@@ -41,9 +40,9 @@ export class SimpleMoveAnimation extends Flow {
   move() {
     this.left = !this.left;
 
-    setTimeout(() => {
-      inEperiment = true; 
-    }, 1000);
+    // setTimeout(() => {
+    //   startExperiment();
+    // }, 1000);
 
     // setTimeout(() => {
     //   log("SETTING TEXT");
@@ -64,8 +63,15 @@ export class SimpleMoveAnimation extends Flow {
     const movingButton = this.button; 
     movingButton.animate = true; // Force property...  
 
+    log(!inExperiment());
     return column(
-      filler(),
+      row(
+        button("Move", this.move.bind(this)),
+        button("Experiment", () => startExperiment()).show(!inExperiment()),
+        filler(),
+        {style: {...animatedContainerStyle, width: "150px"}}
+      ),
+      div({style: {height: "200px"}}),
       row(
         column(
           movingButton.show(this.left), 
@@ -78,14 +84,7 @@ export class SimpleMoveAnimation extends Flow {
           movingButton.show(!this.left), 
           filler(), 
           {style: {...animatedContainerStyle, width: "150px"}}
-        ), 
-        filler(), 
-        column(
-          button("Move", this.move.bind(this)),
-          button(!inEperiment ? "Activate" : "Deactivate", () => inEperiment = !inEperiment),
-          filler(),
-          {style: {...animatedContainerStyle, width: "150px"}}
-        ), 
+        ),
         {style: animatedContainerStyle}
       ),
       filler(),

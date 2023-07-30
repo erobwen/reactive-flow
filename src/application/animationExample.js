@@ -1,10 +1,10 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { standardAnimation } from "../flow.DOMTarget/DOMNodeAnimation";
+import { animationTime, standardAnimation } from "../flow.DOMTarget/DOMNodeAnimation";
 import { column, filler, row } from "../flow.components/Layout";
 import { button, text } from "../flow.components/BasicWidgets";
-import { div } from "../flow.components/BasicHtml"
-;
+import { div } from "../flow.components/BasicHtml";
+import { inExperiment, startExperiment } from "..";
 
 const log = console.log;
 
@@ -90,6 +90,9 @@ export class AnimationExample extends Flow {
         button({text: "Add random", disabled: this.store.length === 0, onClick: () => transaction(() => addRandomly(removeOneRandom(this.store), this.listA))}),
         button({text: "Remove random", disabled: this.listA.length === 0, onClick: () => transaction(() => this.store.push(removeOneRandom(this.listA)))}),
         button({text: "Juggle", onClick: () => this.juggle()}),
+        button({text: "Experiment", onClick: () => {
+          startExperiment();
+        }}).show(!inExperiment())
       ),
       row(
         column(

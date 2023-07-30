@@ -6,7 +6,12 @@ import { camelCase, changeType, extractProperties, flowChanges, getHeightIncludi
 import { getWrapper, movedPrimitives } from "./DOMNode";
 
 const log = console.log;
-const animationTime = 5;
+
+let animationTime = 1;
+
+export function setAnimationTime(value) {
+  animationTime = value; 
+}
 
 export class DOMNodeAnimation {
   /**
@@ -60,18 +65,26 @@ export class DOMNodeAnimation {
    * General helpers
    */
 
-  repurposeLeaderOrTrailer(node) {
-    const bounds = node.getBoundingClientRect();
-    // Fixate size, it might get reset after setting display none! 
-    node.style.width = bounds.width + "px";
-    node.style.height = bounds.height + "px";
+  repurposeLeaderOrTrailer(node, owner) {
+    log("repurposeLeaderOrTrailer");
+    // if (!node.canBeRepurposed) throw new Error("Repurposing of a leader probably!");
+    log("style " + node.style.width)
+    node.style.display = "";
+    if (!node.owner) {
+      const bounds = node.getBoundingClientRect();
+      log("bounds " + bounds.width);
+      // Fixate size, it might get reset after setting display none! 
+      node.style.width = bounds.width + "px";
+      node.style.height = bounds.height + "px";
+    }
 
     node.removeEventListener("transitionend", node.hasCleanupEventListener);
     delete node.hasCleanupEventListener;
+    node.owner = owner; 
     return node;
   }
   
-  createNewTrailerOrLeader(id) {
+  createNewTrailerOrLeader(id, owner) {
     // Create a new leader
     const node = document.createElement("div");
     node.id = id; 
@@ -80,6 +93,7 @@ export class DOMNodeAnimation {
     node.style.overflow = "visible"    
     
     node.style.fontSize = "0px"; // For correctly positioning of buttons? 
+    node.owner = owner; 
     return node; 
   }
 
@@ -139,6 +153,9 @@ export class DOMNodeAnimation {
       case changeType.moved:
       case changeType.removed:
         this.addTrailersForMovedAndRemovedBeforeDomBuilding(node);
+        if (changeType.moved) node.trailer.canBeRepurposed = true;         
+        log(`trailer: `);
+        logProperties(node.trailer.style, this.typicalAnimatedProperties);
         break;
     }
 
@@ -160,7 +177,7 @@ export class DOMNodeAnimation {
       trailer = this.repurposeLeaderOrTrailer(leader);
     } else {
       // Create new trailer.
-      trailer = this.createNewTrailerOrLeader("trailer");
+      trailer = this.createNewTrailerOrLeader("trailer", node);
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
       trailer.style.width = node.originalDimensions.widthIncludingMargin + "px"; // This will not be in effect until display != none  
       trailer.style.height = node.originalDimensions.heightIncludingMargin + "px";  
@@ -206,6 +223,11 @@ export class DOMNodeAnimation {
       case changeType.moved:
         // Bounds (excludes margins)
         node.targetBounds = node.getBoundingClientRect();
+
+        // if (node.trailer) {
+        //   log(`trailer: `);
+        //   logProperties(node.trailer.style, this.typicalAnimatedProperties);
+        // }        
       
         // Styles
         node.targetStyle = {...node.style}
@@ -289,7 +311,7 @@ export class DOMNodeAnimation {
     let previous = node.previousSibling;
     // log(previous) 
     // log(previous && previous.isControlledByAnimation) 
-    while (previous && previous.isControlledByAnimation && !previous.hasChildNodes()) {
+    while (previous && previous.isControlledByAnimation && !previous.hasChildNodes() && previous.canBeRepurposed) {
       // log("found leader...")
       leader = previous; 
       previous = previous.previousSibling;
@@ -302,17 +324,20 @@ export class DOMNodeAnimation {
     } else {
       // Create new leader.
       log("create a new leader")
-      leader = this.createNewTrailerOrLeader("leader");
+      leader = this.createNewTrailerOrLeader("leader", node);
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
       leader.style.width = "0px"; 
       leader.style.height = "0px";
       insertAfter(leader, node);
       leader.appendChild(node);
     }
+    this.show(leader);
     leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
     node.leader = leader;
     // log("leader;")
     // log(leader);
+    log(`leader: `);
+    logProperties(node.leader.style, this.typicalAnimatedProperties);
   }
 
   setOriginalStyleAndFootprintForChainAnimated(node) {
@@ -388,7 +413,6 @@ export class DOMNodeAnimation {
     draw(node.newStructureBounds, "red");
   }
 
-  
   animatedProperties = [
     // "transform",
     // "maxHeight",
@@ -400,11 +424,12 @@ export class DOMNodeAnimation {
     "fontSize",
   ];
 
-
   translateToOriginalBoundsIfNeeded(flow) {
     // TODO: Translate parents first in case of cascading moves? 
     
     if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+      flow.outOfPosition = true; 
+
       log("Not same bounds for " + flow.toString());     
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
@@ -421,10 +446,6 @@ export class DOMNodeAnimation {
         flow.domNode.style.transform = "";
         currentTransform = getComputedStyle(flow.domNode).transform;
         this.recordBoundsInNewStructure(flow.domNode);
-
-        // Mark in new animation
-        flow.domNode.changes.number = flowChanges.number; 
-        flow.domNode.changes.type = changeType.resident;
       }
 
       flow.animateInChanges = flowChanges.number; 
@@ -489,6 +510,82 @@ export class DOMNodeAnimation {
     "paddingTop"
   ]; 
 
+  /**
+   * Activate animation 
+   */
+  activateAnimation(flow, currentFlowChanges) {
+    log("activateAnimation... ")
+    const node = flow.domNode;
+    const changes = flow.changes; 
+    
+    console.group("Activate for " + flow.changes.type + ": " + flow.toString());
+    log(`original properties: `);
+    logProperties(node.style, this.typicalAnimatedProperties);
+    if (node.leader) {
+      log(`leader: `);
+      logProperties(node.leader.style, this.typicalAnimatedProperties);
+    }
+
+    // Setup cleanup
+    this.setupAnimationCleanup(flow);
+
+    // Animate node
+    switch(flow.changes.type) {
+      case changeType.added:
+        this.setupFinalStyleForAdded(node);
+        break;
+
+      case changeType.resident: 
+        if (flow.outOfPosition) {
+          delete flow.outOfPosition;
+          this.setupFinalStyleForResident(node);
+        } 
+        break;
+
+      case changeType.moved:
+        this.setupFinalStyleForMoved(node);
+        break; 
+        
+      case changeType.removed: 
+        this.setupFinalStyleForRemoved(node);
+        break; 
+    }
+
+    // Animate leader
+    const leader = node.leader;
+    delete node.leader; 
+    if (leader && leader.owner === node) {
+      delete leader.owner;
+      log("animate leader")
+      leader.style.transition = this.leaderTransition();
+      Object.assign(leader.style, {
+        width: node.targetDimensions.widthIncludingMargin + "px",
+        height: node.targetDimensions.heightIncludingMargin + "px"
+      })
+    }
+
+    // Animate trailer 
+    const trailer = node.trailer; 
+    delete node.trailer; // Only keep a trailer linked until it has been animated. 
+    if (trailer && trailer.owner === node) {
+      delete leader.owner;
+      log("animate trailer")
+      trailer.style.transition = this.leaderTransition();
+      Object.assign(trailer.style, {
+        width: "0px",
+        height: "0px"
+      });
+    }
+
+    log("final properties: ");
+    logProperties(flow.domNode.style, this.typicalAnimatedProperties);
+    if (leader) {
+      log(`leader: `);
+      logProperties(leader.style, this.typicalAnimatedProperties);
+    }
+    console.groupEnd();
+  }
+  
   setupFinalStyleForAdded(node) {
     // log("before")
     // log(node.style.transform);
@@ -529,79 +626,6 @@ export class DOMNodeAnimation {
     });
   }
 
-  /**
-   * Activate animation 
-   */
-  activateAnimation(flow, currentFlowChanges) {
-    log("activateAnimation... ")
-    const node = flow.domNode;
-    const changes = flow.changes; 
-    
-    console.group("Activate for " + flow.changes.type + ": " + flow.toString());
-    log(`original properties: `);
-    logProperties(node.style, this.typicalAnimatedProperties);
-    if (node.leader) {
-      log(`leader: `);
-      logProperties(node.leader.style, this.typicalAnimatedProperties);
-    }
-
-    // Setup cleanup
-    this.setupAnimationCleanup(flow);
-
-    // Animate node
-    switch(flow.changes.type) {
-      case changeType.added:
-        this.setupFinalStyleForAdded(node);
-        break;
-
-      case changeType.resident: 
-        if (flow.animateInChanges === currentFlowChanges.number) { // In case we got nocked out of position. 
-          this.setupFinalStyleForResident(node);
-        }
-        break;
-
-      case changeType.moved:
-        this.setupFinalStyleForMoved(node);
-        break; 
-        
-      case changeType.removed: 
-        this.setupFinalStyleForRemoved(node);
-        break; 
-    }
-
-    // Animate leader
-    const leader = node.leader;
-    delete node.leader; 
-    if (leader) {
-      log("animate leader")
-      leader.style.transition = this.leaderTransition();
-      Object.assign(leader.style, {
-        width: node.targetDimensions.widthIncludingMargin + "px",
-        height: node.targetDimensions.heightIncludingMargin + "px"
-      })
-    }
-
-    // Animate trailer 
-    const trailer = node.trailer; 
-    delete node.trailer; // Only keep a trailer linked until it has been animated. 
-    if (trailer) {
-      log("animate trailer")
-      trailer.style.transition = this.leaderTransition();
-      Object.assign(trailer.style, {
-        width: "0px",
-        height: "0px"
-      });
-    }
-
-    log("final properties: ");
-    logProperties(flow.domNode.style, this.typicalAnimatedProperties);
-    if (leader) {
-      log(`leader: `);
-      logProperties(leader.style, this.typicalAnimatedProperties);
-    }
-    console.groupEnd();
-  }
-  
 
   /**
    * -------------------------------------------------------------------------------------
@@ -623,7 +647,7 @@ export class DOMNodeAnimation {
       endingAction: (propertyName) => {
         // Synch properties that was transitioned. 
         log("Ending node animation");
-        node.equivalentCreator.synchronizeDomNodeStyle([propertyName, "transition", "transform", "width", "height"]);
+        node.equivalentCreator.synchronizeDomNodeStyle([propertyName, "transition", "transform", "width", "height", "position", "opacity"]);
         if (node.parentNode.isControlledByAnimation) {
           // Note: This should really go in the cleanup code for the trailer/leader. If a leader is finished, 
           // it replaces its content. If a trailer is finished, it just removes itself. But for some weird reason
@@ -633,7 +657,7 @@ export class DOMNodeAnimation {
               if (node.parentNode === trailer) {
                 node.style.position = "";
                 trailer.removeChild(node);
-                trailer.parentNode.removeChild(trailer);
+                if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
               }
               break;
             case changeType.added:
@@ -641,7 +665,7 @@ export class DOMNodeAnimation {
               if (node.parentNode === leader) {
                 node.style.position = "";
                 leader.removeChild(node);
-                leader.parentNode.replaceChild(node, leader);
+                if (leader.parentNode) leader.parentNode.replaceChild(node, leader);
               }
               break; 
           }
@@ -675,7 +699,7 @@ export class DOMNodeAnimation {
         endingAction: () => {
           log("Ending trailer animation"); 
           // TODO: handle if things have already changed?... if reused, the observer should have been removed? Right?... 
-          trailer.parentNode.removeChild(trailer);
+          if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
           delete node.trailer; 
         }
       })
@@ -695,7 +719,8 @@ export class DOMNodeAnimation {
       // if (!node.changes) return;
       const propertyName = camelCase(event.propertyName); 
 
-      console.group("cleanup " + node.id + " in " +  node.changes.type + " animation, triggered by:  " + event.propertyName);
+      const typeOfAnimationString = node.changes ? (" in " +  node.changes.type + " animation") : ""; 
+      console.group("cleanup " + node.id + typeOfAnimationString + ", triggered by:  " + event.propertyName);
       log(node);
       console.groupEnd();
 

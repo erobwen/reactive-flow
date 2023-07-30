@@ -2,7 +2,7 @@ import { flexAutoStyle } from "../flow.components/Layout";
 import { repeat, Flow, trace, configuration, finalize } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
-import { flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges } from "./DOMAnimation";
+import { changeType, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges } from "./DOMAnimation";
 
 const log = console.log;
 
@@ -132,6 +132,21 @@ export function clearNode(node) {
     // Get new children list, this is the target
     const newChildren = this.getPrimitiveChildren(node);
     const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
+
+    // Remove resident nodes that are already inside a node controlled by animation. We dont want to disturb those.
+    let index = newChildNodes.length - 1;
+    while (index >= 0) {
+      const child = newChildNodes[index];
+      const leader = child.parentNode; 
+      if (child.changes && child.changes.type === changeType.resident
+        && leader 
+        && leader.isControlledByAnimation 
+        && leader.parentNode === node) {
+          // Note: at this point we know it is a chained animation, otherwise, why would a resident animated node be in a leader?
+          newChildNodes.splice(index, 1);
+      }
+      index--;
+    }
         
     // Recover other nodes
     const recoveredNodes = [];
@@ -168,7 +183,7 @@ export function clearNode(node) {
     })
 
     // Removing pass, will also rearrange moved elements
-    let index =  node.childNodes.length - 1;
+    index =  node.childNodes.length - 1;
     while(index >= 0) {
       const existingChildNode = node.childNodes[index];
       if ((existingChildNode instanceof Element) && !newChildNodes.includes(existingChildNode)) {
