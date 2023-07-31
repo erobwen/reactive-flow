@@ -626,10 +626,6 @@ export class DOMNodeAnimation {
       logProperties(node.trailer.style, this.typicalAnimatedProperties);
     }
 
-
-    // Setup cleanup
-    this.setupAnimationCleanup(flow);
-
     // Animate node
     switch(flow.changes.type) {
       case changeType.added:
@@ -771,12 +767,13 @@ export class DOMNodeAnimation {
                 node.style.position = "";
                 trailer.removeChild(node);
                 if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
-                delete trailer.owner; 
+                delete trailer.owner;
                 delete node.trailer; 
               }
               break;
             case changeType.added:
             case changeType.moved:
+            case changeType.resident:
               if (node.parentNode === leader) {
                 node.style.position = "";
                 leader.removeChild(node);

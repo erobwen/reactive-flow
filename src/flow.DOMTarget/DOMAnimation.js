@@ -356,7 +356,6 @@ export function onFinishReBuildingDOM() {
   }
   // if (inExperiment()) return;
 
-  // if (inExperimentOnCount(3)) return;
 
   logAnimationSeparator("---------------------------------------- Emulate original footprints and styles ------------------------------");
   // Consider: Introduce leaders at this stage to do more accurate target size measurements without leaders? 
@@ -369,7 +368,6 @@ export function onFinishReBuildingDOM() {
     }
   }
   // We now have original style and footprints, but new structure. 
-
   
   logAnimationSeparator("---------------------------------------- Emulate original bounds for FLIP animations -------------------------");
   
@@ -384,6 +382,8 @@ export function onFinishReBuildingDOM() {
   activateAnimationAfterFirstRender({...flowChanges});  
 }
 
+
+
 function activateAnimationAfterFirstRender(currentFlowChanges) {
   requestAnimationFrame(() => {
     logAnimationSeparator("---------------------------------------- Rendered first frame, activate animations...  ---------------------");
@@ -396,6 +396,17 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {
         flow.animation.activateAnimation(flow, currentFlowChanges);
+      }
+    }
+
+    // if (inExperimentOnCount(3)) return;
+
+    logAnimationSeparator("---------------------------------------- Setup animation cleanup...  ---------------------");
+
+    // Note: There is still time to do this since we have not released controll and allowed a second frame to render. 
+    for (let flow of currentFlowChanges.allAnimatedFlows()) {
+      if (flow.domNode) {
+        flow.animation.setupAnimationCleanup(flow);
       }
     }
 

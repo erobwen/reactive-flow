@@ -47,8 +47,8 @@ const panel = flow("panel", ({ children, style }) =>
 // Items
 function itemDisplay(item) {
   return div(
-    text(item, {style: {margins: ""}}),
-    {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green"}}
+    text(item, {style: {margin: "", lineHeight: ""}}),
+    {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green", textAlign: "center", lineHeight: "40px"}}
   );
   // return text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})
 }

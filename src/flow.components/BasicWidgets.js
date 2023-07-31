@@ -58,7 +58,7 @@ export function unstyledText(...parameters) {
   const label = getTarget().elementNode(key ? key : null, 
     {
       classNameOverride: "text",// + debugIdentifier + "]",
-      tagName:"p",
+      tagName:"span",
       attributes: extractProperty(properties, "attributes"), 
       children: extractProperty(properties, "children"), 
       animate: extractProperty(properties, "animate")
