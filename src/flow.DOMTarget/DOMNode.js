@@ -133,16 +133,11 @@ export function clearNode(node) {
     const newChildren = this.getPrimitiveChildren(node);
     const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
 
-    // Remove resident nodes that are already inside a node controlled by animation. We dont want to disturb those.
+    // Remove nodes in newChildren that are controlled by animation. We dont want to disturb or move them.
     let index = newChildNodes.length - 1;
     while (index >= 0) {
       const child = newChildNodes[index];
-      const leader = child.parentNode; 
-      if (child.changes && child.changes.type === changeType.resident
-        && leader 
-        && leader.isControlledByAnimation 
-        && leader.parentNode === node) {
-          // Note: at this point we know it is a chained animation, otherwise, why would a resident animated node be in a leader?
+      if (child.isControlledByAnimation) {
           newChildNodes.splice(index, 1);
       }
       index--;

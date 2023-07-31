@@ -226,6 +226,7 @@ export class DOMNodeAnimation {
     switch (flow.changes.type) {
       case changeType.moved:
       case changeType.removed:
+        delete node.isControlledByAnimation; // Make sure dom building removes these nodes
         this.addTrailersForMovedAndRemovedBeforeDomBuilding(node);
         if (changeType.moved) node.trailer.canBeRepurposed = true;         
         log(`trailer: `);
@@ -237,8 +238,17 @@ export class DOMNodeAnimation {
     switch (flow.changes.type) {
       case changeType.added:
       case changeType.moved:
-        this.neutralizeTransformationsAndPosition(node);
+        delete node.isControlledByAnimation; // Make sure dom building adds and moves these nodes
+        this.neutralizeTransformationsAndPosition(flow, node);
         break;
+    }
+
+    // Prevent DOM building from touching resident nodes that are inside leaders, moving towards their target.
+    // They might have started their movement in a previous animation frame. 
+    if (flow.changes.type === changeType.resident) {
+      if (node.leader) {
+        node.isControlledByAnimation = true; 
+      }
     }
     console.groupEnd();    
   }
@@ -267,9 +277,8 @@ export class DOMNodeAnimation {
     trailer.style.backgroundColor = "rgba(170, 170, 255, 0.5)";
   }
   
-  neutralizeTransformationsAndPosition(node) {
-    node.style.position = "";
-    node.style.transform = "";
+  neutralizeTransformationsAndPosition(flow) {
+    flow.synchronizeDomNodeStyle(["position", "transform", "width", "height"]);
   }
 
 
@@ -630,11 +639,13 @@ export class DOMNodeAnimation {
     switch(flow.changes.type) {
       case changeType.added:
         this.setupFinalStyleForAdded(node);
+        node.beingAnimated = true; 
         break;
 
       case changeType.resident: 
         if (flow.outOfPosition) {
           delete flow.outOfPosition;
+          node.beingAnimated = true;
           this.setupFinalStyleForResident(node);
         } 
         // delete flow.changes; // Do this? 
@@ -643,10 +654,12 @@ export class DOMNodeAnimation {
 
       case changeType.moved:
         this.setupFinalStyleForMoved(node);
+        node.beingAnimated = true; 
         break; 
         
       case changeType.removed: 
         this.setupFinalStyleForRemoved(node);
+        node.beingAnimated = true; 
         break; 
     }
 
@@ -847,8 +860,10 @@ export class DOMNodeAnimation {
 
       if (!endingProperties || endingProperties.includes(propertyName)) {
         endingAction(propertyName);
-
+        
         // Remove changes.
+        delete node.isControlledByAnimation;
+        delete node.beingAnimated;
         if (node.changes) {
           node.changes.finished = true; 
           const flow = node.equivalentCreator;

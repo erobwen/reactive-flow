@@ -5,20 +5,23 @@ Note: This is a compound repository where I experiment with Flow together with o
 ![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
 * Minimal update dom rendering (equivalent functionality to React).
+    * Minimal component tree updated guaranteed. No need to distinguish between pure and unpure components. The component tree build mechanism of flow allways guarantees minimal updates even on the component level. 
+    * Assignments that sets an object property to the same value as previously, do not cause updates, this is true for models, view models and components alike. 
 
 * Integrated and automated state handling. 
     * Very simple, just call "model({...yourData})" to create model data. 
     * Based on ES6 Proxies that tracks all changes and dependencies (equivalent functionality to MobX). 
-    * Safe model direct manipulation, your GUI will be automatically updated.
+    * Safe model direct manipulation, your GUI will be automatically updated no matter how and when you update your model.
+    * No need to notify flow of changes, as they will be detected automatically.
     * Safe view model and component direct manipulation.
     * No need for observers, reducers, global data stores etc.  
+    * Support for infered data that is automatically updated.
 
 * Sophisticated global transition animation support. 
     * Easy to use, simply add property "animation: true" to your component. 
     * Fully configurable. 
     * Transition animations when components appear, dissapear or are moved accross your user interface. 
-    * Uses FLIP animation technique to make components move to new locations.
-    * Support for infered data that is automatically updated.
+    * Uses FLIP animation technique to make components move with animation to new locations.
     * Uses extra filler divs to make containers of animated objects animate their size as well when applicable.
 
 * Javascript first principle.
@@ -27,7 +30,7 @@ Note: This is a compound repository where I experiment with Flow together with o
     * Javascript code used for responsiveness. 
     * No dependency on template litterals, jsx, Typescript HTML files or CSS, just plain Javascript with direct DOM manipulation! 
 
-* Possibly explicit component life cycle handling: 
+* Possibility for explicit component life cycle handling: 
     * Off-screen components is now a possibility. Allow components to live with a state off screen, for example usable for fast tab-panel switching where all dom elements of the hidden tab component are never deallocated.
     * A component can move from one place in the DOM structure to another while maintaining its state. 
     * Three ways to persist and maintain the state of a sub component: 
@@ -43,13 +46,13 @@ Note: This is a compound repository where I experiment with Flow together with o
 * Basic features: 
     * Property inheritance for making it simple to pass down properties in the component hierarchy. (fullfills same role as Contexts in React)  
     * Component key-paths, for convenient programmatic manipulation of components, UI test automation and debugging.
-    * Component stage portals. Since portals works on the component level, the content of a portal can be in place before the portal has mounted. This is an improvement over React that needs to get hold of a node with a ref on mounting, before that node can be used as a portal, this forces React to populate the portal in a second redering pass. With Flow, the content of a portal work more in line with the contents of any other container, allowing a more smooth user experience.  
+    * Component stage portals, typically used for modals and side panel data. Since portals works on the component level, the content of a portal can be in place before the portal has mounted. This is an improvement over React that needs to get hold of a node with a ref on mounting, before that node can be used as a portal, this forces React to populate the portal in a second redering pass. With Flow, the content of a portal work more in line with the contents of any other container, allowing a more smooth user experience.  
 
 * Technical features: 
     * Based on causalityjs (similar to MobX).  
     * Lightweight < 100 kb.
     * Open source 
-    * DOM independent component model, this would make it easier to make port support other platforms besides Web. 
+    * DOM independent component model, this would make it easier to make support other platforms besides Web, or perhaps develop a system for server side rendering. 
 
 
 # Running the demo
