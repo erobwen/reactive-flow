@@ -15,6 +15,7 @@ import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.compone
 import { modernButton } from "../flow.components/ModernButton";
 import { modalFrame } from "../flow.components/Modal";
 import { svgImage } from "./images";
+import { startExperiment } from "..";
 
 const log = console.log;
 
@@ -78,6 +79,9 @@ export class Demo extends Flow {
     }
     buttons.push(this.leftColumnPortal);
     buttons.push(filler());
+    buttons.push(button({text: "Experiment", onClick: () => {
+      startExperiment();
+    }}));
 
     const leftColumn = column(
       buttons,

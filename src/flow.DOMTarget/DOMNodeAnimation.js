@@ -356,11 +356,6 @@ export class DOMNodeAnimation {
         break; 
     }
 
-    // Fixate environment dependent styles
-    for (let property of inheritedProperties) {
-      node.style[property] = node.computedOriginalStyle[property];
-    }
-
     // Make trailers visible, they should already have original sizes.
     switch (flow.changes.type) {
       case changeType.removed:
@@ -376,10 +371,17 @@ export class DOMNodeAnimation {
     }
 
     // Setup original style, size and transformation.
-    if (node.changes.previous) {
+    if (node.ongoingAnimation) {
       log("chain animated...");
       this.setOriginalStyleAndFootprintForChainAnimated(node);
     } else {
+      
+      // Fixate environment dependent styles
+      if ([changeType.added, changeType.removed, changeType.moved].includes(node.changes.type)) {
+        for (let property of inheritedProperties) {
+          node.style[property] = node.computedOriginalStyle[property];
+        }
+      }
       switch (flow.changes.type) {
         case changeType.added: 
           this.setOriginalStyleAndFootprintForAdded(node);
@@ -639,13 +641,13 @@ export class DOMNodeAnimation {
     switch(flow.changes.type) {
       case changeType.added:
         this.setupFinalStyleForAdded(node);
-        node.beingAnimated = true; 
+        node.ongoingAnimation = true; 
         break;
 
       case changeType.resident: 
         if (flow.outOfPosition) {
           delete flow.outOfPosition;
-          node.beingAnimated = true;
+          node.ongoingAnimation = true;
           this.setupFinalStyleForResident(node);
         } 
         // delete flow.changes; // Do this? 
@@ -654,12 +656,12 @@ export class DOMNodeAnimation {
 
       case changeType.moved:
         this.setupFinalStyleForMoved(node);
-        node.beingAnimated = true; 
+        node.ongoingAnimation = true; 
         break; 
         
       case changeType.removed: 
         this.setupFinalStyleForRemoved(node);
-        node.beingAnimated = true; 
+        node.ongoingAnimation = true; 
         break; 
     }
 
@@ -776,8 +778,9 @@ export class DOMNodeAnimation {
           // the oneventchange event on the trailer wont fire! TODO: Do more research and find out why! 
           switch(node.changes.type) {
             case changeType.removed:
-              if (node.parentNode === trailer) {
-                node.style.position = "";
+              if (trailer) {
+                if (node.parentNode !== trailer) throw new Error("Internal error: Wrong trailer!")
+                node.equivalentCreator.synchronizeDomNodeStyle(["position", "width", "height", "transform"]);
                 trailer.removeChild(node);
                 if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
                 delete trailer.owner;
@@ -787,12 +790,17 @@ export class DOMNodeAnimation {
             case changeType.added:
             case changeType.moved:
             case changeType.resident:
-              if (node.parentNode === leader) {
-                node.style.position = "";
+              if (leader) {
+                if (node.parentNode !== leader) throw new Error("Internal error: Wrong leader!");
+                node.equivalentCreator.synchronizeDomNodeStyle(["position", "width", "height", "transform"]);
                 leader.removeChild(node);
                 if (leader.parentNode) leader.parentNode.replaceChild(node, leader);
                 delete leader.owner; 
                 delete node.leader; 
+              }
+              if (trailer) {
+                delete trailer.owner;
+                delete node.trailer; 
               }
               break; 
           }
@@ -863,7 +871,7 @@ export class DOMNodeAnimation {
         
         // Remove changes.
         delete node.isControlledByAnimation;
-        delete node.beingAnimated;
+        delete node.ongoingAnimation;
         if (node.changes) {
           node.changes.finished = true; 
           const flow = node.equivalentCreator;
