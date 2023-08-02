@@ -18,7 +18,7 @@ export function setAnimationTime(value) {
  * 
  * Properties that might be dependent on the outer div, so we need to maintain them while inside a leader
  */
-const inheritedProperties = ["fontSize"];
+const inheritedProperties = ["fontSize", "color"];
 
 export class DOMNodeAnimation {
   /**
@@ -373,7 +373,7 @@ export class DOMNodeAnimation {
     // Setup original style, size and transformation.
     if (node.ongoingAnimation) {
       log("chain animated...");
-      this.setOriginalStyleAndFootprintForChainAnimated(node);
+      // this.setOriginalStyleAndFootprintForChainAnimated(node);
     } else {
       
       // Fixate environment dependent styles
@@ -425,8 +425,8 @@ export class DOMNodeAnimation {
       leader = this.createNewLeader(node);
       node.leader = leader;
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
-      leader.style.width = "0px"; 
-      leader.style.height = "0px";
+      leader.style.width = "0.0001px"; 
+      leader.style.height = "0.0001px";
       insertAfter(leader, node);
     }
 
@@ -623,7 +623,10 @@ export class DOMNodeAnimation {
    */
   activateAnimation(flow, currentFlowChanges) {
     const node = flow.domNode;
+    const ongoingAnimation = node.ongoingAnimation;
     const changes = flow.changes; 
+    const trailer = node.trailer; 
+    const leader = node.leader;
     
     console.group("Activate for " + this.changesChain(flow) + ": " + flow.toString());
     log(`original properties: `);
@@ -666,25 +669,25 @@ export class DOMNodeAnimation {
     }
 
     // Animate leader
-    const leader = node.leader;
-    if (leader) {
-      log("animate leader")
-      leader.style.transition = this.leaderTransition();
-      Object.assign(leader.style, {
-        width: node.targetDimensions.widthIncludingMargin + "px",
-        height: node.targetDimensions.heightIncludingMargin + "px"
-      })
-    }
-
-    // Animate trailer 
-    const trailer = node.trailer; 
-    if (trailer) {
-      log("animate trailer")
-      trailer.style.transition = this.leaderTransition();
-      Object.assign(trailer.style, {
-        width: "0px",
-        height: "0px"
-      });
+    if (!(flow.changes.type === changeType.resident && ongoingAnimation)) {
+      if (leader && !ongoingAnimation) {
+        log("animate leader")
+        leader.style.transition = this.leaderTransition();
+        Object.assign(leader.style, {
+          width: node.targetDimensions.widthIncludingMargin + "px",
+          height: node.targetDimensions.heightIncludingMargin + "px"
+        })
+      }
+  
+      // Animate trailer
+      if (trailer && !ongoingAnimation) {
+        log("animate trailer")
+        trailer.style.transition = this.leaderTransition();
+        Object.assign(trailer.style, {
+          width: "0.0001px",
+          height: "0.0001px"
+        });
+      }
     }
 
     log("final properties: ");

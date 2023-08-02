@@ -65,10 +65,10 @@ installDOMAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-// startDemo();
+startDemo();
 
 // startModalDemo();
-startAnimationExample();
+// startAnimationExample();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
