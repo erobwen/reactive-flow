@@ -367,6 +367,7 @@ export function onFinishReBuildingDOM() {
       flow.animation.emulateOriginalFootprintsAndFixateAnimatedStyle(flow);
     }
   }
+  // if (inExperimentOnCount(3)) return;
   // We now have original style and footprints, but new structure. 
   
   logAnimationSeparator("---------------------------------------- Emulate original bounds for FLIP animations -------------------------");
@@ -392,7 +393,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
     //   throw new Error("A change triggered while animation not started, consider removing event listeners using pointerEvents:none or similar");
     //   // TODO: Support the possibility of animation flow changes between animation start and animation activation somehow. 
     // }
-    if (inExperiment()) return; 
+    // if (inExperiment()) return; 
 
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {

@@ -133,14 +133,14 @@ export function clearNode(node) {
     const newChildren = this.getPrimitiveChildren(node);
     const newChildNodes = newChildren.map(child => child.ensureDomNodeBuilt()).filter(child => !!child);
 
-    // Remove nodes in newChildren that are controlled by animation. We dont want to disturb or move them.
-    let index = newChildNodes.length - 1;
-    while (index >= 0) {
+    // Nodes wrapped in a leader or trailer, should maintain their wrapper during this operation. 
+    let index = 0;
+    while (index < newChildNodes.length) {
       const child = newChildNodes[index];
-      if (child.isControlledByAnimation) {
-          newChildNodes.splice(index, 1);
+      if (child.isControlledByAnimation && child.leader && child.leader.parentNode === node) {
+        newChildNodes[index] = child.leader;
       }
-      index--;
+      index++;
     }
         
     // Recover other nodes
