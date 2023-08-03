@@ -209,7 +209,9 @@ export class ModernButton extends Flow {
 
         const restorePanelAfterDelay = (panel, circle) => {
           setTimeout(() => {
-            panel.removeChild(circle);
+            if (circle.parentNode === panel) {
+              panel.removeChild(circle);
+            }
             setTimeout(() => {
               this.findChild("button").synchronizeDomNodeStyle(["maxWidth", "maxHeight", "overflow"]);
               this.inAnimation = false; 

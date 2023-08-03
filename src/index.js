@@ -61,11 +61,11 @@ installDOMAnimation();
 
 // buttonTest();
 // startSimpleMoveAnimation();
-// startSimpleAddRemoveAnimation();
+startSimpleAddRemoveAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-startDemo();
+// startDemo();
 
 // startModalDemo();
 // startAnimationExample();

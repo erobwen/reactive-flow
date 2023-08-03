@@ -370,33 +370,48 @@ export class DOMNodeAnimation {
         break;
     }
 
-    // Setup original style, size and transformation.
+    // Set original styles
     if (node.ongoingAnimation) {
-      log("chain animated...");
-      // this.setOriginalStyleAndFootprintForChainAnimated(node);
-    } else {
-      
-      // Fixate environment dependent styles
-      if ([changeType.added, changeType.removed, changeType.moved].includes(node.changes.type)) {
-        for (let property of inheritedProperties) {
-          node.style[property] = node.computedOriginalStyle[property];
-        }
-      }
+      log("ongoing animation...");
       switch (flow.changes.type) {
+        case changeType.resident:
+          break;
         case changeType.added: 
-          this.setOriginalStyleAndFootprintForAdded(node);
+          this.fixateOriginalTransformAndOpacity(node);
           break; 
         case changeType.removed: 
-          this.setOriginalStyleAndFootprintForRemoved(node);
+          this.fixateOriginalTransformAndOpacity(node);
           break;
         case changeType.moved: 
-          this.setOriginalStyleAndFootprintForMoved(node);
+          this.fixateOriginalTransformAndOpacity(node);
+          break;
+      }
+    } else {
+      log("new animation...");
+      switch (flow.changes.type) {
+        case changeType.resident:
+          break;
+        case changeType.added: 
+          this.originalPositionForZoomIn(node);
           break; 
-        case changeType.resident: // Do nothing! 
-          break;  
+        case changeType.removed: 
+          this.originalPositionForZoomOut(node);
+          break;
+        case changeType.moved: 
+          this.fixateOriginalInheritedStyles(node);
+          this.originalPositionForMoveAndResize(node);
+          break;
       }
     }
     console.groupEnd();
+  }
+
+  fixateOriginalInheritedStyles(node) {
+    if ([changeType.added, changeType.removed, changeType.moved].includes(node.changes.type)) {
+      for (let property of inheritedProperties) {
+        node.style[property] = node.computedOriginalStyle[property];
+      }
+    }
   }
 
   setupALeaderForIncomingWithOriginalFootprint(node) {
@@ -441,17 +456,14 @@ export class DOMNodeAnimation {
     logProperties(node.leader.style, this.typicalAnimatedProperties);
   }
 
-  setOriginalStyleAndFootprintForChainAnimated(node) {
+  fixateOriginalTransformAndOpacity(node) {
     Object.assign(node.style, {
       transform: node.computedOriginalStyle.transform,
       opacity: node.computedOriginalStyle.opacity,
     });
-    if (node.parentNode.isControlledByAnimation) {
-      node.style.position = "absolute";
-    }
   }
 
-  setOriginalStyleAndFootprintForAdded(node) {
+  originalPositionForZoomIn(node) {
     Object.assign(node.style, {
       position: "absolute", 
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
@@ -462,7 +474,7 @@ export class DOMNodeAnimation {
     });
   }
     
-  setOriginalStyleAndFootprintForRemoved(node) {
+  originalPositionForZoomOut(node) {
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       position: "absolute", 
@@ -473,7 +485,7 @@ export class DOMNodeAnimation {
     });
   }
 
-  setOriginalStyleAndFootprintForMoved(node) {
+  originalPositionForMoveAndResize(node) {
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       position: "absolute", 
@@ -641,56 +653,86 @@ export class DOMNodeAnimation {
     }
 
     // Animate node
-    switch(flow.changes.type) {
-      case changeType.added:
-        this.setupFinalStyleForAdded(node);
-        node.ongoingAnimation = true; 
-        break;
-
-      case changeType.resident: 
-        if (flow.outOfPosition) {
-          delete flow.outOfPosition;
-          node.ongoingAnimation = true;
-          this.setupFinalStyleForResident(node);
-        } 
-        // delete flow.changes; // Do this? 
-        // delete node.changes; 
-        break;
-
-      case changeType.moved:
-        this.setupFinalStyleForMoved(node);
-        node.ongoingAnimation = true; 
-        break; 
-        
-      case changeType.removed: 
-        this.setupFinalStyleForRemoved(node);
-        node.ongoingAnimation = true; 
-        break; 
+    if (ongoingAnimation) {
+      switch(flow.changes.type) {
+        case changeType.added:
+          this.targetPositionForZoomIn(node);
+          this.targetSizeForLeader(node, node.leader);
+          if (trailer) throw new Error("Internal error, should not happen!");
+          node.ongoingAnimation = true; 
+          break;
+  
+        case changeType.resident: 
+          if (flow.outOfPosition) {
+            delete flow.outOfPosition;
+            node.ongoingAnimation = true;
+            this.targetPositionForMovingInsideContainer(node);
+            // Might be a leader or not, should work in both cases?
+          } 
+          break;
+  
+        case changeType.moved:
+          this.targetPositionForMoved(node);
+          this.targetSizeForLeader(node, node.leader);
+          if (node.trailer) this.targetSizeForTrailer(node.trailer);
+          node.ongoingAnimation = true; 
+          break; 
+          
+        case changeType.removed: 
+          this.targetPositionForZoomOut(node);
+          this.targetSizeForTrailer(node.trailer);
+          node.ongoingAnimation = true; 
+          break; 
+      }
+    } else {
+      switch(flow.changes.type) {
+        case changeType.added:
+          this.targetPositionForZoomIn(node);
+          this.targetSizeForLeader(node, node.leader);
+          if (trailer) throw new Error("Internal error, should not happen!");
+          node.ongoingAnimation = true; 
+          break;
+  
+        case changeType.resident: 
+          if (flow.outOfPosition) {
+            delete flow.outOfPosition;
+            node.ongoingAnimation = true;
+            this.targetPositionForMovingInsideContainer(node);
+            // Might be a leader or not, should work in both cases?
+          } 
+          break;
+  
+        case changeType.moved:
+          this.targetPositionForMoved(node);
+          this.targetSizeForLeader(node, node.leader);
+          if (node.trailer) this.targetSizeForTrailer(node.trailer);
+          node.ongoingAnimation = true; 
+          break; 
+          
+        case changeType.removed: 
+          this.targetPositionForZoomOut(node);
+          this.targetSizeForTrailer(node.trailer);
+          node.ongoingAnimation = true; 
+          break; 
+      }
     }
+
 
     // Animate leader
     if (!(flow.changes.type === changeType.resident && ongoingAnimation)) {
       if (leader && !ongoingAnimation) {
         log("animate leader")
-        leader.style.transition = this.leaderTransition();
-        Object.assign(leader.style, {
-          width: node.targetDimensions.widthIncludingMargin + "px",
-          height: node.targetDimensions.heightIncludingMargin + "px"
-        })
+
       }
   
       // Animate trailer
       if (trailer && !ongoingAnimation) {
         log("animate trailer")
-        trailer.style.transition = this.leaderTransition();
-        Object.assign(trailer.style, {
-          width: "0.0001px",
-          height: "0.0001px"
-        });
+
       }
     }
 
-    log("final properties: ");
+    log("target properties: ");
     logProperties(flow.domNode.style, this.typicalAnimatedProperties);
     if (leader) {
       log(`leader: `);
@@ -703,28 +745,31 @@ export class DOMNodeAnimation {
     console.groupEnd();
   }
   
-  setupFinalStyleForAdded(node) {
-    // log("before")
-    // log(node.style.transform);
-    // log(node.style.opacity);
-    // log(node.style.position);
+  targetSizeForLeader(node, leader) {
+    leader.style.transition = this.leaderTransition();
+    Object.assign(leader.style, {
+      width: node.targetDimensions.widthIncludingMargin + "px",
+      height: node.targetDimensions.heightIncludingMargin + "px"
+    })
+  }
+
+  targetSizeForTrailer(trailer) {
+    trailer.style.transition = this.leaderTransition();
+    Object.assign(trailer.style, {
+      width: "0.0001px",
+      height: "0.0001px"
+    });
+  }
+
+  targetPositionForZoomIn(node) {
     node.style.transition = this.addedTransition();
-    // log("setupFinalStyle")
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       opacity: "1"
     });
-    // Fixate environment dependent styles
-    for (let property of inheritedProperties) {
-      node.style[property] = node.computedTargetStyle[property];
-    }    
-    // log("after")
-    // log(node.style.transform);
-    // log(node.style.opacity);
-    // log(node.style.position);
   }
 
-  setupFinalStyleForResident(node) {
+  targetPositionForMovingInsideContainer(node) {
     // No leader or trailer that needs animation. Just ensure we want to move to a resting place in case we got translated. Should we check this?  
     node.style.transition = this.defaultTransition(node);
     Object.assign(node.style, {
@@ -732,25 +777,29 @@ export class DOMNodeAnimation {
     });
   }
  
-  setupFinalStyleForMoved(node) {
+  targetPositionForMoved(node) {
     node.style.transition = this.defaultTransition();
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, 0)"
     });
-    // Fixate environment dependent styles
-    for (let property of inheritedProperties) {
-      node.style[property] = node.computedTargetStyle[property];
-    }    
+    this.setInheritedTargetStyles(node);
   }
 
-  setupFinalStyleForRemoved(node) {
+
+  targetPositionForZoomOut(node) {
     node.style.transition = this.defaultTransition();
     Object.assign(node.style, {
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",
       opacity: "0.001"
     });
   }
-
+  
+  setInheritedTargetStyles(node) {
+    // Fixate environment dependent styles
+    for (let property of inheritedProperties) {
+      node.style[property] = node.computedTargetStyle[property];
+    }    
+  }
 
   /**
    * -------------------------------------------------------------------------------------

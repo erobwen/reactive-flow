@@ -389,6 +389,8 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
   requestAnimationFrame(() => {
     logAnimationSeparator("---------------------------------------- Rendered first frame, activate animations...  ---------------------");
 
+    // TODO: Cleanup may have occured at this stage while we were waiting for the first frame. If so, act accordingly. 
+
     // if (currentFlowChanges.number !== flowChanges.number) {
     //   throw new Error("A change triggered while animation not started, consider removing event listeners using pointerEvents:none or similar");
     //   // TODO: Support the possibility of animation flow changes between animation start and animation activation somehow. 

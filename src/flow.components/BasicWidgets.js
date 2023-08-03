@@ -160,7 +160,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
 export function button(...parameters) { 
   const properties = readFlowProperties(parameters);
   findTextKeyAndOnClickInProperties(properties);
-  addDefaultStyleToProperties(properties, {lineHeight: "28px"})
+  addDefaultStyleToProperties(properties, {lineHeight: "28px", display: "block"})
   const attributes = extractAttributes(properties);
   if (properties.disabled) attributes.disabled = true; 
   
