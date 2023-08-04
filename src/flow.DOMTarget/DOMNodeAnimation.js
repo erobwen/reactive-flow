@@ -165,6 +165,7 @@ export class DOMNodeAnimation {
    */
   changesChain(flow) {
     let result = ""; 
+    result += flow.domNode.ongoingAnimation ? "[ongoing] " : "";
     let changes = flow.changes; 
     while(changes) {
       const separator = (result === "" ? "" : ", "); 
@@ -373,6 +374,7 @@ export class DOMNodeAnimation {
     // Set original styles
     if (node.ongoingAnimation) {
       log("ongoing animation...");
+      this.fixateOriginalInheritedStyles(node);
       switch (flow.changes.type) {
         case changeType.resident:
           break;
@@ -408,6 +410,7 @@ export class DOMNodeAnimation {
 
   fixateOriginalInheritedStyles(node) {
     if ([changeType.added, changeType.removed, changeType.moved].includes(node.changes.type)) {
+      node.style.transition = "";
       for (let property of inheritedProperties) {
         node.style[property] = node.computedOriginalStyle[property];
       }
@@ -429,7 +432,7 @@ export class DOMNodeAnimation {
       trailer = previous; 
       previous = previous.previousSibling;
     }
-    if (trailer) {
+    if (false && trailer) {
       delete trailer.canBeRepurposed;
       // Found an existing leader. 
       log("repurpose existing trailer ...")
@@ -659,13 +662,11 @@ export class DOMNodeAnimation {
           this.targetPositionForZoomIn(node);
           this.targetSizeForLeader(node, node.leader);
           if (trailer) throw new Error("Internal error, should not happen!");
-          node.ongoingAnimation = true; 
           break;
   
         case changeType.resident: 
           if (flow.outOfPosition) {
             delete flow.outOfPosition;
-            node.ongoingAnimation = true;
             this.targetPositionForMovingInsideContainer(node);
             // Might be a leader or not, should work in both cases?
           } 
@@ -675,13 +676,11 @@ export class DOMNodeAnimation {
           this.targetPositionForMoved(node);
           this.targetSizeForLeader(node, node.leader);
           if (node.trailer) this.targetSizeForTrailer(node.trailer);
-          node.ongoingAnimation = true; 
           break; 
           
         case changeType.removed: 
           this.targetPositionForZoomOut(node);
           this.targetSizeForTrailer(node.trailer);
-          node.ongoingAnimation = true; 
           break; 
       }
     } else {
@@ -714,21 +713,6 @@ export class DOMNodeAnimation {
           this.targetSizeForTrailer(node.trailer);
           node.ongoingAnimation = true; 
           break; 
-      }
-    }
-
-
-    // Animate leader
-    if (!(flow.changes.type === changeType.resident && ongoingAnimation)) {
-      if (leader && !ongoingAnimation) {
-        log("animate leader")
-
-      }
-  
-      // Animate trailer
-      if (trailer && !ongoingAnimation) {
-        log("animate trailer")
-
       }
     }
 
@@ -857,10 +841,6 @@ export class DOMNodeAnimation {
               break; 
           }
         }
-
-        // Just in case cleanup
-        // if(node.trailer ) {
-        // }
       }
     });
   

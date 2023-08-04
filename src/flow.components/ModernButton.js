@@ -185,6 +185,7 @@ export class ModernButton extends Flow {
         
         // Create circle
         const circle = document.createElement('div');
+        circle.isControlledByAnimation = true; 
         panel.appendChild(circle);
         circle.style.width = circle.style.height = diameter + "px";
         circle.style.left = (event.clientX - panel.offsetLeft) - radius + "px";
