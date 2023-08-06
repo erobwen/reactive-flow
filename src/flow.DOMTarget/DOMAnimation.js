@@ -1,4 +1,4 @@
-import { repeat, Flow, trace, configuration, flow, activeTrace, creators } from "../flow/Flow";
+import { repeat, Flow, trace, configuration, flow, activeTrace, creators, postponeInvalidations, continueInvalidations } from "../flow/Flow";
 import { DOMNodeAnimation, standardAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
@@ -386,6 +386,10 @@ export function onFinishReBuildingDOM() {
 
 
 function activateAnimationAfterFirstRender(currentFlowChanges) {
+  
+  // Pause causality reactions while we wait for a new frame. 
+  postponeInvalidations();
+
   requestAnimationFrame(() => {
     logAnimationSeparator("---------------------------------------- Rendered first frame, activate animations...  ---------------------");
 
@@ -416,6 +420,9 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
 
     logAnimationSeparator("------------------------------------------------------------------------------------------------------------");
     console.groupEnd()
+
+    // Reactivate causality reactions while we wait for a new frame. 
+    continueInvalidations();
   });
 }
 

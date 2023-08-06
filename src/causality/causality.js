@@ -104,11 +104,13 @@ function createWorld(configuration) {
 
     // Modifiers
     withoutRecording,
-    withoutReactions,
+    withoutReactions: withoutReactionsDo,
 
     // Transaction
+    postponeInvalidations: postponeInvalidationsAndDo,
+    transaction : postponeInvalidationsAndDo,
     postponeInvalidations,
-    transaction : postponeInvalidations,
+    continueInvalidations,
 
     // Debugging and testing
     clearRepeaterLists,
@@ -215,18 +217,28 @@ function createWorld(configuration) {
     updateContextState();
   }
 
-  function postponeInvalidations(callback) {
+  function postponeInvalidationsAndDo(callback) {
     state.postponeInvalidation++;
     callback();
     state.postponeInvalidation--;
     proceedWithPostponedInvalidations();
   }
 
-  function withoutReactions(callback) {
+  function postponeInvalidations() {
+    state.postponeInvalidation++;
+  }
+
+  function continueInvalidations() {
+    state.postponeInvalidation--;
+    proceedWithPostponedInvalidations();
+  }
+
+  function withoutReactionsDo(callback) {
     state.blockInvalidation++;
     callback();
     state.blockInvalidation--;
   }
+  
 
   /**********************************
    *

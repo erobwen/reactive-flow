@@ -48,7 +48,9 @@ export const {
   withoutRecording,
   sameAsPreviousDeep,
   workOnPriorityLevel,
-  invalidateOnChange
+  invalidateOnChange,
+  postponeInvalidations,
+  continueInvalidations
 } = world;
 
 
