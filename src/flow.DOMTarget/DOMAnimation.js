@@ -246,10 +246,21 @@ export function onFinishReBuildingFlow() {
   function filterAnimatedInMap(map) {
      return Object.values(map)
       .reduce((result, flow) => {
-        const changes = flow.getAnimation();
-        flow.currentAnimation = changes; 
-        if (changes) {
-          result[flow.id] = flow;
+        if (flow.animation) {
+
+          let stableFoundation = true; 
+          let scan = flow.parentPrimitive;
+          while(scan) {
+          
+            if (flowChanges.globallyAdded[scan.id] && (!scan.animation || !scan.animation.allwaysStableFoundationEvenWhenAdded())) {
+              stableFoundation = false; 
+              break; 
+            }
+            scan = scan.parentPrimitive;
+          }
+          if (stableFoundation || flow.animation.acceptUnstableFoundation(scan)) {
+            result[flow.id] = flow;
+          }
         }
         return result;
       }, {});

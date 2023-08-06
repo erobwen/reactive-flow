@@ -580,7 +580,7 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
   return flowBuilder;
 }
 
-function getShapeAnalysis(me) {
+function getShapeAnalysis(flow) {
   return {
     allowMatch: (establishedFlow, newFlow) => {
       // log(establishedFlow instanceof Flow);
@@ -591,7 +591,7 @@ function getShapeAnalysis(me) {
         && (newFlow.className() === establishedFlow.className()) 
         && (newFlow.classNameOverride === establishedFlow.classNameOverride));
     },
-    shapeRoot: () => me.newBuild,
+    shapeRoot: () => flow.newBuild,
     slotsIterator: function*(establishedObject, newObject, hasKey, childrenProperty=false) {
       if (establishedObject instanceof Array && newObject instanceof Array) {
         let newIndex = 0;

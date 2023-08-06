@@ -1,6 +1,6 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
 import { standardAnimation } from "../flow.DOMTarget/DOMNodeAnimation.js";
-import { configuration, finalize, Flow, repeat, trace } from "./Flow.js";
+import { configuration, finalize, Flow, invalidateOnChange, repeat, trace } from "./Flow.js";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { logMark } from "./utility.js";
 
@@ -125,30 +125,33 @@ export class FlowPrimitive extends Flow {
     return [...this.iteratePrimitiveChildren()];
   }
 
-  isStable() {
-    // return true; 
-    return (!flowChanges.globallyAdded[this.id] || this.animateChildrenWhenThisAppears) && (!this.primitiveParent || this.primitiveParent.isStable());
+  inheritAnimation() {
+    let result = this.inheritFromEquivalentCreator("animate"); 
+  
+    if (!result && this.parentPrimitive) {
+      result = this.parentPrimitive.inheritFromEquivalentCreator("animateChildren");   
+    }      
+    
+    if (!result && this.previousParentPrimitive) {
+      result = this.previousParentPrimitive.inheritFromEquivalentCreator("animateChildren");   
+    }
+    
+    if (result === true) result = standardAnimation;
+    return result;
   }
 
-  getAnimation() {
-    // return null;
-    let result; 
-    if (this.parentPrimitive && !this.parentPrimitive.isStable()) {
-      result = null; 
-    } else {
-      result = this.inheritFromEquivalentCreator("animate"); 
-  
-      if (!result && this.parentPrimitive) {
-        result = this.parentPrimitive.inheritFromEquivalentCreator("animateChildren");   
-      }      
-      
-      if (!result && this.previousParentPrimitive) {
-        result = this.previousParentPrimitive.inheritFromEquivalentCreator("animateChildren");   
-      }
-    }
-    if (result === true) result = standardAnimation;
-    this.animation = result; // for quick access after call is made
-    return result;   
+  get animation() {
+    if (!this.cachedAnimation) {
+      invalidateOnChange(
+        () => {
+          this.cachedAnimation = this.inheritAnimation();
+        },
+        () => {
+          delete this.cachedAnimation;
+        }
+      )
+    } 
+    return this.cachedAnimation; 
   }
 }
   
