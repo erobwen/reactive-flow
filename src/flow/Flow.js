@@ -504,74 +504,9 @@ export class Flow {
           }
 
           if (trace) console.groupEnd();
-        }, 
-        {
+        }, {
           priority: 1, 
-          rebuildShapeAnalysis: {
-            allowMatch: (establishedFlow, newFlow) => {
-              // log(establishedFlow instanceof Flow);
-              // log(newFlow instanceof Flow);
-              // log(newFlow.className() === establishedFlow.className());
-              // log(newFlow.classNameOverride === establishedFlow.classNameOverride);
-              return (establishedFlow instanceof Flow && newFlow instanceof Flow  
-                && (newFlow.className() === establishedFlow.className()) 
-                && (newFlow.classNameOverride === establishedFlow.classNameOverride));
-            },
-            shapeRoot: () => me.newBuild,
-            slotsIterator: function*(establishedObject, newObject, hasKey, childrenProperty=false) {
-              if (establishedObject instanceof Array && newObject instanceof Array) {
-                let newIndex = 0;
-                let establishedIndex = 0;
-                while(newIndex < newObject.length) {
-                  while(hasKey(newObject[newIndex]) && newIndex < newObject.length) newIndex++;
-                  while(hasKey(establishedObject[establishedIndex]) && establishedIndex < establishedObject.length) establishedIndex++;
-                  const establishedChild = establishedObject[establishedIndex];
-                  const newChild = newObject[newIndex]
-
-                  if (isObservable(newChild) && isObservable(establishedChild)) {
-                    yield [establishedChild, newChild];
-                  }
-
-                  newIndex++;
-                  establishedIndex++;
-                }  
-              } else if (establishedObject instanceof Flow && newObject instanceof Flow) {
-                if (childrenProperty) yield [establishedObject, newObject];
-                for (let property in newObject) {
-                  if (property === "children") {
-                    yield * this.slotsIterator(
-                      establishedObject[property], 
-                      newObject[property],
-                      hasKey,
-                      true
-                    )
-                  } else {
-                    const establishedChild = establishedObject[property];
-                    const newChild = newObject[property]
-  
-                    if (isObservable(newChild) && isObservable(establishedChild)) {
-                      yield [establishedChild, newChild];
-                    }
-                  }
-                }
-              }
-            },
-            translateReferences: (flow, translateReference) => {
-              for (let property in flow) {
-                flow[property] = translateReference(flow[property]); 
-              }
-              const children = flow.children; // TODO: use iterator! 
-              if (children instanceof Array) {
-                let index = 0;
-                while(index < children.length) {
-                  children[index] = translateReference(children[index]);
-                  index++;
-                }
-              } else if (children instanceof Flow) {
-                flow.children = translateReference(children);
-              }
-            }
-          }
+          rebuildShapeAnalysis: getShapeAnalysis(me)
         }
       );
     }
@@ -644,3 +579,72 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
   }
   return flowBuilder;
 }
+
+function getShapeAnalysis(me) {
+  return {
+    allowMatch: (establishedFlow, newFlow) => {
+      // log(establishedFlow instanceof Flow);
+      // log(newFlow instanceof Flow);
+      // log(newFlow.className() === establishedFlow.className());
+      // log(newFlow.classNameOverride === establishedFlow.classNameOverride);
+      return (establishedFlow instanceof Flow && newFlow instanceof Flow  
+        && (newFlow.className() === establishedFlow.className()) 
+        && (newFlow.classNameOverride === establishedFlow.classNameOverride));
+    },
+    shapeRoot: () => me.newBuild,
+    slotsIterator: function*(establishedObject, newObject, hasKey, childrenProperty=false) {
+      if (establishedObject instanceof Array && newObject instanceof Array) {
+        let newIndex = 0;
+        let establishedIndex = 0;
+        while(newIndex < newObject.length) {
+          while(hasKey(newObject[newIndex]) && newIndex < newObject.length) newIndex++;
+          while(hasKey(establishedObject[establishedIndex]) && establishedIndex < establishedObject.length) establishedIndex++;
+          const establishedChild = establishedObject[establishedIndex];
+          const newChild = newObject[newIndex]
+
+          if (isObservable(newChild) && isObservable(establishedChild)) {
+            yield [establishedChild, newChild];
+          }
+
+          newIndex++;
+          establishedIndex++;
+        }  
+      } else if (establishedObject instanceof Flow && newObject instanceof Flow) {
+        if (childrenProperty) yield [establishedObject, newObject];
+        for (let property in newObject) {
+          if (property === "children") {
+            yield * this.slotsIterator(
+              establishedObject[property], 
+              newObject[property],
+              hasKey,
+              true
+            )
+          } else {
+            const establishedChild = establishedObject[property];
+            const newChild = newObject[property]
+
+            if (isObservable(newChild) && isObservable(establishedChild)) {
+              yield [establishedChild, newChild];
+            }
+          }
+        }
+      }
+    },
+    translateReferences: (flow, translateReference) => {
+      for (let property in flow) {
+        flow[property] = translateReference(flow[property]); 
+      }
+      const children = flow.children; // TODO: use iterator! 
+      if (children instanceof Array) {
+        let index = 0;
+        while(index < children.length) {
+          children[index] = translateReference(children[index]);
+          index++;
+        }
+      } else if (children instanceof Flow) {
+        flow.children = translateReference(children);
+      }
+    }
+  }
+}
+
