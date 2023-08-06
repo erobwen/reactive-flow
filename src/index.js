@@ -12,8 +12,8 @@ import { startModalDemo } from "./application/modalDemo.js";
 import { startSingleStaticWidget } from "./application/singleStaticWidget.js";
 import { startSimpleMoveAnimation } from "./application/simpleMoveAnimation.js";
 import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnimation.js";
-import { setAnimationTime } from "./flow.DOMTarget/DOMNodeAnimation.js";
 import { logMark } from "./flow/utility.js";
+import { setAnimationTime } from "./flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
 
 
 const debuggingState = model({

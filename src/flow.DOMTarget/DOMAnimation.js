@@ -1,5 +1,5 @@
 import { repeat, Flow, trace, configuration, flow, activeTrace, creators, postponeInvalidations, continueInvalidations } from "../flow/Flow";
-import { DOMNodeAnimation, standardAnimation } from "./DOMNodeAnimation";
+import { DOMNodeAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
 import { inExperiment, inExperimentOnCount } from "..";
