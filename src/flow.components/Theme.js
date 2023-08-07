@@ -6,8 +6,8 @@ import { button as basicButton } from "./BasicWidgets";
 
 
 export function button(...parameters) {
-  return basicButton.apply(null, parameters); 
-  // return modernButton.apply(null, parameters);
+  // return basicButton.apply(null, parameters); 
+  return modernButton.apply(null, parameters);
 }
 
 

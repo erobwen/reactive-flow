@@ -47,11 +47,11 @@ const panel = flow("panel", ({ children, style }) =>
 
 // Items
 function itemDisplay(item) {
-  return div(
-    text(item, {style: {margin: "", lineHeight: ""}}),
-    {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green", textAlign: "center", lineHeight: "40px"}}
-  );
-  // return text({key: item, text: item, style: {display: "block", padding: smallSpace, margin: smallSpace, textAlign: "left"}})
+  // return div(
+  //   text(item, {style: {margin: "", lineHeight: ""}}),
+  //   {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green", textAlign: "center", lineHeight: "40px"}}
+  // );
+  return text({key: item, text: item, style: {display: "block", lineHeight: "", padding: "", margin: "", textAlign: "left"}})
 }
 
 
@@ -110,7 +110,7 @@ export class AnimationExample extends Flow {
           filler(),
           panel({
             children: this.listA.map(item => itemDisplay(item)),
-            style: {fontSize: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
+            style: {fontSize: "40px", lineHeight: "40px", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"}, 
             animateChildren: standardAnimation       
           }),
           filler(),
@@ -121,7 +121,7 @@ export class AnimationExample extends Flow {
           filler(),
           panel({
             children: this.listB.map(item => itemDisplay(item)),
-            style: {fontSize: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
+            style: {fontSize: "20px", lineHeight: "20px", color: "blue", margin: largeSpace, padding: largeSpace, overflow: "visible", borderStyle:"solid", borderWidth: "1px"},  
             animateChildren: standardAnimation       
           }),
           filler(),

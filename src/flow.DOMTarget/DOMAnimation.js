@@ -17,6 +17,23 @@ export function installDOMAnimation() {
 
 
 /**
+ * Freeze flow changes (to prevent chained animations)
+ */
+let count = 0;
+export function freezeFlowChanges() {
+  count++;
+  console.warn("Risky to use freeze " + count);
+  postponeInvalidations();
+}
+
+export function unfreezeFlowChanges() {
+  count--;
+  console.warn("Unfreeze... " + count);
+  continueInvalidations();
+}
+
+
+/**
  * DOM Flow Targets to animate
  */
 

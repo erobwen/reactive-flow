@@ -171,7 +171,7 @@ export class ComplexForm extends Flow {
           column(
             // Header       
             text("Cost: " + calculateCost(data), {style: {marginBottom: "5px"}}),
-            text("Traveler Information " + travelerString(), {style: {fontSize: "20px", paddingBottom: "10px"}}),
+            text("Traveler Information " + travelerString(), {style: {fontSize: "15px", paddingBottom: "10px"}}),
 
             // Traveler forms
             new TravelerForm({traveler, isFellowTraveller: false}),
@@ -246,7 +246,7 @@ export class TravelerForm extends Flow {
       div({style: {height: "10px"}}),
 
       // Child info
-      checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
+      // checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
       numberInputField("Age", traveler, "age", {unit: "years", animate: true}).show(traveler.isChild),
       
       // Adress

@@ -1,5 +1,5 @@
 import { draw, insertAfter, logMark } from "../flow/utility";
-import { camelCase, changeType, extractProperties, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, sameBounds } from "./DOMAnimation";
+import { camelCase, changeType, extractProperties, flowChanges, freezeFlowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, sameBounds, unfreezeFlowChanges } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
@@ -16,7 +16,7 @@ export function setAnimationTime(value) {
  * 
  * Properties that might be dependent on the outer div, so we need to maintain them while inside a leader
  */
-const inheritedProperties = ["fontSize", "color"];
+const inheritedProperties = ["fontSize", "lineHeight", "margin", "padding", "color"];
 
 export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   /**
@@ -175,6 +175,37 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }
 
 
+  /**
+   * -------------------------------------------------------------------------------------
+   * 
+   *                               Animation chain
+   * 
+   * -------------------------------------------------------------------------------------
+   */
+
+  startAnimationChain(node) {
+    node.ongoingAnimation = this; 
+    freezeFlowChanges();
+  }
+
+  endAnimationChain(node) {        
+    // Remove changes.
+    if (node.ongoingAnimation) {
+      delete node.isControlledByAnimation;
+      delete node.ongoingAnimation;
+      if (node.changes) {
+        node.changes.finished = true; 
+        const flow = node.equivalentCreator;
+        flow.changes = null;
+        node.changes = null;
+      }
+      //if (node.changes.type !== changeType.resident) 
+      requestAnimationFrame(() => {
+        unfreezeFlowChanges();
+      })
+    }
+  }
+
 
   /**
    * -------------------------------------------------------------------------------------
@@ -275,7 +306,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     this.hide(trailer);
 
     // Debugging
-    trailer.style.backgroundColor = "rgba(170, 170, 255, 0.5)";
+    // trailer.style.backgroundColor = "rgba(170, 170, 255, 0.5)";
   }
   
   neutralizeTransformationsAndPosition(flow) {
@@ -372,6 +403,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     }
 
     // Set original styles
+    log("ongoingAnimation: " + node.ongoingAnimation)
     if (node.ongoingAnimation) {
       log("ongoing animation...");
       this.fixateOriginalInheritedStyles(node);
@@ -453,7 +485,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     this.show(leader);
 
     // Debugging
-    leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
+    // leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
     log(`leader: `);
     logProperties(node.leader.style, this.typicalAnimatedProperties);
@@ -656,6 +688,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     }
 
     // Animate node
+    log("ongoingAnimation: " + ongoingAnimation)
     if (ongoingAnimation) {
       switch(flow.changes.type) {
         case changeType.added:
@@ -689,13 +722,14 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
           this.targetPositionForZoomIn(node);
           this.targetSizeForLeader(node, node.leader);
           if (trailer) throw new Error("Internal error, should not happen!");
-          node.ongoingAnimation = true; 
+          this.startAnimationChain(node);
           break;
   
         case changeType.resident: 
+          log("outOfPosition: " + flow.outOfPosition);
           if (flow.outOfPosition) {
-            delete flow.outOfPosition;
-            node.ongoingAnimation = true;
+            this.startAnimationChain(node);
+            delete flow.outOfPosition;            
             this.targetPositionForMovingInsideContainer(node);
             // Might be a leader or not, should work in both cases?
           } 
@@ -705,13 +739,13 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
           this.targetPositionForMoved(node);
           this.targetSizeForLeader(node, node.leader);
           if (node.trailer) this.targetSizeForTrailer(node.trailer);
-          node.ongoingAnimation = true; 
+          this.startAnimationChain(node);
           break; 
           
         case changeType.removed: 
           this.targetPositionForZoomOut(node);
           this.targetSizeForTrailer(node.trailer);
-          node.ongoingAnimation = true; 
+          this.startAnimationChain(node);
           break; 
       }
     }
@@ -728,7 +762,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     }
     console.groupEnd();
   }
-  
+
   targetSizeForLeader(node, leader) {
     leader.style.transition = this.leaderTransition();
     Object.assign(leader.style, {
@@ -841,6 +875,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
               break; 
           }
         }
+
+        this.endAnimationChain(node);
       }
     });
   
@@ -871,6 +907,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       endingAction: () => {
         log("Ending trailer animation"); 
         // TODO: handle if things have already changed?... if reused, the observer should have been removed? Right?... 
+        delete trailer.isControlledByAnimation;
         if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
         if (trailer.owner) {
           delete trailer.owner.trailer;
@@ -900,16 +937,6 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
 
       if (!endingProperties || endingProperties.includes(propertyName)) {
         endingAction(propertyName);
-        
-        // Remove changes.
-        delete node.isControlledByAnimation;
-        delete node.ongoingAnimation;
-        if (node.changes) {
-          node.changes.finished = true; 
-          const flow = node.equivalentCreator;
-          flow.changes = null;
-          node.changes = null;
-        }
   
         // Finish animation
         node.removeEventListener("transitionend", onTransitionEnd);
