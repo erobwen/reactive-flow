@@ -31,7 +31,7 @@ export class Demo extends Flow {
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.components = [
-      new HelloWorld({key: "helloWorld"}),
+      // new HelloWorld({key: "helloWorld"}),
       new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       new ComplexForm({key: "complexForm", initialData}),
       new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
