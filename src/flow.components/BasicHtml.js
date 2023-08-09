@@ -15,7 +15,7 @@ export function elemenNode(...parameters) {
 export function textNode(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
-  return getTarget().textNode({key: properties.key, attributes, children: properties.children});
+  return getTarget().create({type: "dom.textNode", key: properties.key, attributes, children: properties.children});
 }
 
 export function span(...parameters) {
@@ -51,7 +51,8 @@ export function textToTextNode(properties) {
     // TODO: Investigate why there is an infinite loop if we do not add array around children??
     properties.children = 
       // [
-        getTarget().textNode({
+        getTarget().create({
+          type: "dom.textNode",
           key: properties.key ? properties.key + ".text" : null,
           text: extractProperty(properties, "text"),
         })

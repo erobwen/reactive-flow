@@ -72,12 +72,6 @@ export class DOMFlowTarget extends FlowTarget {
     return this.create({...properties});
   }
 
-  textNode(...parameters) {
-    const properties = findKeyInProperties(readFlowProperties(parameters)); 
-    properties.type = "dom.textNode";
-    return this.create({...properties});
-  }
-
   create(...parameters) {
     const properties = findKeyInProperties(readFlowProperties(parameters));
     switch(properties.type) {

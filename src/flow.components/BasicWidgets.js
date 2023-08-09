@@ -178,7 +178,7 @@ export function button(...parameters) {
   // Autogenerate child text node from string.
   let children; 
   if (properties.text && !properties.children) {
-    children = [getTarget().textNode(properties.key ? properties.key + ".button-text" : null, {text: properties.text})]; 
+    children = [getTarget().create({type: "dom.textNode", key: properties.key ? properties.key + ".button-text" : null, text: properties.text})]; 
   } else {
     children = properties.children;
   } 
