@@ -9,7 +9,7 @@ import { readFlowProperties, findTextAndKeyInPropertiesUsingCase, findTextAndKey
 export function elemenNode(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({key: properties.key, attributes, children: properties.children});
+  return getTarget().create({type: "dom.elementNode", key: properties.key, attributes, children: properties.children});
 }
 
 export function textNode(...parameters) {
@@ -23,26 +23,26 @@ export function span(...parameters) {
   let properties = findTextAndKeyInPropertiesUsingCase(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
   textToTextNode(properties);
-  return getTarget().elementNode({tagName: "span", key: properties.key, classNameOverride: "span", attributes, children: properties.children, animate: properties.animate});
+  return getTarget().create({type: "dom.elementNode", tagName: "span", key: properties.key, classNameOverride: "span", attributes, children: properties.children, animate: properties.animate});
 }
 
 export function div(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children, animate: properties.animate});
+  return getTarget().create({type: "dom.elementNode", tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children, animate: properties.animate});
 }
 
 export function div2(...parameters) {
   let properties = findKeyInProperties(readFlowProperties(parameters)); 
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode({tagName: "div", key: properties.key, classNameOverride: "modal-frame", attributes, children: properties.children});
+  return getTarget().create({type: "dom.elementNode", tagName: "div", key: properties.key, classNameOverride: "modal-frame", attributes, children: properties.children});
 }
 
  export function styledDiv(classNameOverride, style, parameters) { 
   const properties = findKeyInProperties(readFlowProperties(parameters));
   const attributes = extractAttributes(properties);
   attributes.style = {...style, ...attributes.style}; // Inject row style (while making it possible to override)
-  return getTarget().elementNode({key: properties.key, classNameOverride, tagName: "div", attributes, ...properties }); 
+  return getTarget().create({type: "dom.elementNode", key: properties.key, classNameOverride, tagName: "div", attributes, ...properties }); 
 }
 
 

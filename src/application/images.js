@@ -8,5 +8,5 @@ export function svgImage(...parameters) {
   log("in image")
   log(flow)
   // return null
-  return getTarget().elementNode({tagName: "img", attributes: {style: {padding: "20px", backgroundColor: "white"}, src: flow}});
+  return getTarget().create({type: "dom.elementNode", tagName: "img", attributes: {style: {padding: "20px", backgroundColor: "white"}, src: flow}});
 }

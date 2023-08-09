@@ -56,8 +56,9 @@ export function unstyledText(...parameters) {
   if (properties.div) return textDiv(properties);
   
   const key = extractProperty(properties, "key");
-  const label = getTarget().elementNode(key ? key : null, 
+  const label = getTarget().create(key ? key : null, 
     {
+      type: "dom.elementNode",
       classNameOverride: "text",// + debugIdentifier + "]",
       tagName:"span",
       attributes: extractProperty(properties, "attributes"), 
@@ -139,7 +140,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     ...inputAttributes
   };
   
-  const children = [getTarget().elementNode({
+  const children = [getTarget().create({type: "dom.elementNode", 
     key: properties.key + ".input", 
     classNameOverride: type + "InputField", 
     tagName: "input", 
@@ -182,7 +183,8 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  result = getTarget().elementNode(properties.key, {
+  result = getTarget().create(properties.key, {
+    type: "dom.elementNode",
     classNameOverride: "button", 
     tagName: "button", 
     attributes, 

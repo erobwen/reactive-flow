@@ -128,7 +128,7 @@ export class Item extends Flow {
 
 // function shadePanel(close) {
 //   const target = getTarget();
-//   return target.elementNode({
+//   return target.create({type: "dom.elementNode", 
 //     tagName: "div", 
 //     classNameOverride: "shadePanel",
 //     attributes: {

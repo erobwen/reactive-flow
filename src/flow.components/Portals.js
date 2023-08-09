@@ -42,8 +42,9 @@ export function portalExit(...parameters) {
   const properties = readFlowProperties(parameters);
   findKeyInProperties(properties);
   const attributes = extractAttributes(properties);
-  return getTarget().elementNode(properties.key, 
+  return getTarget().create(properties.key, 
     { 
+      type: "dom.elementNode",
       classNameOverride: "portalExit", 
       tagName: "div", 
       attributes, 
