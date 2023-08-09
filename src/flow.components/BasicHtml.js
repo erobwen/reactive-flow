@@ -3,7 +3,7 @@
  * Basic HTML Node building 
  */
 
-import { getTarget } from "../flow/Flow";
+import { getTarget } from "../flow/flowBuildContext";
 import { readFlowProperties, findTextAndKeyInPropertiesUsingCase, findTextAndKeyInProperties, findKeyInProperties } from "../flow/flowParameters";
 
 export function elemenNode(...parameters) {

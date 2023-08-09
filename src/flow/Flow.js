@@ -1,6 +1,7 @@
 import getWorld from "../causality/causality.js";
 import { logMark, isUpperCase } from "./utility.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
+import { creators } from "./flowBuildContext.js";
 const log = console.log;
 
 
@@ -94,11 +95,6 @@ window.idToFlow = {}
 window.world = world;
 window.model = model;
 
-
-/**
- * Flow creation stack
- */
-export let creators = [];
 
 
 /**
@@ -551,9 +547,6 @@ export function when(condition, operation) {
   });
 }
 
-export function getTarget() {
-  return creators[creators.length - 1].target;
-}
 
 export function callback(callback, key) {
   return observable(callback, key);

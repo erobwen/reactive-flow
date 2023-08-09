@@ -1,4 +1,5 @@
-import { trace, getTarget, Flow, transaction, creators, callback, flow } from "../flow/Flow.js";
+import { trace, Flow, transaction, creators, callback, flow } from "../flow/Flow.js";
+import { getTarget } from "../flow/flowBuildContext.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { logMark } from "../flow/utility.js";
 import { div, extractAttributes, extractChildStyles, extractProperty, textToTextNode } from "./BasicHtml.js";

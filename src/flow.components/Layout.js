@@ -1,4 +1,4 @@
-import { trace, getTarget, Flow, transaction, creators } from "../flow/Flow.js";
+import { trace, Flow, transaction, creators } from "../flow/Flow.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { deepFreeze } from "../flow/utility.js";
 import { styledDiv } from "./BasicHtml.js";

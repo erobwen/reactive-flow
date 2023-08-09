@@ -1,6 +1,6 @@
 import { div, elemenNode } from "../flow.components/BasicHtml";
-import { getTarget } from "../flow/Flow";
 import flow from "../../resources/flow.svg"
+import { getTarget } from "../flow/flowBuildContext";
 
 const log = console.log;
 
