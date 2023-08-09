@@ -67,26 +67,25 @@ export class DOMFlowTarget extends FlowTarget {
   }
 
   elementNode(...parameters) {
-    return new DOMElementNode(findKeyInProperties(readFlowProperties(parameters)));
+    const properties = findKeyInProperties(readFlowProperties(parameters)); 
+    properties.type = "dom.elementNode";
+    return this.create({...properties});
   }
 
   textNode(...parameters) {
-    return new DOMTextNode(findKeyInProperties(readFlowProperties(parameters)));
+    const properties = findKeyInProperties(readFlowProperties(parameters)); 
+    properties.type = "dom.textNode";
+    return this.create({...properties});
   }
 
   create(...parameters) {
     const properties = findKeyInProperties(readFlowProperties(parameters));
-    // logMark("create");
-    // log(properties);
-    let result;
     switch(properties.type) {
       case "dom.textNode":
-        result = new DOMTextNode(properties);
+        return new DOMTextNode(properties);
       case "dom.elementNode": 
-        result = new DOMElementNode(properties);
+        return new DOMElementNode(properties);
     }
-    // logMark("... finished create");
-    return result; 
   }
 }
 
