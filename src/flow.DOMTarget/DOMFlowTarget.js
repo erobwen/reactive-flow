@@ -6,6 +6,7 @@ import { DOMTextNode} from "./DOMTextNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, removeDOMFlowTarget } from "./DOMAnimation";
 import { div } from "../flow.components/BasicWidgets";
+import { logMark } from "../flow/utility";
 
 const log = console.log;
 
@@ -71,6 +72,21 @@ export class DOMFlowTarget extends FlowTarget {
 
   textNode(...parameters) {
     return new DOMTextNode(findKeyInProperties(readFlowProperties(parameters)));
+  }
+
+  create(...parameters) {
+    const properties = findKeyInProperties(readFlowProperties(parameters));
+    // logMark("create");
+    // log(properties);
+    let result;
+    switch(properties.type) {
+      case "dom.textNode":
+        result = new DOMTextNode(properties);
+      case "dom.elementNode": 
+        result = new DOMElementNode(properties);
+    }
+    // logMark("... finished create");
+    return result; 
   }
 }
 

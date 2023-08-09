@@ -8,9 +8,6 @@ const log = console.log;
 
 export class FlowPrimitive extends Flow {
     
-  constructor(...parameters) {
-    super(readFlowProperties(parameters));
-  }
   
   findChild(key) {
     if (this.key === key) return this;

@@ -1,6 +1,7 @@
 import getWorld from "../causality/causality.js";
 import { isObservable } from "./Flow.js";
 import { logMark, isUpperCase } from "./utility.js";
+const log = console.log;
 
 export function addDefaultStyleToProperties(properties, defaultStyle) {
   properties.style = Object.assign({}, defaultStyle, properties.style);
@@ -85,7 +86,8 @@ export function findBuildInProperties(properties) {
   return properties;
 }
 
-export function readFlowProperties(arglist, config) {
+export function readFlowProperties(arglist) {
+  if (!(arglist instanceof Array)) throw new Error("readFlowProperties expects an array");
   // Shortcut if argument is a properties object
   if (arglist[0] !== null && typeof(arglist[0]) === "object" && !(arglist[0] instanceof Array) && !isObservable(arglist[0]) && typeof(arglist[1]) === "undefined") {
     return arglist[0];

@@ -24,18 +24,13 @@ export class FlowTarget {
     }
     
     // General creation method, this is similar to a service locator in the service locator pattern. 
-    // The purpose of this method is to choose what FlowPrimitive to use, given the configuration object.   
-    create(configuration) {
-        throw new Error("Not implemented yet!");
-    }
-
-    elementNode() {
-        // Should return an object of the type: FlowTargetPrimitive
-        throw new Error("Not implemented yet!");
-    }
-
-    textNode() {
-        // Should return an object of the type: FlowTargetPrimitive
+    // The purpose of this method is to choose what FlowPrimitive to create, given the properties object.
+    // This makes it possible to create total custom FlowTargets that reinterprets the properties in 
+    // new ways. For example, a DOMFlowTarget may create FlowPrimitive objects that renders a DOM in a web browsser.
+    // But the same flow could be sent to a FlowTarget that renders a native app, or create contents for a printout, 
+    // or create a server rendered page. The possibilities are endless!      
+    create(...parameters) {
+        const properties = readFlowProperties(parameters);
         throw new Error("Not implemented yet!");
     }
     
