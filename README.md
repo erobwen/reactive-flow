@@ -4,24 +4,27 @@ Note: This is a compound repository where I experiment with Flow together with o
 
 ![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
-* Minimal update dom rendering (equivalent functionality to React).
-    * Minimal component tree updated guaranteed. No need to distinguish between pure and unpure components. The component tree build mechanism of flow allways guarantees minimal updates even on the component level. 
+* Minimal update dom rendering
+    * Only render changes to the DOM (equivalent functionality to React).
+    * Minimal component tree updated guaranteed, this means. 
+        * No need to distinguish between pure and unpure components as in React. The component tree build mechanism of flow allways guarantees minimal updates even on the component level. 
     * Assignments that sets an object property to the same value as previously, do not cause updates, this is true for models, view models and components alike. 
 
 * Integrated and automated state handling. 
     * Very simple, just call "model({...yourData})" to create model data. 
     * Based on ES6 Proxies that tracks all changes and dependencies (equivalent functionality to MobX). 
-    * Safe model direct manipulation, your GUI will be automatically updated no matter how and when you update your model.
-    * No need to notify flow of changes, as they will be detected automatically.
-    * Safe view model and component direct manipulation.
-    * No need for observers, reducers, global data stores etc.  
+    * Safe model direct manipulation, your GUI will be automatically updated no matter how and when you update your model. This means: 
+        * No need to notify flow of changes, as they will be detected automatically.
+        * No need for observers, reducers, global data stores etc.  
+    * Each model object can belong to a store, that gets notifications whenever objects in that store updates, and how they are uptaded. I.e. "model(yourData, store)"
     * Support for infered data that is automatically updated.
+    * Data model transaction support. Changes done in a transaction will result in dom changes restricted to one single animation frame. 
 
 * Sophisticated global transition animation support. 
+    * Transition animations when components appear, dissapear or are moved accross your user interface. 
     * Easy to use, simply add property "animation: true" to your component. 
     * Fully configurable. 
-    * Transition animations when components appear, dissapear or are moved accross your user interface. 
-    * Uses FLIP animation technique to make components move with animation to new locations.
+    * Uses FLIP animation technique to make components move with animation to new locations anywhere on the screen.
     * Uses extra filler divs to make containers of animated objects animate their size as well when applicable.
 
 * Javascript first principle.
@@ -29,9 +32,24 @@ Note: This is a compound repository where I experiment with Flow together with o
     * Javascript used for styling
     * Javascript code used for responsiveness. 
     * No dependency on template litterals, jsx, Typescript HTML files or CSS, just plain Javascript with direct DOM manipulation! 
+    * Full reactive programmatic control over all aspects of your app. 
+
+* Render to any medium using flow target independent flow components
+    * With flow you typically build a structure of flow components, that typically render onto the DOM in a web browser.
+    * However, your flow components are not hardly dependent on the DOM and the web browser.
+        * A flow renders into flow primitives that in turn do the rendering onto the DOM.  
+        * A flow renders into flow primitives made available by the flow target, but flows are not directly dependent on specific flow primitives.
+        * The flow target acts as a service locator mechanism, or a dependency injector, creating a loose coupling between your flow components, and the flow primitives that perform the DOM rendering. 
+        * You can build your custom flow target, with its own set of flow primitives that is provided to the flow rendered upon it. 
+        * This means that you could theoretically render your flow components onto anything on any platform, as long as you have a flow target/flow-primitives that supports it.
+    * You can use flow targets in recursive configurations as you wish. For example, inside a flow component, there can be a new flow target, that another flow component renders onto, etc. 
+    * If you want to modify the existing dom rendering to support some missing feature? You can just overload DOMFlowTarget and related classes and do whatever changes you like. 
+
+* Compliance with web component standards. 
+    You can use Flow to use or to build webcomponents. For example, inside a web component definition, you can create a new flow target connected to the web component, that another inner flow component is rendered upon. The drawback of doing so is that the dom outside the web component needs to render and send new arguments to the web component, before any chage can happen to the flow inside the web component. This could potentially have consequences for frame and animation synchronization over the entire document as a whole. Flow component contexts will also not work within webcomponents. You can use webcomponents if you want to comply to modern web browser standards or integrate with other projects, or you can just use bare flow components if you want to have a better component intercommunication. The choice is yours!  
 
 * Possibility for explicit component life cycle handling: 
-    * Off-screen components is now a possibility. Allow components to live with a state off screen, for example usable for fast tab-panel switching where all dom elements of the hidden tab component are never deallocated.
+    * Off-screen (dissconnected from the DOM), components is now a possibility. Allow components to live with a state off screen, disconnected from the document yet having all dom nodes ready, for example usable for fast tab-panel switching where all dom elements of the hidden tab component are never deallocated.
     * A component can move from one place in the DOM structure to another while maintaining its state. 
     * Three ways to persist and maintain the state of a sub component: 
         * Rendered components will be persisted implicitly using pattern matching of the build structure. 
