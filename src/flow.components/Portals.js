@@ -2,7 +2,7 @@ import { extractAttributes } from "../flow.DOMTarget/domNodeAttributes.js";
 import { Flow, transaction, creators } from "../flow/Flow.js";
 import { getTarget } from "../flow/flowBuildContext.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { div, div2 } from "./BasicHtml.js";
+import { div, div2 } from "../flow.DOMTarget/BasicHtml.js";
 import { text } from "./BasicWidgets.js";
 const log = console.log;
 

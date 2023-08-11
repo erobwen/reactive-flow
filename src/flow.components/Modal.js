@@ -1,7 +1,7 @@
 import { Flow, transaction } from "../flow/Flow.js";
 import { creators } from "../flow/flowBuildContext.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { div, div2 } from "./BasicHtml.js";
+import { div, div2 } from "../flow.DOMTarget/BasicHtml.js";
 import { text } from "./BasicWidgets.js";
 const log = console.log;
 

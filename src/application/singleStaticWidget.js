@@ -4,7 +4,7 @@ import { panel, text } from "../flow.components/BasicWidgets";
 import { column, filler, row, centerMiddle, columnStyle} from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
-import { div, span } from "../flow.components/BasicHtml"
+import { div, span } from "../flow.DOMTarget/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
 import { suitcaseIcon } from "../flow.components/Icons";

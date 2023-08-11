@@ -3,7 +3,7 @@ import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowPara
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { basicWidgetTheme, numberInputField, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../flow.components/Layout";
-import { div } from "../flow.components/BasicHtml"
+import { div } from "../flow.DOMTarget/BasicHtml"
 ;
 import { logMark } from "../flow/utility";
 import { fitTextWithinWidth } from "../flow.DOMTarget/fontMetrics";

@@ -3,7 +3,7 @@ import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowPara
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
-import { div } from "../flow.components/BasicHtml"
+import { div } from "../flow.DOMTarget/BasicHtml"
 ;
 import { adjustLightness } from "../flow.components/Color";
 import { modernButton } from "../flow.components/ModernButton";

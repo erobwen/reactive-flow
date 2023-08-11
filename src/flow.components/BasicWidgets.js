@@ -2,7 +2,7 @@ import { extractAttributes, extractChildStyles, extractProperty } from "../flow.
 import { trace, Flow, callback } from "../flow/Flow.js";
 import { getTarget } from "../flow/flowBuildContext.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { div,  textToTextNode } from "./BasicHtml.js";
+import { div,  textToTextNode } from "../flow.DOMTarget/BasicHtml.js";
 import { filler, row } from "./Layout.js";
 const log = console.log;
 

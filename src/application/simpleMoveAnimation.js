@@ -4,7 +4,7 @@ import { text } from "../flow.components/BasicWidgets";
 import { column, filler, fillerStyle, row } from "../flow.components/Layout";
 import { modernButton } from "../flow.components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../flow.components/Style";
-import { div } from "../flow.components/BasicHtml"
+import { div } from "../flow.DOMTarget/BasicHtml"
 ;
 import { button } from "../flow.components/Theme";
 import { startExperiment, inExperiment } from "..";

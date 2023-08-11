@@ -3,7 +3,7 @@
  * Basic HTML Node building 
  */
 
-import { extractAttributes, extractProperty } from "../flow.DOMTarget/domNodeAttributes";
+import { extractAttributes, extractProperty } from "./domNodeAttributes";
 import { getTarget } from "../flow/flowBuildContext";
 import { readFlowProperties, findTextAndKeyInPropertiesUsingCase, findTextAndKeyInProperties, findKeyInProperties } from "../flow/flowParameters";
 

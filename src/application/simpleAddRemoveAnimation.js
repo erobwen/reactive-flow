@@ -1,4 +1,4 @@
-import { div } from "../flow.components/BasicHtml";
+import { div } from "../flow.DOMTarget/BasicHtml";
 import { button, text } from "../flow.components/BasicWidgets";
 import { column } from "../flow.components/Layout";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";

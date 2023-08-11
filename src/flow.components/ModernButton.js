@@ -1,5 +1,5 @@
 import { Flow } from "../flow/Flow";
-import { div } from "./BasicHtml";
+import { div } from "../flow.DOMTarget/BasicHtml";
 import { adjustLightness, grayColor } from "./Color";
 import { button, text } from "../flow.components/BasicWidgets";
 import { panelStyle } from "./Style";

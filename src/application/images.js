@@ -1,4 +1,4 @@
-import { div, elemenNode } from "../flow.components/BasicHtml";
+import { div, elemenNode } from "../flow.DOMTarget/BasicHtml";
 import flow from "../../resources/flow.svg"
 import { getTarget } from "../flow/flowBuildContext";
 
