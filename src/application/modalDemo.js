@@ -2,14 +2,14 @@ import { Flow } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../components/basic/BasicWidgets";
-import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../components/Layout";
+import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../components/basic/Layout";
 import { div } from "../flow.DOMTarget/BasicHtml"
 ;
-import { adjustLightness } from "../components/Color";
-import { modernButton } from "../components/ModernButton";
-import { animatedContainerStyle } from "../components/Style";
-import { modal, modalFrame } from "../components/Modal";
-import { button } from "../components/Theme";
+import { adjustLightness } from "../components/themed/Color";
+import { modernButton } from "../components/modern/ModernButton";
+import { animatedContainerStyle } from "../components/modern/Style";
+import { modal, modalFrame } from "../components/basic/Modal";
+import { button } from "../components/themed/Theme";
 
 
 const log = console.log;

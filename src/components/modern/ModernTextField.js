@@ -3,8 +3,8 @@ import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowPara
 import { div } from "../flow.DOMTarget/BasicHtml";
 import { adjustLightness } from "./Color";
 import { button, inputField, text, textInputField } from "./basic/BasicWidgets";
-import { panelStyle } from "./Style";
-import { centerMiddle, column, filler, fitStyle, row } from "./Layout";
+import { panelStyle } from "./modern/Style";
+import { centerMiddle, column, filler, fitStyle, row } from "./basic/Layout";
 
 const log = console.log; 
 

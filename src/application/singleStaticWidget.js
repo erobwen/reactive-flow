@@ -1,13 +1,13 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../components/basic/BasicWidgets";
-import { column, filler, row, centerMiddle, columnStyle} from "../components/Layout";
-import { modernButton } from "../components/ModernButton";
-import { animatedContainerStyle, borderStyle, panelStyle } from "../components/Style";
+import { column, filler, row, centerMiddle, columnStyle} from "../components/basic/Layout";
+import { modernButton } from "../components/modern/ModernButton";
+import { animatedContainerStyle, borderStyle, panelStyle } from "../components/modern/Style";
 import { div, span } from "../flow.DOMTarget/BasicHtml"
 ;
-import { button } from "../components/Theme";
-import { suitcaseIcon } from "../components/Icons";
+import { button } from "../components/themed/Theme";
+import { suitcaseIcon } from "../components/basic/Icons";
 
 
 const log = console.log;

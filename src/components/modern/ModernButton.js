@@ -1,11 +1,11 @@
-import { Flow } from "../flow/Flow";
-import { div } from "../flow.DOMTarget/BasicHtml";
-import { adjustLightness, grayColor } from "./Color";
-import { button, text } from "./basic/BasicWidgets";
+import { Flow } from "../../flow/Flow";
+import { div } from "../../flow.DOMTarget/BasicHtml";
+import { adjustLightness, grayColor } from "../themed/Color";
+import { button, text } from "../basic/BasicWidgets";
 import { panelStyle } from "./Style";
-import { centerMiddle, fitStyle, wrapper } from "./Layout";
-import { logMark } from "../flow/utility";
-import { findTextKeyAndOnClickInProperties, readFlowProperties } from "../flow/flowParameters";
+import { centerMiddle, fitStyle, wrapper } from "../basic/Layout";
+import { logMark } from "../../flow/utility";
+import { findTextKeyAndOnClickInProperties, readFlowProperties } from "../../flow/flowParameters";
 
 const log = console.log; 
 

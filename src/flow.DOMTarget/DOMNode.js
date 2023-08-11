@@ -1,4 +1,4 @@
-import { flexAutoStyle } from "../components/Layout";
+import { flexAutoStyle } from "../components/basic/Layout";
 import { repeat, Flow, trace, configuration, finalize } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { FlowPrimitive } from "../flow/FlowPrimitive";

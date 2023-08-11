@@ -1,11 +1,11 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text } from "../components/basic/BasicWidgets";
-import { column, filler, fillerStyle, row } from "../components/Layout";
-import { modernButton } from "../components/ModernButton";
-import { animatedContainerStyle, borderStyle, panelStyle } from "../components/Style";
+import { column, filler, fillerStyle, row } from "../components/basic/Layout";
+import { modernButton } from "../components/modern/ModernButton";
+import { animatedContainerStyle, borderStyle, panelStyle } from "../components/modern/Style";
 ;
-import { button } from "../components/Theme";
+import { button } from "../components/themed/Theme";
 import { startExperiment, inExperiment } from "..";
 import { div } from "../flow.DOMTarget/BasicHtml";
 

@@ -1,8 +1,8 @@
-import { extractAttributes } from "../flow.DOMTarget/domNodeAttributes.js";
-import { Flow } from "../flow/Flow.js";
-import { getTarget } from "../flow/flowBuildContext.js";
-import { readFlowProperties, findKeyInProperties } from "../flow/flowParameters";
-import { text } from "./basic/BasicWidgets.js";
+import { extractAttributes } from "../../flow.DOMTarget/domNodeAttributes.js";
+import { Flow } from "../../flow/Flow.js";
+import { getTarget } from "../../flow/flowBuildContext.js";
+import { readFlowProperties, findKeyInProperties } from "../../flow/flowParameters";
+import { text } from "./BasicWidgets.js";
 const log = console.log;
 
 

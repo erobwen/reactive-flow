@@ -1,4 +1,4 @@
-import { adjustLightness, rgba2hex } from "../components/Color";
+import { adjustLightness, rgba2hex } from "../components/themed/Color";
 
 export const log = console.log;
 

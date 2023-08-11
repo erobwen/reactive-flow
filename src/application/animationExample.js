@@ -1,7 +1,7 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { animationTime } from "../flow.DOMTarget/DOMNodeAnimation";
-import { column, filler, row } from "../components/Layout";
+import { column, filler, row } from "../components/basic/Layout";
 import { button, text } from "../components/basic/BasicWidgets";
 import { div } from "../flow.DOMTarget/BasicHtml";
 import { startExperiment } from "..";

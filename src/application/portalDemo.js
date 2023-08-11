@@ -1,8 +1,8 @@
 import { observable, world, repeat, when, Flow, finalize, readFlowProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { portalEntrance } from "../components/Portals";
+import { portalEntrance } from "../components/basic/Portals";
 import { button, text } from "../components/basic/BasicWidgets";
-import { column, filler, row } from "../components/Layout";
+import { column, filler, row } from "../components/basic/Layout";
 
 const log = console.log;
 const loga = (action) => {
