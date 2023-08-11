@@ -1,7 +1,7 @@
 import { Flow } from "../flow/Flow";
 import { div } from "../flow.DOMTarget/BasicHtml";
 import { adjustLightness, grayColor } from "./Color";
-import { button, text } from "../components/BasicWidgets";
+import { button, text } from "./basic/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, fitStyle, wrapper } from "./Layout";
 import { logMark } from "../flow/utility";

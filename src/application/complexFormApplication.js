@@ -3,7 +3,7 @@ import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 // import { simpleButton as button } from "../components/SimpleButton";
 import { div, span, textNode } from "../flow.DOMTarget/BasicHtml";
 import { column, filler, flexGrowShrinkStyle, row } from "../components/Layout";
-import { checkboxInputField, numberInputField, text } from "../components/BasicWidgets";
+import { checkboxInputField, numberInputField, text } from "../components/basic/BasicWidgets";
 import { button, textInputField } from "../components/Theme";
 import { crossIcon, plusIcon, suitcaseIcon, icon } from "../components/Icons";
 

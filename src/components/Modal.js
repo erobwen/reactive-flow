@@ -1,8 +1,8 @@
 import { Flow, transaction } from "../flow/Flow.js";
-import { creators } from "../flow/flowBuildContext.js";
-import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { div, div2 } from "../flow.DOMTarget/BasicHtml.js";
-import { text } from "./BasicWidgets.js";
+import { creators, getTarget } from "../flow/flowBuildContext.js";
+import { readFlowProperties, findKeyInProperties } from "../flow/flowParameters";
+import { div } from "../flow.DOMTarget/BasicHtml.js";
+import { extractAttributes } from "../flow.DOMTarget/domNodeAttributes.js";
 const log = console.log;
 
 /**
@@ -155,7 +155,13 @@ class ModalFrame extends Flow {
 
   build() {
     if (this.reallyDisposed) throw new Error("CANNOT REBUILD A DISPOSED ONE!!!");
-    return new div2({style: this.style, children: this.actualChildren});
+    return new modalFrameDiv({style: this.style, children: this.actualChildren});
     // return new styledDiv("modalFrame", this.style, {children: this.actualChildren});
   }
+}
+
+export function modalFrameDiv(...parameters) {
+  let properties = findKeyInProperties(readFlowProperties(parameters)); 
+  const attributes = extractAttributes(properties);
+  return getTarget().create({type: "dom.elementNode", tagName: "div", key: properties.key, classNameOverride: "modal-frame", attributes, children: properties.children});
 }

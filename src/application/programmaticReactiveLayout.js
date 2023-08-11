@@ -1,7 +1,7 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { basicWidgetTheme, numberInputField, text } from "../components/BasicWidgets";
+import { basicWidgetTheme, numberInputField, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../components/Layout";
 import { div } from "../flow.DOMTarget/BasicHtml"
 ;

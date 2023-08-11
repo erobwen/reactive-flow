@@ -1,6 +1,6 @@
 import { observable, world, repeat, when, Flow, finalize, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { button, numberInputField, text } from "../components/BasicWidgets";
+import { button, numberInputField, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../components/Layout";
 ;
 import { modal } from "../components/Portals";

@@ -33,13 +33,7 @@ export function div(...parameters) {
   return getTarget().create({type: "dom.elementNode", tagName: "div", key: properties.key, classNameOverride: "div", attributes, children: properties.children, animate: properties.animate});
 }
 
-export function div2(...parameters) {
-  let properties = findKeyInProperties(readFlowProperties(parameters)); 
-  const attributes = extractAttributes(properties);
-  return getTarget().create({type: "dom.elementNode", tagName: "div", key: properties.key, classNameOverride: "modal-frame", attributes, children: properties.children});
-}
-
- export function styledDiv(classNameOverride, style, parameters) { 
+export function styledDiv(classNameOverride, style, parameters) { 
   const properties = findKeyInProperties(readFlowProperties(parameters));
   const attributes = extractAttributes(properties);
   attributes.style = {...style, ...attributes.style}; // Inject row style (while making it possible to override)

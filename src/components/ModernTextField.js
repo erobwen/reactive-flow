@@ -2,7 +2,7 @@ import { findTextKeyAndOnClickInProperties, Flow } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { div } from "../flow.DOMTarget/BasicHtml";
 import { adjustLightness } from "./Color";
-import { button, inputField, text, textInputField } from "../components/BasicWidgets";
+import { button, inputField, text, textInputField } from "./basic/BasicWidgets";
 import { panelStyle } from "./Style";
 import { centerMiddle, column, filler, fitStyle, row } from "./Layout";
 

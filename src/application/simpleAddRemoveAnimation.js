@@ -1,5 +1,5 @@
 import { div } from "../flow.DOMTarget/BasicHtml";
-import { button, text } from "../components/BasicWidgets";
+import { button, text } from "../components/basic/BasicWidgets";
 import { column } from "../components/Layout";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";
 import { Flow } from "../flow/Flow";

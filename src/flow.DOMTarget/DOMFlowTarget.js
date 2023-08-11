@@ -5,7 +5,7 @@ import { DOMElementNode, DOMModalNode } from "./DOMElementNode";
 import { DOMTextNode} from "./DOMTextNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, removeDOMFlowTarget } from "./DOMAnimation";
-import { div } from "../components/BasicWidgets";
+import { div } from "../components/basic/BasicWidgets";
 import { logMark } from "../flow/utility";
 
 const log = console.log;

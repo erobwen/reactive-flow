@@ -1,8 +1,8 @@
 import { div } from "../flow.DOMTarget/BasicHtml";
-import { textInputField as basicTextInputField } from "./BasicWidgets";
+import { textInputField as basicTextInputField } from "./basic/BasicWidgets";
 import { modernButton } from "./ModernButton"
 import { modernTextField } from "./ModernTextField";
-import { button as basicButton } from "./BasicWidgets";
+import { button as basicButton } from "./basic/BasicWidgets";
 
 
 export function button(...parameters) {

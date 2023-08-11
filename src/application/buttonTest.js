@@ -1,4 +1,4 @@
-import { text } from "../components/BasicWidgets";
+import { text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, fitStyle } from "../components/Layout";
 import { modernButton } from "../components/ModernButton";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";

@@ -1,7 +1,7 @@
 import { Flow } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { panel, text } from "../components/BasicWidgets";
+import { panel, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../components/Layout";
 import { div } from "../flow.DOMTarget/BasicHtml"
 ;

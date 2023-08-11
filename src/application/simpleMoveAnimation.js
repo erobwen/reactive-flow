@@ -1,6 +1,6 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { text } from "../components/BasicWidgets";
+import { text } from "../components/basic/BasicWidgets";
 import { column, filler, fillerStyle, row } from "../components/Layout";
 import { modernButton } from "../components/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../components/Style";
