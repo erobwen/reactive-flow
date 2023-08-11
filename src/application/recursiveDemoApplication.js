@@ -2,7 +2,6 @@ import { observable, world, repeat, when, Flow, finalize, getTarget } from "../f
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, numberInputField, text } from "../flow.components/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../flow.components/Layout";
-import { extractAttributes } from "../flow.components/BasicHtml"
 ;
 import { modal } from "../flow.components/Portals";
 

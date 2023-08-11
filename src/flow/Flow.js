@@ -119,10 +119,7 @@ export class Flow {
   }
 
   constructor(...parameters) {
-    log("constructor")
-    log([...parameters])
     let properties = findKeyInProperties(readFlowProperties(parameters));
-    log({...properties})
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
     // For debug purposes, this place this property first in the list and makes it easier to identify flows when they are proxies in the debugger. 

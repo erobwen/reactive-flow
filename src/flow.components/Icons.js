@@ -6,7 +6,8 @@ import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickIn
 
 import { aggregateToString } from '../flow.DOMTarget/DOMNode';
 import { logMark } from '../flow/utility';
-import { elemenNode, extractProperty, span } from './BasicHtml';
+import { elemenNode, span } from './BasicHtml';
+import { extractProperty } from '../flow.DOMTarget/domNodeAttributes';
 // library.add(faSuitcase);
 // library.add(faPlus);
 // library.add(faCross);
