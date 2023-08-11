@@ -1,15 +1,15 @@
 import { Flow } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { panel, text } from "../flow.components/BasicWidgets";
-import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../flow.components/Layout";
+import { panel, text } from "../components/BasicWidgets";
+import { centerMiddle, centerMiddleStyle, column, columnStyle, fitStyle, row, zStack, zStackElementStyle } from "../components/Layout";
 import { div } from "../flow.DOMTarget/BasicHtml"
 ;
-import { adjustLightness } from "../flow.components/Color";
-import { modernButton } from "../flow.components/ModernButton";
-import { animatedContainerStyle } from "../flow.components/Style";
-import { modal, modalFrame } from "../flow.components/Modal";
-import { button } from "../flow.components/Theme";
+import { adjustLightness } from "../components/Color";
+import { modernButton } from "../components/ModernButton";
+import { animatedContainerStyle } from "../components/Style";
+import { modal, modalFrame } from "../components/Modal";
+import { button } from "../components/Theme";
 
 
 const log = console.log;

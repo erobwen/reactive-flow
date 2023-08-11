@@ -1,11 +1,11 @@
 import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-// import { simpleButton as button } from "../flow.components/SimpleButton";
+// import { simpleButton as button } from "../components/SimpleButton";
 import { div, span, textNode } from "../flow.DOMTarget/BasicHtml";
-import { column, filler, flexGrowShrinkStyle, row } from "../flow.components/Layout";
-import { checkboxInputField, numberInputField, text } from "../flow.components/BasicWidgets";
-import { button, textInputField } from "../flow.components/Theme";
-import { crossIcon, plusIcon, suitcaseIcon, icon } from "../flow.components/Icons";
+import { column, filler, flexGrowShrinkStyle, row } from "../components/Layout";
+import { checkboxInputField, numberInputField, text } from "../components/BasicWidgets";
+import { button, textInputField } from "../components/Theme";
+import { crossIcon, plusIcon, suitcaseIcon, icon } from "../components/Icons";
 
 const log = console.log;
 

@@ -1,8 +1,8 @@
 import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { animationTime } from "../flow.DOMTarget/DOMNodeAnimation";
-import { column, filler, row } from "../flow.components/Layout";
-import { button, text } from "../flow.components/BasicWidgets";
+import { column, filler, row } from "../components/Layout";
+import { button, text } from "../components/BasicWidgets";
 import { div } from "../flow.DOMTarget/BasicHtml";
 import { startExperiment } from "..";
 import { standardAnimation } from "../flow.DOMTarget/ZoomFlyDOMNodeAnimation";

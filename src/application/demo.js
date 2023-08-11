@@ -9,11 +9,11 @@ import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
 import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
-import { portalExit } from "../flow.components/Portals";
-import { button } from "../flow.components/Theme";
-import { column, columnStyle, filler, flexAutoStyle, row } from "../flow.components/Layout";
-import { modernButton } from "../flow.components/ModernButton";
-import { modalFrame } from "../flow.components/Modal";
+import { portalExit } from "../components/Portals";
+import { button } from "../components/Theme";
+import { column, columnStyle, filler, flexAutoStyle, row } from "../components/Layout";
+import { modernButton } from "../components/ModernButton";
+import { modalFrame } from "../components/Modal";
 import { svgImage } from "./images";
 import { startExperiment } from "..";
 

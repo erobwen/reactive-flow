@@ -1,4 +1,4 @@
-import { adjustLightness, rgba2hex } from "../flow.components/Color";
+import { adjustLightness, rgba2hex } from "../components/Color";
 
 export const log = console.log;
 

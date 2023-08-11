@@ -1,8 +1,8 @@
 import { observable, Flow, flow, repeat } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { basicWidgetTheme, numberInputField, text } from "../flow.components/BasicWidgets";
-import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../flow.components/Layout";
+import { basicWidgetTheme, numberInputField, text } from "../components/BasicWidgets";
+import { centerMiddle, column, fitStyle, flexAutoHeightStyle, flexAutoStyle, flexGrowShrinkStyle, flexerStyle, row } from "../components/Layout";
 import { div } from "../flow.DOMTarget/BasicHtml"
 ;
 import { logMark } from "../flow/utility";
