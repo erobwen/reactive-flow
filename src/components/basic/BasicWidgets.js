@@ -211,7 +211,7 @@ export const panel = (...parameters) => {
   return new Flow({
     ...properties,
     description: "panel",
-    build: flow => {
+    buildFunction: flow => {
       return div("panel", properties);
     }
   });

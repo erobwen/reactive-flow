@@ -7,9 +7,16 @@
 export let creators = [];
 
 export function getCreator() {
+  if (!creators.length) return null;
   return creators[creators.length - 1];
 }
 
 export function getTarget() {
-  return creators[creators.length - 1].target;
+  const creator = getCreator();
+  return creator ? creator.target : null;
+}
+
+export function getTheme() {
+  const creator = getCreator();
+  return creator ? creator.theme : null;
 }

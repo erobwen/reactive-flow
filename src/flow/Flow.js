@@ -1,7 +1,7 @@
 import getWorld from "../causality/causality.js";
 import { logMark, isUpperCase } from "./utility.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { creators } from "./flowBuildContext.js";
+import { creators, getCreator, getTarget, getTheme } from "./flowBuildContext.js";
 const log = console.log;
 
 
@@ -67,6 +67,7 @@ export const model = deeplyObservable;
 export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
+  autoAssignProperties: false, 
   defaultTransitionAnimations: null,
   onFinishReBuildingFlowCallbacks: [],
   onFinishReBuildingDOMCallbacks:  [],
@@ -101,6 +102,9 @@ window.model = model;
  * Flow
  */
 export class Flow {
+  theme;
+  target; 
+
   get id() {
     return this.causality.id;
   }
@@ -119,34 +123,37 @@ export class Flow {
   }
 
   constructor(...parameters) {
+    // Process parameters. 
     let properties = findKeyInProperties(readFlowProperties(parameters));
+    if (properties.build) {
+      properties.buildFunction = properties.build;
+      delete properties.build;
+    }
     // log("Flow constructor: " + this.className() + "." + properties.key);
 
     // For debug purposes, this place this property first in the list and makes it easier to identify flows when they are proxies in the debugger. 
     this._ = null; 
 
-    // Key & Creator
+    // Key
     if (!this.key) this.key = properties.key ? properties.key : null;
     delete properties.key;
-    this.creator = creators.length > 0 ? creators[creators.length - 1] : null; // Note this can only be done in constructor!
     // this.flowDepth = this.creator ? this.creator.flowDepth + 1 : 0;
-
-    // Set properties by bypassing setProperties. TODO: Remove this!?
-    for (let property in properties) {
-      let destination = property;
-      if (property === "build") destination = "buildFunction";
-      this[destination] = properties[property];
+    
+    // Auto set all properties to this. Have an option for this?
+    if (configuration.autoAssignProperties) {
+      Object.assign(this, properties);
     }
-
-    // Inherit target from parent. TODO: Use general inheritance mechanism instead or let this be? 
-    this.target = this.creator ? this.creator.target : null;
+    
+    // Get and inherit certain things from creator.
+    this.creator = getCreator(); // Note this can only be done in constructor!
+    this.inheritFromCreator();
 
     // Create observable
     let me = observable(this, this.key);
 
     // Set properties through interface, set default values here.
     me.setProperties(properties); 
-    
+        
     // Debug & warning
     me._ = me.toString(); 
     if (configuration.warnWhenNoKey && me.key === null && me.creator)
@@ -159,10 +166,23 @@ export class Flow {
     return me;
   }
 
+  
+  /**
+   * Creator inheritance
+   */
+
+  setTheme(theme) {
+    this.theme = theme; 
+  }
+
+  setTarget(target) {
+    this.target = target; 
+  }
+
+
   /**
    * Lifecycle methods
    */
-
   setProperties() {
     // throw new Error("Not implemented yet");
   }
@@ -185,11 +205,22 @@ export class Flow {
     // throw new Error("Not implemented yet");
   }
 
+
+  /**
+   * Inheritance 
+   */
+  inheritFromCreator() {
+    if (this.creator) {
+      this.setTarget(this.creator.target);
+      this.setTheme(this.creator.theme);
+    }
+  }
+
   inherit(property) {
     const result = this.inheritCached(property);
-    withoutRecording(()=> {
-      // log("inherit: " + property + " result: " + result);
-    })
+    // withoutRecording(()=> {
+    //   // log("inherit: " + property + " result: " + result);
+    // })
     return result; 
   }
 
