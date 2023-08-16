@@ -80,6 +80,7 @@ function createWorld(configuration) {
     dirtyRepeaters: [...Array(configuration.priorityLevels).keys()].map(() => ({first: null, last: null})),
     refreshingAllDirtyRepeaters: false,
     workOnPriorityLevel: [...Array(configuration.priorityLevels).keys()].map(() => 0),
+    revalidationLevelLock: -1,
   };
 
 
@@ -262,6 +263,17 @@ function createWorld(configuration) {
     state.workOnPriorityLevel[level]--
     if (state.workOnPriorityLevel[level] === 0) {
       if (typeof(configuration.onFinishedPriorityLevel) === "function") {
+        // Trigger revalidation of next level.
+        state.revalidationLevelLock = level;
+
+        // Ensure work on next level?
+        // const nextLevel = level + 1;
+        // if (!state.workOnPriorityLevel[nextLevel]) {
+        //   setTimeout(() => {
+        //     enterPriorityLevel(nextLevel);
+        //     exitPriorityLevel(nextLevel);
+        //   }, 0);
+        // }
         configuration.onFinishedPriorityLevel(level, !anyDirtyRepeater());
       }
     }
@@ -1691,13 +1703,24 @@ function createWorld(configuration) {
 
   function firstDirtyRepeater() {
     const priorityList = state.dirtyRepeaters; 
-    let priority = 0; 
+    let priority = state.revalidationLevelLock + 1;
     while (priority < priorityList.length) {
       if (priorityList[priority].first) {
         return priorityList[priority].first;
       }
       priority++;
     }
+
+    // Nothing found, reset lock and start again! 
+    state.revalidationLevelLock = -1;
+    priority = state.revalidationLevelLock + 1;
+    while (priority < priorityList.length) {
+      if (priorityList[priority].first) {
+        return priorityList[priority].first;
+      }
+      priority++;
+    }
+
     return null; 
   }
 
