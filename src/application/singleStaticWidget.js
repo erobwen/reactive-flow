@@ -20,7 +20,7 @@ export class SingleStaticWidget extends Flow {
 
   build() {
   
-    // const singleWidget = text("Hello");
+    const singleWidget = text("Hello");
 
     // const singleWidget = button(
     //   suitcaseIcon(), 
@@ -28,7 +28,7 @@ export class SingleStaticWidget extends Flow {
     //   () => { log("Pressed!") }
     // );
 
-    const singleWidget = panel(text("in a panel"));
+    // const singleWidget = panel(text("in a panel"));
   
     return centerMiddle(singleWidget);
   }

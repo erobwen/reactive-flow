@@ -4,6 +4,9 @@ Note: This is a compound repository where I experiment with Flow together with o
 
 ![Logotype](/src/document/flow.PNG?raw=true "Flow Logotype")
 
+* Composite component model. 
+    * Allows you to build a user interface as a composite of components. Each component builds reactivley into a composite of other components or primitive components. 
+
 * Minimal update dom rendering
     * Only render changes to the DOM (equivalent functionality to React).
     * Minimal component tree updated guaranteed, this means. 
