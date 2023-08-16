@@ -211,7 +211,7 @@ export function clearNode(node) {
   ensureDomNodeExists() { 
     if (this.givenDomNode) {
       this.domNode = this.givenDomNode;
-      this.domNode.id = aggregateToString(this);
+      // this.domNode.id = aggregateToString(this);
       this.domNode.equivalentCreator = this; 
     } else if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {

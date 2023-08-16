@@ -15,6 +15,9 @@ import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnim
 import { logMark } from "./flow/utility.js";
 import { setAnimationTime } from "./flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
 
+if (module.hot) {
+  module.hot.accept();
+}
 
 const debuggingState = model({
   inExperiment: false
