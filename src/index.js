@@ -1,11 +1,11 @@
 import { startRecursiveDemo } from "./application/recursiveDemoApplication.js";
 import { startHelloWorld } from "./application/helloWorldApplication.js";
-import { model, setFlowConfiguration } from "./flow/Flow.js";
+import { configuration, model, setFlowConfiguration } from "./flow/Flow.js";
 import { startProgrammaticReactiveLayout } from "./application/programmaticReactiveLayout.js";
 import { startComplexFormApplication } from "./application/complexFormApplication.js";
 import { startAnimationExample } from "./application/animationExample.js";
 import { startDemo } from "./application/demo.js";
-import { installDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
+import { installDOMAnimation, resetDOMAnimation } from "./flow.DOMTarget/DOMAnimation.js";
 import { startPatternMatching } from "./application/patternMatching.js";
 import { buttonTest } from "./application/buttonTest.js";
 import { startModalDemo } from "./application/modalDemo.js";
@@ -17,6 +17,11 @@ import { setAnimationTime } from "./flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
 
 if (module.hot) {
   module.hot.accept();
+  module.hot.dispose(() => { 
+    resetDOMAnimation();
+    configuration.onFinishReBuildingFlowCallbacks.length = 0;
+    configuration.onFinishReBuildingDOMCallbacks.length = 0;
+  });
 }
 
 const debuggingState = model({

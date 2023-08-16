@@ -15,6 +15,16 @@ export function installDOMAnimation() {
   configuration.onFinishReBuildingDOMCallbacks.push(onFinishReBuildingDOM);
 }
 
+/**
+ * Reset global animation state (on hot reload)
+ */
+export function resetDOMAnimation() {
+  Object.assign(flowChanges, newFlowChanges());
+  previousFlowChanges = {}
+  counter = 0;
+  domFlowTargets = [];
+}
+
 
 /**
  * Freeze flow changes (to prevent chained animations)
@@ -37,7 +47,7 @@ export function unfreezeFlowChanges() {
  * DOM Flow Targets to animate
  */
 
-const domFlowTargets = [];
+let domFlowTargets = [];
 
 export function addDOMFlowTarget(target) {
   domFlowTargets.push(target)
@@ -81,8 +91,11 @@ export function extractProperties(object, properties) {
 /**
  * Global flow change tracking
  */
+export const flowChanges = newFlowChanges();
 
-export const flowChanges = {
+function newFlowChanges() {
+  return ({
+
   number: 0,
 
   idPrimitiveMap: {},
@@ -175,13 +188,14 @@ export const flowChanges = {
       yield flow; 
     }
   },
+})
 };
 
 
 /**
  * Flow changes, to keep track of animation frames. 
  */
-export const previousFlowChanges = {}
+export let previousFlowChanges = {}
 window.flowChanges = flowChanges;
 let counter = 0;
 
