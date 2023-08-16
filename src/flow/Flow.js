@@ -263,19 +263,19 @@ export class Flow {
     }
   }
   
-  inheritFromParentContainer(property) {
-    if (this[property]) {
-      return this[property];
-    } else if (this.parentPrimitive) {
-      const valueFromEquivalent = this.parentPrimitive.inheritFromEquivalentCreator(property);
-      if (valueFromEquivalent) {
-        return valueFromEquivalent;
-      }
-      return this.parentPrimitive.inheritFromParentContainer(property)
-    } else {
-      return null; 
-    }
-  }
+  // inheritFromParentContainer(property) {
+  //   if (this[property]) {
+  //     return this[property];
+  //   } else if (this.parentPrimitive) {
+  //     const valueFromEquivalent = this.parentPrimitive.inheritFromEquivalentCreator(property);
+  //     if (valueFromEquivalent) {
+  //       return valueFromEquivalent;
+  //     }
+  //     return this.parentPrimitive.inheritFromParentContainer(property)
+  //   } else {
+  //     return null; 
+  //   }
+  // }
 
   inheritFromEquivalentCreator(property) {
     const propertyValue = this[property];
@@ -611,7 +611,8 @@ function getShapeAnalysis(flow) {
       // log(newFlow instanceof Flow);
       // log(newFlow.className() === establishedFlow.className());
       // log(newFlow.classNameOverride === establishedFlow.classNameOverride);
-      return (establishedFlow instanceof Flow && newFlow instanceof Flow  
+      return (establishedFlow instanceof Flow && newFlow instanceof Flow
+        && (!newFlow.tagName || newFlow.tagName === establishedFlow.tagName)  
         && (newFlow.className() === establishedFlow.className()) 
         && (newFlow.classNameOverride === establishedFlow.classNameOverride));
     },

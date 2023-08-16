@@ -27,14 +27,14 @@ export class Modal extends Flow {
   }
 
   ensure() {
-    this.modalFrame = this.inheritFromParentContainer("modalFrame")
-    if (this.isVisible && this.modalFrame) {
-      this.visibleOnFrame = this.modalFrame;
-      this.modalFrame.openModal(this.content);
+    const modalFrame = this.inherit("modalFrame")
+    if (this.isVisible && modalFrame) {
+      this.visibleOnFrame = modalFrame;
+      modalFrame.openModal(this.content);
     } 
     
-    if (!this.isVisible && this.visibleOnFrame) {
-      this.modalFrame.closeModal(this.content);
+    if (!this.isVisible && this.visibleOnFrame === modalFrame) {
+      modalFrame.closeModal(this.content);
     }
   }
 
