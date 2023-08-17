@@ -38,7 +38,7 @@ const color = "rgba(170, 100, 100, 1)";
 const animationFrameBackgroundColor = rgba2hex("rgba(150, 150, 255, 1)");
 const animationFrameColor = "#000000"; //rgba2hex("rgba(255, 255, 255, 1)");
 const animationFrameSeparatorBackgroundColor = adjustLightness(animationFrameBackgroundColor, +0.1)
-export function logAnimationFrame(counter) {
+export function logAnimationFrameGroup(counter) {
   const text = "      Animation Frame " + counter + "      ";
   const colors = `background: ${animationFrameBackgroundColor}; color: ${animationFrameColor}`
   // log(colors);

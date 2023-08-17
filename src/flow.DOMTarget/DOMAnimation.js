@@ -1,7 +1,7 @@
 import { repeat, Flow, trace, configuration, flow, activeTrace, creators, postponeInvalidations, continueInvalidations } from "../flow/Flow";
 import { DOMNodeAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
-import { logMark, logAnimationFrame, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
+import { logMark, logAnimationFrameGroup, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
 import { inExperiment, inExperimentOnCount } from "..";
 
 const log = console.log;
@@ -213,7 +213,7 @@ export const changeType = {
 export function onFinishReBuildingFlow() {
   
   counter++
-  logAnimationFrame(counter)
+  logAnimationFrameGroup(counter)
   logAnimationSeparator("---------------------------------------- Flow rebuilt, DOM untouched, calculate changes... -------------------");
   console.groupCollapsed("Potentially start DOM building for new flows here ...");
   // log(counter);

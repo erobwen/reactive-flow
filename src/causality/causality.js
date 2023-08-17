@@ -262,14 +262,17 @@ function createWorld(configuration) {
       level = (typeof(context.priority) === "function") ? context.priority() : 0;
     }
     state.workOnPriorityLevel[level]--
+
+    // Handle finished priority levels. 
+    let first = true;  
     while (level < state.workOnPriorityLevel.length && state.workOnPriorityLevel[level] === 0) {
+      // if (!first) logMark("No work on next level, signaling early finish.");
       if (typeof(configuration.onFinishedPriorityLevel) === "function") {
-        configuration.onFinishedPriorityLevel(level, !anyDirtyRepeater());
+        configuration.onFinishedPriorityLevel(level, first);
       }
       state.revalidationLevelLock = level;
-      break; 
-      level++; // leads to infinite loop somehow. 
-
+      level++;
+      first = false;  
     }
   } 
 
@@ -1696,7 +1699,9 @@ function createWorld(configuration) {
   }
 
   function firstDirtyRepeater() {
-    const priorityList = state.dirtyRepeaters; 
+    const priorityList = state.dirtyRepeaters;
+    
+    // Find work in unlocked level
     let priority = state.revalidationLevelLock + 1;
     while (priority < priorityList.length) {
       if (priorityList[priority].first) {
