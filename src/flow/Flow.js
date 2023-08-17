@@ -18,7 +18,8 @@ export const world = getWorld({
 });
 
 function onFinishedPriorityLevel(level, finishedAllLevels) {
-  if (trace) log("<<<finished priority: " + level + ">>>");
+  // if (trace) 
+  log("<<<finished priority: " + level + ">>>");
   // if (finishedAllLevels) log("no more repeaters...");
 
   // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 

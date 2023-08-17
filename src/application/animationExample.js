@@ -58,7 +58,7 @@ function itemDisplay(item) {
 // A very simple view component
 export class AnimationExample extends Flow {
   setProperties({items}) {
-    this.name = "AnimationExample"
+    this.name = "Animation Example"
     this.items = items; 
   }
 
