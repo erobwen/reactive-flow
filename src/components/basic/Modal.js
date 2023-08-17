@@ -3,6 +3,7 @@ import { creators, getTarget } from "../../flow/flowBuildContext.js";
 import { readFlowProperties, findKeyInProperties } from "../../flow/flowParameters.js";
 import { div } from "../../flow.DOMTarget/BasicHtml.js";
 import { extractAttributes } from "../../flow.DOMTarget/domNodeAttributes.js";
+import { logMark } from "../../flow/utility.js";
 const log = console.log;
 
 /**
@@ -27,14 +28,16 @@ export class Modal extends Flow {
   }
 
   ensure() {
-    const modalFrame = this.inherit("modalFrame")
-    if (this.isVisible && modalFrame) {
-      this.visibleOnFrame = modalFrame;
-      modalFrame.openModal(this.content);
-    } 
-    
-    if (!this.isVisible && this.visibleOnFrame === modalFrame) {
-      modalFrame.closeModal(this.content);
+    if (this.isVisible) {
+      // Try to show
+      const modalFrame = this.inherit("modalFrame");
+      if (modalFrame) {
+        this.visibleOnFrame = modalFrame;
+        modalFrame.openModal(this.content);
+      }
+    } else if (this.visibleOnFrame) {
+      // Try to hide
+      this.visibleOnFrame.closeModal(this.content);
     }
   }
 
@@ -71,9 +74,10 @@ class ModalFrame extends Flow {
   }
 
   openModal(modalContent) {
+    logMark("openModal");
     this.setModalContent(modalContent)
   }
-
+  
   onDispose() {
     log("DISPOSE!!!!!");
     console.group("onDispose");
@@ -81,8 +85,9 @@ class ModalFrame extends Flow {
     this.setModalContent(null);
     console.groupEnd();
   }
-
+  
   closeModal(modalContent) {
+    logMark("closeModal");
     if (this.modalContent === modalContent) {
       this.setModalContent(null);
     }
