@@ -14,6 +14,7 @@ import { startSimpleMoveAnimation } from "./application/simpleMoveAnimation.js";
 import { startSimpleAddRemoveAnimation } from "./application/simpleAddRemoveAnimation.js";
 import { logMark } from "./flow/utility.js";
 import { setAnimationTime } from "./flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
+import { startSimpleApplicationMenu } from "./application/simpleApplicationMenu.js";
 
 if (module.hot) {
   module.hot.accept();
@@ -71,10 +72,11 @@ installDOMAnimation();
 // buttonTest();
 // startSimpleMoveAnimation();
 // startSimpleAddRemoveAnimation();
+startSimpleApplicationMenu();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-startDemo();
+// startDemo();
 
 // startModalDemo();
 // startAnimationExample();

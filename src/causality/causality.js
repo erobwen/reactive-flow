@@ -2,6 +2,7 @@ import { argumentsToArray, configSignature, mergeInto } from "./lib/utility.js";
 import { objectlog } from "./lib/objectlog.js";
 import { createCachingFunction } from "./lib/caching.js";
 import { defaultDependencyInterfaceCreator } from "./lib/defaultDependencyInterface.js";
+import { logMark } from "../flow/utility.js";
 const defaultObjectlog = objectlog;
 
 
@@ -261,21 +262,14 @@ function createWorld(configuration) {
       level = (typeof(context.priority) === "function") ? context.priority() : 0;
     }
     state.workOnPriorityLevel[level]--
-    if (state.workOnPriorityLevel[level] === 0) {
+    while (level < state.workOnPriorityLevel.length && state.workOnPriorityLevel[level] === 0) {
       if (typeof(configuration.onFinishedPriorityLevel) === "function") {
-        // Trigger revalidation of next level.
-        state.revalidationLevelLock = level;
-
-        // Ensure work on next level?
-        // const nextLevel = level + 1;
-        // if (!state.workOnPriorityLevel[nextLevel]) {
-        //   setTimeout(() => {
-        //     enterPriorityLevel(nextLevel);
-        //     exitPriorityLevel(nextLevel);
-        //   }, 0);
-        // }
         configuration.onFinishedPriorityLevel(level, !anyDirtyRepeater());
       }
+      state.revalidationLevelLock = level;
+      break; 
+      level++; // leads to infinite loop somehow. 
+
     }
   } 
 

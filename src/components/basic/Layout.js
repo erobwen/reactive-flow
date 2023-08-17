@@ -4,6 +4,18 @@ import { deepFreeze } from "../../flow/utility.js";
 import { styledDiv } from "../../flow.DOMTarget/BasicHtml.js";
 const log = console.log;
 
+
+/**
+ * Useful for debugging and seeing where your components are. 
+ */
+export const layoutBorderStyle = {
+  borderStyle: "solid",
+  borderColor: "light-gray",
+  borderWidth: "1px",
+  boxSizing: "border-box"
+}
+
+
 /**
  * Basic layout styles
  * TODO: Deep freeze all styles. 
