@@ -1,11 +1,9 @@
-import { observable, repeat, transaction, configuration, Flow, enterPriorityLevel, exitPriorityLevel, workOnPriorityLevel } from "../flow/Flow";
-import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
-import { mostAbstractFlow, clearNode } from "./DOMNode";
-import { DOMElementNode, DOMModalNode } from "./DOMElementNode";
+import { observable, transaction } from "../flow/Flow";
+import { readFlowProperties, findKeyInProperties } from "../flow/flowParameters";
+import { DOMElementNode } from "./DOMElementNode";
 import { DOMTextNode} from "./DOMTextNode";
 import { FlowTarget } from "../flow/FlowTarget";
 import { addDOMFlowTarget, removeDOMFlowTarget } from "./DOMAnimation";
-import { div } from "../components/basic/BasicWidgets";
 import { logMark } from "../flow/utility";
 
 const log = console.log;
@@ -65,12 +63,6 @@ export class DOMFlowTarget extends FlowTarget {
   dispose() {
     super.dispose();
     if (this.animate) removeDOMFlowTarget(this);
-  }
-
-  elementNode(...parameters) {
-    const properties = findKeyInProperties(readFlowProperties(parameters)); 
-    properties.type = "dom.elementNode";
-    return this.create({...properties});
   }
 
   create(...parameters) {

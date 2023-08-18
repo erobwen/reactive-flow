@@ -27,10 +27,18 @@ export function aggregateToString(flow) {
 export const movedPrimitives = [];
 window.moved = movedPrimitives;
 
-export function clearNode(node) {
+export function clearNode(node, attributes) {
   while (node.childNodes.length > 0) {
     node.removeChild(node.lastChild);
   }
+  // for (let attribute in attributes) {
+  //   if (attribute === "style") {
+  //     for () {
+
+  //     }
+  //     node.style
+  //   }
+  // }
 }
 
 
@@ -215,7 +223,7 @@ export function clearNode(node) {
   ensureDomNodeExists() { 
     if (this.givenDomNode) {
       this.domNode = this.givenDomNode;
-      // this.domNode.id = aggregateToString(this);
+      this.domNode.className = aggregateToString(this);
       this.domNode.equivalentCreator = this; 
     } else if (!this.createElementRepeater) {
       this.createElementRepeater = repeat(mostAbstractFlow(this).toString() + ".createElementRepeater", (repeater) => {

@@ -2,7 +2,7 @@ import { Flow } from "../../flow/Flow"
 import { readFlowProperties } from "../../flow/flowParameters";
 import { log, logMark } from "../../flow/utility";
 import { button, text } from "./BasicWidgets";
-import { column, row } from "./Layout";
+import { centerMiddle, column, filler, layoutBorderStyle, row } from "./Layout";
 import { modal, modalFrame } from "./Modal";
 
 
@@ -18,6 +18,7 @@ class ApplicationMenuFrame extends Flow {
 
   setState() {
     this.menuOpen = false; 
+    this.menuIsModal = false; 
   }
 
   setApplicationContent(content) {
@@ -32,7 +33,8 @@ class ApplicationMenuFrame extends Flow {
     const menuWidth = this.appplicationMenu.dimensions().width;
     log("menuWidth " + menuWidth);
     log("width " + this.bounds.width);
-    const menuIsModal = this.bounds.width < menuWidth * 3;
+    // const menuIsModal = this.bounds.width < menuWidth * 3;
+    const { menuIsModal } = this;
     log(menuIsModal);
 
     this.applicationContent.bounds = { 
@@ -41,20 +43,49 @@ class ApplicationMenuFrame extends Flow {
     };
     // if (menuIsModal) return text("Foo");
 
-    return modalFrame( 
-      (menuIsModal) ? 
-        column(
-          button("Menu", () => {this.menuOpen = true;}),
-          modal(this.appplicationMenu).show(this.menuOpen),
-          this.applicationContent, 
-          {style: {width: "100%", overflow: "visible"}}
-        )
-        :
-        row(
-          this.appplicationMenu, 
-          this.applicationContent, 
-          {style: {height: "100%", overflow: "visible"}}
-        )
-    )
+    // return centerMiddle(
+    //   menuIsModal ? text("modal", "Modal") : text("nonmodal", "Non modal")
+    // );
+    
+    const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModal = !this.menuIsModal);
+    // return centerMiddle(toggleButton);
+
+    if (menuIsModal) {
+      return column(
+        centerMiddle(
+          toggleButton,
+          // text("Menu..."),
+          {style: layoutBorderStyle}
+        ),
+        filler()
+      );
+    } else {
+      return row(
+        centerMiddle(
+          toggleButton,
+          // text("Menu..."),
+          {style: layoutBorderStyle}
+        ),
+        filler()
+      );
+    }
+
+
+
+    // return modalFrame( 
+    //   (menuIsModal) ? 
+    //     column(
+    //       button("Menu", () => {this.menuOpen = true;}),
+    //       modal(this.appplicationMenu).show(this.menuOpen),
+    //       this.applicationContent, 
+    //       {style: {width: "100%", overflow: "visible"}}
+    //     )
+    //     :
+    //     row(
+    //       this.appplicationMenu, 
+    //       this.applicationContent, 
+    //       {style: {height: "100%", overflow: "visible"}}
+    //     )
+    // )
   }
 }
