@@ -2,7 +2,7 @@ import { Flow } from "../../flow/Flow"
 import { readFlowProperties } from "../../flow/flowParameters";
 import { log, logMark } from "../../flow/utility";
 import { button, text } from "./BasicWidgets";
-import { centerMiddle, column, filler, layoutBorderStyle, row } from "./Layout";
+import { centerMiddle, column, filler, fillerStyle, layoutBorderStyle, row } from "./Layout";
 import { modal, modalFrame } from "./Modal";
 
 
@@ -50,11 +50,29 @@ class ApplicationMenuFrame extends Flow {
     const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModal = !this.menuIsModal);
     // return centerMiddle(toggleButton);
 
+    const modalMenu = centerMiddle(
+      text("Menu..."),
+      {style: layoutBorderStyle, animate: true}
+    );
+
+    const leftMenu = centerMiddle(
+      text("Menu..."),
+      {style: layoutBorderStyle, animate: true}      
+    );
+
+    return column("a",
+      modalMenu.show(menuIsModal),
+      row("b",
+        leftMenu.show(!menuIsModal),
+        centerMiddle("content", toggleButton,{style: fillerStyle}),
+        {style: {...fillerStyle, ...layoutBorderStyle}}
+      )
+    );
     if (menuIsModal) {
       return column(
         centerMiddle(
-          toggleButton,
-          // text("Menu..."),
+          // toggleButton,
+          text("Menu..."),
           {style: layoutBorderStyle}
         ),
         filler()
@@ -62,8 +80,8 @@ class ApplicationMenuFrame extends Flow {
     } else {
       return row(
         centerMiddle(
-          toggleButton,
-          // text("Menu..."),
+          // toggleButton,
+          text("Menu..."),
           {style: layoutBorderStyle}
         ),
         filler()

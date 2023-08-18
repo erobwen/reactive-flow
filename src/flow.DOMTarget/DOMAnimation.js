@@ -309,6 +309,7 @@ export function onFinishReBuildingFlow() {
       resident: Object.values(changes.globallyResidentAnimated).map(flow => flow.toString()), 
       moved: Object.values(changes.globallyMovedAnimated).map(flow => flow.toString()),
       removed: Object.values(changes.globallyRemovedAnimated).map(flow => flow.toString()),
+      removedIncludingNonAnimated: Object.values(changes.globallyRemoved).map(flow => flow.toString()),
     }
   }
 

@@ -334,6 +334,10 @@ export class Flow {
   }
 
   startGeneralEnsure() {
+    // Only start if ensure is implemented
+    const proto = Object.getPrototypeOf(this);
+    if (!proto.hasOwnProperty("ensure")) return;
+
     if (!this.generalEnsureRepeater) {
       this.generalEnsureRepeater = repeat(
         this.toString() + ".generalRepeater",
@@ -352,7 +356,6 @@ export class Flow {
   }
 
   onDispose() {
-    console.log("DISPOSING: " + this.toString());
     delete window.flows[this.toString()];
     delete window.idToFlow[this.id];
     // Dispose created by repeater in call. 
