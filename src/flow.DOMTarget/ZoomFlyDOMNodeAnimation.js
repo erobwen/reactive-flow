@@ -668,7 +668,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   /**
    * Activate animation 
    */
-  activateAnimation(flow, currentFlowChanges) {
+  activateAnimation(flow) {
     const node = flow.domNode;
     const ongoingAnimation = node.ongoingAnimation;
     const changes = flow.changes; 
@@ -827,9 +827,10 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * -------------------------------------------------------------------------------------
    */
 
-  // Setup animation cleanup
 
-  // Setup animation cleanup
+  /**
+   * Setup animation cleanyp
+   */
   setupAnimationCleanup(flow) {
     const node = flow.domNode;
     
