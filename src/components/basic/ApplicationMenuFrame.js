@@ -1,3 +1,4 @@
+import { flyFromTopAnimation } from "../../flow.DOMTarget/FlyDOMNodeAnimation";
 import { Flow } from "../../flow/Flow"
 import { readFlowProperties } from "../../flow/flowParameters";
 import { log, logMark } from "../../flow/utility";
@@ -52,12 +53,12 @@ class ApplicationMenuFrame extends Flow {
 
     const modalMenu = centerMiddle(
       text("Menu..."),
-      {style: layoutBorderStyle, animate: true}
+      {style: layoutBorderStyle, animate: flyFromTopAnimation}
     );
 
     const leftMenu = centerMiddle(
       text("Menu..."),
-      {style: layoutBorderStyle, animate: true}      
+      {style: layoutBorderStyle, animate: flyFromTopAnimation}      
     );
 
     return column("a",

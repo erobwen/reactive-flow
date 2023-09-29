@@ -965,5 +965,6 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
 // }
 
 
-export const standardAnimation = new ZoomFlyDOMNodeAnimation();
+export const zoomFlyAnimation = new ZoomFlyDOMNodeAnimation();
+export const standardAnimation = zoomFlyAnimation;
   
