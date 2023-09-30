@@ -74,7 +74,6 @@ class ModalFrame extends Flow {
   }
 
   openModal(modalContent) {
-    logMark("openModal");
     this.setModalContent(modalContent)
   }
   
@@ -87,7 +86,6 @@ class ModalFrame extends Flow {
   }
   
   closeModal(modalContent) {
-    logMark("closeModal");
     if (this.modalContent === modalContent) {
       this.setModalContent(null);
     }

@@ -17,6 +17,7 @@ export class SimpleApplicationMenu extends Flow {
     return applicationMenuFrame({
       appplicationMenu: column(text("First"), text("Second"), text("Third"), {style: {width: "200px"}}),
       applicationContent: centerMiddle(text("Content!"), {style: {...fillerStyle, ...layoutBorderStyle}}),
+      topPanelContent: [text("by Robert Renbris")],
       bounds: this.bounds
     })
   }

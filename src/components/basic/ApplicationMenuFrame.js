@@ -3,6 +3,7 @@ import { Flow } from "../../flow/Flow"
 import { readFlowProperties } from "../../flow/flowParameters";
 import { log, logMark } from "../../flow/utility";
 import { button, text } from "./BasicWidgets";
+import { icon } from "./Icons";
 import { centerMiddle, column, filler, fillerStyle, layoutBorderStyle, row } from "./Layout";
 import { modal, modalFrame } from "./Modal";
 
@@ -12,9 +13,10 @@ export function applicationMenuFrame(...parameters) {
 }
 
 class ApplicationMenuFrame extends Flow {
-  setProperties({appplicationMenu, applicationContent}) {
+  setProperties({appplicationMenu, applicationContent, topPanelContent}) {
     this.appplicationMenu = appplicationMenu;
     this.applicationContent = applicationContent;
+    this.topPanelContent = topPanelContent;
   }
 
   setState() {
@@ -29,6 +31,7 @@ class ApplicationMenuFrame extends Flow {
   build() {
     logMark("build menu frame");
     log(this.appplicationMenu)
+    log(this.topPanelContent)
     log(this.appplicationMenu.getDomNode())
     log(this.appplicationMenu.dimensions())
     const menuWidth = this.appplicationMenu.dimensions().width;
@@ -51,27 +54,26 @@ class ApplicationMenuFrame extends Flow {
     const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModalOverride = !this.menuIsModalOverride);
     // return centerMiddle(toggleButton);
 
-    const modalMenu = centerMiddle("modalMenu",
-      text("Menu..."),
-      {style: layoutBorderStyle, animate: flyFromTopAnimation}
+    const modalButton = button("modalButton", icon("bars"));
+
+    const topPanel = row("modalMenu",
+      modalButton.show(menuIsModal),
+      ...this.topPanelContent,      
+      {style: {...layoutBorderStyle, justifyContent: "space-between"}, animate: flyFromTopAnimation}
     );
 
-    const leftMenu = centerMiddle("leftMenu", 
-      text("Menu..."),
+    const leftPanel = column("leftMenu", 
+      this.appplicationMenu,
+      // text("Menu..."),
       {style: layoutBorderStyle, animate: flyFromLeftAnimation}      
     );
 
-    const leftSupportMenu = centerMiddle(
-      text("Menu..."),
-      {key: "leftSupportMenu", style: layoutBorderStyle, animate: flyFromTopAnimation}      
-    );
-
     return row("a",
-      leftMenu.show(!menuIsModal),
+      leftPanel.show(!menuIsModal),
       column("d",
-        leftSupportMenu.show(!menuIsModal),
-        modalMenu.show(menuIsModal),
-        centerMiddle("content", toggleButton,{style: fillerStyle}),
+        topPanel,
+        this.applicationContent,
+        // centerMiddle("content", toggleButton,{style: fillerStyle}),
         {style: {...fillerStyle, ...layoutBorderStyle}}
       ),
       {style: {...fillerStyle, ...layoutBorderStyle}}
@@ -79,9 +81,9 @@ class ApplicationMenuFrame extends Flow {
 
 
     return column("a",
-      modalMenu.show(menuIsModal),
+      topPanel.show(menuIsModal),
       row("b",
-        leftMenu.show(!menuIsModal),
+        leftPanel.show(!menuIsModal),
         column(
           "d",
           leftSupportMenu.show(!menuIsModal),
@@ -95,7 +97,7 @@ class ApplicationMenuFrame extends Flow {
       return column(
         centerMiddle(
           // toggleButton,
-          modalMenu,
+          topPanel,
           // text("Menu...x", {animate: flyFromTopAnimation}),
           {style: layoutBorderStyle}
         ),
@@ -105,7 +107,7 @@ class ApplicationMenuFrame extends Flow {
       return row(
         centerMiddle(
           // toggleButton,
-          leftMenu,
+          leftPanel,
           // text("Menu...x", {animate: flyFromLeftAnimation}),
           {style: layoutBorderStyle}
         ),

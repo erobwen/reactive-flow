@@ -72,11 +72,11 @@ installDOMAnimation();
 // buttonTest();
 // startSimpleMoveAnimation();
 // startSimpleAddRemoveAnimation();
-startSimpleApplicationMenu();
+// startSimpleApplicationMenu();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-// startDemo();
+startDemo();
 
 // startModalDemo();
 // startAnimationExample();

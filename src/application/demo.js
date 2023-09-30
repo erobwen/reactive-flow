@@ -1,80 +1,72 @@
 import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
-import { SimpleMoveAnimation } from "./simpleMoveAnimation";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
-import { HelloWorld } from "./helloWorldApplication";
 import { RecursiveExample } from "./recursiveDemoApplication";
 import { ProgrammaticReactiveLayout } from "./programmaticReactiveLayout";
-import { ToggleView } from "./toggleExample";
 import { PortalExample } from "./portalDemo";
 import { ModalExample } from "./modalDemo";
 import { portalExit } from "../components/basic/Portals";
 import { button } from "../components/themed/Theme";
 import { column, columnStyle, filler, flexAutoStyle, row } from "../components/basic/Layout";
-import { modernButton } from "../components/modern/ModernButton";
-import { modalFrame } from "../components/basic/Modal";
 import { svgImage } from "./images";
 import { startExperiment } from "..";
+import flowImage from "../../resources/flow.svg"
+import { applicationMenuFrame } from "../components/basic/ApplicationMenuFrame";
+import { text } from "../components/basic/BasicWidgets";
+import { logMark } from "../flow/utility";
+import { span } from "../flow.DOMTarget/BasicHtml";
 
 const log = console.log;
 
+
 /**
- * Flow definitions
+ * Demo
  */
 
-
-// A very simple view component
 export class Demo extends Flow {
   setState() {
     this.leftColumnPortal = portalExit({key: "portal", style: {...columnStyle, overflow: "visible"}});
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
-    this.components = [
-      // new HelloWorld({key: "helloWorld"}),
+    this.items = [
       new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
       new ComplexForm({key: "complexForm", initialData}),
       new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
       new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
-      // "Super Simple": new SimpleMoveAnimation({model: observable({value: ""})}),
       new RecursiveExample({key: "recursiveDemo", name: "Recursive Example"}),
-      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"}),
-      // "Toggle": new ToggleView()
+      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"})
     ];
     
-    for (let component of this.components) {
-      component.onEstablish();
+    for (let item of this.items) {
+      item.onEstablish();
     }
 
-    // this.choosen = this.components.find(component => component.key === "portalExample");
-    this.choosen = this.components.find(component => component.key === "complexForm");
-    // this.choosen = this.components.find(component => component.key === "programmaticReactiveLayout");
-    // this.choosen = this.components.find(component => component.key === "modalExample");
-    // this.choosen = this.components["Recursive and Modal Demo"];
-    // this.choosen = this.components["Hello World"];
+    this.choosen = this.items.find(item => item.key === "complexForm");
+    // this.choosen = this.items.find(item => item.key === "portalExample");
+    // this.choosen = this.items.find(item => item.key === "programmaticReactiveLayout");
+    // this.choosen = this.items.find(item => item.key === "modalExample");
   }
   
   disposeState() {
     super.onDispose();
-    for (let name in this.components) {
-      this.components[name].onDispose();
+    for (let name in this.items) {
+      this.items[name].onDispose();
     }
     this.leftColumnPortal.onDispose();
     this.leftColumnPortal.dispose();
   }
 
-  buildButton(component) { // Extra function to get a stack frame that provides variables to the lambda function.
-    return button(component.name, {onClick: () => {this.choosen = component}, pressed: this.choosen === component})
+  buildButton(item) {
+    return button(item.name, {onClick: () => { this.choosen = item }, pressed: this.choosen === item});
   }
 
-  build() {
-    // log("BUILD DEMO -----------------------------------------------")
-    // log(creators.length)
+  buildMenu() {
     const buttons = [];
-    buttons.push(svgImage())
-    for (let component of this.components) {
+    buttons.push(svgImage({image: flowImage}));
+    for (let item of this.items) {
       buttons.push(
-        this.buildButton(component), 
+        this.buildButton(item)
       )
     }
     buttons.push(this.leftColumnPortal);
@@ -83,24 +75,30 @@ export class Demo extends Flow {
       startExperiment();
     }}));
 
-    const leftColumn = column(
+    return column(
       buttons,
-      {key: "left-column", 
-       style: {...flexAutoStyle, borderRight: "1px", borderRightStyle: "solid", backgroundColor: "lightgray", overflow: "visible"}}
+      {
+        key: "left-column", 
+        style: {
+          ...flexAutoStyle, 
+          borderRight: "2px", 
+          borderRightStyle: "solid", 
+          backgroundColor: "lightgray", 
+          overflow: "visible"
+        }
+      }
     );
-    const width = leftColumn.dimensions().width; 
-    // log("HERE")
-    // log(width);
-    this.choosen.bounds = { width: this.bounds.width - leftColumn.dimensions().width, height: this.bounds.height};
-    // this.choosen.leftColumnPortal =  this.leftColumnPortal;  
+  }
 
-    return modalFrame(
-      row(
-        leftColumn, 
-        this.choosen, 
-        {style: {height: "100%", overflow: "visible"}}
-      )  
-    )
+  build() {
+    // return text("Foo");
+    logMark("build demo")
+    return applicationMenuFrame({
+      appplicationMenu: this.buildMenu(),
+      applicationContent: this.choosen,
+      topPanelContent: [span(), text("by Robert Renbris")],
+      bounds: this.bounds
+    })
   }
 }
 
