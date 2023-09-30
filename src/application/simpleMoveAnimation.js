@@ -4,7 +4,7 @@ import { text } from "../components/basic/BasicWidgets";
 import { column, filler, fillerStyle, row } from "../components/basic/Layout";
 import { modernButton } from "../components/modern/ModernButton";
 import { animatedContainerStyle, borderStyle, panelStyle } from "../components/modern/Style";
-;
+import { button as basicButton } from "../components/basic/BasicWidgets";
 import { button } from "../components/themed/Theme";
 import { startExperiment, inExperiment } from "..";
 import { div } from "../flow.DOMTarget/BasicHtml";
@@ -65,10 +65,10 @@ export class SimpleMoveAnimation extends Flow {
 
     return column(
       row(
-        button("Move", this.move.bind(this)),
-        button("Experiment", () => startExperiment()),
+        basicButton("Move", this.move.bind(this)),
+        basicButton("Experiment", () => startExperiment()),
         filler(),
-        {style: {...animatedContainerStyle, width: "150px"}}
+        {style: {...animatedContainerStyle}}
       ),
       div({style: {height: "200px"}}),
       row(

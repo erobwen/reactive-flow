@@ -428,17 +428,21 @@ export class Flow {
     return "(" + result + ")";
   }
 
-  findChild(key) {
+  findKey(key) {
     if (this.key === key) return this;
+    return this.findChild(key)
+  }
+
+  findChild(key) {
     const primitive = this.getPrimitive();
     if (primitive instanceof Array) {
       for (let fragment of primitive) {
-        const result = fragment.findChild();
+        const result = fragment.findKey();
         if (result) return result; 
       }
       return null;
     } else {
-      return primitive.findChild(key);
+      return primitive.findKey(key);
     }
   }
 

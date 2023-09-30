@@ -1,5 +1,5 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
-import { configuration, finalize, Flow, invalidateOnChange, repeat, trace } from "./Flow.js";
+import { configuration, finalize, Flow, invalidateOnChange, repeat, state, trace } from "./Flow.js";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { logMark } from "./utility.js";
 import { standardAnimation } from "../flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
@@ -8,14 +8,17 @@ const log = console.log;
 
 export class FlowPrimitive extends Flow {
     
-  
-  findChild(key) {
+  findKey(key) {
     if (this.key === key) return this;
+    return this.findChild(key)
+  }
+
+  findChild(key) {
     // TODO: Use iterator!
     if (this.children) {
       for (let child of this.children) {
         if (child !== null) {
-          let result = child.findChild(key);
+          let result = child.findKey(key);
           if (result !== null) return result;
         }
       }
@@ -51,6 +54,7 @@ export class FlowPrimitive extends Flow {
     if (!this.expandRepeater) {
       this.expandRepeater = repeat(this.toString() + ".expandRepeater", repeater => {
         if (trace) console.group(repeater.causalityString());
+        if (trace) console.log([...state.workOnPriorityLevel]);
 
         // Check visibility
         if (this.parentPrimitive) {
