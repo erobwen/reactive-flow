@@ -28,7 +28,6 @@ export class DOMFlowTarget extends FlowTarget {
       window.addEventListener("resize", () => {
         if (document.body.style.height != window.innerHeight + "px")
           document.body.style.height = window.innerHeight + "px";
-          logMark("resizing!!!");
           transaction(() => {
             if (this.flow) {
               this.flow.bounds = {width: window.innerWidth, height: window.innerHeight}

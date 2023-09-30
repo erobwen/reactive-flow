@@ -257,9 +257,7 @@ export class ModernButton extends Flow {
     let children; 
     
     if (this.children) {
-      // logMark("FOOOBAR")
-      children = this.children; 
-      // log(children)
+      children = this.children;
     } else if (this.render) {
       children = this.render(); 
     } else if (this.text) {

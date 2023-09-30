@@ -6,7 +6,8 @@ const log = console.log;
 
 
 class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
-
+  animateLeaderWidth = false; 
+  animateLeaderHeight = true;
 
   emulateOriginalFootprintsAndFixateAnimatedStyle(flow) {
     console.group("Emulate original style and footprints for " + this.changesChain(flow) + ": " + flow.toString());
@@ -183,9 +184,6 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    logMark("fly out... ")
-    log(node.originalDimensions);
-    log(node.style.transform);
     console.log("matrix(1, 0, 0, 1, 0, -" + node.originalDimensions.heightWithoutMargin + ")");
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, -" + node.originalDimensions.heightWithoutMargin + ")",
@@ -196,6 +194,8 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
 
 
 class FlyFromLeftDOMNodeAnimation extends FlyFromTopDOMNodeAnimation {
+  animateLeaderWidth = true; 
+  animateLeaderHeight = false;
 
   originalPositionForFlyIn(node) {
     Object.assign(node.style, {
@@ -210,9 +210,6 @@ class FlyFromLeftDOMNodeAnimation extends FlyFromTopDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    logMark("fly out... ")
-    log(node.originalDimensions);
-    log(node.style.transform);
     console.log("matrix(1, 0, 0, 1, -" + node.originalDimensions.widthWithoutMargin + ", 0)");
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, -" + node.originalDimensions.widthWithoutMargin + ", 0)",

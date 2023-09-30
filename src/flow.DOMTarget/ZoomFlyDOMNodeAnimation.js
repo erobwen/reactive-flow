@@ -5,7 +5,7 @@ import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
 const log = console.log;
 
-let animationTime = 1;
+let animationTime = .5;
 
 export function setAnimationTime(value) {
   animationTime = value; 
@@ -19,6 +19,12 @@ export function setAnimationTime(value) {
 const inheritedProperties = ["fontSize", "lineHeight", "margin", "padding", "color"];
 
 export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
+  /**
+   * Configuration
+   */
+  animateLeaderWidth = true; 
+  animateLeaderHeight = true;
+
   /**
    * Default transitions
    */
@@ -288,7 +294,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   addTrailersForMovedAndRemovedBeforeDomBuilding(node) {
     let trailer; 
     
-    if (node.parentNode.isControlledByAnimation) {
+    if (node.leader && node.leader === node.parentNode && node.parentNode.isControlledByAnimation) {
       // Repurpose existing leader as trailer.
       trailer = this.repurposeOwnLeaderAsTrailer(node);
       this.fixateLeaderOrTrailer(trailer);
@@ -475,8 +481,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       leader = this.createNewLeader(node);
       node.leader = leader;
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
-      leader.style.width = "0.0001px"; 
-      leader.style.height = "0.0001px";
+      if (this.animateLeaderWidth) leader.style.width = "0.0001px"; 
+      if (this.animateLeaderHeight) leader.style.height = "0.0001px";
       insertAfter(leader, node);
     }
 
@@ -765,10 +771,10 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
 
   targetSizeForLeader(node, leader) {
     leader.style.transition = this.leaderTransition();
-    Object.assign(leader.style, {
-      width: node.targetDimensions.widthIncludingMargin + "px",
-      height: node.targetDimensions.heightIncludingMargin + "px"
-    })
+    const style = {};
+    if (this.animateLeaderHeight) style.height = node.targetDimensions.heightIncludingMargin + "px"; 
+    if (this.animateLeaderWidth) style.width = node.targetDimensions.widthIncludingMargin + "px"; 
+    Object.assign(leader.style, style);
   }
 
   targetSizeForTrailer(trailer) {

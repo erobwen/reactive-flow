@@ -19,7 +19,7 @@ class ApplicationMenuFrame extends Flow {
 
   setState() {
     this.menuOpen = false; 
-    this.menuIsModal = false; 
+    this.menuIsModalOverride = null; 
   }
 
   setApplicationContent(content) {
@@ -34,8 +34,8 @@ class ApplicationMenuFrame extends Flow {
     const menuWidth = this.appplicationMenu.dimensions().width;
     log("menuWidth " + menuWidth);
     log("width " + this.bounds.width);
-    // const menuIsModal = this.bounds.width < menuWidth * 3;
-    const { menuIsModal } = this;
+    const { menuIsModalOverride } = this;
+    const menuIsModal = menuIsModalOverride !== null ? menuIsModalOverride : this.bounds.width < menuWidth * 3;
     log(menuIsModal);
 
     this.applicationContent.bounds = { 
@@ -48,24 +48,46 @@ class ApplicationMenuFrame extends Flow {
     //   menuIsModal ? text("modal", "Modal") : text("nonmodal", "Non modal")
     // );
     
-    const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModal = !this.menuIsModal);
+    const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModalOverride = !this.menuIsModalOverride);
     // return centerMiddle(toggleButton);
 
-    const modalMenu = centerMiddle(
+    const modalMenu = centerMiddle("modalMenu",
       text("Menu..."),
       {style: layoutBorderStyle, animate: flyFromTopAnimation}
     );
 
-    const leftMenu = centerMiddle(
+    const leftMenu = centerMiddle("leftMenu", 
       text("Menu..."),
       {style: layoutBorderStyle, animate: flyFromLeftAnimation}      
     );
+
+    const leftSupportMenu = centerMiddle(
+      text("Menu..."),
+      {key: "leftSupportMenu", style: layoutBorderStyle, animate: flyFromTopAnimation}      
+    );
+
+    return row("a",
+      leftMenu.show(!menuIsModal),
+      column("d",
+        leftSupportMenu.show(!menuIsModal),
+        modalMenu.show(menuIsModal),
+        centerMiddle("content", toggleButton,{style: fillerStyle}),
+        {style: {...fillerStyle, ...layoutBorderStyle}}
+      ),
+      {style: {...fillerStyle, ...layoutBorderStyle}}
+    )
+
 
     return column("a",
       modalMenu.show(menuIsModal),
       row("b",
         leftMenu.show(!menuIsModal),
-        centerMiddle("content", toggleButton,{style: fillerStyle}),
+        column(
+          "d",
+          leftSupportMenu.show(!menuIsModal),
+          centerMiddle("content", toggleButton,{style: fillerStyle}),
+          {style: {...fillerStyle, ...layoutBorderStyle}}
+        ),
         {style: {...fillerStyle, ...layoutBorderStyle}}
       )
     );
@@ -73,7 +95,8 @@ class ApplicationMenuFrame extends Flow {
       return column(
         centerMiddle(
           // toggleButton,
-          text("Menu..."),
+          modalMenu,
+          // text("Menu...x", {animate: flyFromTopAnimation}),
           {style: layoutBorderStyle}
         ),
         filler()
@@ -82,7 +105,8 @@ class ApplicationMenuFrame extends Flow {
       return row(
         centerMiddle(
           // toggleButton,
-          text("Menu..."),
+          leftMenu,
+          // text("Menu...x", {animate: flyFromLeftAnimation}),
           {style: layoutBorderStyle}
         ),
         filler()
