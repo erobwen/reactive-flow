@@ -52,7 +52,8 @@ export const {
   workOnPriorityLevel,
   invalidateOnChange,
   postponeInvalidations,
-  continueInvalidations
+  continueInvalidations,
+  state
 } = world;
 
 
@@ -311,6 +312,13 @@ export class Flow {
       this.derriveRepeaters = [];
     }
     this.derriveRepeaters.push(repeat(action));
+  }
+
+  derriveAtBuild(action) {
+    if (!this.derriveRepeaters) {
+      this.derriveRepeaters = [];
+    }
+    this.derriveRepeaters.push(repeat(action, {priority: 1}));
   }
 
   ensureEstablished() {

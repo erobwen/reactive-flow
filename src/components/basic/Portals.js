@@ -19,7 +19,7 @@ export class PortalEntrance extends Flow {
   setProperties({portalContent, portalExit}) {
     this.portalExit = portalExit; 
     this.portalContent = portalContent;
-    this.derrive(() => {
+    this.derriveAtBuild(() => {
       if (this.isVisible) {
         // Note: check if children already set will cause infinite loop. This is unnecessary since it is built in to causality anyway. 
         this.portalExit.children = this.portalContent;
