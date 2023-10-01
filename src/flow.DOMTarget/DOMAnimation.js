@@ -463,7 +463,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
       }
     }
 
-    logAnimationSeparator("------------------------------------------------------------------------------------------------------------");
+    logAnimationSeparator(counter + "------------------------------------------------------------------------------------------------------------");
     console.groupEnd()
 
     // Reactivate causality reactions while we wait for a new frame. 

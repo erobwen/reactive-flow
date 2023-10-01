@@ -157,6 +157,9 @@ export class ModernButton extends Flow {
     // log(panel)
 
     this.rippleAndCallback = (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      
       // log("TRY RIPPLE");
 
 

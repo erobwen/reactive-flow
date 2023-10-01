@@ -79,9 +79,9 @@ installDOMAnimation();
 // startDemo();
 
 // startModalDemo();
-startAnimationExample();
+// startAnimationExample();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
-// startComplexFormApplication();
+startComplexFormApplication();
 

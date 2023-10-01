@@ -5,7 +5,7 @@ import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
 const log = console.log;
 
-let animationTime = 5;
+let animationTime = 1;
 
 export function setAnimationTime(value) {
   animationTime = value; 
@@ -991,6 +991,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     log("...")
     
     function onTransitionEnd(event) {
+      event.stopPropagation();
+      event.preventDefault();
+
       // if (!node.changes) return;
       // Is just about to activate a new animation, dont disturb it! 
       if (!node.changes || !node.changes.activated) return;
@@ -1011,7 +1014,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         delete node.hasCleanupEventListener;
       }      
     }
-    node.addEventListener("transitionend", onTransitionEnd);
+    node.addEventListener("transitionend", onTransitionEnd, true);
     node.hasCleanupEventListener = onTransitionEnd; 
   }   
 }

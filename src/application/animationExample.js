@@ -51,7 +51,7 @@ function itemDisplay(item) {
   //   text(item, {style: {margin: "", lineHeight: ""}}),
   //   {key: item, animate: true, style: {width: "200px", height: "40px", backgroundColor: "green", textAlign: "center", lineHeight: "40px"}}
   // );
-  return text({key: item, text: item, style: {display: "block", lineHeight: "", padding: "", margin: "", textAlign: "left"}})
+  return text({key: item, text: item, style: {display: "block", lineHeight: "", padding: "", margin: smallSpace, textAlign: "left"}})
 }
 
 
