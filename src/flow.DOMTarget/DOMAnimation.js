@@ -341,7 +341,7 @@ export function onFinishReBuildingFlow() {
   for (let flow of flowChanges.allAnimatedRemovedFlows()) {
     if (flow.domNode) {
       flow.domNode.changes.type = changeType.removed;
-      flow.domNode.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
+      flow.domNode.changes.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
     }
   }
   console.groupEnd();

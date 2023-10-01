@@ -361,11 +361,11 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     log("trailer: " + node.trailer);
     
     switch (flow.changes.type) {
-      case changeType.resident:
       case changeType.added:
+      case changeType.resident:
       case changeType.moved:
         // Bounds (excludes margins)
-        node.targetBounds = node.getBoundingClientRect();
+        node.changes.targetBounds = node.getBoundingClientRect();
 
         // if (node.trailer) {
         //   log(`trailer: `);
@@ -373,11 +373,11 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         // }        
       
         // Styles
-        node.targetStyle = {...node.style}
-        node.computedTargetStyle = {...getComputedStyle(node)}; // TODO: Remove or optimize if not needed fully. 
+        node.changes.targetStyle = {...node.style}
+        node.changes.computedTargetStyle = {...getComputedStyle(node)}; // TODO: Remove or optimize if not needed fully. 
 
         // Dimensions (with and without margins)
-        node.targetDimensions = this.calculateDimensionsIncludingMargin(node.targetBounds, node.computedTargetStyle);
+        node.changes.targetDimensions = this.calculateDimensionsIncludingMargin(node.changes.targetBounds, node.changes.computedTargetStyle);
     }
     console.groupEnd();
   }
@@ -546,8 +546,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       position: "absolute", 
       transform: "matrix(0.0001, 0, 0, 0.0001, 0, 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       // This is to make the absolute positioned added node to have the right size.
-      width: node.targetDimensions.widthWithoutMargin + "px", 
-      height: node.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
+      width: node.changes.targetDimensions.widthWithoutMargin + "px", 
+      height: node.changes.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
       opacity: "0.001",
     });
   }
@@ -812,8 +812,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   targetSizeForLeader(node, leader) {
     leader.style.transition = this.leaderTransition();
     const style = {};
-    if (this.animateLeaderHeight) style.height = node.targetDimensions.heightIncludingMargin + "px"; 
-    if (this.animateLeaderWidth) style.width = node.targetDimensions.widthIncludingMargin + "px"; 
+    if (this.animateLeaderHeight) style.height = node.changes.targetDimensions.heightIncludingMargin + "px"; 
+    if (this.animateLeaderWidth) style.width = node.changes.targetDimensions.widthIncludingMargin + "px"; 
     Object.assign(leader.style, style);
   }
 
@@ -861,7 +861,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   setInheritedTargetStyles(node) {
     // Fixate environment dependent styles
     for (let property of inheritedProperties) {
-      node.style[property] = node.computedTargetStyle[property];
+      node.style[property] = node.changes.computedTargetStyle[property];
     }    
   }
 

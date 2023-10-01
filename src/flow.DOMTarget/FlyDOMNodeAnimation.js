@@ -78,10 +78,10 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
   originalPositionForFlyIn(node) {
     Object.assign(node.style, {
       position: "absolute", 
-      transform: "matrix(1, 0, 0, 1, 0, -" + node.targetDimensions.heightWithoutMargin + ")",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+      transform: "matrix(1, 0, 0, 1, 0, -" + node.changes.targetDimensions.heightWithoutMargin + ")",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       // This is to make the absolute positioned added node to have the right size.
-      width: node.targetDimensions.widthWithoutMargin + "px", 
-      height: node.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
+      width: node.changes.targetDimensions.widthWithoutMargin + "px", 
+      height: node.changes.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
       opacity: "0.001",
     });
   }
@@ -200,10 +200,10 @@ class FlyFromLeftDOMNodeAnimation extends FlyFromTopDOMNodeAnimation {
   originalPositionForFlyIn(node) {
     Object.assign(node.style, {
       position: "absolute", 
-      transform: "matrix(1, 0, 0, 1, -" + node.targetDimensions.widthWithoutMargin + ", 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
+      transform: "matrix(1, 0, 0, 1, -" + node.changes.targetDimensions.widthWithoutMargin + ", 0)",//transform, //"matrix(1, 0, 0, 1, 0, 0)", //
       // This is to make the absolute positioned added node to have the right size.
-      width: node.targetDimensions.widthWithoutMargin + "px", 
-      height: node.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
+      width: node.changes.targetDimensions.widthWithoutMargin + "px", 
+      height: node.changes.targetDimensions.heightWithoutMargin + "px", // Note: Added can have target dimensions at this stage, because it is transformed into a point. 
       opacity: "0.001",
     });
   }

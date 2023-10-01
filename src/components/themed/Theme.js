@@ -7,8 +7,8 @@ import { modernButton } from "../modern/ModernButton";
 
 export function button(...parameters) {
   // return theme.button.apply(null, parameters);
-  return basicButton.apply(null, parameters); 
-  // return modernButton.apply(null, parameters);
+  // return basicButton.apply(null, parameters); 
+  return modernButton.apply(null, parameters);
 }
 
 
