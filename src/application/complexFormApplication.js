@@ -17,7 +17,7 @@ const log = console.log;
 export const initialData = model({
   traveler: createInitialTraveler(),
   fellowTravellers: [
-    createTraveler(true)
+    createTraveler(true, true)
   ]
 }, true);
 
@@ -37,8 +37,9 @@ function createInitialTraveler() {
   };
 }
 
-function createTraveler(isFellowTraveller) {
+function createTraveler(isFellowTraveller, luggage) {
   const result = model(createInitialTraveler(), true);
+  if (luggage) result.luggages.push(model({weight: 1, type: "bag"}))
   result.isFellowTraveller = isFellowTraveller;
   return result; 
 }
