@@ -16,7 +16,9 @@ const log = console.log;
 
 export const initialData = model({
   traveler: createInitialTraveler(),
-  fellowTravellers: []
+  fellowTravellers: [
+    createTraveler(true)
+  ]
 }, true);
 
 function createInitialTraveler() {

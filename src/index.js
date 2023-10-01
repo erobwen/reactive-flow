@@ -76,12 +76,12 @@ installDOMAnimation();
 // startSingleStaticWidget();
 // startPatternMatching();
 
-startDemo();
+// startDemo();
 
 // startModalDemo();
 // startAnimationExample();
 // startHelloWorld();
 // startRecursiveDemo();
 // startProgrammaticReactiveLayout();
-// startComplexFormApplication();
+startComplexFormApplication();
 

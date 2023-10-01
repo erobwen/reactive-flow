@@ -33,13 +33,13 @@ let count = 0;
 export function freezeFlowChanges() {
   count++;
   console.warn("Risky to use freeze " + count);
-  postponeInvalidations();
+  // postponeInvalidations();
 }
 
 export function unfreezeFlowChanges() {
   count--;
   console.warn("Unfreeze... " + count);
-  continueInvalidations();
+  // continueInvalidations();
 }
 
 

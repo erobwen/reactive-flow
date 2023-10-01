@@ -509,7 +509,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       return this.repurposeOwnTrailerAsLeader(node);
     } else {
       return null;
-      
+
       // Find a leader for added, either borrow one, or create a new one.   
       let trailer; 
       let previous = node.previousSibling;
