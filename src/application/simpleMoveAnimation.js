@@ -8,6 +8,7 @@ import { button as basicButton } from "../components/basic/BasicWidgets";
 import { button } from "../components/themed/Theme";
 import { startExperiment, inExperiment } from "..";
 import { div } from "../flow.DOMTarget/BasicHtml";
+import { logMark } from "../flow/utility";
 
 
 const log = console.log;
@@ -19,18 +20,8 @@ export class SimpleMoveAnimation extends Flow {
   setState() {
     this.left = false;
     this.showButton = false;
-    this.button = button(
-      "button", "Text", 
-      this.move.bind(this),
-      {
-        ripple: true,
-        style: {
-          margin: "10px",
-          color: "green",
-          width: "150px"
-        }
-      }
-    );
+    this.color = "green"; 
+    this.text = "Text"
   }
 
   onDispose() {
@@ -44,23 +35,36 @@ export class SimpleMoveAnimation extends Flow {
     //   startExperiment();
     // }, 1000);
 
-    // setTimeout(() => {
-    //   log("SETTING TEXT");
-    //   log(this.button);
-    //   log(this.button);
-    //   this.button.hover = false;  
+    setTimeout(() => {
+      log("SETTING TEXT");
+      log(this.button);
+      log(this.button);
+      // this.backgroundColor = this.backgroundColor === "green" ? "red" : "green";  
+      this.text = this.text === "Text" ? "Next" : "Text";  
 
-    //   // let color = this.button.style.color;  
-    //   // color = color === "red" ? "green" : "red"; 
-    //   // log(this.button.style = {...this.button.style, color});
-    //   // this.button.text = this.button.text + "!"       
-    // }, 2500);
+      // let color = this.button.style.color;  
+      // color = color === "red" ? "green" : "red"; 
+      // log(this.button.style = {...this.button.style, color});
+      // this.button.text = this.button.text + "!"       
+    }, 2500);
   }
 
   build() {
+    logMark("build simple animation ");
     // const button = new modernButton(
     // const button = div("wrapper", this.button, {animate: true});
-    const movingButton = this.button; 
+    const movingButton = button(
+      "button", this.text, 
+      this.move.bind(this),
+      {
+        ripple: true,
+        style: {
+          margin: "10px",
+          // backgroundColor: this.backgroundColor,
+          width: "150px"
+        }
+      }
+    );
     movingButton.animate = true; // Force property...  
 
     return column(
