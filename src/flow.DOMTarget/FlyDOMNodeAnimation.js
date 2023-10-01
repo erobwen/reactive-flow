@@ -184,9 +184,9 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    console.log("matrix(1, 0, 0, 1, 0, -" + node.originalDimensions.heightWithoutMargin + ")");
+    console.log("matrix(1, 0, 0, 1, 0, -" + node.changes.originalDimensions.heightWithoutMargin + ")");
     Object.assign(node.style, {
-      transform: "matrix(1, 0, 0, 1, 0, -" + node.originalDimensions.heightWithoutMargin + ")",
+      transform: "matrix(1, 0, 0, 1, 0, -" + node.changes.originalDimensions.heightWithoutMargin + ")",
       opacity: "1"
     });
   }
@@ -210,9 +210,9 @@ class FlyFromLeftDOMNodeAnimation extends FlyFromTopDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    console.log("matrix(1, 0, 0, 1, -" + node.originalDimensions.widthWithoutMargin + ", 0)");
+    console.log("matrix(1, 0, 0, 1, -" + node.changes.originalDimensions.widthWithoutMargin + ", 0)");
     Object.assign(node.style, {
-      transform: "matrix(1, 0, 0, 1, -" + node.originalDimensions.widthWithoutMargin + ", 0)",
+      transform: "matrix(1, 0, 0, 1, -" + node.changes.originalDimensions.widthWithoutMargin + ", 0)",
       opacity: "1"
     });
   }

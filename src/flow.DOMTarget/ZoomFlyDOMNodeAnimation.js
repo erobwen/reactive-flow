@@ -252,14 +252,14 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     const node = flow.domNode; 
 
     // Bounds (excludes margins)
-    node.originalBounds = node.getBoundingClientRect();
+    node.changes.originalBounds = node.getBoundingClientRect();
   
     // Styles
-    node.originalStyle = {...node.style}
-    node.computedOriginalStyle = {...getComputedStyle(node)}; // TODO: Remove or optimize if not needed fully. 
+    node.changes.originalStyle = {...node.style}
+    node.changes.computedOriginalStyle = {...getComputedStyle(node)}; // TODO: Remove or optimize if not needed fully. 
 
     // Dimensions (with and without margins)
-    node.originalDimensions = this.calculateDimensionsIncludingMargin(node.originalBounds, node.computedOriginalStyle);
+    node.changes.originalDimensions = this.calculateDimensionsIncludingMargin(node.changes.originalBounds, node.changes.computedOriginalStyle);
     console.groupEnd();
   }
   
@@ -323,8 +323,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       trailer = this.createNewTrailer(node);
 
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
-      trailer.style.width = node.originalDimensions.widthIncludingMargin + "px"; // This will not be in effect until display != none  
-      trailer.style.height = node.originalDimensions.heightIncludingMargin + "px";  
+      trailer.style.width = node.changes.originalDimensions.widthIncludingMargin + "px"; // This will not be in effect until display != none  
+      trailer.style.height = node.changes.originalDimensions.heightIncludingMargin + "px";  
       insertAfter(trailer, node);
     }
 
@@ -470,7 +470,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     if ([changeType.added, changeType.removed, changeType.moved].includes(node.changes.type)) {
       node.style.transition = "";
       for (let property of inheritedProperties) {
-        node.style[property] = node.computedOriginalStyle[property];
+        node.style[property] = node.changes.computedOriginalStyle[property];
       }
     }
   }
@@ -536,8 +536,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
 
   fixateOriginalTransformAndOpacity(node) {
     Object.assign(node.style, {
-      transform: node.computedOriginalStyle.transform,
-      opacity: node.computedOriginalStyle.opacity,
+      transform: node.changes.computedOriginalStyle.transform,
+      opacity: node.changes.computedOriginalStyle.opacity,
     });
   }
 
@@ -557,8 +557,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       position: "absolute", 
       // This is to make the absolute positioned added node to have the right size.
-      width: node.originalDimensions.widthWithoutMargin + "px", 
-      height: node.originalDimensions.heightWithoutMargin + "px",
+      width: node.changes.originalDimensions.widthWithoutMargin + "px", 
+      height: node.changes.originalDimensions.heightWithoutMargin + "px",
       opacity: "1",
     });
   }
@@ -568,8 +568,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       transform: "matrix(1, 0, 0, 1, 0, 0)",
       position: "absolute", 
       // This is to make the absolute positioned added node to have the right size.
-      width: node.originalDimensions.widthWithoutMargin + "px", 
-      height: node.originalDimensions.heightWithoutMargin + "px"
+      width: node.changes.originalDimensions.widthWithoutMargin + "px", 
+      height: node.changes.originalDimensions.heightWithoutMargin + "px"
     });
   }
 
@@ -623,11 +623,11 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   translateToOriginalBoundsIfNeeded(flow) {
     // TODO: Translate parents first in case of cascading moves? 
     
-    if (!sameBounds(flow.domNode.originalBounds, flow.domNode.newStructureBounds)) {
+    if (!sameBounds(flow.domNode.changes.originalBounds, flow.domNode.newStructureBounds)) {
       flow.outOfPosition = true; 
 
       log("Not same bounds for " + flow.toString());   
-      log(flow.domNode.originalBounds)
+      log(flow.domNode.changes.originalBounds)
       log(flow.domNode.newStructureBounds);  
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
@@ -660,16 +660,16 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     // // Origin bouds... really use?
     // const defaultOrigin = {top: 0, left: 0};
     // // const animationOriginNode = node.animationOriginNode; //delete node.animationOriginNode;
-    // const originOriginalBounds = defaultOrigin; //animationOriginNode.originalBounds; //delete animationOriginNode.originalBounds;
+    // const originOriginalBounds = defaultOrigin; //animationOriginNode.changes.originalBounds; //delete animationOriginNode.changes.originalBounds;
     // const originInitialBounds = defaultOrigin; //animationOriginNode.newStructureBounds; //delete animationOriginNode.newStructureBounds;
     
-    // const originalBounds = node.originalBounds; //delete node.originalBounds;
+    // const originalBounds = node.changes.originalBounds; //delete node.changes.originalBounds;
     // const newStructureBounds = node.newStructureBounds; //delete node.newStructureBounds;
     // const deltaX = (newStructureBounds.left - originInitialBounds.left) - (originalBounds.left - originOriginalBounds.left) //- node.animationStartTotalHeight;
     // const deltaY = (newStructureBounds.top - originInitialBounds.top) - (originalBounds.top - originOriginalBounds.top) //-  node.animationStartTotalWidth;
     // node.style.transform = "";
 
-    const originalBounds = node.originalBounds; //delete node.originalBounds;
+    const originalBounds = node.changes.originalBounds; //delete node.changes.originalBounds;
     const newStructureBounds = node.newStructureBounds; //delete node.newStructureBounds;
     const deltaX = newStructureBounds.left - originalBounds.left;  //- node.animationStartTotalHeight;
     const deltaY = newStructureBounds.top - originalBounds.top; //-  node.animationStartTotalWidth;
