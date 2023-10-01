@@ -5,7 +5,7 @@ import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
 const log = console.log;
 
-let animationTime = .99;
+let animationTime = 5;
 
 export function setAnimationTime(value) {
   animationTime = value; 
@@ -261,6 +261,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     // Dimensions (with and without margins)
     node.changes.originalDimensions = this.calculateDimensionsIncludingMargin(node.changes.originalBounds, node.changes.computedOriginalStyle);
     console.groupEnd();
+
+    // Note: Computed original style is not allways correct here. It might not reflect the current state of an ongoing animation. 
   }
   
 
@@ -276,6 +278,10 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * Prepare for DOM building. 
    */
   prepareForDOMBuilding(flow) {
+
+    // Attempt to halt transition animation by setting the end style. 
+    // if (flow.changes.changeType !== changeType.resident) flow.domNode.style = flow.changes.originalStyle;
+
     console.group("Prepare for DOM building for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode;
     log("trailer: " + node.trailer);
@@ -298,6 +304,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       case changeType.moved:
         delete node.isControlledByAnimation; // Make sure dom building adds and moves these nodes
         this.neutralizeTransformationsAndPosition(flow, node);
+        flow.synchronizeDomNodeStyle(inheritedProperties);
         break;
     }
 
@@ -362,6 +369,15 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     
     switch (flow.changes.type) {
       case changeType.added:
+        if (flow.changes.previous && flow.changes.previous.type === changeType.removed) {
+          const removeChange = flow.changes.previous; 
+          node.changes.targetBounds = removeChange.originalBounds;
+          node.changes.targetStyle = removeChange.originalStyle;
+          node.changes.computedTargetStyle = removeChange.computedOriginalStyle; 
+          node.changes.targetDimensions = removeChange.originalDimensions;
+          break;
+        }
+
       case changeType.resident:
       case changeType.moved:
         // Bounds (excludes margins)
@@ -901,6 +917,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
                 trailer.removeChild(node);
                 if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
                 delete trailer.owner;
+                node.trailer.canBeRepurposed = true; 
                 delete node.trailer; 
               }
               break;
@@ -917,6 +934,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
               }
               if (trailer) {
                 delete trailer.owner;
+                node.trailer.canBeRepurposed = true; 
                 delete node.trailer; 
               }
               break; 
