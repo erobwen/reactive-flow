@@ -5,7 +5,7 @@ import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
 const log = console.log;
 
-let animationTime = .5;
+let animationTime = .99;
 
 export function setAnimationTime(value) {
   animationTime = value; 
@@ -102,6 +102,26 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     if (trailer.owner !== node) throw new Error("unexpected owner"); 
     node.trailer = trailer; 
     return trailer;
+  }
+
+  repurposeOwnTrailerAsLeader(node) {
+    log("repurposeOwnTrailerAsLeader");
+    const trailer = node.trailer; 
+    
+    delete node.trailer;
+    trailer.removeEventListener("transitionend", trailer.hasCleanupEventListener);
+    delete trailer.hasCleanupEventListener;
+    
+    // Disconnect previous leader
+    if (node.leader) {
+      delete node.leader.owner;
+      delete node.leader;
+    }
+
+    const leader = trailer; 
+    if (leader.owner !== node) throw new Error("unexpected owner"); 
+    node.leader = leader; 
+    return leader;
   }
 
   repurposeTrailerAsLeader(trailer, node) {
@@ -458,24 +478,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   setupALeaderForIncomingWithOriginalFootprint(node) {
     log("setupALeaderForIncomingWithOriginalFootprint")
     // Get a leader for the added, this is either a new one, or a reused one from a remove. 
-    let leader;
+    let leader = this.tryRepurposeTrailerAsLeader(node);
 
-    // Find a leader for added, either borrow one, or create a new one.   
-    let previous = node.previousSibling;
-    // log(previous) 
-    // log(previous && previous.isControlledByAnimation) 
-    let trailer; 
-    while (previous && previous.isControlledByAnimation && previous.canBeRepurposed) {
-      // log("found leader...")
-      trailer = previous; 
-      previous = previous.previousSibling;
-    }
-    if (false && trailer) {
-      delete trailer.canBeRepurposed;
-      // Found an existing leader. 
-      log("repurpose existing trailer ...")
-      leader = this.repurposeTrailerAsLeader(trailer, node);
-    } else {
+    if (!leader) {
       // Create new leader.
       log("create a new leader ...")
       leader = this.createNewLeader(node);
@@ -495,6 +500,38 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
 
     log(`leader: `);
     logProperties(node.leader.style, this.typicalAnimatedProperties);
+  }
+
+  tryRepurposeTrailerAsLeader(node) {
+    if (node.trailer && node.parentNode === node.trailer) {
+      // Reuse own trailer as leader. 
+      log("repurpose existing trailer ...")
+      return this.repurposeOwnTrailerAsLeader(node);
+    } else {
+      return null;
+      
+      // Find a leader for added, either borrow one, or create a new one.   
+      let trailer; 
+      let previous = node.previousSibling;
+      // log(previous) 
+      // log(previous && previous.isControlledByAnimation) 
+      while (previous && previous.isControlledByAnimation && previous.canBeRepurposed) {
+        trailer = previous; 
+        previous = previous.previousSibling;
+      }
+
+      if (trailer) {  
+        log(node.trailer);
+        log(node.trailer.parentNode);
+        log(node.parentNode);
+        log(node.trailer === node.parentNode);
+        delete trailer.canBeRepurposed;
+        // Found an existing leader. 
+        log("repurpose existing trailer ...")
+        return this.repurposeTrailerAsLeader(trailer, node);
+      }
+    }
+    return null;
   }
 
   fixateOriginalTransformAndOpacity(node) {
@@ -700,6 +737,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         case changeType.added:
           this.targetPositionForZoomIn(node);
           this.targetSizeForLeader(node, node.leader);
+          log(trailer)
+          log(leader);
+          log(trailer === leader);
           if (trailer) throw new Error("Internal error, should not happen!");
           break;
   

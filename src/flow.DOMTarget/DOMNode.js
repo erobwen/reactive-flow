@@ -2,6 +2,7 @@ import { flexAutoStyle } from "../components/basic/Layout";
 import { repeat, Flow, trace, configuration, finalize } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
+import { logMark } from "../flow/utility";
 import { changeType, flowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, previousFlowChanges } from "./DOMAnimation";
 
 const log = console.log;
@@ -136,7 +137,7 @@ export function clearNode(node, attributes) {
   }
 
   ensureDomNodeChildrenInPlace() {// But do not change style for animated children!
-    // log("ensureDomNodeChildrenInPlace " + this.toString());
+    log("ensureDomNodeChildrenInPlace " + this.toString());
     // Impose animation. CONSIDER: introduce this with more general mechanism?
     const node = this.domNode;
     if (!(node instanceof Element)) return;
@@ -148,9 +149,16 @@ export function clearNode(node, attributes) {
     // Nodes wrapped in a leader or trailer, should maintain their wrapper during this operation. 
     let index = 0;
     while (index < newChildNodes.length) {
+      log("scanning.....");
       const child = newChildNodes[index];
-      if (child.isControlledByAnimation && child.leader && child.leader.parentNode === node) {
+      // log(child.isControlledByAnimation);
+      if (child.leader && child.parentNode === child.leader && child.leader.parentNode === node) {
+        logMark("wrapped in leader")
         newChildNodes[index] = child.leader;
+      }
+      if (child.trailer && child.parentNode === child.trailer && child.trailer.parentNode === node) {
+        logMark("wrapped in trailer")
+        newChildNodes[index] = child.trailer;
       }
       index++;
     }
