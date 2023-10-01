@@ -318,6 +318,7 @@ export function onFinishReBuildingFlow() {
     if (flow.getDomNode()) {
       const changes = {
         number: flowChanges.number,
+        activated: false, 
         type: changeType.resident,
         previous: flow.changes,
         transitioningProperties: (flow.changes && flow.changes.transitioningProperties) ? flow.changes.transitioningProperties : {} 
@@ -448,6 +449,7 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
       if (flow.domNode) {
         flow.animation.activateAnimation(flow, currentFlowChanges);
       }
+      flow.changes.activated = true; 
     }
 
     // if (inExperimentOnCount(3)) return;

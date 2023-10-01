@@ -107,6 +107,10 @@ const log = console.log;
     // }
 
     synchronizeDomNodeStyle(properties) {
+      if (!properties) {
+        properties = Object.keys(this.unobservable.previouslySetAttributes);
+        log(properties);
+      }
       if (!(properties instanceof Array)) properties = [properties];
       // log("synchronizeDomNodeStyle");
       const style = (this.attributes && this.attributes.style) ? this.attributes.style : {}; 

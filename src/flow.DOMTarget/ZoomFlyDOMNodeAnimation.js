@@ -974,6 +974,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     
     function onTransitionEnd(event) {
       // if (!node.changes) return;
+      // Is just about to activate a new animation, dont disturb it! 
+      if (!node.changes || !node.changes.activated) return;
+
       const propertyName = camelCase(event.propertyName); 
 
       const typeOfAnimationString = node.changes ? (" in " +  node.changes.type + " animation") : ""; 
