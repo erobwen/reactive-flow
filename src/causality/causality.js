@@ -2,7 +2,7 @@ import { argumentsToArray, configSignature, mergeInto } from "./lib/utility.js";
 import { objectlog } from "./lib/objectlog.js";
 import { createCachingFunction } from "./lib/caching.js";
 import { defaultDependencyInterfaceCreator } from "./lib/defaultDependencyInterface.js";
-import { logMark } from "../flow/utility.js";
+// import { logMark } from "../flow/utility.js";
 const defaultObjectlog = objectlog;
 
 
@@ -109,7 +109,7 @@ function createWorld(configuration) {
     withoutReactions: withoutReactionsDo,
 
     // Transaction
-    postponeInvalidations: postponeInvalidationsAndDo,
+    doWhileInvalidationsPostponed: postponeInvalidationsAndDo,
     transaction : postponeInvalidationsAndDo,
     postponeInvalidations,
     continueInvalidations,
@@ -1553,8 +1553,10 @@ function createWorld(configuration) {
       if (state.inRepeater) {
         // console.group("reBuildShapeAnalysis");
         const repeater = state.context;
-        const {matchChildrenInEquivalentSlot} = reBuildShapeAnalysis(repeater);
-        matchChildrenInEquivalentSlot(object[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
+        if (repeater.options.rebuildShapeAnalysis) {
+          const {matchChildrenInEquivalentSlot} = reBuildShapeAnalysis(repeater);
+          matchChildrenInEquivalentSlot(object[objectMetaProperty].target, temporaryObject[objectMetaProperty].target);
+        }
         // console.groupEnd();
       }
 
@@ -1580,7 +1582,6 @@ function createWorld(configuration) {
         const timeSinceLastRepeat = time - repeater.lastRepeatTime;
         if (throttle > timeSinceLastRepeat) {
           const waiting = throttle - timeSinceLastRepeat;
-          debugger; 
           setTimeout(() => { repeater.restart() }, waiting);
         } else {
           repeater.lastRepeatTime = time;
@@ -1723,7 +1724,7 @@ function createWorld(configuration) {
     return null; 
   }
 
-  let currentRepeater= null; 
+  // let currentRepeater= null; 
 
   function refreshAllDirtyRepeaters() {
     if (state.postponeRefreshRepeaters === 0) {
@@ -1732,7 +1733,7 @@ function createWorld(configuration) {
           state.refreshingAllDirtyRepeaters = true;
           while (anyDirtyRepeater()) {
             let repeater = firstDirtyRepeater();
-            currentRepeater = repeater; 
+            // currentRepeater = repeater; 
             repeater.refresh();
             detatchRepeater(repeater);
             exitPriorityLevel(repeater.priority());
