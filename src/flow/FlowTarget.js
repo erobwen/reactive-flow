@@ -1,5 +1,5 @@
 import { clearNode } from "../flow.DOMTarget/DOMNode";
-import { flow, repeat, trace, workOnPriorityLevel } from "./Flow";
+import { component, repeat, trace, workOnPriorityLevel } from "./Flow";
 
 /**
  * Implement any flow target that implements HTML Element Node and HTML Text Node. 

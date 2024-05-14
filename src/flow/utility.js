@@ -1,4 +1,5 @@
 import { adjustLightness, rgba2hex } from "../components/themed/Color";
+import { traceAnimation } from "./Flow";
 
 export const log = console.log;
 
@@ -39,6 +40,7 @@ const animationFrameBackgroundColor = rgba2hex("rgba(150, 150, 255, 1)");
 const animationFrameColor = "#000000"; //rgba2hex("rgba(255, 255, 255, 1)");
 const animationFrameSeparatorBackgroundColor = adjustLightness(animationFrameBackgroundColor, +0.1)
 export function logAnimationFrameGroup(counter) {
+  if (!traceAnimation) return;
   const text = "      Animation Frame " + counter + "      ";
   const colors = `background: ${animationFrameBackgroundColor}; color: ${animationFrameColor}`
   // log(colors);
@@ -46,10 +48,12 @@ export function logAnimationFrameGroup(counter) {
 } 
 
 export function logAnimationFrameEnd() {
+  if (!traceAnimation) return;
   console.groupEnd();
 }
 
 export function logAnimationSeparator(text) {
+  if (!traceAnimation) return;
   const colors = `background: ${animationFrameSeparatorBackgroundColor}; color: ${animationFrameColor}`
   // log(colors);
   console.log('%c' + text, colors);

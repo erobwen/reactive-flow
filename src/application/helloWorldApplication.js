@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { observable, Component, component, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, unstyledText as text } from "../components/basic/BasicWidgets";
 import { column, row as basicRow } from "../components/basic/Layout";
@@ -11,7 +11,7 @@ const log = console.log;
  */
 
 // Parent flow
-export class HelloWorld extends Flow {
+export class HelloWorld extends Component {
   setState() {
     this.name = "Hello World";
     this.helloText = observable({ value: "..." });
@@ -36,13 +36,13 @@ export class HelloWorld extends Flow {
 }
 
 // Stateless child flow (compact definition)
-const hello = flow("hello", (flow) =>
+const hello = component("hello", (flow) =>
   text({ key: "text", text: flow.inherit("helloText").withComma })
 );
 //
 
 // Statefull child flow
-class World extends Flow {
+class World extends Component {
   setProperties({ exclamationCharacter }) {
     // This life cycle function is optional, but can be used to set default values for properties.
     this.exclamationCharacter = exclamationCharacter ? exclamationCharacter : "?";
@@ -65,12 +65,12 @@ class World extends Flow {
 }
 
 // Another stateless child flow
-const exclamationMark = flow("exclamationMark", ({ on, character }) =>
+const exclamationMark = component("exclamationMark", ({ on, character }) =>
   on ? text({ text: character }) : null
 );
 
 // My own dynamically/reactivley styled row
-const myRow = flow("myRow", (flow) => {
+const myRow = component("myRow", (flow) => {
   let { style, children } = flow;
   if (!style) style = {};
   if (flow.inherit("emphasis")) style.fontSize = "20px"; 

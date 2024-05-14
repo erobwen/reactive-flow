@@ -2,6 +2,7 @@ import { argumentsToArray, configSignature, mergeInto } from "./lib/utility.js";
 import { objectlog } from "./lib/objectlog.js";
 import { createCachingFunction } from "./lib/caching.js";
 import { defaultDependencyInterfaceCreator } from "./lib/defaultDependencyInterface.js";
+import { traceWarnings } from "../flow/Flow.js";
 // import { logMark } from "../flow/utility.js";
 const defaultObjectlog = objectlog;
 
@@ -1629,7 +1630,7 @@ function createWorld(configuration) {
       if( !parentDesc ){
         parentDesc = 'unnamed';
       }
-      console.warn(Error(`repeater ${description||'unnamed'} inside active recording ${parentDesc}`));
+      if (configuration.traceWarnings) console.warn(Error(`repeater ${description||'unnamed'} inside active recording ${parentDesc}`));
     }
     
     // Activate!

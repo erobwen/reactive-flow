@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
+import { observable, Component, component, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text } from "../components/basic/BasicWidgets";
 import { column, filler, fillerStyle, row } from "../components/basic/Layout";
@@ -16,7 +16,7 @@ const log = console.log;
 /**
  * Minimalistic component used for experiments. 
  */
-export class SimpleMoveAnimation extends Flow {
+export class SimpleMoveAnimation extends Component {
   setState() {
     this.left = false;
     this.showButton = false;
@@ -61,7 +61,7 @@ export class SimpleMoveAnimation extends Flow {
     logMark("build simple animation ");
     // const button = new modernButton(
     // const button = div("wrapper", this.button, {animate: true});
-    if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
+    if (window.idToComponent[14]) console.log(window.idToComponent[14].animate);
     const movingButton = button(
       "button", this.text, 
       this.move.bind(this),
@@ -75,7 +75,7 @@ export class SimpleMoveAnimation extends Flow {
       }
     );
     console.log(movingButton.animate);
-    if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
+    if (window.idToComponent[14]) console.log(window.idToComponent[14].animate);
     // movingButton.animate = true; // Force property...  
 
     return column(

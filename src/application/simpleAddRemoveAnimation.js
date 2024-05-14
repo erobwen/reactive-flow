@@ -2,14 +2,14 @@ import { div } from "../flow.DOMTarget/BasicHtml";
 import { button, text } from "../components/basic/BasicWidgets";
 import { column } from "../components/basic/Layout";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";
-import { Flow } from "../flow/Flow";
+import { Component } from "../flow/Flow";
 
 const log = console.log;
 
 /**
  * Minimalistic component used for experiments. 
  */
-export class SimpleAddRemoveAnimation extends Flow {
+export class SimpleAddRemoveAnimation extends Component {
   setState() {
     this.showText = false;
     this.color = "green"; 

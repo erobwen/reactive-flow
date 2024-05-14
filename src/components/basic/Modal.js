@@ -1,4 +1,4 @@
-import { Flow, transaction } from "../../flow/Flow.js";
+import { Component, transaction } from "../../flow/Flow.js";
 import { creators, getTarget } from "../../flow/flowBuildContext.js";
 import { readFlowProperties, findKeyInProperties } from "../../flow/flowParameters.js";
 import { div } from "../../flow.DOMTarget/BasicHtml.js";
@@ -16,7 +16,7 @@ export function modal(...parameters) {
   return result; 
 }
 
-export class Modal extends Flow {
+export class Modal extends Component {
   setProperties({children}) {
     if (children.length !== 1) throw new Error("Modal only accepts a single child!");
     this.content = children[0];
@@ -53,7 +53,7 @@ export function modalFrame(...parameters) {
   return result; 
 }
 
-class ModalFrame extends Flow {
+class ModalFrame extends Component {
   setProperties({style, children}) {
     this.style = style; 
     this.children = children;  

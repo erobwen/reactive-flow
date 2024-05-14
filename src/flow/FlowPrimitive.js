@@ -1,12 +1,12 @@
 import { flowChanges } from "../flow.DOMTarget/DOMAnimation.js";
-import { configuration, finalize, Flow, invalidateOnChange, repeat, state, trace } from "./Flow.js";
+import { configuration, finalize, Component, invalidateOnChange, repeat, state, trace, traceWarnings } from "./Flow.js";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { logMark } from "./utility.js";
 import { standardAnimation } from "../flow.DOMTarget/ZoomFlyDOMNodeAnimation.js";
 
 const log = console.log;
 
-export class FlowPrimitive extends Flow {
+export class FlowPrimitive extends Component {
     
   findKey(key) {
     if (this.key === key) return this;
@@ -29,8 +29,8 @@ export class FlowPrimitive extends Flow {
   getPrimitive(parentPrimitive) {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
-        log("FlowPrimitive.getPrimitive");
-        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+        // log("FlowPrimitive.getPrimitive");
+        if (traceWarnings) console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive
     } 
@@ -43,8 +43,8 @@ export class FlowPrimitive extends Flow {
     if (flowTarget) this.visibleOnTarget = flowTarget;
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
-        log("FlowPrimitive.ensureBuiltRecursive");
-        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+        // log("FlowPrimitive.ensureBuiltRecursive");
+        if (traceWarnings) console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
         if (parentPrimitive === this) throw new Error("What the fuck just happened. ");
       }
       this.parentPrimitive = parentPrimitive
@@ -75,8 +75,8 @@ export class FlowPrimitive extends Flow {
           } else {
             if (this.parentPrimitive && this.parentPrimitive !== scan.parentPrimitive) {
               if (this.parentPrimitive) {
-                log("FlowPrimitive, scanning equivalent creators");
-                console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+                // log("FlowPrimitive, scanning equivalent creators");
+                if (traceWarnings) console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
               }
               scan.parentPrimitive = this.parentPrimitive
             }         
@@ -148,7 +148,7 @@ export class FlowPrimitive extends Flow {
           this.cachedAnimation = this.inheritAnimation();
         },
         () => {
-          logMark("deleting cache!!!!")
+          // logMark("deleting cache!!!!")
           delete this.cachedAnimation;
         }
       )

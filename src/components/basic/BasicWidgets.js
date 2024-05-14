@@ -1,5 +1,5 @@
 import { extractAttributes, extractChildStyles, extractProperty } from "../../flow.DOMTarget/domNodeAttributes.js";
-import { trace, Flow, callback } from "../../flow/Flow.js";
+import { trace, Component, callback } from "../../flow/Flow.js";
 import { getTarget } from "../../flow/flowBuildContext.js";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../../flow/flowParameters.js";
 import { div,  textToTextNode } from "../../flow.DOMTarget/BasicHtml.js";
@@ -214,7 +214,7 @@ export const panel = (...parameters) => {
     boxSizing: "border-box"
   });
   console.log(properties);
-  return new Flow({
+  return new Component({
     ...properties,
     description: "panel",
     buildFunction: flow => {

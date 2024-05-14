@@ -1,5 +1,5 @@
 import { flexAutoStyle } from "../components/basic/Layout";
-import { repeat, Flow, trace, configuration, finalize } from "../flow/Flow";
+import { repeat, Component, trace, configuration, finalize, traceWarnings } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties, findTextKeyAndOnClickInProperties, addDefaultStyleToProperties, findKeyInProperties } from "../flow/flowParameters";
 import { FlowPrimitive } from "../flow/FlowPrimitive";
 import { logMark } from "../flow/utility";
@@ -50,7 +50,7 @@ export function clearNode(node, attributes) {
 
   dimensions(contextNode) {
     //TODO: Research a way to isolate the reflow used in dimensions to a wecomponent?
-    console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
+    if (traceWarnings) console.warn("Calls to dimensions() could lead to performance issues as it forces a reflow to measure the size of a dom-node. Note that transition animations may use dimensions() for measuring the size of added nodes"); 
     let domNode = this.ensureDomNodeBuilt();
     let alreadyInContext;
     if (contextNode) { 

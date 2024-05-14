@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Flow, finalize, getTarget } from "../flow/Flow";
+import { observable, world, repeat, when, Component, finalize, getTarget } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, numberInputField, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../components/basic/Layout";
@@ -22,7 +22,7 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-export class RecursiveExample extends Flow {
+export class RecursiveExample extends Component {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
@@ -53,7 +53,7 @@ export class RecursiveExample extends Flow {
   }
 }
   
-export class ControlRow extends Flow {
+export class ControlRow extends Component {
   setProperties({demoComponent}) {
     this.demoComponent = demoComponent;
   }
@@ -79,7 +79,7 @@ export class ControlRow extends Flow {
   }
 }
 
-export class List extends Flow {
+export class List extends Component {
   // This is the function setProperties where you declare all properties that a parent can set on its child. This is optional, but is a good place to define default values, modify values given by parent, or document what properties that the component needs.   
   setProperties({maxCount, count}) {
     this.maxCount = maxCount;
@@ -96,7 +96,7 @@ export class List extends Flow {
   }
 }
 
-export class Item extends Flow {
+export class Item extends Component {
   setProperties({depth}) {
     this.depth = depth;
   }

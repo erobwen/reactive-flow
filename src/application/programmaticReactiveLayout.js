@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { observable, Component, component, repeat } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { basicWidgetTheme, numberInputField, text } from "../components/basic/BasicWidgets";
@@ -16,7 +16,7 @@ const log = console.log;
  */
 
 // Parent flow
-export class ProgrammaticReactiveLayout extends Flow {
+export class ProgrammaticReactiveLayout extends Component {
   
   setProperties({bounds}) {
     this.bounds = bounds; 
@@ -88,7 +88,7 @@ export class ProgrammaticReactiveLayout extends Flow {
   }
 }
 
-export class BoundsDisplay extends Flow {
+export class BoundsDisplay extends Component {
 
   setProperties({bounds, style}) {
     this.bounds = bounds;
@@ -116,7 +116,7 @@ export class BoundsDisplay extends Flow {
 }
 
 
-export class StringDisplay extends Flow {
+export class StringDisplay extends Component {
 
   setProperties({bounds, style}) {
     this.bounds = bounds;
@@ -165,7 +165,7 @@ function scaledTextWithMaxFontSize(...parameters) {
 }
 
 
-export class FixedAspectRatioDisplay extends Flow {
+export class FixedAspectRatioDisplay extends Component {
 
   setProperties({bounds, style}) {
     this.bounds = bounds;

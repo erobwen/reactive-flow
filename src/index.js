@@ -64,7 +64,7 @@ Array.prototype.remove = function(target) {
 
 setFlowConfiguration({
   warnWhenNoKey: false,
-  traceReactivity: true,
+  traceReactivity: false,
   autoAssignProperties: true
 });
 installDOMAnimation();

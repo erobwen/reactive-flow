@@ -1,4 +1,4 @@
-import { repeat, Flow, trace, configuration, flow, activeTrace, creators, postponeInvalidations, continueInvalidations } from "../flow/Flow";
+import { repeat, Component, trace, configuration, component, activeTrace, creators, postponeInvalidations, continueInvalidations, traceAnimation } from "../flow/Flow";
 import { DOMNodeAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrameGroup, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
@@ -32,13 +32,13 @@ export function resetDOMAnimation() {
 let count = 0;
 export function freezeFlowChanges() {
   count++;
-  console.warn("Risky to use freeze " + count);
+  if (traceAnimation) console.warn("Risky to use freeze " + count);
   // postponeInvalidations();
 }
 
 export function unfreezeFlowChanges() {
   count--;
-  console.warn("Unfreeze... " + count);
+  if (traceAnimation) console.warn("Unfreeze... " + count);
   // continueInvalidations();
 }
 
@@ -212,10 +212,12 @@ export const changeType = {
 export function onFinishReBuildingFlow() {
   
   counter++
-  logAnimationFrameGroup(counter)
-  logAnimationSeparator("---------------------------------------- Flow rebuilt, DOM untouched, calculate changes... -------------------");
-  console.groupCollapsed("Potentially start DOM building for new flows here ...");
-  // log(counter);
+  if (traceAnimation) {
+    logAnimationFrameGroup(counter)
+    logAnimationSeparator("---------------------------------------- Flow rebuilt, DOM untouched, calculate changes... -------------------");
+    console.groupCollapsed("Potentially start DOM building for new flows here ...");
+    // log(counter);
+  }
   // if (counter === 5) return; 
 
   // Save previous state for comparison
@@ -245,6 +247,7 @@ export function onFinishReBuildingFlow() {
   for (let target of domFlowTargets) {
     analyzePrimitives(idPrimitiveMap, target.flow.getPrimitive());
   }
+  // console.log(idParentIdMap);
 
   // Added, resident or moved 
   for (let id in idPrimitiveMap) {
@@ -345,12 +348,13 @@ export function onFinishReBuildingFlow() {
       flow.domNode.changes.targetDimensions = {width: flow.domNode.offsetWidth, height: flow.domNode.offsetHeight } 
     }
   }
-  console.groupEnd();
-  console.log("New animated changes:");
-  log(toStrings(flowChanges));
 
+  if (traceAnimation) {
+    console.groupEnd();
+    console.log("New animated changes:");
+    log(toStrings(flowChanges));
+  }
   logAnimationSeparator("---------------------------------------- Measure original bounds... ------------------------------------------");
-  
 
   for (let flow of flowChanges.allAnimatedFlows()) {
     if (flow.getDomNode()) {
@@ -369,7 +373,7 @@ export function onFinishReBuildingFlow() {
   // Insert deflated trailers for moved. 
   
   logAnimationSeparator("---------------------------------------- Rebuilding DOM... ----------------------------------------------------")
-  console.groupCollapsed("...");
+  if (traceAnimation) console.groupCollapsed("...");
   flowChanges.onFinishReBuildingFlowDone = true;
 }
 
@@ -389,7 +393,7 @@ export function onFinishReBuildingDOM() {
   if (!flowChanges.onFinishReBuildingFlowDone) return;
   delete flowChanges.onFinishReBuildingFlowDone;
 
-  console.groupEnd();
+  if (traceAnimation) console.groupEnd();
   logAnimationSeparator("---------------------------------------- DOM rebuilt, measure target sizes ... -------------------------------");
   
   // Measure the final size of added and moved (do this before we start to emulate original)
@@ -447,7 +451,14 @@ function activateAnimationAfterFirstRender(currentFlowChanges) {
 
     for (let flow of currentFlowChanges.allAnimatedFlows()) {
       if (flow.domNode) {
+        if (traceAnimation) {
+          console.group();
+          console.log(flow.domNode);
+        }
         flow.animation.activateAnimation(flow, currentFlowChanges);
+        if (traceAnimation) {
+          console.groupEnd();
+        }
       }
       flow.changes.activated = true; 
     }

@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Flow, finalize, readFlowProperties } from "../flow/Flow";
+import { observable, world, repeat, when, Component, finalize, readFlowProperties } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { portalEntrance } from "../components/basic/Portals";
 import { button, text } from "../components/basic/BasicWidgets";
@@ -21,7 +21,7 @@ const loga = (action) => {
  * Also, open and expand the view-elements debug panel in Chrome, to verify minimal updates
  * to the DOM when the UI is rebuilt.  
  */
-export class PortalExample extends Flow {
+export class PortalExample extends Component {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   setProperties({portal}) {
     this.name = "Portal Example";

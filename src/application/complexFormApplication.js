@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, transaction, model } from "../flow/Flow";
+import { observable, Component, component, repeat, transaction, model } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 // import { simpleButton as button } from "../components/SimpleButton";
 import { div, span, textNode } from "../flow.DOMTarget/BasicHtml";
@@ -113,11 +113,11 @@ function verifyFieldNotEmpty(object, property, requestedDataMessage) {
  * Reusable components. Flow component definitions.
  */
 
-const panel = flow("panel", ({ children }) =>
+const panel = component("panel", ({ children }) =>
   div("panel", {children, style: {margin: "4px", borderRadius: "5px", backgroundColor: "#eeeeee", borderColor: "#cccccc", borderStyle: "solid", borderWidth: "1px", padding: "10px", boxSizing: "border-box"}})
 );
 
-export class SimpleDrawer extends Flow {
+export class SimpleDrawer extends Component {
  setProperties({openButtonLabel = "Open", closeButtonLabel = "Close", isOpen, toggleOpen, content}) {
     this.openButtonLabel = openButtonLabel;
     this.closeButtonLabel = closeButtonLabel;
@@ -140,7 +140,7 @@ export class SimpleDrawer extends Flow {
  * Components. Flow component definitions.
  */
 
-export class ComplexForm extends Flow {
+export class ComplexForm extends Component {
 
   setProperties({initialData}) {
     this.name = "Complex Form";
@@ -224,7 +224,7 @@ export class ComplexForm extends Flow {
 }
 
 
-export class TravelerForm extends Flow {
+export class TravelerForm extends Component {
   setProperties({traveler, isFellowTraveller}) {
     this.traveler = traveler; 
     this.isFellowTraveller = isFellowTraveller;
@@ -302,7 +302,7 @@ export class TravelerForm extends Flow {
   }
 }
 
-export class LuggageForm extends Flow {
+export class LuggageForm extends Component {
   setProperties({luggage}) {
     this.luggage = luggage;
   }

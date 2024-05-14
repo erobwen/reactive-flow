@@ -1,4 +1,4 @@
-import { observable, Flow } from "../flow/Flow";
+import { observable, Component } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, text } from "../components/basic/BasicWidgets";
 import { column, row } from "../components/basic/Layout";
@@ -13,7 +13,7 @@ const log = console.log;
 const model = observable({value: ""});
 
 // A very simple view component
-export class PatternMatching extends Flow {
+export class PatternMatching extends Component {
   setState() {
     this.state = 1;
   }

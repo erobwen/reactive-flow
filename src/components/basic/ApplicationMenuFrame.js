@@ -1,5 +1,5 @@
 import { flyFromLeftAnimation, flyFromTopAnimation } from "../../flow.DOMTarget/FlyDOMNodeAnimation";
-import { Flow } from "../../flow/Flow"
+import { Component } from "../../flow/Flow"
 import { readFlowProperties } from "../../flow/flowParameters";
 import { log, logMark } from "../../flow/utility";
 import { button, text } from "./BasicWidgets";
@@ -13,7 +13,7 @@ export function applicationMenuFrame(...parameters) {
   return new ApplicationMenuFrame(readFlowProperties(parameters));
 }
 
-class ApplicationMenuFrame extends Flow {
+class ApplicationMenuFrame extends Component {
   setProperties({appplicationMenu, applicationContent, topPanelContent}) {
     this.appplicationMenu = appplicationMenu;
     this.applicationContent = applicationContent;
@@ -30,17 +30,17 @@ class ApplicationMenuFrame extends Flow {
   } 
 
   build() {
-    logMark("build menu frame");
-    log(this.appplicationMenu)
-    log(this.topPanelContent)
-    log(this.appplicationMenu.getDomNode())
-    log(this.appplicationMenu.dimensions())
+    // logMark("build menu frame");
+    // log(this.appplicationMenu)
+    // log(this.topPanelContent)
+    // log(this.appplicationMenu.getDomNode())
+    // log(this.appplicationMenu.dimensions())
     const menuWidth = this.appplicationMenu.dimensions().width;
-    log("menuWidth " + menuWidth);
-    log("width " + this.bounds.width);
+    // log("menuWidth " + menuWidth);
+    // log("width " + this.bounds.width);
     const { menuIsModalOverride } = this;
     const menuIsModal = menuIsModalOverride !== null ? menuIsModalOverride : this.bounds.width < menuWidth * 3;
-    log(menuIsModal);
+    // log(menuIsModal);
 
     this.applicationContent.bounds = { 
       width: menuIsModal ? this.bounds.width : this.bounds.width - menuWidth, 

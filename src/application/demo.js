@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, creators } from "../flow/Flow";
+import { observable, Component, component, repeat, creators } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { AnimationExample } from "./animationExample";
 import { ComplexForm, initialData } from "./complexFormApplication";
@@ -23,7 +23,7 @@ const log = console.log;
  * Demo
  */
 
-export class Demo extends Flow {
+export class Demo extends Component {
   setState() {
     this.leftColumnPortal = portalExit({key: "portal", style: {...columnStyle, overflow: "visible"}});
 
@@ -91,7 +91,7 @@ export class Demo extends Flow {
 
   build() {
     // return text("Foo");
-    logMark("build demo")
+    // logMark("build demo")
     return applicationMenuFrame({
       appplicationMenu: this.buildMenu(),
       applicationContent: this.choosen,

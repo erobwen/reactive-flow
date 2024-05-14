@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
+import { observable, Component, component, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { animationTime } from "../flow.DOMTarget/DOMNodeAnimation";
 import { column, filler, row } from "../components/basic/Layout";
@@ -29,7 +29,7 @@ const items = [
     "Fumbar"
 ];
 
-const panel = flow("panel", ({ children, style }) =>
+const panel = component("panel", ({ children, style }) =>
   column({key: "panel", 
     children, 
     style: {
@@ -56,7 +56,7 @@ function itemDisplay(item) {
 
 
 // A very simple view component
-export class AnimationExample extends Flow {
+export class AnimationExample extends Component {
   setProperties({items}) {
     this.name = "Animation Example"
     this.items = items; 

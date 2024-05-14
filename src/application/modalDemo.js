@@ -1,4 +1,4 @@
-import { Flow } from "../flow/Flow";
+import { Component } from "../flow/Flow";
 import { readFlowProperties, findTextAndKeyInProperties } from "../flow/flowParameters";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../components/basic/BasicWidgets";
@@ -35,7 +35,7 @@ const panelStyle = {
 const shadeColor = "rgba(0, 0, 0, 0.4)";
 const transparentColor = "rgba(0, 0, 0, 0)";
 
-export class Dialog extends Flow {
+export class Dialog extends Component {
   setProperties({close, text, children}) {
     this.close = close; 
     this.text = text; 
@@ -82,7 +82,7 @@ export class Dialog extends Flow {
 /**
  * Modal example
  */
-export class ModalExample extends Flow {
+export class ModalExample extends Component {
   // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   setProperties({}) {
     // Object.assign(this, properties)
@@ -105,7 +105,7 @@ export class ModalExample extends Flow {
 }
   
 
-class BasicModalExample extends Flow {
+class BasicModalExample extends Component {
  
   setState() {
     this.showModal = false;
@@ -130,7 +130,7 @@ class BasicModalExample extends Flow {
   }
 }
 
-class FlyoutModalExample extends Flow {
+class FlyoutModalExample extends Component {
  
   setState() {
     this.showModal = false;
@@ -155,7 +155,7 @@ class FlyoutModalExample extends Flow {
   }
 }
 
-class PopoverModalExample extends Flow {
+class PopoverModalExample extends Component {
  
   setState() {
     this.showModal = false;
@@ -180,7 +180,7 @@ class PopoverModalExample extends Flow {
   }
 }
 
-class HybridModalExample extends Flow {
+class HybridModalExample extends Component {
  
   setState() {
     this.showModal = false;

@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { observable, Component, component, repeat } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { panel, text } from "../components/basic/BasicWidgets";
 import { column, filler, row, centerMiddle, columnStyle} from "../components/basic/Layout";
@@ -15,7 +15,7 @@ const log = console.log;
 /**
  * Minimalistic component used for experiments. 
  */
-export class SingleStaticWidget extends Flow {
+export class SingleStaticWidget extends Component {
   setState() {}
 
   build() {

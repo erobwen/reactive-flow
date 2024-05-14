@@ -17,24 +17,6 @@ export const world = getWorld({
   onFinishedPriorityLevel: onFinishedPriorityLevel
 });
 
-function onFinishedPriorityLevel(level, didActualWork) {
-  // if (trace) 
-  log("<<<finished priority: " + level + ">>>");
-  // if (finishedAllLevels) log("no more repeaters...");
-
-  // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
-  if (level === 1 && didActualWork) {
-    // log(configuration.onFinishReBuildingFlowCallbacks)
-    configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
-  }
-
-  // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
-
-  // Finished re building DOM, proceed with animations.  
-  if (level === 2) {
-    configuration.onFinishReBuildingDOMCallbacks.forEach(callback => callback())
-  }
-}
 
 
 /**
@@ -69,6 +51,8 @@ export const model = deeplyObservable;
 export const configuration = {
   warnWhenNoKey: false,
   traceReactivity: false,
+  traceAnimation: false,
+  traceWarnings: false, 
   autoAssignProperties: false, 
   defaultTransitionAnimations: null,
   onFinishReBuildingFlowCallbacks: [],
@@ -78,6 +62,8 @@ export const configuration = {
 export function setFlowConfiguration(newConfiguration) {
   Object.assign(configuration, newConfiguration);
   trace = configuration.traceReactivity;
+  traceAnimation = configuration.traceAnimation;
+  traceWarnings = configuration.traceWarnings; 
 }
 
 
@@ -85,6 +71,8 @@ export function setFlowConfiguration(newConfiguration) {
  * Debugging
  */
 export let trace = false;
+export let traceAnimation = false; 
+export let traceWarnings = false; 
 export let activeTrace = false; 
 export const activeTraceModel = model({
   on: false 
@@ -93,17 +81,35 @@ window.activeTrace = activeTraceModel;
 repeat(() => {
   activeTrace = activeTraceModel.on;
 })
-window.flows = {};
-window.idToFlow = {}
+window.components = {};
+window.idToComponent = {}
 window.world = world;
 window.model = model;
 
 
+function onFinishedPriorityLevel(level, didActualWork) {
+  // if (trace)
+  if (trace) log("<<<finished priority: " + level + ">>>");
+  // if (finishedAllLevels) log("no more repeaters...");
+
+  // Finished re building flow with expanded primitives. Measure bounds and style before FLIP animation. 
+  if (level === 1 && didActualWork) {
+    // log(configuration.onFinishReBuildingFlowCallbacks)
+    configuration.onFinishReBuildingFlowCallbacks.forEach(callback => callback())
+  }
+
+  // Let flow rebuild the DOM, while not removing nodes of animated flows (they might move if inserted elsewhere)
+
+  // Finished re building DOM, proceed with animations.  
+  if (level === 2) {
+    configuration.onFinishReBuildingDOMCallbacks.forEach(callback => callback())
+  }
+}
 
 /**
  * Flow
  */
-export class Flow {
+export class Component {
   theme;
   target; 
 
@@ -159,7 +165,7 @@ export class Flow {
     // Debug & warning
     me._ = me.toString(); 
     if (configuration.warnWhenNoKey && me.key === null && me.creator)
-      console.warn(
+    if (traceWarnings) console.warn(
         "Component " +
           me.toString() +
           " with no key, add key for better performance."
@@ -261,7 +267,7 @@ export class Flow {
       // Note that a composed component might not have an equivalent creator, and if not visible it has no parentPrimitive.
       return this.creator.inheritUncached(property); 
     } else {
-      console.warn("Could not find inherited property: " + property);
+      if (traceWarnings) console.warn("Could not find inherited property: " + property);
     }
   }
   
@@ -330,8 +336,8 @@ export class Flow {
   onEstablish() {
     this.causality.established = true; 
     this.unobservable.established = true; 
-    window.flows[this.toString()] = this;
-    window.idToFlow[this.id] = this;
+    window.components[this.toString()] = this;
+    window.idToComponent[this.id] = this;
     creators.push(this);
     this.setState();
     creators.pop();
@@ -364,8 +370,8 @@ export class Flow {
   }
 
   onDispose() {
-    delete window.flows[this.toString()];
-    delete window.idToFlow[this.id];
+    delete window.components[this.toString()];
+    delete window.idToComponent[this.id];
     // Dispose created by repeater in call. 
     if (trace) log("Disposed:" + this.toString());
     if (this.buildRepeater) {
@@ -478,8 +484,8 @@ export class Flow {
   ensureBuiltRecursive(flowTarget, parentPrimitive) {
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
-        log("Flow.ensureBuiltRecursive");
-        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+        // log("Flow.ensureBuiltRecursive");
+        if (traceWarnings) console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive
     } 
@@ -491,8 +497,8 @@ export class Flow {
     // if (parentPrimitive && this.parentPrimitive && this.parentPrimitive !== parentPrimitive) console.warn("Changed parent primitive for " + this.toString());
     if (parentPrimitive && this.parentPrimitive !== parentPrimitive) {
       if (this.parentPrimitive) {
-        log("getPrimitive");
-        console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
+        // log("getPrimitive");
+        if (traceWarnings) console.warn("Changed parent primitive for " + this.toString() + ":" + this.parentPrimitive.toString() + " --> " + parentPrimitive.toString());
       }
       this.parentPrimitive = parentPrimitive
     } 
@@ -512,7 +518,7 @@ export class Flow {
           // Build and rebuild
           me.newBuild = me.build(repeater);
           repeater.finishRebuilding();
-          if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
+          // if (window.idToComponent[14]) console.log(window.idToComponent[14].animate);
           me.newBuild = repeater.establishedShapeRoot;
 
           // Establish relationship between equivalent child and this (its creator).
@@ -560,17 +566,17 @@ export class Flow {
   *iterateChildren() {
     if (this.children instanceof Array) {
       for (let child of this.children) {
-        if (child instanceof Flow && child !== null) {
+        if (child instanceof Component && child !== null) {
           yield child;
         }
       }
-    } else if (this.children instanceof Flow  && this.children !== null) {
+    } else if (this.children instanceof Component  && this.children !== null) {
       yield this.children;
     }
   }
 
   dimensions(contextNode) {
-    if (!this.key) console.warn("It is considered unsafe to use dimensions on a flow without a key. The reason is that a call to dimensions from a parent build function will finalize the flow early, and without a key, causality cannot send proper onEstablish event to your flow component before it is built");
+    if (!this.key && traceWarnings) console.warn("It is considered unsafe to use dimensions on a flow without a key. The reason is that a call to dimensions from a parent build function will finalize the flow early, and without a key, causality cannot send proper onEstablish event to your flow component before it is built");
     const primitive = this.getPrimitive();
     if (primitive instanceof Array) throw new Error("Dimensions not supported for fragmented components.");
     return primitive ? primitive.dimensions(contextNode) : null;
@@ -601,8 +607,8 @@ export function callback(callback, key) {
 }
 
 
-export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
-  console.warn("Deprecated: dont use this function, build a macro component instead using flow parameter helper functions.")
+export function component(descriptionOrBuildFunction, possibleBuildFunction) {
+  if (traceWarnings) console.warn("Deprecated: dont use this function, build a macro component instead using flow parameter helper functions.")
   let description;
   let buildFunction;
   if (typeof descriptionOrBuildFunction === "string") {
@@ -614,7 +620,7 @@ export function flow(descriptionOrBuildFunction, possibleBuildFunction) {
   function flowBuilder(...parameters) {
     const properties = findKeyInProperties(readFlowProperties(parameters));
     properties.buildFunction = buildFunction;
-    const flow = new Flow(properties);
+    const flow = new Component(properties);
     if (description) flow.description = description;
     return flow;
   }
@@ -628,7 +634,7 @@ function getShapeAnalysis(flow) {
       // log(newFlow instanceof Flow);
       // log(newFlow.className() === establishedFlow.className());
       // log(newFlow.classNameOverride === establishedFlow.classNameOverride);
-      return (establishedFlow instanceof Flow && newFlow instanceof Flow
+      return (establishedFlow instanceof Component && newFlow instanceof Component
         && (!newFlow.tagName || newFlow.tagName === establishedFlow.tagName)  
         && (newFlow.className() === establishedFlow.className()) 
         && (newFlow.classNameOverride === establishedFlow.classNameOverride));
@@ -651,7 +657,7 @@ function getShapeAnalysis(flow) {
           newIndex++;
           establishedIndex++;
         }  
-      } else if (establishedObject instanceof Flow && newObject instanceof Flow) {
+      } else if (establishedObject instanceof Component && newObject instanceof Component) {
         if (childrenProperty) yield [establishedObject, newObject];
         for (let property in newObject) {
           if (property === "children") {
@@ -683,7 +689,7 @@ function getShapeAnalysis(flow) {
           children[index] = translateReference(children[index]);
           index++;
         }
-      } else if (children instanceof Flow) {
+      } else if (children instanceof Component) {
         flow.children = translateReference(children);
       }
     }

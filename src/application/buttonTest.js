@@ -2,14 +2,14 @@ import { text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, fitStyle } from "../components/basic/Layout";
 import { modernButton } from "../components/modern/ModernButton";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget";
-import { Flow } from "../flow/Flow";
+import { Component } from "../flow/Flow";
 
 const log = console.log;
 
 /**
  * Minimalistic component used for experiments. 
  */
-class ButtonTest extends Flow {
+class ButtonTest extends Component {
   setState() {
     this.pressed = false; 
   }

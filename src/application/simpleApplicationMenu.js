@@ -1,4 +1,4 @@
-import { Flow } from "../flow/Flow";
+import { Component } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { centerMiddle, column, fillerStyle, layoutBorderStyle } from "../components/basic/Layout";
 import { applicationMenuFrame } from "../components/basic/ApplicationMenuFrame";
@@ -11,7 +11,7 @@ const log = console.log;
  * Demo
  */
 
-export class SimpleApplicationMenu extends Flow {
+export class SimpleApplicationMenu extends Component {
   build() {
     // return text("Foo");
     return applicationMenuFrame({

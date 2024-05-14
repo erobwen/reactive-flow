@@ -1,5 +1,5 @@
 import { extractAttributes } from "../../flow.DOMTarget/domNodeAttributes.js";
-import { Flow } from "../../flow/Flow.js";
+import { Component } from "../../flow/Flow.js";
 import { getTarget } from "../../flow/flowBuildContext.js";
 import { readFlowProperties, findKeyInProperties } from "../../flow/flowParameters";
 import { text } from "./BasicWidgets.js";
@@ -15,7 +15,7 @@ export function portalEntrance(...parameters) {
   return new PortalEntrance(properties);
 }
 
-export class PortalEntrance extends Flow {
+export class PortalEntrance extends Component {
   setProperties({portalContent, portalExit}) {
     this.portalExit = portalExit; 
     this.portalContent = portalContent;

@@ -294,7 +294,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         this.addTrailersForMovedAndRemovedBeforeDomBuilding(node);
         if (changeType.moved) node.trailer.canBeRepurposed = true;         
         // log(`trailer: `);
-        log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
+        // log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
         break;
     }
 
@@ -515,7 +515,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     // leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
     // log(`leader: `);
-    log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
+    // log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
   }
 
   tryRepurposeTrailerAsLeader(node) {
@@ -735,8 +735,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     const leader = node.leader;
     
     // console.group("Activate for " + this.changesChain(flow) + ": " + flow.toString());
-    log(`original properties: `);
-    log(extractProperties(node.style, this.typicalAnimatedProperties));
+    // log(`original properties: `);
+    // log(extractProperties(node.style, this.typicalAnimatedProperties));
     if (node.leader) {
       // log(`leader: `);
       // log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
@@ -812,8 +812,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       }
     }
 
-    log("target properties: ");
-    log(extractProperties(flow.domNode.style, this.typicalAnimatedProperties));
+    // log("target properties: ");
+    // log(extractProperties(flow.domNode.style, this.typicalAnimatedProperties));
     if (leader) {
       // log(`leader: `);
       // log(extractProperties(leader.style, this.typicalAnimatedProperties));
