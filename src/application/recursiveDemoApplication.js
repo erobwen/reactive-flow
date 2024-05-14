@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Component, finalize, getTarget } from "../flow/Flow";
+import { observable, world, repeat, when, Component, finalize, getTarget, trace } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, numberInputField, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../components/basic/Layout";
@@ -7,7 +7,7 @@ import { modal } from "../components/basic/Portals";
 
 const log = console.log;
 const loga = (action) => {
-  log("-----------" + action + "-----------");
+  if (trace) log("-----------" + action + "-----------");
 }
 
 
@@ -64,7 +64,7 @@ export class ControlRow extends Component {
     const moreButton = button({key: "more-button", onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
 
     // Early finalization of sub-component, and dimension analysis of it while building 
-    console.log(moreButton.dimensions());
+    // console.log(moreButton.dimensions());
 
     return row(
       rootText,
@@ -110,7 +110,7 @@ export class Item extends Component {
     const me = this; 
 
     function close() {
-      log("Closing modal...");
+      // log("Closing modal...");
       me.showModal = false; 
     }
 

@@ -29,12 +29,12 @@ export class Demo extends Component {
 
     // Example of building static child-flow components in the setState. Remember to add them to onEstablish/onDispose
     this.items = [
-      new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
-      new ComplexForm({key: "complexForm", initialData}),
-      new PortalExample({key: "portalExample", portal: this.leftColumnPortal}),
-      new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
       new RecursiveExample({key: "recursiveDemo", name: "Recursive Example"}),
-      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"})
+      new ComplexForm({key: "complexForm", initialData}),
+      new AnimationExample({key: "animationExample", items: ["Foo", "Fie", "Fum", "Bar", "Foobar", "Fiebar", "Fumbar"]}),
+      new ProgrammaticReactiveLayout({key: "programmaticReactiveLayout", name: "Programmatic Responsiveness"}),
+      new ModalExample({key: "modalExample", portal: this.leftColumnPortal}),
+      new PortalExample({key: "portalExample", portal: this.leftColumnPortal})
     ];
     
     for (let item of this.items) {
@@ -42,9 +42,10 @@ export class Demo extends Component {
     }
 
     // this.choosen = this.items.find(item => item.key === "complexForm");
-    this.choosen = this.items.find(item => item.key === "portalExample");
+    // this.choosen = this.items.find(item => item.key === "portalExample");
     // this.choosen = this.items.find(item => item.key === "programmaticReactiveLayout");
     // this.choosen = this.items.find(item => item.key === "modalExample");
+    this.choosen = this.items.find(item => item.key === "recursiveDemo");
   }
   
   disposeState() {
@@ -70,9 +71,9 @@ export class Demo extends Component {
     }
     buttons.push(this.leftColumnPortal);
     buttons.push(filler());
-    buttons.push(button({text: "Experiment", onClick: () => {
-      startExperiment();
-    }}));
+    // buttons.push(button({text: "Experiment", onClick: () => {
+    //   startExperiment();
+    // }}));
 
     return column(
       buttons,

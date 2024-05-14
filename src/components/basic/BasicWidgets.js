@@ -115,7 +115,7 @@ export function inputField(type, label, getter, setter, ...parameters) {
     properties.key = properties.key + "." + targetObject.causality.id + "." + targetProperty;
     key = properties.key; 
     getter = callback(() => targetObject[targetProperty], properties.key + ".getter");
-    setter = callback(newValue => { log(newValue); targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}, properties.key + ".setter")
+    setter = callback(newValue => { targetObject[targetProperty] = (type === "number") ? parseInt(newValue) : newValue;}, properties.key + ".setter")
     error = targetObject[targetProperty + "Error"];
   }
 
@@ -170,7 +170,7 @@ export function button(...parameters) {
   if (trace && properties.onClick) {
     const onClick = properties.onClick;
     properties.onClick = () => {
-      console.log("clicked at: " + JSON.stringify(result.getPath()));
+      // console.log("clicked at: " + JSON.stringify(result.getPath()));
       onClick();
     }  
   }
@@ -213,7 +213,7 @@ export const panel = (...parameters) => {
     padding: "10px", 
     boxSizing: "border-box"
   });
-  console.log(properties);
+  // console.log(properties);
   return new Component({
     ...properties,
     description: "panel",

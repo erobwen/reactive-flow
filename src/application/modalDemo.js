@@ -40,17 +40,17 @@ export class Dialog extends Component {
     this.close = close; 
     this.text = text; 
     this.children = children ? children : []; 
-    this.backgroundColor = transparentColor;
+    this.backgroundColor = shadeColor;
   }
 
   onDidDisplayFirstFrame() {
     this.backgroundColor = shadeColor;
-    log("onDidDisplayFirstFrame");
+    // log("onDidDisplayFirstFrame");
     // log("onDidDisplayFirstFrame: " + this.toString() + ".visibility = " + isVisible);
   }
 
   build() {
-    log("Dialog.build")
+    // log("Dialog.build")
     const background = div({
       key: "background", 
       style: {
@@ -60,7 +60,7 @@ export class Dialog extends Component {
         backgroundColor: this.backgroundColor
       }});
     const domNode = background.getPrimitive().getDomNode();
-    log(domNode);
+    // log(domNode);
 
     return zStack(
       background,

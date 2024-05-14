@@ -69,11 +69,11 @@ export class ProgrammaticReactiveLayout extends Component {
         columnIndex++;
       }
       const currentRow = row(columns, {style: flexerStyle});
-      log(currentRow);
+      // log(currentRow);
       rows.push(currentRow);
       rowIndex++;
     } 
-    log(rows);
+    // log(rows);
 
 
     return column(
