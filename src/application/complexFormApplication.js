@@ -17,7 +17,7 @@ const log = console.log;
 export const initialData = model({
   traveler: createInitialTraveler(),
   fellowTravellers: [
-    createTraveler(true, true)
+    // createTraveler(true, true)
   ]
 }, true);
 
@@ -130,7 +130,7 @@ export class SimpleDrawer extends Flow {
   const buttonLabel = this.isOpen ? this.closeButtonLabel : this.openButtonLabel; 
   return column(
     button(row(span(buttonLabel), buttonIcon, {style: {justifyContent: "space-between"}}), () => this.toggleOpen(), {style: {margin: "5px"}, ripple: true}),
-    column("contents", {children: [this.isOpen ? this.content : null], animateChildren: true })
+    column("contents", {children: [this.isOpen ? this.content : null], /*animateChildren: true*/ })
   );
  }
 }
@@ -180,7 +180,7 @@ export class ComplexForm extends Flow {
             new TravelerForm({traveler, isFellowTraveller: false}),
             column({
               children: this.editData.fellowTravellers.map(traveler => new TravelerForm("id-" + traveler.causality.id, {traveler, isFellowTraveller: true})),
-              animateChildren: true,  
+              // animateChildren: true,  
               style: { overflow: "visible" } 
             }),
 
@@ -250,7 +250,7 @@ export class TravelerForm extends Flow {
 
       // Child info
       // checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
-      numberInputField("Age", traveler, "age", {unit: "years", animate: true}).show(traveler.isChild),
+      numberInputField("Age", traveler, "age", {unit: "years" /*, animate: true*/}).show(traveler.isChild),
       
       // Adress
       column(
@@ -262,7 +262,7 @@ export class TravelerForm extends Flow {
 
       // Luggages 
       new SimpleDrawer("luggages-drawer", {
-        animate: true,
+        // animate: true,
         closeButtonLabel: "Hide luggage",
         openButtonLabel: "Show luggage (" + this.traveler.luggages.length + ")",
         toggleOpen: () => { this.showLuggage = !this.showLuggage },
@@ -270,7 +270,7 @@ export class TravelerForm extends Flow {
         content: column("luggage-panel",
           column("luggage-list", {
             children: this.traveler.luggages.map(luggage => new LuggageForm("id-" + luggage.causality.id, {luggage})),
-            animateChildren: true
+            // animateChildren: true
           })
         )
       }).show(this.traveler.luggages.length),
@@ -294,9 +294,9 @@ export class TravelerForm extends Flow {
             edge: false 
           }
         ),
-        {
-          animate: true
-        }
+        // {
+        //   animate: true
+        // }
       ).show(!this.traveler.luggages.length || this.showLuggage)
     );
   }

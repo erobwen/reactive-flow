@@ -5,6 +5,7 @@ import { log, logMark } from "../../flow/utility";
 import { button, text } from "./BasicWidgets";
 import { icon } from "./Icons";
 import { centerMiddle, column, filler, fillerStyle, layoutBorderStyle, row } from "./Layout";
+import { animatedContainerStyle } from "../modern/Style"
 import { modal, modalFrame } from "./Modal";
 
 
@@ -51,7 +52,7 @@ class ApplicationMenuFrame extends Flow {
     //   menuIsModal ? text("modal", "Modal") : text("nonmodal", "Non modal")
     // );
     
-    const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModalOverride = !this.menuIsModalOverride);
+    // const toggleButton = button(menuIsModal ? "To Modal" : "To Nonmodal", () => this.menuIsModalOverride = !this.menuIsModalOverride);
     // return centerMiddle(toggleButton);
 
     const modalButton = button("modalButton", icon("bars"));
@@ -59,14 +60,16 @@ class ApplicationMenuFrame extends Flow {
     const topPanel = row("modalMenu",
       modalButton.show(menuIsModal),
       ...this.topPanelContent,      
-      {style: {...layoutBorderStyle, justifyContent: "space-between"}, animate: flyFromTopAnimation}
+      {style: {...layoutBorderStyle, justifyContent: "space-between"}} //, animate: flyFromTopAnimation
     );
 
     const leftPanel = column("leftMenu", 
       this.appplicationMenu,
       // text("Menu..."),
-      {style: layoutBorderStyle, animate: flyFromLeftAnimation}      
+      {style: {...layoutBorderStyle, ...animatedContainerStyle}} //, animate: flyFromLeftAnimation
     );
+
+    // const animatedContainerStyle = {};
 
     return row("a",
       leftPanel.show(!menuIsModal),
@@ -74,9 +77,9 @@ class ApplicationMenuFrame extends Flow {
         topPanel,
         this.applicationContent,
         // centerMiddle("content", toggleButton,{style: fillerStyle}),
-        {style: {...fillerStyle, ...layoutBorderStyle}}
+        {style: {...fillerStyle, ...layoutBorderStyle, ...animatedContainerStyle}}
       ),
-      {style: {...fillerStyle, ...layoutBorderStyle}}
+      {style: {...fillerStyle, ...layoutBorderStyle, ...animatedContainerStyle}}
     )
 
 

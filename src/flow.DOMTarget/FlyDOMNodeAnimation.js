@@ -1,5 +1,5 @@
 import { logMark } from "../flow/utility";
-import { changeType, logProperties } from "./DOMAnimation";
+import { changeType, extractProperties } from "./DOMAnimation";
 import { ZoomFlyDOMNodeAnimation } from "./ZoomFlyDOMNodeAnimation";
 
 const log = console.log;
@@ -13,7 +13,7 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
     console.group("Emulate original style and footprints for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode;
     const trailer = node.trailer;
-    log("trailer: " + node.trailer);
+    // log("trailer: " + node.trailer);
 
     // Setup leaders, typically deflated unless an existing leader/trailer can be reused.
     switch (flow.changes.type) {
@@ -38,9 +38,9 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
     }
 
     // Set original styles
-    log("ongoingAnimation: " + node.ongoingAnimation)
+    // log("ongoingAnimation: " + node.ongoingAnimation)
     if (node.ongoingAnimation) {
-      log("ongoing animation...");
+      // log("ongoing animation...");
       this.fixateOriginalInheritedStyles(node);
       switch (flow.changes.type) {
         case changeType.resident:
@@ -56,7 +56,7 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
           break;
       }
     } else {
-      log("new animation...");
+      // log("new animation...");
       switch (flow.changes.type) {
         case changeType.resident:
           break;
@@ -95,19 +95,19 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
     const leader = node.leader;
     
     console.group("Activate for " + this.changesChain(flow) + ": " + flow.toString());
-    log(`original properties: `);
-    logProperties(node.style, this.typicalAnimatedProperties);
+    // log(`original properties: `);
+    log(extractProperties(node.style, this.typicalAnimatedProperties));
     if (node.leader) {
-      log(`leader: `);
-      logProperties(node.leader.style, this.typicalAnimatedProperties);
+      // log(`leader: `);
+      log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
     }
     if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+      // log(`trailer: `);
+      log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
     }
 
     // Animate node
-    log("ongoingAnimation: " + ongoingAnimation)
+    // log("ongoingAnimation: " + ongoingAnimation)
     if (ongoingAnimation) {
       switch(flow.changes.type) {
         case changeType.added:
@@ -145,7 +145,7 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
           break;
   
         case changeType.resident: 
-          log("outOfPosition: " + flow.outOfPosition);
+          // log("outOfPosition: " + flow.outOfPosition);
           if (flow.outOfPosition) {
             this.startAnimationChain(node);
             delete flow.outOfPosition;            
@@ -168,15 +168,15 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
           break; 
       }
     }
-    log("target properties: ");
-    logProperties(flow.domNode.style, this.typicalAnimatedProperties);
+    // log("target properties: ");
+    log(extractProperties(flow.domNode.style, this.typicalAnimatedProperties));
     if (leader) {
-      log(`leader: `);
-      logProperties(leader.style, this.typicalAnimatedProperties);
+      // log(`leader: `);
+      log(extractProperties(leader.style, this.typicalAnimatedProperties));
     }
     if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+      // log(`trailer: `);
+      log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
     }
     console.groupEnd();
   }
@@ -184,7 +184,7 @@ class FlyFromTopDOMNodeAnimation extends ZoomFlyDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    console.log("matrix(1, 0, 0, 1, 0, -" + node.changes.originalDimensions.heightWithoutMargin + ")");
+    // console.log("matrix(1, 0, 0, 1, 0, -" + node.changes.originalDimensions.heightWithoutMargin + ")");
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, 0, -" + node.changes.originalDimensions.heightWithoutMargin + ")",
       opacity: "1"
@@ -210,7 +210,7 @@ class FlyFromLeftDOMNodeAnimation extends FlyFromTopDOMNodeAnimation {
 
   targetPositionForFlyOut(node) {
     node.style.transition = this.removeTransition();
-    console.log("matrix(1, 0, 0, 1, -" + node.changes.originalDimensions.widthWithoutMargin + ", 0)");
+    // console.log("matrix(1, 0, 0, 1, -" + node.changes.originalDimensions.widthWithoutMargin + ", 0)");
     Object.assign(node.style, {
       transform: "matrix(1, 0, 0, 1, -" + node.changes.originalDimensions.widthWithoutMargin + ", 0)",
       opacity: "1"

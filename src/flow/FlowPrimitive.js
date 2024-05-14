@@ -148,6 +148,7 @@ export class FlowPrimitive extends Flow {
           this.cachedAnimation = this.inheritAnimation();
         },
         () => {
+          logMark("deleting cache!!!!")
           delete this.cachedAnimation;
         }
       )

@@ -512,6 +512,7 @@ export class Flow {
           // Build and rebuild
           me.newBuild = me.build(repeater);
           repeater.finishRebuilding();
+          if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
           me.newBuild = repeater.establishedShapeRoot;
 
           // Establish relationship between equivalent child and this (its creator).

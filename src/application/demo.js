@@ -19,7 +19,6 @@ import { span } from "../flow.DOMTarget/BasicHtml";
 
 const log = console.log;
 
-
 /**
  * Demo
  */
@@ -42,8 +41,8 @@ export class Demo extends Flow {
       item.onEstablish();
     }
 
-    this.choosen = this.items.find(item => item.key === "complexForm");
-    // this.choosen = this.items.find(item => item.key === "portalExample");
+    // this.choosen = this.items.find(item => item.key === "complexForm");
+    this.choosen = this.items.find(item => item.key === "portalExample");
     // this.choosen = this.items.find(item => item.key === "programmaticReactiveLayout");
     // this.choosen = this.items.find(item => item.key === "modalExample");
   }

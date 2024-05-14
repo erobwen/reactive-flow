@@ -1,5 +1,5 @@
 import { draw, insertAfter, logMark } from "../flow/utility";
-import { camelCase, changeType, extractProperties, flowChanges, freezeFlowChanges, getHeightIncludingMargin, getWidthIncludingMargin, logProperties, sameBounds, unfreezeFlowChanges } from "./DOMAnimation";
+import { camelCase, changeType, extractProperties, flowChanges, freezeFlowChanges, sameBounds, unfreezeFlowChanges } from "./DOMAnimation";
 import { getWrapper, movedPrimitives } from "./DOMNode";
 import { DOMNodeAnimation } from "./DOMNodeAnimation";
 
@@ -77,7 +77,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    */
 
   fixateLeaderOrTrailer(leaderOrTrailer) {
-    log("fixating leader/trailer bounds");
+    // log("fixating leader/trailer bounds");
     const bounds = leaderOrTrailer.getBoundingClientRect();
     // Fixate size, it might get reset after setting display none? 
     leaderOrTrailer.style.width = bounds.width + "px";
@@ -85,7 +85,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }
 
   repurposeOwnLeaderAsTrailer(node) {
-    log("repurposeOwnLeaderAsTrailer");
+    // log("repurposeOwnLeaderAsTrailer");
     const leader = node.leader; 
     
     delete node.leader;
@@ -105,7 +105,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }
 
   repurposeOwnTrailerAsLeader(node) {
-    log("repurposeOwnTrailerAsLeader");
+    // log("repurposeOwnTrailerAsLeader");
     const trailer = node.trailer; 
     
     delete node.trailer;
@@ -125,7 +125,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }
 
   repurposeTrailerAsLeader(trailer, node) {
-    log("repurposeTrailerAsLeader");
+    // log("repurposeTrailerAsLeader");
     
     // Dissconnect trailer (it could be from another node)
     if (trailer.owner)  {
@@ -248,7 +248,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * Also offset width and height do not include margin. 
    */
   recordOriginalBoundsAndStyle(flow) {
-    console.group("Record original bounds and style for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Record original bounds and style for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode; 
 
     // Bounds (excludes margins)
@@ -282,9 +282,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     // Attempt to halt transition animation by setting the end style. 
     // if (flow.changes.changeType !== changeType.resident) flow.domNode.style = flow.changes.originalStyle;
 
-    console.group("Prepare for DOM building for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Prepare for DOM building for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode;
-    log("trailer: " + node.trailer);
+    // log("trailer: " + node.trailer);
 
     // Add trailers for removed to keep a reference of their position, since dom building will remove them. 
     switch (flow.changes.type) {
@@ -293,8 +293,8 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         delete node.isControlledByAnimation; // Make sure dom building removes these nodes
         this.addTrailersForMovedAndRemovedBeforeDomBuilding(node);
         if (changeType.moved) node.trailer.canBeRepurposed = true;         
-        log(`trailer: `);
-        logProperties(node.trailer.style, this.typicalAnimatedProperties);
+        // log(`trailer: `);
+        log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
         break;
     }
 
@@ -363,9 +363,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * Trailers should also be minimized at this point.
    */
   domJustRebuiltMeasureTargetSizes(flow) {
-    console.group("Measure target size for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Measure target size for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode;
-    log("trailer: " + node.trailer);
+    // log("trailer: " + node.trailer);
     
     switch (flow.changes.type) {
       case changeType.added:
@@ -417,10 +417,10 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * nodes. This is for a smooth transition from their original position. 
    */
   emulateOriginalFootprintsAndFixateAnimatedStyle(flow) {
-    console.group("Emulate original style and footprints for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Emulate original style and footprints for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode;
     const trailer = node.trailer;
-    log("trailer: " + node.trailer);
+    // log("trailer: " + node.trailer);
 
     // Setup leaders, typically deflated unless an existing leader/trailer can be reused.
     switch (flow.changes.type) {
@@ -445,9 +445,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     }
 
     // Set original styles
-    log("ongoingAnimation: " + node.ongoingAnimation)
+    // log("ongoingAnimation: " + node.ongoingAnimation)
     if (node.ongoingAnimation) {
-      log("ongoing animation...");
+      // log("ongoing animation...");
       this.fixateOriginalInheritedStyles(node);
       switch (flow.changes.type) {
         case changeType.resident:
@@ -463,7 +463,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
           break;
       }
     } else {
-      log("new animation...");
+      // log("new animation...");
       switch (flow.changes.type) {
         case changeType.resident:
           break;
@@ -492,13 +492,13 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }
 
   setupALeaderForIncomingWithOriginalFootprint(node) {
-    log("setupALeaderForIncomingWithOriginalFootprint")
+    // log("setupALeaderForIncomingWithOriginalFootprint")
     // Get a leader for the added, this is either a new one, or a reused one from a remove. 
     let leader = this.tryRepurposeTrailerAsLeader(node);
 
     if (!leader) {
       // Create new leader.
-      log("create a new leader ...")
+      // log("create a new leader ...")
       leader = this.createNewLeader(node);
       node.leader = leader;
       // Note: We set width/height at this point because here we know if the leader was reused or not. If we do it later, we wont know that.  
@@ -514,14 +514,14 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     // Debugging
     // leader.style.backgroundColor = "rgba(255, 170, 170, 0.5)";
 
-    log(`leader: `);
-    logProperties(node.leader.style, this.typicalAnimatedProperties);
+    // log(`leader: `);
+    log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
   }
 
   tryRepurposeTrailerAsLeader(node) {
     if (node.trailer && node.parentNode === node.trailer) {
       // Reuse own trailer as leader. 
-      log("repurpose existing trailer ...")
+      // log("repurpose existing trailer ...")
       return this.repurposeOwnTrailerAsLeader(node);
     } else {
       return null;
@@ -537,13 +537,13 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       }
 
       if (trailer) {  
-        log(node.trailer);
-        log(node.trailer.parentNode);
-        log(node.parentNode);
-        log(node.trailer === node.parentNode);
+        // log(node.trailer);
+        // log(node.trailer.parentNode);
+        // log(node.parentNode);
+        // log(node.trailer === node.parentNode);
         delete trailer.canBeRepurposed;
         // Found an existing leader. 
-        log("repurpose existing trailer ...")
+        // log("repurpose existing trailer ...")
         return this.repurposeTrailerAsLeader(trailer, node);
       }
     }
@@ -602,9 +602,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
    * Emulate original bounds
    */
   emulateOriginalBounds(flow) {
-    console.group("Emulate original bounds for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Emulate original bounds for " + this.changesChain(flow) + ": " + flow.toString());
     const node = flow.domNode; 
-    log("trailer: " + node.trailer);
+    // log("trailer: " + node.trailer);
     // Do the FLIP animation technique
     // Note: This will not happen for flows being removed (in earlier flowChanges.number). Should we include those here as well?
     this.recordBoundsInNewStructure(flow.domNode);
@@ -642,9 +642,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     if (!sameBounds(flow.domNode.changes.originalBounds, flow.domNode.newStructureBounds)) {
       flow.outOfPosition = true; 
 
-      log("Not same bounds for " + flow.toString());   
-      log(flow.domNode.changes.originalBounds)
-      log(flow.domNode.newStructureBounds);  
+      // log("Not same bounds for " + flow.toString());   
+      // log(flow.domNode.changes.originalBounds)
+      // log(flow.domNode.newStructureBounds);  
       const computedStyle = getComputedStyle(flow.domNode);
       let currentTransform = getComputedStyle(flow.domNode).transform;
       // log(currentTransform);
@@ -734,28 +734,28 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     const trailer = node.trailer; 
     const leader = node.leader;
     
-    console.group("Activate for " + this.changesChain(flow) + ": " + flow.toString());
+    // console.group("Activate for " + this.changesChain(flow) + ": " + flow.toString());
     log(`original properties: `);
-    logProperties(node.style, this.typicalAnimatedProperties);
+    log(extractProperties(node.style, this.typicalAnimatedProperties));
     if (node.leader) {
-      log(`leader: `);
-      logProperties(node.leader.style, this.typicalAnimatedProperties);
+      // log(`leader: `);
+      // log(extractProperties(node.leader.style, this.typicalAnimatedProperties));
     }
     if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+      // log(`trailer: `);
+      // log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
     }
 
     // Animate node
-    log("ongoingAnimation: " + ongoingAnimation)
+    // log("ongoingAnimation: " + ongoingAnimation)
     if (ongoingAnimation) {
       switch(flow.changes.type) {
         case changeType.added:
           this.targetPositionForZoomIn(node);
           this.targetSizeForLeader(node, node.leader);
-          log(trailer)
-          log(leader);
-          log(trailer === leader);
+          // log(trailer)
+          // log(leader);
+          // log(trailer === leader);
           if (trailer) throw new Error("Internal error, should not happen!");
           break;
   
@@ -788,7 +788,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
           break;
   
         case changeType.resident: 
-          log("outOfPosition: " + flow.outOfPosition);
+          // log("outOfPosition: " + flow.outOfPosition);
           if (flow.outOfPosition) {
             this.startAnimationChain(node);
             delete flow.outOfPosition;            
@@ -813,14 +813,14 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
     }
 
     log("target properties: ");
-    logProperties(flow.domNode.style, this.typicalAnimatedProperties);
+    log(extractProperties(flow.domNode.style, this.typicalAnimatedProperties));
     if (leader) {
-      log(`leader: `);
-      logProperties(leader.style, this.typicalAnimatedProperties);
+      // log(`leader: `);
+      // log(extractProperties(leader.style, this.typicalAnimatedProperties));
     }
     if (node.trailer) {
-      log(`trailer: `);
-      logProperties(node.trailer.style, this.typicalAnimatedProperties);
+      // log(`trailer: `);
+      // log(extractProperties(node.trailer.style, this.typicalAnimatedProperties));
     }
     console.groupEnd();
   }
@@ -903,7 +903,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
         const trailer = node.trailer; 
 
         // Synch properties that was transitioned. 
-        log("Ending node animation");
+        // log("Ending node animation");
         node.equivalentCreator.synchronizeDomNodeStyle([propertyName, "transition", "transform", "width", "height", "position", "opacity", ...inheritedProperties]);
         if (node.parentNode.isControlledByAnimation) {
           // Note: This should really go in the cleanup code for the trailer/leader. If a leader is finished, 
@@ -970,7 +970,7 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       purpose: "trailer",
       endingProperties: ["width", "height"],
       endingAction: () => {
-        log("Ending trailer animation"); 
+        // log("Ending trailer animation"); 
         // TODO: handle if things have already changed?... if reused, the observer should have been removed? Right?... 
         delete trailer.isControlledByAnimation;
         if (trailer.parentNode) trailer.parentNode.removeChild(trailer);
@@ -983,12 +983,12 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
   }  
 
   setupNodeAnimationCleanup(node, {endingProperties, endingAction, purpose}) {
-    log("setupNodeAnimationCleanup");
-    log(node);
+    // log("setupNodeAnimationCleanup");
+    // log(node);
 
     // There can be only one
     if (node.hasCleanupEventListener) return; 
-    log("...")
+    // log("...")
     
     function onTransitionEnd(event) {
       event.stopPropagation();
@@ -1001,9 +1001,9 @@ export class ZoomFlyDOMNodeAnimation extends DOMNodeAnimation {
       const propertyName = camelCase(event.propertyName); 
 
       const typeOfAnimationString = node.changes ? (" in " +  node.changes.type + " animation") : ""; 
-      console.group("cleanup " + node.id + typeOfAnimationString + ", triggered by:  " + event.propertyName);
-      log("purpose:" + purpose)
-      log(node);
+      // console.group("cleanup " + node.id + typeOfAnimationString + ", triggered by:  " + event.propertyName);
+      // log("purpose:" + purpose)
+      // log(node);
       console.groupEnd();
 
       if (!endingProperties || endingProperties.includes(propertyName)) {

@@ -1,4 +1,4 @@
-import { observable, Flow, flow, repeat } from "../flow/Flow";
+import { observable, Flow, flow, repeat, transaction } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { text } from "../components/basic/BasicWidgets";
 import { column, filler, fillerStyle, row } from "../components/basic/Layout";
@@ -29,30 +29,39 @@ export class SimpleMoveAnimation extends Flow {
   }
 
   move() {
-    this.left = !this.left;
+    logMark("move"); 
+    transaction(() => {
+      console.log(this.findKey("button"));
+      this.findKey("button").animate = true;
+      this.findKey("button").foo = "bar";
+      console.log(this.findKey("button").animate);
+      this.left = !this.left;
+    });
+    console.log(this.findKey("button"));
 
     // setTimeout(() => {
     //   startExperiment();
     // }, 1000);
 
-    setTimeout(() => {
-      log("SETTING TEXT");
-      log(this.button);
-      log(this.button);
-      // this.backgroundColor = this.backgroundColor === "green" ? "red" : "green";  
-      this.text = this.text === "Text" ? "Next" : "Text";  
+    // setTimeout(() => {
+    //   log("SETTING TEXT");
+    //   log(this.button);
+    //   log(this.button);
+    //   // this.backgroundColor = this.backgroundColor === "green" ? "red" : "green";  
+    //   this.text = this.text === "Text" ? "Next" : "Text";  
 
-      // let color = this.button.style.color;  
-      // color = color === "red" ? "green" : "red"; 
-      // log(this.button.style = {...this.button.style, color});
-      // this.button.text = this.button.text + "!"       
-    }, 2500);
+    //   // let color = this.button.style.color;  
+    //   // color = color === "red" ? "green" : "red"; 
+    //   // log(this.button.style = {...this.button.style, color});
+    //   // this.button.text = this.button.text + "!"       
+    // }, 2500);
   }
 
   build() {
     logMark("build simple animation ");
     // const button = new modernButton(
     // const button = div("wrapper", this.button, {animate: true});
+    if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
     const movingButton = button(
       "button", this.text, 
       this.move.bind(this),
@@ -65,7 +74,9 @@ export class SimpleMoveAnimation extends Flow {
         }
       }
     );
-    movingButton.animate = true; // Force property...  
+    console.log(movingButton.animate);
+    if (window.idToFlow[14]) console.log(window.idToFlow[14].animate);
+    // movingButton.animate = true; // Force property...  
 
     return column(
       row(

@@ -182,15 +182,21 @@ export function button(...parameters) {
   } else {
     children = properties.children;
   } 
-  result = getTarget().create(properties.key, {
+
+  const creationProperties = {
     type: "dom.elementNode",
     classNameOverride: "button", 
     tagName: "button", 
     attributes, 
     children, 
-    onClick: properties.onClick, 
-    animate: properties.animate
-  });
+  }
+  if (typeof(properties.animate) !== "undefined") { // Note: Had to do this to make animate undefined in the flow, so a set value could survive recreation. 
+    creationProperties.animate = properties.animate;
+  }
+  if (typeof(properties.onClick) !== "undefined") { // Note: Had to do this to make onClick undefined in the flow, so a set value could survive recreation. 
+    creationProperties.onClick = properties.onClick;
+  }
+  result = getTarget().create(properties.key, creationProperties);
   return result; 
 };
 

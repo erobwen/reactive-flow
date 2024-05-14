@@ -34,7 +34,7 @@ export class PortalExample extends Flow {
   }
 
   build() {
-    const flyingText = text("flying text in portal", {key: "flying-content", animate: true}); 
+    const flyingText = text("flying text in portal", {animate: true, key: "flying-content"}); 
     const staticText = text("text in portal", {key: "content", animate: true})
 
     const portalContent = [staticText];
@@ -50,7 +50,7 @@ export class PortalExample extends Flow {
           filler()
         ),
         row(
-          button(this.showFlyingTextInPortal ? "Fly from portal" : "Fly to portal", ()=> {this.showFlyingTextInPortal = !this.showFlyingTextInPortal}),
+          button(this.showFlyingTextInPortal ? "Fly from portal" : "Fly to portal", ()=> {flyingText.animate = true; this.showFlyingTextInPortal = !this.showFlyingTextInPortal}),
           flyingText.show(!this.showFlyingTextInPortal),
           filler(),
           {style: {overflow: "visible"}}

@@ -46,7 +46,6 @@ export function unfreezeFlowChanges() {
 /**
  * DOM Flow Targets to animate
  */
-
 let domFlowTargets = [];
 
 export function addDOMFlowTarget(target) {
@@ -308,6 +307,7 @@ export function onFinishReBuildingFlow() {
       added: Object.values(changes.globallyAddedAnimated).map(flow => flow.toString()),
       resident: Object.values(changes.globallyResidentAnimated).map(flow => flow.toString()), 
       moved: Object.values(changes.globallyMovedAnimated).map(flow => flow.toString()),
+      movedIncludingNonAnimated: Object.values(changes.globallyMoved).map(flow => flow.toString()),
       removed: Object.values(changes.globallyRemovedAnimated).map(flow => flow.toString()),
       removedIncludingNonAnimated: Object.values(changes.globallyRemoved).map(flow => flow.toString()),
     }
