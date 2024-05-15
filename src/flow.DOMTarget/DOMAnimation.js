@@ -1,4 +1,4 @@
-import { repeat, Component, trace, configuration, component, activeTrace, creators, postponeInvalidations, continueInvalidations, traceAnimation } from "../flow/Flow";
+import { repeat, Component, trace, configuration, component, activeTrace, creators, postponeInvalidations, continueInvalidations, traceAnimation, traceWarnings } from "../flow/Flow";
 import { DOMNodeAnimation } from "./DOMNodeAnimation";
 import { getWrapper } from "./DOMNode";
 import { logMark, logAnimationFrameGroup, logAnimationFrameEnd, logAnimationSeparator } from "../flow/utility";
@@ -32,13 +32,13 @@ export function resetDOMAnimation() {
 let count = 0;
 export function freezeFlowChanges() {
   count++;
-  if (traceAnimation) console.warn("Risky to use freeze " + count);
+  if (traceAnimation && traceWarnings) console.warn("Risky to use freeze " + count);
   // postponeInvalidations();
 }
 
 export function unfreezeFlowChanges() {
   count--;
-  if (traceAnimation) console.warn("Unfreeze... " + count);
+  if (traceAnimation && traceWarnings) console.warn("Unfreeze... " + count);
   // continueInvalidations();
 }
 

@@ -123,7 +123,7 @@ class BasicModalExample extends Component {
       ),
       modal(
         "modal",
-        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+        dialog("dialog", "Modal!", {close: () => { this.showModal = false}})
       ).show(this.showModal),
       { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
     );
@@ -148,7 +148,7 @@ class FlyoutModalExample extends Component {
       ),
       modal(
         "modal",
-        dialog("dialog", "Modal!", {close: () => {log("CLOSE"); this.showModal = false}})
+        dialog("dialog", "Modal!", {close: () => { this.showModal = false}})
       ).show(this.showModal),
       { style: { ...centerMiddleStyle, width: "300px", height: "300px", margin: "10px"}}
     );

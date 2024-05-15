@@ -42,7 +42,6 @@ export function clearNode(node, attributes) {
   // }
 }
 
-
 /**
  * DOM Node
  */

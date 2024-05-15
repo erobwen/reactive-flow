@@ -1,4 +1,4 @@
-import { observable, world, repeat, when, Component, finalize, getTarget, trace } from "../flow/Flow";
+import { observable, world, repeat, when, Component, finalize, getTarget, trace, model } from "../flow/Flow";
 import { DOMFlowTarget } from "../flow.DOMTarget/DOMFlowTarget.js";
 import { button, numberInputField, text } from "../components/basic/BasicWidgets";
 import { centerMiddle, column, row, wrapper } from "../components/basic/Layout";
@@ -26,28 +26,36 @@ export class RecursiveExample extends Component {
   
   // Constructor: Normally do not override constructor!!! (unless modifying the framework itself)
 
-  // Lifecycle function onEstablish when a flow is first established. The same flow (same parent same key) may be constructed many times, but the first time a flow under a certain parent with a certain key is created, it is established and this event is sent. Use this function to initialize expensive resorces like DB-connections etc. 
+  // Set properties from parent, suitable for default values etc.
+  setProperties(properties) {}
+
+  // Create state, create model data and initilize external resources
   setState() {
     this.count = 1
-    this.myModel = observable({
+    this.myModel = model({
       value: 42 
     });
   }
 
+  // Release external resources
+  disposeState() {}
+
+  // Allow children to inherit data from this component 
   getContext() {
-    // Give all grand-children access to myModel, they will get this as a property of their own.
     return {
       myModel: this.myModel
     };
   }
 
-  // Lifecycle function build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
+  // Build is run reactivley on any change, either in the model or in the view model. It reads data from anywhere in the model or view model, and the system automatically infers all dependencies.
   build() {
-    
     return (
       column(
         new ControlRow("control-row", {demoComponent: this}),
-        new List("root-list", {maxCount: this.count, count: 1})
+        new List("root-list", {
+          maxCount: this.count, 
+          count: 1
+        })
       )
     );
   }
@@ -61,7 +69,13 @@ export class ControlRow extends Component {
   build() {
     const me = this;    
     const rootText = text({ key: "root-text", text: "Recursive Structure"});
-    const moreButton = button({key: "more-button", onClick: () => {loga("More");me.demoComponent.count++}, text: "More"});
+    const moreButton = button({
+      key: "more-button", 
+      onClick: () => { 
+        me.demoComponent.count++ 
+      },
+      text: "More"
+    });
 
     // Early finalization of sub-component, and dimension analysis of it while building 
     // console.log(moreButton.dimensions());
@@ -71,7 +85,7 @@ export class ControlRow extends Component {
       row(
         text("Depth:"),
         moreButton, 
-        button({key: "less-button", onClick: () => {loga("Less");me.demoComponent.count--}, text: "Less"}),
+        button({key: "less-button", onClick: () => {me.demoComponent.count--}, text: "Less"}),
         ),
       numberInputField("Shared state", this.inherit("myModel"), "value"),
       {style: {padding: "10px", gap: "20px"}} // Reactive programmatic styling! 

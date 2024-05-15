@@ -249,7 +249,7 @@ export class TravelerForm extends Component {
       div({style: {height: "10px"}}),
 
       // Child info
-      // checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
+      checkboxInputField("Is Child", traveler, "isChild").show(this.isFellowTraveller),
       numberInputField("Age", traveler, "age", {unit: "years" /*, animate: true*/}).show(traveler.isChild),
       
       // Adress
