@@ -75,6 +75,9 @@ Note: This is a compound repository where I experiment with Flow together with o
     * Open source 
     * DOM independent component model, this would make it easier to make support other platforms besides Web, or perhaps develop a system for server side rendering. 
 
+# Video introduction
+
+[Introduction to Flow. A new front end framework.](https://www.youtube.com/watch?v=eNdQrf7WLWU)
 
 # Running the demo
 
